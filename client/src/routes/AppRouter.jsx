@@ -14,6 +14,10 @@ import Teachers from '../pages/school-admin/Teachers';
 import Admissions from '../pages/school-admin/Admissions';
 import Academic from '../pages/school-admin/Academic';
 import Timetable from '../pages/school-admin/Timetable';
+import TimetableConfig from '../pages/school-admin/TimetableConfig';
+import TeacherTimetable from '../pages/teacher/TeacherTimetable';
+import StudentTimetable from '../pages/student/StudentTimetable';
+import ParentTimetable from '../pages/parent/ParentTimetable';
 import Attendance from '../pages/school-admin/Attendance';
 import Exams from '../pages/school-admin/Exams';
 import Fees from '../pages/school-admin/Fees';
@@ -34,6 +38,15 @@ function RoleDashboard() {
   };
   const Dashboard = dashboards[user?.role] || SchoolAdminDashboard;
   return <DashboardShell><Dashboard /></DashboardShell>;
+}
+
+function UnifiedTimetable() {
+  const user = useUserStore((s) => s.user);
+  if (user?.role === 'school_admin') return <Timetable />;
+  if (user?.role === 'teacher') return <TeacherTimetable />;
+  if (user?.role === 'student') return <StudentTimetable />;
+  if (user?.role === 'parent') return <ParentTimetable />;
+  return <Timetable />;
 }
 
 function ModulePage({ children }) {
@@ -62,7 +75,8 @@ export default function AppRouter() {
       <Route path="/teachers" element={<ModulePage><Teachers /></ModulePage>} />
       <Route path="/admissions" element={<ModulePage><Admissions /></ModulePage>} />
       <Route path="/academic" element={<ModulePage><Academic /></ModulePage>} />
-      <Route path="/timetable" element={<ModulePage><Timetable /></ModulePage>} />
+      <Route path="/timetable" element={<ModulePage><UnifiedTimetable /></ModulePage>} />
+      <Route path="/timetable-config" element={<ModulePage><TimetableConfig /></ModulePage>} />
       <Route path="/attendance" element={<ModulePage><Attendance /></ModulePage>} />
       <Route path="/exams" element={<ModulePage><Exams /></ModulePage>} />
       <Route path="/fees" element={<ModulePage><Fees /></ModulePage>} />

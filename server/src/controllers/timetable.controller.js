@@ -3,8 +3,13 @@ import ApiResponse from '../utils/ApiResponse.js';
 import * as timetableService from '../services/timetable.service.js';
 
 export const generateTimetable = asyncHandler(async (req, res) => {
-  const timetable = await timetableService.generateTimetable(req.schoolId, req.body);
-  res.status(201).json(new ApiResponse(201, timetable, 'Timetable generated'));
+  const result = await timetableService.generateTimetable(req.schoolId, req.body);
+  res.status(201).json(new ApiResponse(201, result, 'Timetable generated'));
+});
+
+export const generateBulkTimetables = asyncHandler(async (req, res) => {
+  const results = await timetableService.generateBulkTimetables(req.schoolId, req.body);
+  res.status(201).json(new ApiResponse(201, results, 'Bulk timetables generation completed'));
 });
 
 export const getTimetables = asyncHandler(async (req, res) => {
@@ -24,18 +29,84 @@ export const getTimetableByClassSection = asyncHandler(async (req, res) => {
 });
 
 export const updateTimetablePeriods = asyncHandler(async (req, res) => {
-  const timetable = await timetableService.updateTimetablePeriods(req.params.id, req.schoolId, req.body.periods);
-  res.status(200).json(new ApiResponse(200, timetable, 'Timetable updated'));
+  const result = await timetableService.updateTimetablePeriods(req.params.id, req.schoolId, req.body.periods);
+  res.status(200).json(new ApiResponse(200, result, 'Timetable periods updated'));
+});
+
+export const manualEdit = asyncHandler(async (req, res) => {
+  const result = await timetableService.manualEdit(req.params.id, req.schoolId, req.body);
+  res.status(200).json(new ApiResponse(200, result, 'Period slot updated'));
+});
+
+export const swapPeriods = asyncHandler(async (req, res) => {
+  const result = await timetableService.swapPeriods(req.params.id, req.schoolId, req.body);
+  res.status(200).json(new ApiResponse(200, result, 'Periods swapped successfully'));
+});
+
+export const lockPeriods = asyncHandler(async (req, res) => {
+  const timetable = await timetableService.lockPeriods(req.params.id, req.schoolId, req.body);
+  res.status(200).json(new ApiResponse(200, timetable, 'Periods locked state updated'));
+});
+
+export const regeneratePartial = asyncHandler(async (req, res) => {
+  const result = await timetableService.regeneratePartial(req.params.id, req.schoolId);
+  res.status(200).json(new ApiResponse(200, result, 'Timetable regenerated partially'));
 });
 
 export const publishTimetable = asyncHandler(async (req, res) => {
   const timetable = await timetableService.publishTimetable(req.params.id, req.schoolId, req.body.status);
-  res.status(200).json(new ApiResponse(200, timetable, `Timetable ${req.body.status}`));
+  res.status(200).json(new ApiResponse(200, timetable, `Timetable status updated to ${req.body.status}`));
 });
 
 export const deleteTimetable = asyncHandler(async (req, res) => {
   await timetableService.deleteTimetable(req.params.id, req.schoolId);
   res.status(200).json(new ApiResponse(200, null, 'Timetable deleted'));
+});
+
+export const getTeacherTimetable = asyncHandler(async (req, res) => {
+  const schedule = await timetableService.getTeacherTimetable(req.schoolId, req.params.teacherId);
+  res.status(200).json(new ApiResponse(200, schedule, 'Teacher timetable schedule fetched'));
+});
+
+export const getSubjectTimetable = asyncHandler(async (req, res) => {
+  const schedule = await timetableService.getSubjectTimetable(req.schoolId, req.params.subjectId);
+  res.status(200).json(new ApiResponse(200, schedule, 'Subject timetable schedule fetched'));
+});
+
+export const getDailyView = asyncHandler(async (req, res) => {
+  const schedule = await timetableService.getDailyView(req.schoolId, req.params.day);
+  res.status(200).json(new ApiResponse(200, schedule, 'Daily timetables view fetched'));
+});
+
+export const getConflictReport = asyncHandler(async (req, res) => {
+  const conflicts = await timetableService.getConflictReport(req.params.id, req.schoolId);
+  res.status(200).json(new ApiResponse(200, conflicts, 'Conflict report fetched'));
+});
+
+export const getTeacherWorkloadReport = asyncHandler(async (req, res) => {
+  const { academicYear } = req.query;
+  const workload = await timetableService.getTeacherWorkloadReport(req.schoolId, academicYear);
+  res.status(200).json(new ApiResponse(200, workload, 'Teacher workload report fetched'));
+});
+
+export const getSubjectDistributionReport = asyncHandler(async (req, res) => {
+  const { academicYear } = req.query;
+  const distribution = await timetableService.getSubjectDistributionReport(req.schoolId, academicYear);
+  res.status(200).json(new ApiResponse(200, distribution, 'Subject distribution report fetched'));
+});
+
+export const exportToPdf = asyncHandler(async (req, res) => {
+  const buffer = await timetableService.exportToPdf(req.params.id, req.schoolId);
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', 'attachment; filename=timetable.pdf');
+  res.send(buffer);
+});
+
+export const exportToExcel = asyncHandler(async (req, res) => {
+  const buffer = await timetableService.exportToExcel(req.params.id, req.schoolId);
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.setHeader('Content-Disposition', 'attachment; filename=timetable.xlsx');
+  res.send(buffer);
 });
 
 export const findSubstitutes = asyncHandler(async (req, res) => {
