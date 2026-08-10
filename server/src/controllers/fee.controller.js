@@ -1,5 +1,6 @@
 import asyncHandler from '../utils/asyncHandler.js';
 import ApiResponse from '../utils/ApiResponse.js';
+import ApiError from '../utils/ApiError.js';
 import * as feeService from '../services/fee.service.js';
 
 export const createFeeStructure = asyncHandler(async (req, res) => {
@@ -45,4 +46,12 @@ export const getStudentFeeStatus = asyncHandler(async (req, res) => {
 export const getFeeReport = asyncHandler(async (req, res) => {
   const report = await feeService.getFeeReport(req.schoolId);
   res.status(200).json(new ApiResponse(200, report));
+});
+
+export const importFeeStructures = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    throw new ApiError(400, 'Please upload a CSV or Excel file');
+  }
+  const result = await feeService.importFeeStructures(req.schoolId, req.file.path);
+  res.status(200).json(new ApiResponse(200, result, 'Fee structures imported successfully'));
 });

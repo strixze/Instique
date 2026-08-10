@@ -270,7 +270,7 @@ export class TimetableEngine {
       // Find available teachers for this subject
       const subjectTeachers = this.teachers.filter(
         (t) => t.subjects?.some((s) => s.toString() === subjectIdStr)
-          && t.assignedClasses?.some((c) => c.toString() === this.schoolClass._id.toString())
+          && (!t.assignedClasses?.length || t.assignedClasses.some((c) => c.toString() === this.schoolClass._id.toString()))
           && t.status === 'active'
       );
 

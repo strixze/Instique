@@ -36,7 +36,7 @@ export function preValidateClassSection({ schoolClass, section, subjects, teache
   for (const subject of subjects) {
     const subjectTeachers = teachers.filter(
       (t) => t.subjects?.some((s) => s.toString() === subject._id.toString())
-        && t.assignedClasses?.some((c) => c.toString() === classId)
+        && (!t.assignedClasses?.length || t.assignedClasses.some((c) => c.toString() === classId))
         && t.status === 'active'
     );
 
@@ -112,7 +112,7 @@ export function preValidateClassSection({ schoolClass, section, subjects, teache
   for (const subject of subjects) {
     const subjectTeachers = teachers.filter(
       (t) => t.subjects?.some((s) => s.toString() === subject._id.toString())
-        && t.assignedClasses?.some((c) => c.toString() === classId)
+        && (!t.assignedClasses?.length || t.assignedClasses.some((c) => c.toString() === classId))
     );
     if (subjectTeachers.length === 1) {
       // If only one teacher option, their load is guaranteed
@@ -137,7 +137,7 @@ export function preValidateClassSection({ schoolClass, section, subjects, teache
   for (const subject of subjects) {
     const subjectTeachers = teachers.filter(
       (t) => t.subjects?.some((s) => s.toString() === subject._id.toString())
-        && t.assignedClasses?.some((c) => c.toString() === classId)
+        && (!t.assignedClasses?.length || t.assignedClasses.some((c) => c.toString() === classId))
         && t.status === 'active'
     );
 
@@ -231,7 +231,7 @@ export function preValidateBulk({ classSections, teachers, config }) {
     for (const subject of cs.subjects) {
       const subjectTeachers = teachers.filter(
         (t) => t.subjects?.some((s) => s.toString() === subject._id.toString())
-          && t.assignedClasses?.some((c) => c.toString() === cs.schoolClass._id.toString())
+          && (!t.assignedClasses?.length || t.assignedClasses.some((c) => c.toString() === cs.schoolClass._id.toString()))
       );
       if (subjectTeachers.length === 1) {
         const tId = subjectTeachers[0]._id.toString();

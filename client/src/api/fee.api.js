@@ -10,4 +10,7 @@ export const feeApi = {
   recordPayment: (data) => api.post('/fees/payments', data),
   getStudentStatus: (studentId) => api.get(`/fees/student/${studentId}`),
   getReport: () => api.get('/fees/report'),
+  importStructures: (formData) => api.post('/fees/structures/import', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
 };

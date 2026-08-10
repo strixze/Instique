@@ -1,6 +1,7 @@
 import Admission from '../models/Admission.js';
 import Student from '../models/Student.js';
 import Parent from '../models/Parent.js';
+import Section from '../models/Section.js';
 import User from '../models/User.js';
 import ApiError from '../utils/ApiError.js';
 import { paginate } from '../utils/pagination.js';
@@ -31,6 +32,21 @@ export const updateAdmissionStatus = async (id, schoolId, status, remarks) => {
   await admission.save();
 
   if (status === 'enrolled') {
+    let sectionId = null;
+    if (admission.applyingForClass) {
+      const sections = await Section.find({ schoolClass: admission.applyingForClass });
+      if (sections.length > 0) {
+        const studentCounts = await Promise.all(
+          sections.map(async (sec) => {
+            const count = await Student.countDocuments({ schoolId, currentSection: sec._id });
+            return { id: sec._id, count };
+          })
+        );
+        studentCounts.sort((a, b) => a.count - b.count);
+        sectionId = studentCounts[0].id;
+      }
+    }
+
     const student = await Student.create({
       schoolId,
       firstName: admission.applicantName.split(' ')[0],
@@ -39,6 +55,8 @@ export const updateAdmissionStatus = async (id, schoolId, status, remarks) => {
       gender: admission.gender,
       admissionNo: `STU-${admission.applicationNo}`,
       admission: admission._id,
+      currentClass: admission.applyingForClass || undefined,
+      currentSection: sectionId || undefined,
       contact: { phone: admission.parentPhone, email: admission.parentEmail, address: admission.address },
     });
 

@@ -27,3 +27,15 @@ export const getAttendanceReport = asyncHandler(async (req, res) => {
   const report = await attendanceService.getAttendanceReport(req.schoolId, classId, startDate, endDate);
   res.status(200).json(new ApiResponse(200, report));
 });
+
+export const getStudentsByClassSection = asyncHandler(async (req, res) => {
+  const { classId, sectionId } = req.query;
+  const students = await attendanceService.getStudentsByClassSection(req.schoolId, classId, sectionId);
+  res.status(200).json(new ApiResponse(200, students));
+});
+
+export const getAttendanceForDate = asyncHandler(async (req, res) => {
+  const { classId, sectionId, date } = req.query;
+  const attendance = await attendanceService.getAttendanceForDate(req.schoolId, classId, sectionId, date);
+  res.status(200).json(new ApiResponse(200, attendance));
+});
