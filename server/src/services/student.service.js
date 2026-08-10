@@ -1,11 +1,32 @@
 import Student from '../models/Student.js';
+import Section from '../models/Section.js';
 import ApiError from '../utils/ApiError.js';
 import { paginate } from '../utils/pagination.js';
 
 export const createStudent = async (schoolId, data) => {
   const existing = await Student.findOne({ schoolId, admissionNo: data.admissionNo });
   if (existing) throw new ApiError(409, 'Admission number already exists');
-  const student = await Student.create({ ...data, schoolId });
+
+  let sectionId = data.currentSection;
+  if (!sectionId && data.currentClass) {
+    const sections = await Section.find({ schoolClass: data.currentClass });
+    if (sections.length > 0) {
+      const studentCounts = await Promise.all(
+        sections.map(async (sec) => {
+          const count = await Student.countDocuments({ schoolId, currentSection: sec._id });
+          return { id: sec._id, count };
+        })
+      );
+      studentCounts.sort((a, b) => a.count - b.count);
+      sectionId = studentCounts[0].id;
+    }
+  }
+
+  const student = await Student.create({
+    ...data,
+    currentSection: sectionId || undefined,
+    schoolId,
+  });
   return student;
 };
 
@@ -39,7 +60,26 @@ export const bulkCreateStudents = async (schoolId, students) => {
   const results = { created: [], errors: [] };
   for (const data of students) {
     try {
-      const student = await Student.create({ ...data, schoolId });
+      let sectionId = data.currentSection;
+      if (!sectionId && data.currentClass) {
+        const sections = await Section.find({ schoolClass: data.currentClass });
+        if (sections.length > 0) {
+          const studentCounts = await Promise.all(
+            sections.map(async (sec) => {
+              const count = await Student.countDocuments({ schoolId, currentSection: sec._id });
+              return { id: sec._id, count };
+            })
+          );
+          studentCounts.sort((a, b) => a.count - b.count);
+          sectionId = studentCounts[0].id;
+        }
+      }
+
+      const student = await Student.create({
+        ...data,
+        currentSection: sectionId || undefined,
+        schoolId,
+      });
       results.created.push(student);
     } catch (err) {
       results.errors.push({ data, error: err.message });

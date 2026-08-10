@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Edit2, Upload } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 import DataTable from '../../components/ui/DataTable';
 import Button from '../../components/ui/Button';
@@ -11,6 +11,7 @@ import Select from '../../components/ui/Select';
 import Badge from '../../components/ui/Badge';
 import { academicApi } from '../../api/academic.api';
 import { teacherApi } from '../../api/teacher.api';
+import BulkImportModal from '../../components/ui/BulkImportModal';
 
 function AcademicYears() {
   const [data, setData] = useState([]);
@@ -135,9 +136,12 @@ function Classes() {
   const [reload, setReload] = useState(0);
   const [years, setYears] = useState([]);
   const [teachers, setTeachers] = useState([]);
+  const [allSubjects, setAllSubjects] = useState([]);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ name: '', academicYear: '', classTeacher: '' });
+  const [editingId, setEditingId] = useState(null);
+  const [form, setForm] = useState({ name: '', academicYear: '', classTeacher: '', subjects: [] });
+  const [bulkOpen, setBulkOpen] = useState(false);
 
   useEffect(() => {
     academicApi.getAcademicYears({ limit: 100 }).then((res) => {
@@ -149,6 +153,7 @@ function Classes() {
       }
     }).catch(() => {});
     teacherApi.getAll({ limit: 100 }).then((res) => setTeachers(res.data || [])).catch(() => {});
+    academicApi.getSubjects({ limit: 100 }).then((res) => setAllSubjects(res.data || [])).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -172,28 +177,59 @@ function Classes() {
   const yearMap = Object.fromEntries(years.map((y) => [y._id, y.name]));
   const teacherMap = Object.fromEntries(teachers.map((t) => [t._id, `${t.firstName} ${t.lastName}`]));
   const setField = (key, value) => setForm((f) => ({ ...f, [key]: value }));
+
+  const toggleSubject = (subjectId) => {
+    setForm((f) => {
+      const current = f.subjects || [];
+      if (current.includes(subjectId)) {
+        return { ...f, subjects: current.filter(id => id !== subjectId) };
+      } else {
+        return { ...f, subjects: [...current, subjectId] };
+      }
+    });
+  };
+
   const resetAndClose = () => {
     const defaultYear = years.find((y) => y.isCurrent)?._id || years[0]?._id || '';
-    setForm({ name: '', academicYear: defaultYear, classTeacher: '' });
+    setForm({ name: '', academicYear: defaultYear, classTeacher: '', subjects: [] });
+    setEditingId(null);
     setOpen(false);
   };
 
-  const handleCreate = async () => {
+  const handleEdit = (row) => {
+    setEditingId(row._id);
+    setForm({
+      name: row.name,
+      academicYear: row.academicYear,
+      classTeacher: row.classTeacher || '',
+      subjects: Array.isArray(row.subjects) ? row.subjects.map(s => s._id || s) : [],
+    });
+    setOpen(true);
+  };
+
+  const handleSave = async () => {
     if (!form.name || !form.academicYear) { toast.error('Class name and academic year are required'); return; }
     setSaving(true);
     try {
-      await academicApi.createClass({
+      const payload = {
         name: form.name,
         academicYear: form.academicYear,
         classTeacher: form.classTeacher || undefined,
-      });
-      toast.success('Class created');
+        subjects: form.subjects,
+      };
+
+      if (editingId) {
+        await academicApi.updateClass(editingId, payload);
+        toast.success('Class updated successfully');
+      } else {
+        await academicApi.createClass(payload);
+        toast.success('Class created successfully');
+      }
       resetAndClose();
-      setPage(1);
       setLoading(true);
       setReload((r) => r + 1);
     } catch (e) {
-      toast.error(e?.message || 'Failed to create class');
+      toast.error(e?.message || 'Failed to save class');
     } finally {
       setSaving(false);
     }
@@ -231,9 +267,14 @@ function Classes() {
       key: 'actions',
       label: '',
       render: (r) => (
-        <button onClick={() => handleDelete(r)} className="p-2 text-gray-400 hover:text-red-400 rounded-lg hover:bg-red-500/10 transition-colors" title="Delete">
-          <Trash2 size={16} />
-        </button>
+        <div className="flex items-center gap-1">
+          <button onClick={() => handleEdit(r)} className="p-2 text-gray-400 hover:text-indigo-400 rounded-lg hover:bg-indigo-500/10 transition-colors" title="Edit">
+            <Edit2 size={16} />
+          </button>
+          <button onClick={() => handleDelete(r)} className="p-2 text-gray-400 hover:text-red-400 rounded-lg hover:bg-red-500/10 transition-colors" title="Delete">
+            <Trash2 size={16} />
+          </button>
+        </div>
       ),
     },
   ];
@@ -242,25 +283,34 @@ function Classes() {
     <>
       <PageHeader
         title="Classes"
-        description="Define classes for the current academic year"
-        action={<Button onClick={() => setOpen(true)}><Plus size={16} className="mr-2" />Add Class</Button>}
+        description="Define classes and assign subjects for the current academic year"
+        action={
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => setBulkOpen(true)}><Upload size={14} className="mr-1.5" />Bulk Import</Button>
+            <Button onClick={() => setOpen(true)}><Plus size={16} className="mr-2" />Add Class</Button>
+          </div>
+        }
       />
       <DataTable columns={columns} data={data} loading={loading} meta={meta} onPageChange={(p) => { setLoading(true); setPage(p); }} onSearch={(s) => { setLoading(true); setSearch(s); setPage(1); }} searchPlaceholder="Search classes..." />
-      <Modal isOpen={open} onClose={resetAndClose} title="Add Class">
+      <Modal isOpen={open} onClose={resetAndClose} title={editingId ? 'Edit Class' : 'Add Class'} size="lg">
         <div className="space-y-4">
           {years.length === 0 && (
             <div className="p-3 text-sm rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300">
               No academic years found. Please create an Academic Year first in the Academic Years tab.
             </div>
           )}
-          <Input label="Class name *" value={form.name} onChange={(e) => setField('name', e.target.value)} placeholder="Grade 8" />
-          <Select
-            label="Academic year *"
-            placeholder="Select Academic Year"
-            options={years.map((y) => ({ value: y._id, label: y.name }))}
-            value={form.academicYear}
-            onChange={(e) => setField('academicYear', e.target.value)}
-          />
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input label="Class name *" value={form.name} onChange={(e) => setField('name', e.target.value)} placeholder="Grade 8" />
+            <Select
+              label="Academic year *"
+              placeholder="Select Academic Year"
+              options={years.map((y) => ({ value: y._id, label: y.name }))}
+              value={form.academicYear}
+              onChange={(e) => setField('academicYear', e.target.value)}
+            />
+          </div>
+
           <Select
             label="Class teacher"
             placeholder="Select Class Teacher (Optional)"
@@ -268,12 +318,55 @@ function Classes() {
             value={form.classTeacher}
             onChange={(e) => setField('classTeacher', e.target.value)}
           />
+
+          {/* Multi-Subject Selection */}
+          <div className="mt-6">
+            <label className="text-sm font-medium text-gray-300 mb-2 block">Assigned Subjects (select multiple)</label>
+            {allSubjects.length === 0 ? (
+              <p className="text-sm text-gray-500">No subjects found. Create subjects in the Subjects section first.</p>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 overflow-y-auto p-3 bg-gray-900/60 border border-gray-700 rounded-xl">
+                {allSubjects.map((subject) => {
+                  const isSelected = form.subjects.includes(subject._id);
+                  return (
+                    <button
+                      key={subject._id}
+                      type="button"
+                      onClick={() => toggleSubject(subject._id)}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 border ${
+                        isSelected
+                          ? 'bg-indigo-600/20 border-indigo-500 text-indigo-300'
+                          : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-600 hover:text-gray-300'
+                      }`}
+                    >
+                      <span className={`w-4 h-4 rounded border flex items-center justify-center text-[10px] ${
+                        isSelected ? 'bg-indigo-600 border-indigo-500 text-white' : 'border-gray-600'
+                      }`}>
+                        {isSelected && '✓'}
+                      </span>
+                      {subject.name}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+            {form.subjects.length > 0 && (
+              <p className="text-xs text-gray-500 mt-1.5">{form.subjects.length} subject{form.subjects.length > 1 ? 's' : ''} selected</p>
+            )}
+          </div>
         </div>
         <div className="flex justify-end gap-3 mt-6">
           <Button variant="ghost" onClick={resetAndClose}>Cancel</Button>
-          <Button onClick={handleCreate} loading={saving} disabled={years.length === 0}>Create</Button>
+          <Button onClick={handleSave} loading={saving} disabled={years.length === 0}>{editingId ? 'Update' : 'Create'}</Button>
         </div>
       </Modal>
+
+      <BulkImportModal
+        isOpen={bulkOpen}
+        onClose={() => setBulkOpen(false)}
+        entityType="classes"
+        onSuccess={() => { setLoading(true); setReload((r) => r + 1); }}
+      />
     </>
   );
 }
@@ -289,6 +382,7 @@ function Sections() {
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ name: '', schoolClass: '', roomNo: '' });
+  const [bulkOpen, setBulkOpen] = useState(false);
 
   useEffect(() => {
     academicApi.getClasses({ limit: 100 }).then((res) => {
@@ -386,7 +480,12 @@ function Sections() {
       <PageHeader
         title="Sections"
         description="Define sections within each class"
-        action={<Button onClick={() => setOpen(true)}><Plus size={16} className="mr-2" />Add Section</Button>}
+        action={
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => setBulkOpen(true)}><Upload size={14} className="mr-1.5" />Bulk Import</Button>
+            <Button onClick={() => setOpen(true)}><Plus size={16} className="mr-2" />Add Section</Button>
+          </div>
+        }
       />
       <DataTable columns={columns} data={data} loading={loading} meta={meta} onPageChange={(p) => { setLoading(true); setPage(p); }} onSearch={(s) => { setLoading(true); setSearch(s); setPage(1); }} searchPlaceholder="Search sections..." />
       <Modal isOpen={open} onClose={resetAndClose} title="Add Section">
@@ -411,6 +510,13 @@ function Sections() {
           <Button onClick={handleCreate} loading={saving} disabled={classes.length === 0}>Create</Button>
         </div>
       </Modal>
+
+      <BulkImportModal
+        isOpen={bulkOpen}
+        onClose={() => setBulkOpen(false)}
+        entityType="sections"
+        onSuccess={() => { setLoading(true); setReload((r) => r + 1); }}
+      />
     </>
   );
 }
@@ -425,6 +531,7 @@ function Subjects() {
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ name: '', code: '', type: 'core', weeklyPeriods: 5, maxMarks: 100, passMarks: 33 });
+  const [bulkOpen, setBulkOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -515,7 +622,12 @@ function Subjects() {
       <PageHeader
         title="Subjects"
         description="Manage the subjects offered by the school"
-        action={<Button onClick={() => setOpen(true)}><Plus size={16} className="mr-2" />Add Subject</Button>}
+        action={
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => setBulkOpen(true)}><Upload size={14} className="mr-1.5" />Bulk Import</Button>
+            <Button onClick={() => setOpen(true)}><Plus size={16} className="mr-2" />Add Subject</Button>
+          </div>
+        }
       />
       <DataTable columns={columns} data={data} loading={loading} meta={meta} onPageChange={(p) => { setLoading(true); setPage(p); }} onSearch={(s) => { setLoading(true); setSearch(s); setPage(1); }} searchPlaceholder="Search subjects..." />
       <Modal isOpen={open} onClose={resetAndClose} title="Add Subject">
@@ -541,6 +653,13 @@ function Subjects() {
           <Button onClick={handleCreate} loading={saving}>Create</Button>
         </div>
       </Modal>
+
+      <BulkImportModal
+        isOpen={bulkOpen}
+        onClose={() => setBulkOpen(false)}
+        entityType="subjects"
+        onSuccess={() => { setLoading(true); setReload((r) => r + 1); }}
+      />
     </>
   );
 }

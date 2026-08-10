@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
-import { Plus, Trash2, Wallet } from 'lucide-react';
+import { Plus, Trash2, Wallet, Upload } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 import DataTable from '../../components/ui/DataTable';
 import Button from '../../components/ui/Button';
@@ -41,8 +41,18 @@ function Structures() {
   });
 
   useEffect(() => {
-    academicApi.getAcademicYears({ limit: 100 }).then((res) => setYears(res.data)).catch(() => {});
-    academicApi.getClasses({ limit: 100 }).then((res) => setClasses(res.data)).catch(() => {});
+    academicApi.getAcademicYears({ limit: 100 }).then((res) => {
+      setYears(res.data);
+      if (res.data?.length > 0) {
+        setForm((f) => ({ ...f, academicYear: f.academicYear || res.data[0]._id }));
+      }
+    }).catch(() => {});
+    academicApi.getClasses({ limit: 100 }).then((res) => {
+      setClasses(res.data);
+      if (res.data?.length > 0) {
+        setForm((f) => ({ ...f, schoolClass: f.schoolClass || res.data[0]._id }));
+      }
+    }).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -64,6 +74,7 @@ function Structures() {
   }, [page, search, reload]);
 
   const yearMap = Object.fromEntries(years.map((y) => [y._id, y.name]));
+  const classMap = Object.fromEntries(classes.map((c) => [c._id, c.name]));
   const setField = (key, value) => setForm((f) => ({ ...f, [key]: value }));
 
   const updateCategory = (index, key, value) => {
@@ -78,7 +89,13 @@ function Structures() {
   const removeCategory = (index) => setForm((f) => ({ ...f, categories: f.categories.filter((_, i) => i !== index) }));
 
   const resetAndClose = () => {
-    setForm({ name: '', academicYear: '', schoolClass: '', lateFeePerDay: 0, categories: [{ name: '', type: 'tuition', amount: 100, frequency: 'monthly' }] });
+    setForm({
+      name: '',
+      academicYear: years[0]?._id || '',
+      schoolClass: classes[0]?._id || '',
+      lateFeePerDay: 0,
+      categories: [{ name: '', type: 'tuition', amount: 100, frequency: 'monthly' }]
+    });
     setOpen(false);
   };
 
@@ -140,9 +157,53 @@ function Structures() {
     });
   };
 
+  const handleImportFile = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const loadToast = toast.loading('Uploading and processing file...');
+    try {
+      const res = await feeApi.importStructures(formData);
+      toast.dismiss(loadToast);
+      
+      const { savedCount, errors } = res.data || {};
+      
+      if (errors && errors.length > 0) {
+        Swal.fire({
+          title: `Imported ${savedCount} structures with ${errors.length} warning(s)`,
+          html: `<div class="text-left text-xs text-red-400 max-h-60 overflow-y-auto space-y-1 bg-gray-900/80 p-3 rounded-lg border border-gray-700 font-mono">${errors.map(err => `<div>• ${err}</div>`).join('')}</div>`,
+          icon: 'warning',
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#4f46e5'
+        });
+      } else {
+        toast.success(`Successfully imported ${savedCount} fee structures`);
+      }
+      
+      setLoading(true);
+      setReload(r => r + 1);
+    } catch (err) {
+      toast.dismiss(loadToast);
+      toast.error(err?.message || 'Failed to import file');
+    } finally {
+      e.target.value = '';
+    }
+  };
+
   const columns = [
     { key: 'name', label: 'Structure', sortable: true, render: (r) => <span className="font-medium text-gray-200">{r.name}</span> },
-    { key: 'academicYear', label: 'Academic Year', render: (r) => yearMap[r.academicYear] || '—' },
+    { key: 'academicYear', label: 'Academic Year', render: (r) => r.academicYear?.name || yearMap[r.academicYear?._id || r.academicYear] || '—' },
+    {
+      key: 'schoolClass',
+      label: 'Class',
+      render: (r) => {
+        if (!Array.isArray(r.schoolClass) || r.schoolClass.length === 0) return '—';
+        return r.schoolClass.map((c) => c?.name || classMap[c?._id || c] || '—').join(', ');
+      },
+    },
     { key: 'categories', label: 'Categories', render: (r) => Array.isArray(r.categories) ? r.categories.length : '—' },
     { key: 'totalAmount', label: 'Total Amount', render: (r) => <span className="text-indigo-300">₹{r.totalAmount?.toLocaleString()}</span> },
     { key: 'lateFeePerDay', label: 'Late Fee / Day', render: (r) => `₹${r.lateFeePerDay || 0}` },
@@ -163,7 +224,21 @@ function Structures() {
       <PageHeader
         title="Fee Structures"
         description="Define fee categories and amounts per class"
-        action={<Button onClick={() => setOpen(true)}><Plus size={16} className="mr-2" />Add Structure</Button>}
+        action={
+          <div className="flex gap-2">
+            <label className="flex items-center gap-2 px-4 py-2 bg-gray-800 border border-gray-700 hover:border-gray-600 rounded-lg text-sm font-medium text-gray-200 cursor-pointer transition-colors">
+              <Upload size={16} />
+              Import Excel/CSV
+              <input
+                type="file"
+                accept=".xlsx,.xls,.csv"
+                className="hidden"
+                onChange={handleImportFile}
+              />
+            </label>
+            <Button onClick={() => setOpen(true)}><Plus size={16} className="mr-2" />Add Structure</Button>
+          </div>
+        }
       />
       <DataTable columns={columns} data={data} loading={loading} meta={meta} onPageChange={(p) => { setLoading(true); setPage(p); }} onSearch={(s) => { setLoading(true); setSearch(s); setPage(1); }} searchPlaceholder="Search structures..." />
       <Modal isOpen={open} onClose={resetAndClose} title="Add Fee Structure" size="lg">
@@ -247,9 +322,26 @@ function Transactions() {
   const [form, setForm] = useState({ student: '', feeStructure: '', academicYear: '', amount: '', paidAmount: '', paymentMethod: 'cash', transactionId: '', remarks: '' });
 
   useEffect(() => {
-    studentApi.getAll({ limit: 100 }).then((res) => setStudents(res.data)).catch(() => {});
-    feeApi.getStructures({ limit: 100 }).then((res) => setStructures(res.data)).catch(() => {});
-    academicApi.getAcademicYears({ limit: 100 }).then((res) => setYears(res.data)).catch(() => {});
+    studentApi.getAll({ limit: 100 }).then((res) => {
+      setStudents(res.data);
+      if (res.data?.length > 0) {
+        setForm((f) => ({ ...f, student: f.student || res.data[0]._id }));
+      }
+    }).catch(() => {});
+    
+    feeApi.getStructures({ limit: 100 }).then((res) => {
+      setStructures(res.data);
+      if (res.data?.length > 0) {
+        setForm((f) => ({ ...f, feeStructure: f.feeStructure || res.data[0]._id }));
+      }
+    }).catch(() => {});
+    
+    academicApi.getAcademicYears({ limit: 100 }).then((res) => {
+      setYears(res.data);
+      if (res.data?.length > 0) {
+        setForm((f) => ({ ...f, academicYear: f.academicYear || res.data[0]._id }));
+      }
+    }).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -273,7 +365,19 @@ function Transactions() {
   const studentMap = Object.fromEntries(students.map((s) => [s._id, `${s.firstName} ${s.lastName}`]));
   const structureMap = Object.fromEntries(structures.map((s) => [s._id, s.name]));
   const setField = (key, value) => setForm((f) => ({ ...f, [key]: value }));
-  const resetAndClose = () => { setForm({ student: '', feeStructure: '', academicYear: '', amount: '', paidAmount: '', paymentMethod: 'cash', transactionId: '', remarks: '' }); setOpen(false); };
+  const resetAndClose = () => {
+    setForm({
+      student: students[0]?._id || '',
+      feeStructure: structures[0]?._id || '',
+      academicYear: years[0]?._id || '',
+      amount: '',
+      paidAmount: '',
+      paymentMethod: 'cash',
+      transactionId: '',
+      remarks: '',
+    });
+    setOpen(false);
+  };
 
   const handleRecord = async () => {
     if (!form.student || !form.feeStructure || !form.academicYear || !form.amount || !form.paidAmount) {

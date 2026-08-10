@@ -16,7 +16,7 @@ const httpServer = createServer(app);
 app.use(cors({ origin: [env.CLIENT_URL, "http://localhost:5173"], methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], credentials: true }));
 app.use(morgan('dev'));
 // app.use(generalLimiter);
-app.use(express.json({ limit: '16kb' }));
+app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '16kb' }));
 app.use(cookieParser());
 app.use(express.static('public'));
@@ -47,6 +47,7 @@ import saasRoutes from './routes/saas.routes.js';
 import auditRoutes from './routes/audit.routes.js';
 import dashboardRoutes from './routes/dashboard.routes.js';
 import settingRoutes from './routes/setting.routes.js';
+import bulkImportRoutes from './routes/bulkImport.routes.js';
 
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/schools', schoolRoutes);
@@ -74,6 +75,7 @@ app.use('/api/v1/saas', saasRoutes);
 app.use('/api/v1/audit-logs', auditRoutes);
 app.use('/api/v1/dashboards', dashboardRoutes);
 app.use('/api/v1/settings', settingRoutes);
+app.use('/api/v1/bulk-import', bulkImportRoutes);
 
 app.get('/api/v1/health', (req, res) => {
   res.json({ success: true, message: 'Instique API is running', timestamp: new Date().toISOString() });
@@ -84,3 +86,4 @@ app.use(errorMiddleware);
 initializeSocket(httpServer);
 
 export { httpServer, app };
+// Trigger reload

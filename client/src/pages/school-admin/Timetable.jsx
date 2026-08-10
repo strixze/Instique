@@ -68,6 +68,10 @@ export default function Timetable() {
   const [distributionReport, setDistributionReport] = useState([]);
   const [showReports, setShowReports] = useState(false);
 
+  // Bulk generation results
+  const [bulkResults, setBulkResults] = useState(null);
+  const [showBulkResults, setShowBulkResults] = useState(false);
+
   // Drag and drop state
   const [draggedPeriod, setDraggedPeriod] = useState(null); // { day, periodNo }
 
@@ -156,12 +160,27 @@ export default function Timetable() {
       return;
     }
     setGenerating(true);
+    const loadToast = toast.loading('Generating timetables for all classes... This may take a moment.');
     try {
-      await timetableApi.generateBulk({ academicYear: form.academicYear });
-      toast.success('Bulk generation for all class sections completed!');
+      const res = await timetableApi.generateBulk({ academicYear: form.academicYear });
+      toast.dismiss(loadToast);
+      const data = res.data;
+
+      setBulkResults(data);
       setOpenGen(false);
+      setShowBulkResults(true);
+      setLoading(true);
       setReload((r) => r + 1);
+
+      if (data.phase === 'pre-validation') {
+        toast.error(`Pre-validation failed: ${data.preValidationErrors?.length || 0} issue(s) found. Fix them before generating.`);
+      } else if (data.summary?.failed > 0) {
+        toast.error(`Generation completed with ${data.summary.failed} failure(s).`);
+      } else {
+        toast.success(`Successfully generated ${data.summary?.generated || 0} timetable(s)!`);
+      }
     } catch (e) {
+      toast.dismiss(loadToast);
       toast.error(e?.message || 'Bulk generation failed');
     } finally {
       setGenerating(false);
@@ -912,6 +931,110 @@ export default function Timetable() {
             </div>
           </div>
         </div>
+      </Modal>
+
+      {/* Bulk Generation Results Modal */}
+      <Modal isOpen={showBulkResults} onClose={() => setShowBulkResults(false)} title="Timetable Generation Results" size="xl">
+        {bulkResults && (
+          <div className="space-y-5 max-h-[75vh] overflow-y-auto pr-1">
+            {/* Summary Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="p-4 bg-gray-700/40 rounded-xl text-center">
+                <p className="text-2xl font-bold text-gray-100">{bulkResults.summary?.total ?? 0}</p>
+                <p className="text-xs text-gray-400 mt-1">Total Sections</p>
+              </div>
+              <div className="p-4 bg-emerald-900/30 border border-emerald-800/40 rounded-xl text-center">
+                <p className="text-2xl font-bold text-emerald-400">{bulkResults.summary?.generated ?? 0}</p>
+                <p className="text-xs text-gray-400 mt-1">Generated</p>
+              </div>
+              <div className="p-4 bg-amber-900/30 border border-amber-800/40 rounded-xl text-center">
+                <p className="text-2xl font-bold text-amber-400">{bulkResults.summary?.skipped ?? 0}</p>
+                <p className="text-xs text-gray-400 mt-1">Skipped (Published)</p>
+              </div>
+              <div className="p-4 bg-red-900/30 border border-red-800/40 rounded-xl text-center">
+                <p className="text-2xl font-bold text-red-400">{bulkResults.summary?.failed ?? 0}</p>
+                <p className="text-xs text-gray-400 mt-1">Failed</p>
+              </div>
+            </div>
+
+            {/* Pre-validation Errors */}
+            {bulkResults.preValidationErrors?.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="text-sm font-bold text-red-400 flex items-center gap-1.5">
+                  <AlertCircle size={14} /> Pre-Validation Errors — Fix these before generating
+                </h4>
+                <div className="bg-red-950/30 border border-red-800/40 rounded-xl p-4 space-y-2 max-h-48 overflow-y-auto">
+                  {bulkResults.preValidationErrors.map((err, i) => (
+                    <div key={i} className="flex items-start gap-2 text-sm text-red-300">
+                      <span className="text-red-500 mt-0.5 shrink-0">✕</span>
+                      <span>{err.message}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Pre-validation Warnings */}
+            {bulkResults.preValidationWarnings?.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="text-sm font-bold text-amber-400 flex items-center gap-1.5">
+                  <AlertCircle size={14} /> Warnings
+                </h4>
+                <div className="bg-amber-950/30 border border-amber-800/40 rounded-xl p-4 space-y-2 max-h-36 overflow-y-auto">
+                  {bulkResults.preValidationWarnings.map((w, i) => (
+                    <div key={i} className="flex items-start gap-2 text-sm text-amber-300">
+                      <span className="text-amber-500 mt-0.5 shrink-0">⚠</span>
+                      <span>{w.message}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Per-Class Results Table */}
+            {bulkResults.results?.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="text-sm font-bold text-gray-200">Per-Class Results</h4>
+                <div className="overflow-hidden border border-gray-700 rounded-xl">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-gray-900/60 text-gray-400 text-xs uppercase tracking-wider">
+                        <th className="text-left px-4 py-2.5">Class</th>
+                        <th className="text-left px-4 py-2.5">Section</th>
+                        <th className="text-left px-4 py-2.5">Status</th>
+                        <th className="text-left px-4 py-2.5">Details</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-700/50">
+                      {bulkResults.results.map((r, i) => {
+                        const statusColor = r.status === 'generated' ? 'text-emerald-400' 
+                          : r.status === 'skipped' ? 'text-amber-400' 
+                          : r.status === 'generated_with_warnings' ? 'text-yellow-400'
+                          : 'text-red-400';
+                        const statusIcon = r.status === 'generated' ? '✓' 
+                          : r.status === 'skipped' ? '⏭' 
+                          : r.status === 'generated_with_warnings' ? '⚠'
+                          : '✕';
+                        return (
+                          <tr key={i} className="hover:bg-gray-800/40">
+                            <td className="px-4 py-2.5 text-gray-200 font-medium">{r.className}</td>
+                            <td className="px-4 py-2.5 text-gray-300">{r.sectionName}</td>
+                            <td className={`px-4 py-2.5 font-semibold ${statusColor}`}>
+                              {statusIcon} {r.status.replace(/_/g, ' ')}
+                            </td>
+                            <td className="px-4 py-2.5 text-gray-500 text-xs">
+                              {r.statusReason || (r.conflicts?.length > 0 ? `${r.conflicts.length} conflict(s)` : '—')}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </Modal>
     </div>
   );

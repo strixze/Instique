@@ -31,7 +31,8 @@ export function teacherOnlyAssignedSubjects(teacher, subjectId) {
  * Teacher can only teach classes they are assigned to.
  */
 export function teacherOnlyAssignedClasses(teacher, classId) {
-  if (!teacher.assignedClasses || teacher.assignedClasses.length === 0) return false;
+  // If no classes are explicitly assigned, teacher is eligible for any class
+  if (!teacher.assignedClasses || teacher.assignedClasses.length === 0) return true;
   return teacher.assignedClasses.some((c) => c.toString() === classId.toString());
 }
 

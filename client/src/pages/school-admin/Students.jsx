@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Upload } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 import DataTable from '../../components/ui/DataTable';
 import Button from '../../components/ui/Button';
@@ -11,6 +11,7 @@ import Select from '../../components/ui/Select';
 import Badge from '../../components/ui/Badge';
 import { studentApi } from '../../api/student.api';
 import { academicApi } from '../../api/academic.api';
+import BulkImportModal from '../../components/ui/BulkImportModal';
 
 const emptyForm = {
   firstName: '',
@@ -36,6 +37,7 @@ export default function Students() {
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(emptyForm);
+  const [bulkOpen, setBulkOpen] = useState(false);
 
   useEffect(() => {
     academicApi.getClasses({ limit: 100 }).then((res) => setClasses(res.data)).catch(() => {});
@@ -150,7 +152,12 @@ export default function Students() {
       <PageHeader
         title="Students"
         description="Manage student records and information"
-        action={<Button onClick={() => setOpen(true)}><Plus size={16} className="mr-2" />Add Student</Button>}
+        action={
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={() => setBulkOpen(true)}><Upload size={16} className="mr-2" />Bulk Import</Button>
+            <Button onClick={() => setOpen(true)}><Plus size={16} className="mr-2" />Add Student</Button>
+          </div>
+        }
       />
 
       <DataTable
@@ -199,6 +206,13 @@ export default function Students() {
           <Button onClick={handleCreate} loading={saving}>Create Student</Button>
         </div>
       </Modal>
+
+      <BulkImportModal
+        isOpen={bulkOpen}
+        onClose={() => setBulkOpen(false)}
+        entityType="students"
+        onSuccess={() => { setLoading(true); setReload((r) => r + 1); }}
+      />
     </div>
   );
 }
