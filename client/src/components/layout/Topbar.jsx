@@ -22,34 +22,34 @@ export default function Topbar({ setMobileOpen }) {
   }, []);
 
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between h-16 px-4 lg:px-6 bg-gray-900/80 backdrop-blur-md border-b border-gray-700/50">
+    <header className="sticky top-0 z-30 flex items-center justify-between h-14 px-4 lg:px-6 bg-white/80 backdrop-blur-md border-b border-border">
       <div className="flex items-center gap-3">
-        <button className="lg:hidden p-2 text-gray-400 hover:text-gray-200 rounded-lg hover:bg-gray-700" onClick={() => setMobileOpen?.(true)}>
+        <button className="lg:hidden p-2 text-secondary hover:text-deep rounded-lg hover:bg-sage-soft transition-colors" onClick={() => setMobileOpen?.(true)}>
           <Menu size={20} />
         </button>
-        <div className="hidden sm:flex items-center bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5">
-          <Search size={16} className="text-gray-500 mr-2" />
-          <input className="bg-transparent border-none outline-none text-sm text-gray-200 placeholder-gray-500 w-48" placeholder="Search..." />
+        <div className="hidden sm:flex items-center bg-page border border-border rounded-lg px-3 py-1.5">
+          <Search size={16} className="text-muted mr-2" />
+          <input className="bg-transparent border-none outline-none text-sm text-deep placeholder-muted w-56" placeholder="Search students, teachers, classes..." />
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
-        <button className="relative p-2 text-gray-400 hover:text-gray-200 rounded-lg hover:bg-gray-700 transition-colors" onClick={() => navigate('/notifications')}>
+      <div className="flex items-center gap-2">
+        <button className="relative p-2 text-secondary hover:text-deep rounded-lg hover:bg-sage-soft transition-colors" onClick={() => navigate('/notifications')}>
           <Bell size={20} />
           {unreadCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white bg-red-500 rounded-full">
+            <span className="absolute -top-0.5 -right-0.5 flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white bg-danger rounded-full">
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
         </button>
 
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-700/50 cursor-pointer transition-colors">
-          <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center">
-            <User size={16} className="text-white" />
+        <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg hover:bg-sage-soft cursor-pointer transition-colors">
+          <div className="w-8 h-8 rounded-full bg-forest flex items-center justify-center">
+            <User size={15} className="text-white" />
           </div>
           <div className="hidden sm:block">
-            <p className="text-sm font-medium text-gray-200 leading-tight">{user?.name}</p>
-            <p className="text-xs text-gray-500 capitalize">{user?.role?.replace('_', ' ')}</p>
+            <p className="text-sm font-medium text-deep leading-tight">{user?.name}</p>
+            <p className="text-xs text-muted capitalize">{user?.role?.replace('_', ' ')}</p>
           </div>
         </div>
       </div>

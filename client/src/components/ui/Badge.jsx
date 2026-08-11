@@ -1,15 +1,15 @@
 const colors = {
-  success: 'bg-green-900/50 text-green-300 border-green-700',
-  warning: 'bg-yellow-900/50 text-yellow-300 border-yellow-700',
-  danger: 'bg-red-900/50 text-red-300 border-red-700',
-  info: 'bg-blue-900/50 text-blue-300 border-blue-700',
-  primary: 'bg-indigo-900/50 text-indigo-300 border-indigo-700',
-  gray: 'bg-gray-700 text-gray-300 border-gray-600',
+  success: 'bg-success-light text-success-text',
+  warning: 'bg-warning-light text-warning-text',
+  danger: 'bg-danger-light text-danger-text',
+  info: 'bg-info-light text-info-text',
+  primary: 'bg-sage-soft text-forest',
+  gray: 'bg-surface text-secondary',
 };
 
 export default function Badge({ children, color = 'gray', className = '' }) {
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${colors[color]} ${className}`}>
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${colors[color]} ${className}`}>
       {children}
     </span>
   );

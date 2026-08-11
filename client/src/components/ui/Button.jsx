@@ -1,15 +1,15 @@
 const variants = {
-  primary: 'bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500',
-  secondary: 'bg-gray-700 text-gray-100 hover:bg-gray-600 focus:ring-gray-500',
-  danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
-  ghost: 'bg-transparent text-gray-300 hover:bg-gray-700 focus:ring-gray-500',
-  outline: 'border border-gray-600 text-gray-200 hover:bg-gray-700 focus:ring-gray-500',
+  primary: 'bg-forest text-white hover:bg-forest-dark focus:ring-forest/40',
+  secondary: 'bg-white text-deep border border-border hover:bg-sage-soft focus:ring-forest/20',
+  danger: 'bg-danger text-white hover:bg-danger-text focus:ring-danger/40',
+  ghost: 'bg-transparent text-secondary hover:bg-sage-soft hover:text-deep focus:ring-forest/20',
+  outline: 'border border-border text-deep hover:bg-sage-soft focus:ring-forest/20',
 };
 
 const sizes = {
-  sm: 'px-3 py-1.5 text-sm',
+  sm: 'px-3 py-1.5 text-xs',
   md: 'px-4 py-2 text-sm',
-  lg: 'px-6 py-3 text-base',
+  lg: 'px-6 py-2.5 text-sm',
 };
 
 export default function Button({ children, variant = 'primary', size = 'md', className = '', disabled, loading, type = 'button', ...props }) {
@@ -17,7 +17,7 @@ export default function Button({ children, variant = 'primary', size = 'md', cla
     <button
       type={type}
       disabled={disabled || loading}
-      className={`inline-flex items-center justify-center font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${sizes[size]} ${className}`}
+      className={`inline-flex items-center justify-center font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-offset-white transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${sizes[size]} ${className}`}
       {...props}
     >
       {loading && (

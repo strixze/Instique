@@ -14,12 +14,12 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md' })
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className={`relative w-full ${sizes[size]} bg-gray-800 border border-gray-700 rounded-2xl shadow-2xl animate-scale-in`}>
-        <div className="flex items-center justify-between p-5 border-b border-gray-700">
-          <h2 className="text-lg font-semibold text-gray-100">{title}</h2>
-          <button onClick={onClose} className="p-1 text-gray-400 hover:text-gray-200 rounded-lg hover:bg-gray-700 transition-colors">
-            <X size={20} />
+      <div className="fixed inset-0 bg-deep/40 backdrop-blur-sm" onClick={onClose} />
+      <div className={`relative w-full ${sizes[size]} bg-white border border-border rounded-2xl shadow-modal animate-scale-in`}>
+        <div className="flex items-center justify-between p-5 border-b border-border">
+          <h2 className="text-lg font-semibold text-deep">{title}</h2>
+          <button onClick={onClose} className="p-1.5 text-muted hover:text-deep rounded-lg hover:bg-sage-soft transition-colors">
+            <X size={18} />
           </button>
         </div>
         <div className="p-5 max-h-[70vh] overflow-y-auto">{children}</div>

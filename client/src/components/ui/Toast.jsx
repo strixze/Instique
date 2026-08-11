@@ -7,14 +7,15 @@ export default function ToastProvider() {
       toastOptions={{
         duration: 3000,
         style: {
-          background: '#1f2937',
-          color: '#f3f4f6',
-          border: '1px solid #374151',
+          background: '#FFFFFF',
+          color: '#1F2A23',
+          border: '1px solid #DCE4DE',
           borderRadius: '12px',
           fontSize: '14px',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
         },
-        success: { iconTheme: { primary: '#22d3a0', secondary: '#1f2937' } },
-        error: { iconTheme: { primary: '#f87171', secondary: '#1f2937' } },
+        success: { iconTheme: { primary: '#3F7652', secondary: '#FFFFFF' } },
+        error: { iconTheme: { primary: '#C85B55', secondary: '#FFFFFF' } },
       }}
     />
   );
