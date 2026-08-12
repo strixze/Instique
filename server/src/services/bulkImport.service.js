@@ -575,7 +575,7 @@ export const importSections = async (schoolId, rows) => {
 };
 
 export const importSubjects = async (schoolId, rows) => {
-  const results = { created: 0, skipped: 0, errors: [] };
+  const results = { created: 0, updated: 0, skipped: 0, errors: [] };
 
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
@@ -601,8 +601,13 @@ export const importSubjects = async (schoolId, rows) => {
     try {
       const existing = await Subject.findOne({ schoolId, code });
       if (existing) {
-        results.errors.push({ row: rowNum, errors: [{ field: 'code', message: `Subject code "${code}" already exists` }] });
-        results.skipped++;
+        existing.name = name;
+        existing.type = type;
+        existing.weeklyPeriods = Number(row.weeklyPeriods) || existing.weeklyPeriods || 5;
+        existing.maxMarks = Number(row.maxMarks) || existing.maxMarks || 100;
+        existing.passMarks = Number(row.passMarks) || existing.passMarks || 33;
+        await existing.save();
+        results.updated++;
         continue;
       }
 

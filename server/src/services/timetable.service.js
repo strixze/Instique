@@ -582,7 +582,7 @@ export const exportToPdf = async (id, schoolId) => {
   const timetable = await getTimetableById(id, schoolId);
   
   const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  const workingDays = timetable.configSnapshot?.workingDays || [1, 2, 3, 4, 5];
+  const workingDays = timetable.configSnapshot?.workingDays || [1, 2, 3, 4, 5, 6];
   const maxPeriods = timetable.totalPeriodsPerDay || 8;
 
   // Build HTML table for pdf rendering
@@ -660,7 +660,7 @@ export const exportToExcel = async (id, schoolId) => {
   const worksheet = workbook.addWorksheet(`${timetable.schoolClass.name} - ${timetable.section.name}`);
 
   const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  const workingDays = timetable.configSnapshot?.workingDays || [1, 2, 3, 4, 5];
+  const workingDays = timetable.configSnapshot?.workingDays || [1, 2, 3, 4, 5, 6];
   const maxPeriods = timetable.totalPeriodsPerDay || 8;
 
   // Add headers

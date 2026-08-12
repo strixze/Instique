@@ -32,7 +32,7 @@ export const createSchool = async (data) => {
     ],
     feeSettings: { dueDayOfMonth: 10, lateFeeEnabled: true, lateFeePerDay: 10, paymentMethods: ['cash', 'online', 'cheque'] },
     notificationToggles: { attendance: true, homework: true, fee: true, exam: true, events: true, general: true },
-    academicSettings: { maxSubjectsPerTeacher: 5, maxPeriodsPerDay: 8, workingDays: [1, 2, 3, 4, 5] },
+    academicSettings: { maxSubjectsPerTeacher: 5, maxPeriodsPerDay: 8, workingDays: [1, 2, 3, 4, 5, 6] },
   });
 
   return school;

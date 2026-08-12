@@ -28,7 +28,7 @@ export const importData = asyncHandler(async (req, res) => {
 
   const result = await bulkImportService.importData(type, req.schoolId, rows);
 
-  const message = `Import completed: ${result.created} created, ${result.skipped} skipped${result.errors.length > 0 ? `, ${result.errors.length} errors` : ''}`;
+  const message = `Import completed: ${result.created} created, ${result.updated !== undefined ? `${result.updated} updated, ` : ''}${result.skipped} skipped${result.errors.length > 0 ? `, ${result.errors.length} errors` : ''}`;
 
   res.status(200).json(new ApiResponse(200, result, message));
 });

@@ -26,7 +26,7 @@ export default function TimetableConfig() {
  
  // Configuration State
  const [configId, setConfigId] = useState(null);
- const [workingDays, setWorkingDays] = useState([1, 2, 3, 4, 5]);
+ const [workingDays, setWorkingDays] = useState([1, 2, 3, 4, 5, 6]);
  const [periodsPerDay, setPeriodsPerDay] = useState(8);
  const [schoolStartTime, setSchoolStartTime] = useState('08:00');
  const [schoolEndTime, setSchoolEndTime] = useState('14:30');
@@ -36,7 +36,7 @@ export default function TimetableConfig() {
  // Assembly State
  const [assemblyEnabled, setAssemblyEnabled] = useState(false);
  const [assemblyPeriod, setAssemblyPeriod] = useState(1);
- const [assemblyDays, setAssemblyDays] = useState([1, 2, 3, 4, 5]);
+ const [assemblyDays, setAssemblyDays] = useState([1, 2, 3, 4, 5, 6]);
  const [assemblyDuration, setAssemblyDuration] = useState(15);
  
  // Fixed Events State

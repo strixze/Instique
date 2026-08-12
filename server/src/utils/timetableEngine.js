@@ -6,7 +6,7 @@ export class TimetableGenerator {
     this.teachers = teachers;
     this.periodsPerDay = periodsPerDay || 8;
     this.lunchAfter = lunchAfter || 4;
-    this.workingDays = workingDays || [1, 2, 3, 4, 5];
+    this.workingDays = workingDays || [1, 2, 3, 4, 5, 6];
     this.holidays = holidays || [];
     this.teacherPreferences = teacherPreferences || {};
     this.subjectWeeklyLimits = subjectWeeklyLimits || {};

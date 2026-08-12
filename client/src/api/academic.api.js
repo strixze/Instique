@@ -22,4 +22,5 @@ export const academicApi = {
   createSubject: (data) => api.post('/academic/subjects', data),
   updateSubject: (id, data) => api.put(`/academic/subjects/${id}`, data),
   deleteSubject: (id) => api.delete(`/academic/subjects/${id}`),
+  bulkEditSubjects: (data) => api.put('/academic/subjects/bulk/edit', data),
 };

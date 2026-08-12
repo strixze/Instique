@@ -91,3 +91,9 @@ export const deleteSubject = asyncHandler(async (req, res) => {
   await academicService.deleteSubject(req.params.id, req.schoolId);
   res.status(200).json(new ApiResponse(200, null, 'Subject deleted'));
 });
+
+export const bulkEditSubjects = asyncHandler(async (req, res) => {
+  const result = await academicService.bulkEditSubjects(req.schoolId, req.body);
+  res.status(200).json(new ApiResponse(200, result, 'Subjects bulk updated successfully'));
+});
+

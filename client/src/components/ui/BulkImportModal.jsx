@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { Upload, Download, FileSpreadsheet, CheckCircle2, AlertTriangle, XCircle, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { Upload, Download, FileSpreadsheet, CheckCircle2, AlertTriangle, XCircle, ChevronDown, ChevronUp, X, RefreshCw } from 'lucide-react';
 import Button from './Button';
 import { bulkImportApi } from '../../api/bulkImport.api';
 import toast from 'react-hot-toast';
@@ -281,26 +281,33 @@ export default function BulkImportModal({ isOpen, onClose, entityType, onSuccess
  )}
 
  {/* Step: Results */}
- {step === STEPS.RESULTS && results && (
- <div className="space-y-5">
- {/* Summary cards */}
- <div className="grid grid-cols-3 gap-3">
- <div className="p-4 bg-emerald-600/10 border border-emerald-600/20 rounded-xl text-center">
- <CheckCircle2 size={24} className="mx-auto text-emerald-400 mb-1"/>
- <p className="text-2xl font-bold text-emerald-400">{results.created}</p>
- <p className="text-xs text-muted">Created</p>
- </div>
- <div className="p-4 bg-amber-600/10 border border-amber-600/20 rounded-xl text-center">
- <AlertTriangle size={24} className="mx-auto text-amber-400 mb-1"/>
- <p className="text-2xl font-bold text-amber-400">{results.skipped}</p>
- <p className="text-xs text-muted">Skipped</p>
- </div>
- <div className="p-4 bg-red-600/10 border border-red-600/20 rounded-xl text-center">
- <XCircle size={24} className="mx-auto text-red-400 mb-1"/>
- <p className="text-2xl font-bold text-red-400">{results.errors.length}</p>
- <p className="text-xs text-muted">Errors</p>
- </div>
- </div>
+  {step === STEPS.RESULTS && results && (
+    <div className="space-y-5">
+      {/* Summary cards */}
+      <div className={`grid gap-3 ${results.updated !== undefined ? 'grid-cols-4' : 'grid-cols-3'}`}>
+        <div className="p-4 bg-emerald-600/10 border border-emerald-600/20 rounded-xl text-center">
+          <CheckCircle2 size={24} className="mx-auto text-emerald-400 mb-1"/>
+          <p className="text-2xl font-bold text-emerald-400">{results.created}</p>
+          <p className="text-xs text-muted">Created</p>
+        </div>
+        {results.updated !== undefined && (
+          <div className="p-4 bg-blue-600/10 border border-blue-600/20 rounded-xl text-center">
+            <RefreshCw size={24} className="mx-auto text-blue-400 mb-1"/>
+            <p className="text-2xl font-bold text-blue-400">{results.updated}</p>
+            <p className="text-xs text-muted">Updated</p>
+          </div>
+        )}
+        <div className="p-4 bg-amber-600/10 border border-amber-600/20 rounded-xl text-center">
+          <AlertTriangle size={24} className="mx-auto text-amber-400 mb-1"/>
+          <p className="text-2xl font-bold text-amber-400">{results.skipped}</p>
+          <p className="text-xs text-muted">Skipped</p>
+        </div>
+        <div className="p-4 bg-red-600/10 border border-red-600/20 rounded-xl text-center">
+          <XCircle size={24} className="mx-auto text-red-400 mb-1"/>
+          <p className="text-2xl font-bold text-red-400">{results.errors.length}</p>
+          <p className="text-xs text-muted">Errors</p>
+        </div>
+      </div>
 
  {/* Error details */}
  {results.errors.length > 0 && (

@@ -3,7 +3,7 @@ import {
   createAcademicYear, getAcademicYears, updateAcademicYear, deleteAcademicYear,
   createClass, getClasses, getClassById, updateClass, deleteClass,
   createSection, getSections, getSectionsByClass, updateSection, deleteSection,
-  createSubject, getSubjects, updateSubject, deleteSubject,
+  createSubject, getSubjects, updateSubject, deleteSubject, bulkEditSubjects,
 } from '../controllers/academic.controller.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
 import { requireRole } from '../middlewares/rbac.middleware.js';
@@ -36,6 +36,7 @@ router.delete('/sections/:id', requireRole('school_admin'), deleteSection);
 
 router.post('/subjects', requireRole('school_admin'), validate(createSubjectSchema), createSubject);
 router.get('/subjects', requireRole('school_admin', 'teacher'), getSubjects);
+router.put('/subjects/bulk/edit', requireRole('school_admin'), bulkEditSubjects);
 router.put('/subjects/:id', requireRole('school_admin'), updateSubject);
 router.delete('/subjects/:id', requireRole('school_admin'), deleteSubject);
 

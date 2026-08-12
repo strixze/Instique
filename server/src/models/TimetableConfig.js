@@ -20,7 +20,7 @@ const timetableConfigSchema = new mongoose.Schema({
   academicYear: { type: mongoose.Schema.Types.ObjectId, ref: 'AcademicYear', required: true },
 
   // Working days (0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat)
-  workingDays: { type: [Number], default: [1, 2, 3, 4, 5] },
+  workingDays: { type: [Number], default: [1, 2, 3, 4, 5, 6] },
 
   // Period structure
   periodsPerDay: { type: Number, default: 8, min: 1, max: 15 },
@@ -41,7 +41,7 @@ const timetableConfigSchema = new mongoose.Schema({
   assemblyConfig: {
     enabled: { type: Boolean, default: false },
     periodNo: { type: Number, default: 1 },
-    days: { type: [Number], default: [1, 2, 3, 4, 5] },
+    days: { type: [Number], default: [1, 2, 3, 4, 5, 6] },
     durationMinutes: { type: Number, default: 15 },
   },
 

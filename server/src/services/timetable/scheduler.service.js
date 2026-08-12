@@ -13,7 +13,7 @@ import {
 } from './conflict.service.js';
 
 export const scheduleTimetables = (config, classSections, teachers, lockedPeriods, metrics) => {
-  const workingDays = config.workingDays || [1, 2, 3, 4, 5];
+  const workingDays = config.workingDays || [1, 2, 3, 4, 5, 6];
   const periodsPerDay = config.periodsPerDay || 8;
 
   // Identify non-teaching periods
