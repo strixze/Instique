@@ -111,14 +111,16 @@ export const generateBulkTimetables = async (schoolId, { academicYear }) => {
 
   const results = [];
   drafts.forEach(d => {
+    const logs = d.generationLog || [];
+    const hasError = logs.some(l => l.severity === 'error');
     results.push({
       classId: d.schoolClass._id,
       className: d.schoolClass.name,
       sectionId: d.section._id,
       sectionName: d.section.name,
-      success: true,
-      status: 'generated',
-      conflicts: [],
+      success: !hasError,
+      status: hasError ? 'failed' : 'generated',
+      conflicts: logs,
     });
   });
 
@@ -135,14 +137,17 @@ export const generateBulkTimetables = async (schoolId, { academicYear }) => {
     });
   });
 
+  const generatedCount = results.filter(r => r.status === 'generated').length;
+  const failedCount = results.filter(r => r.status === 'failed').length;
+
   return {
     success: true,
     phase: 'generation',
     summary: {
       total: results.length,
-      generated: drafts.length,
+      generated: generatedCount,
       skipped: published.length,
-      failed: 0,
+      failed: failedCount,
     },
     preValidationWarnings: [],
     results,

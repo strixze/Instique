@@ -106,7 +106,7 @@ export const validateSchedulingData = (config, classes, teachers, subjects, clas
       if (totalRequiredPeriods > totalWeeklySlots) {
         errors.push({
           type: "SLOTS_OVERFLOW",
-          message: `Class "${classObj.name}" requires ${totalRequiredPeriods} periods/week, but only ${totalWeeklySlots} weekly slots are available.`
+          message: `Class "${classObj.name}" requires ${totalRequiredPeriods} periods/week, but only ${totalWeeklySlots} weekly slots are available in the schedule (Missing: ${totalRequiredPeriods - totalWeeklySlots} slots).`
         });
       }
     }
@@ -116,17 +116,12 @@ export const validateSchedulingData = (config, classes, teachers, subjects, clas
   if (teachers.length === 0) {
     errors.push({
       type: "MISSING_TEACHERS",
-      message: "No active teachers found in the system."
+      message: "No active teachers found in the system. Timetable requires at least one active teacher."
     });
   }
 
-  // Map to track teacher weekly qualified load
-  const teacherMaxCapacity = new Map();
-  teachers.forEach(t => {
-    teacherMaxCapacity.set(t._id.toString(), t.weeklyTeachingLimit || 30);
-  });
-
   // Check subject-teacher mapping per class section
+  const teacherLoad = new Map();
   classSections.forEach(cs => {
     const classId = cs.schoolClass._id.toString();
     const className = cs.schoolClass.name;
@@ -134,7 +129,6 @@ export const validateSchedulingData = (config, classes, teachers, subjects, clas
 
     cs.subjects.forEach(sub => {
       // Find qualified teachers who teach this subject and are assigned to this class
-      // Note: If no classes are explicitly assigned, the teacher is eligible for any class
       const qualifiedTeachers = teachers.filter(t => {
         const teachesSubject = t.subjects?.some(s => s.toString() === sub._id.toString());
         const hasClass = !t.assignedClasses || t.assignedClasses.length === 0 || 
@@ -145,10 +139,37 @@ export const validateSchedulingData = (config, classes, teachers, subjects, clas
       if (qualifiedTeachers.length === 0) {
         errors.push({
           type: "MISSING_TEACHER",
-          message: `Subject "${sub.name}" (${sub.code}) has no qualified teacher assigned for class ${className} ${sectionName}.`
+          message: `Subject "${sub.name}" (${sub.code}) has no qualified teacher assigned for class ${className} ${sectionName}. At least 1 active teacher must have this subject in their profile.`
         });
+      } else if (qualifiedTeachers.length === 1) {
+        const tId = qualifiedTeachers[0]._id.toString();
+        teacherLoad.set(tId, (teacherLoad.get(tId) || 0) + (sub.weeklyPeriods || 5));
       }
     });
+  });
+
+  // Check teacher weekly limit overload
+  for (const [tId, load] of teacherLoad) {
+    const teacher = teachers.find(t => t._id.toString() === tId);
+    const limit = teacher ? (teacher.weeklyTeachingLimit || 30) : 30;
+    if (load > limit) {
+      errors.push({
+        type: "TEACHER_OVERLOAD",
+        message: `Teacher "${teacher.firstName} ${teacher.lastName}" is exclusively assigned to subjects totaling ${load} periods/week, which exceeds their weekly teaching limit of ${limit} periods (Overload: ${load - limit} periods).`
+      });
+    }
+  }
+
+  // Check teacher availability matching school schedule
+  teachers.forEach(teacher => {
+    const teacherDays = teacher.availableWorkingDays || [1, 2, 3, 4, 5, 6];
+    const availableDays = workingDays.filter(d => teacherDays.includes(d));
+    if (availableDays.length === 0) {
+      errors.push({
+        type: "TEACHER_AVAILABILITY",
+        message: `Teacher "${teacher.firstName} ${teacher.lastName}" has no available working days matching the school's timetable schedule (School Days: ${workingDays.join(', ')}).`
+      });
+    }
   });
 
   return {
@@ -156,4 +177,5 @@ export const validateSchedulingData = (config, classes, teachers, subjects, clas
     message: errors.length === 0 ? "Validation successful" : "Validation failed",
     errors
   };
+
 };

@@ -71,10 +71,28 @@ export const generateDeterministicTimetables = async (schoolId, data) => {
 
   if (!validation.success) {
     console.log('[Timetable Scheduler] Validation failed: ', JSON.stringify(validation.errors, null, 2));
-    const combinedMessage = validation.errors.map(err => err.message).join('\n');
+    
+    const errorsForLog = validation.errors.map(err => ({
+      type: err.type,
+      severity: 'error',
+      message: err.message,
+      context: err.context || {}
+    }));
+
+    await saveGeneratedTimetables(
+      schoolId,
+      academicYearId,
+      classSections,
+      new Map(),
+      config,
+      config.workingDays || [1, 2, 3, 4, 5, 6],
+      config.periodsPerDay || 8,
+      errorsForLog
+    );
+
     return {
-      success: false,
-      message: combinedMessage || "Validation failed",
+      success: true,
+      message: "Pre-validation failed. Timetable draft created with conflict logs.",
       errors: validation.errors
     };
   }
@@ -126,15 +144,28 @@ export const generateDeterministicTimetables = async (schoolId, data) => {
   console.log(`[Timetable Scheduler] Backtracking count: ${metrics.backtrackCount}`);
 
   if (!result.success) {
+    const errorsForLog = [
+      {
+        type: "SCHEDULING_FAIL",
+        severity: "error",
+        message: "Unable to resolve scheduling constraints. Try adjusting teacher weekly loads, daily period limits, or adding more teachers."
+      }
+    ];
+
+    await saveGeneratedTimetables(
+      schoolId,
+      academicYearId,
+      classSections,
+      new Map(),
+      config,
+      config.workingDays || [1, 2, 3, 4, 5, 6],
+      config.periodsPerDay || 8,
+      errorsForLog
+    );
+
     return {
-      success: false,
-      message: "Unable to generate timetable.",
-      errors: [
-        {
-          type: "SCHEDULING_FAIL",
-          message: "Unable to resolve constraints. Try adjusting teacher weekly loads or daily period limits."
-        }
-      ]
+      success: true,
+      message: "Unable to resolve constraints. Timetable draft created with conflict logs."
     };
   }
 

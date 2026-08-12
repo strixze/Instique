@@ -132,26 +132,33 @@ export default function Timetable() {
 
  // APIs
  const handleGenerate = async () => {
- if (!form.schoolClass || !form.section || !form.academicYear) {
- toast.error('Please select class, section, and academic year');
- return;
- }
- setGenerating(true);
- try {
- const res = await timetableApi.generate({
- schoolClass: form.schoolClass,
- section: form.section,
- academicYear: form.academicYear,
- });
- toast.success('Timetable generated successfully');
- setOpenGen(false);
- setReload((r) => r + 1);
- openEditor(res.data.timetable);
- } catch (e) {
- toast.error(e?.message || 'Generation failed');
- } finally {
- setGenerating(false);
- }
+   if (!form.schoolClass || !form.section || !form.academicYear) {
+     toast.error('Please select class, section, and academic year');
+     return;
+   }
+   setGenerating(true);
+   try {
+     const res = await timetableApi.generate({
+       schoolClass: form.schoolClass,
+       section: form.section,
+       academicYear: form.academicYear,
+     });
+     const timetable = res.data.timetable;
+     const hasErrors = timetable?.generationLog?.some(l => l.severity === 'error');
+     
+     if (hasErrors) {
+       toast.error('Timetable generated with conflicts. Review Conflict Logs in the sidebar.');
+     } else {
+       toast.success('Timetable generated successfully');
+     }
+     setOpenGen(false);
+     setReload((r) => r + 1);
+     openEditor(timetable);
+   } catch (e) {
+     toast.error(e?.message || 'Generation failed');
+   } finally {
+     setGenerating(false);
+   }
  };
 
  const handleBulkGenerate = async () => {
