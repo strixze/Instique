@@ -20,7 +20,7 @@ const periodSchema = z.object({
 
 export const generateTimetableSchema = z.object({
   schoolClass: z.string().min(1),
-  section: z.string().min(1),
+  section: z.string().optional(),
   academicYear: z.string().min(1),
   configId: z.string().optional(),
 });

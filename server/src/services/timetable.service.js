@@ -46,27 +46,31 @@ const buildGlobalSchedules = async (schoolId, academicYear, excludeTimetableId =
 };
 
 export const generateTimetable = async (schoolId, data) => {
-  // Check if timetable already exists for this class/section
-  const existing = await Timetable.findOne({
+  // Check for published timetables in this class
+  const publishedCheck = await Timetable.findOne({
     schoolId,
     schoolClass: data.schoolClass,
-    section: data.section,
+    academicYear: data.academicYear,
+    status: 'published',
+  });
+
+  if (publishedCheck) {
+    throw new ApiError(409, 'A published timetable exists for a section in this class. Unpublish or delete it first.');
+  }
+
+  const result = await generateDeterministicTimetables(schoolId, {
+    schoolClass: data.schoolClass,
     academicYear: data.academicYear,
   });
 
-  if (existing && existing.status === 'published') {
-    throw new ApiError(409, 'A published timetable already exists for this class/section. Unpublish or delete it first.');
-  }
-
-  const result = await generateDeterministicTimetables(schoolId, data);
   if (!result.success) {
     throw new ApiError(400, result.message || 'Generation failed', result.errors);
   }
 
-  const timetable = await Timetable.findOne({
+  // Fetch all generated timetables for this class
+  const timetables = await Timetable.find({
     schoolId,
     schoolClass: data.schoolClass,
-    section: data.section,
     academicYear: data.academicYear,
   })
     .populate('schoolClass', 'name')
@@ -75,7 +79,7 @@ export const generateTimetable = async (schoolId, data) => {
     .populate('periods.subject', 'name code category')
     .populate('periods.teacher', 'firstName lastName');
 
-  return { timetable, conflicts: [], success: true };
+  return { timetables, conflicts: [], success: true };
 };
 
 export const generateBulkTimetables = async (schoolId, { academicYear }) => {

@@ -531,7 +531,7 @@ function Subjects() {
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [form, setForm] = useState({ name: '', code: '', type: 'core', weeklyPeriods: 5, maxMarks: 100, passMarks: 33 });
+  const [form, setForm] = useState({ name: '', code: '', type: 'core', maxMarks: 100, passMarks: 33 });
   const [bulkOpen, setBulkOpen] = useState(false);
   const [bulkEditOpen, setBulkEditOpen] = useState(false);
   const [bulkEditForm, setBulkEditForm] = useState({ field: 'maxMarks', value: '' });
@@ -557,7 +557,7 @@ function Subjects() {
   const setField = (key, value) => setForm((f) => ({ ...f, [key]: value }));
   
   const resetAndClose = () => { 
-    setForm({ name: '', code: '', type: 'core', weeklyPeriods: 5, maxMarks: 100, passMarks: 33 }); 
+    setForm({ name: '', code: '', type: 'core', maxMarks: 100, passMarks: 33 }); 
     setEditingId(null);
     setOpen(false); 
   };
@@ -568,7 +568,6 @@ function Subjects() {
       name: row.name,
       code: row.code,
       type: row.type || 'core',
-      weeklyPeriods: row.weeklyPeriods ?? 5,
       maxMarks: row.maxMarks ?? 100,
       passMarks: row.passMarks ?? 33,
     });
@@ -583,7 +582,6 @@ function Subjects() {
         name: form.name,
         code: form.code,
         type: form.type,
-        weeklyPeriods: Number(form.weeklyPeriods) || 5,
         maxMarks: Number(form.maxMarks) || 100,
         passMarks: Number(form.passMarks) || 33,
       };
@@ -655,7 +653,6 @@ function Subjects() {
     { key: 'code', label: 'Code', sortable: true, render: (r) => <span className="font-medium text-deep">{r.code}</span> },
     { key: 'name', label: 'Name', sortable: true },
     { key: 'type', label: 'Type', render: (r) => <Badge color={r.type === 'core' ? 'primary' : 'gray'}>{r.type}</Badge> },
-    { key: 'weeklyPeriods', label: 'Weekly Periods', render: (r) => r.weeklyPeriods ?? '—' },
     { key: 'maxMarks', label: 'Max Marks', render: (r) => r.maxMarks ?? '—' },
     {
       key: 'actions',
@@ -702,7 +699,6 @@ function Subjects() {
             value={form.type}
             onChange={(e) => setField('type', e.target.value)}
           />
-          <Input label="Weekly periods" type="number" value={form.weeklyPeriods} onChange={(e) => setField('weeklyPeriods', e.target.value)} />
           <Input label="Max marks" type="number" value={form.maxMarks} onChange={(e) => setField('maxMarks', e.target.value)} />
           <Input label="Pass marks" type="number" value={form.passMarks} onChange={(e) => setField('passMarks', e.target.value)} />
         </div>
@@ -722,7 +718,6 @@ function Subjects() {
             options={[
               { value: 'maxMarks', label: 'Max Marks' },
               { value: 'passMarks', label: 'Pass Marks' },
-              { value: 'weeklyPeriods', label: 'Weekly Periods' },
               { value: 'type', label: 'Type' },
             ]}
             value={bulkEditForm.field}

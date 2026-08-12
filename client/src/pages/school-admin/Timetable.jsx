@@ -132,28 +132,30 @@ export default function Timetable() {
 
  // APIs
  const handleGenerate = async () => {
-   if (!form.schoolClass || !form.section || !form.academicYear) {
-     toast.error('Please select class, section, and academic year');
+   if (!form.schoolClass || !form.academicYear) {
+     toast.error('Please select class and academic year');
      return;
    }
    setGenerating(true);
    try {
      const res = await timetableApi.generate({
        schoolClass: form.schoolClass,
-       section: form.section,
        academicYear: form.academicYear,
      });
-     const timetable = res.data.timetable;
-     const hasErrors = timetable?.generationLog?.some(l => l.severity === 'error');
+     const timetables = res.data.timetables || [];
+     const hasErrors = timetables.some(t => t.generationLog?.some(l => l.severity === 'error'));
      
      if (hasErrors) {
        toast.error('Timetable generated with conflicts. Review Conflict Logs in the sidebar.');
      } else {
-       toast.success('Timetable generated successfully');
+       toast.success(`Generated ${timetables.length} timetable(s) successfully`);
      }
      setOpenGen(false);
+     setLoading(true);
      setReload((r) => r + 1);
-     openEditor(timetable);
+     if (timetables.length > 0) {
+       openEditor(timetables[0]);
+     }
    } catch (e) {
      toast.error(e?.message || 'Generation failed');
    } finally {
@@ -812,27 +814,20 @@ export default function Timetable() {
  />
 
  <div className="border border-border/60 p-4 rounded-xl bg-white/30 space-y-4">
- <h4 className="text-sm font-semibold text-secondary">Single Class Generation</h4>
- <div className="grid grid-cols-2 gap-4">
+ <h4 className="text-sm font-semibold text-secondary">Class Generation (All Sections)</h4>
+ <p className="text-xs text-muted leading-relaxed">
+ Select a class to generate timetables for all its sections simultaneously. Teachers will be distributed evenly across sections with no overlaps.
+ </p>
  <Select
  label="Class"
  options={classes.map((c) => ({ value: c._id, label: c.name }))}
  value={form.schoolClass}
- onChange={(e) => setForm((f) => ({ ...f, schoolClass: e.target.value, section: '' }))}
+ onChange={(e) => setForm((f) => ({ ...f, schoolClass: e.target.value }))}
  placeholder="Select Class"
  />
- <Select
- label="Section"
- options={filteredSections.map((s) => ({ value: s._id, label: s.name }))}
- value={form.section}
- onChange={(e) => setForm((f) => ({ ...f, section: e.target.value }))}
- placeholder="Select Section"
- disabled={!form.schoolClass}
- />
- </div>
  <div className="flex justify-end">
- <Button onClick={handleGenerate} loading={generating} disabled={!form.schoolClass || !form.section || !form.academicYear}>
- Generate Single
+ <Button onClick={handleGenerate} loading={generating} disabled={!form.schoolClass || !form.academicYear}>
+ Generate for Class
  </Button>
  </div>
  </div>

@@ -23,7 +23,6 @@ export const generateDeterministicTimetables = async (schoolId, data) => {
 
   const academicYearId = data.academicYear;
   const singleClassId = data.schoolClass || null;
-  const singleSectionId = data.section || null;
 
   console.log(`[Timetable Scheduler] Generation started for academicYear: ${academicYearId}`);
 
@@ -39,19 +38,19 @@ export const generateDeterministicTimetables = async (schoolId, data) => {
 
   let classes = [];
   if (singleClassId) {
+    // Generate for a single class — ALL its sections
     const singleClass = await SchoolClass.findOne({ schoolId, _id: singleClassId }).populate('sections');
     if (singleClass) classes = [singleClass];
   } else {
     classes = await SchoolClass.find({ schoolId, academicYear: academicYearId }).populate('sections');
   }
 
-  // Build class-section list
+  // Build class-section list (all sections of each class)
   const classSections = [];
   for (const classObj of classes) {
     const classSubjects = subjects.filter(sub => classObj.subjects.some(id => id.toString() === sub._id.toString()));
     
     for (const sec of classObj.sections) {
-      if (singleSectionId && sec._id.toString() !== singleSectionId.toString()) continue;
       classSections.push({
         schoolClass: classObj,
         classId: classObj._id.toString(),
@@ -97,18 +96,8 @@ export const generateDeterministicTimetables = async (schoolId, data) => {
     };
   }
 
-  // 4. Gather pre-allocated/locked periods
-  const lockQuery = { schoolId, academicYear: academicYearId };
-  if (singleClassId && singleSectionId) {
-    // Single class generation: lock everything else (drafts or published) to prevent overlaps
-    lockQuery.$or = [
-      { schoolClass: { $ne: singleClassId } },
-      { section: { $ne: singleSectionId } }
-    ];
-  } else {
-    // Bulk generation: only lock published timetables
-    lockQuery.status = 'published';
-  }
+  // 4. Gather pre-allocated/locked periods from published timetables
+  const lockQuery = { schoolId, academicYear: academicYearId, status: 'published' };
 
   const lockedTimetables = await Timetable.find(lockQuery)
     .populate('schoolClass', 'name')
@@ -141,35 +130,8 @@ export const generateDeterministicTimetables = async (schoolId, data) => {
   const generationTimeMs = Date.now() - startTime;
   console.log(`[Timetable Scheduler] Generation time: ${generationTimeMs}ms`);
   console.log(`[Timetable Scheduler] Total conflicts checked: ${metrics.conflictsChecked}`);
-  console.log(`[Timetable Scheduler] Backtracking count: ${metrics.backtrackCount}`);
 
-  if (!result.success) {
-    const errorsForLog = [
-      {
-        type: "SCHEDULING_FAIL",
-        severity: "error",
-        message: "Unable to resolve scheduling constraints. Try adjusting teacher weekly loads, daily period limits, or adding more teachers."
-      }
-    ];
-
-    await saveGeneratedTimetables(
-      schoolId,
-      academicYearId,
-      classSections,
-      new Map(),
-      config,
-      config.workingDays || [1, 2, 3, 4, 5, 6],
-      config.periodsPerDay || 8,
-      errorsForLog
-    );
-
-    return {
-      success: true,
-      message: "Unable to resolve constraints. Timetable draft created with conflict logs."
-    };
-  }
-
-  // 6. Save Timetables
+  // 6. Save Timetables (always succeeds with greedy approach)
   console.log('[Timetable Scheduler] Saving timetable...');
   const saveResult = await saveGeneratedTimetables(
     schoolId,
