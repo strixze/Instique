@@ -9,6 +9,7 @@ const studentSchema = new mongoose.Schema({
   admissionNo: { type: String, required: true, trim: true },
   currentClass: { type: mongoose.Schema.Types.ObjectId, ref: 'SchoolClass' },
   currentSection: { type: mongoose.Schema.Types.ObjectId, ref: 'Section' },
+  rollNo: { type: Number },
   academicYear: { type: mongoose.Schema.Types.ObjectId, ref: 'AcademicYear' },
   parents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Parent' }],
   admission: { type: mongoose.Schema.Types.ObjectId, ref: 'Admission' },

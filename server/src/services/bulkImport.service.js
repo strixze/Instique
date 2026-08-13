@@ -1,5 +1,6 @@
 import ExcelJS from 'exceljs';
 import Student from '../models/Student.js';
+import Admission from '../models/Admission.js';
 import Teacher from '../models/Teacher.js';
 import SchoolClass from '../models/SchoolClass.js';
 import Section from '../models/Section.js';
@@ -85,6 +86,35 @@ const TEMPLATES = {
       { name: 'English', code: 'ENG', type: 'core', weeklyPeriods: 5, maxMarks: 100, passMarks: 33 },
     ],
   },
+  admissions: {
+    label: 'Admissions',
+    columns: [
+      { header: 'firstName', key: 'firstName', width: 18, required: true, note: 'First name of the applicant' },
+      { header: 'middleName', key: 'middleName', width: 18, required: false, note: 'Middle name of the applicant' },
+      { header: 'lastName', key: 'lastName', width: 18, required: true, note: 'Last name of the applicant' },
+      { header: 'gender', key: 'gender', width: 12, required: true, note: 'male / female / other' },
+      { header: 'dateOfBirth', key: 'dateOfBirth', width: 16, required: true, note: 'Date of birth in YYYY-MM-DD format' },
+      { header: 'bloodGroup', key: 'bloodGroup', width: 12, required: false, note: 'A+ / B+ / O+ etc.' },
+      { header: 'aadhaarId', key: 'aadhaarId', width: 18, required: false, note: '12 digit Aadhaar number' },
+      { header: 'address', key: 'address', width: 30, required: false, note: 'Residential address' },
+      { header: 'city', key: 'city', width: 18, required: false, note: 'City of residence' },
+      { header: 'state', key: 'state', width: 18, required: false, note: 'State of residence' },
+      { header: 'pincode', key: 'pincode', width: 12, required: false, note: '6 digit pincode' },
+      { header: 'previousSchool', key: 'previousSchool', width: 24, required: false, note: 'Previous school name' },
+      { header: 'previousClass', key: 'previousClass', width: 16, required: false, note: 'Previous class name' },
+      { header: 'applyingForClass', key: 'applyingForClass', width: 18, required: true, note: 'Class name applying for (e.g. Grade 8)' },
+      { header: 'academicSession', key: 'academicSession', width: 18, required: true, note: 'Academic year (e.g. 2026-2027)' },
+      { header: 'parentPhone', key: 'parentPhone', width: 18, required: true, note: 'Primary parent contact number' },
+      { header: 'parentEmail', key: 'parentEmail', width: 24, required: false, note: 'Parent email address' },
+      { header: 'fatherName', key: 'fatherName', width: 18, required: false, note: 'Father\'s name' },
+      { header: 'fatherPhone', key: 'fatherPhone', width: 18, required: false, note: 'Father\'s phone number' },
+      { header: 'motherName', key: 'motherName', width: 18, required: false, note: 'Mother\'s name' },
+      { header: 'motherPhone', key: 'motherPhone', width: 18, required: false, note: 'Mother\'s phone number' },
+    ],
+    sampleRows: [
+      { firstName: 'Rahul', middleName: 'Kumar', lastName: 'Varma', gender: 'male', dateOfBirth: '2015-10-12', bloodGroup: 'O+', aadhaarId: '123456789012', address: 'Apartment 4B', city: 'Mumbai', state: 'Maharashtra', pincode: '400001', previousSchool: 'Little Angels', previousClass: 'Class 4', applyingForClass: 'Grade 8', academicSession: '2026-2027', parentPhone: '+91 90000 00050', parentEmail: 'parent@example.com', fatherName: 'Sanjay Varma', fatherPhone: '+91 90000 00050', motherName: 'Anjali Varma', motherPhone: '+91 90000 00051' }
+    ]
+  }
 };
 
 // ─── Template Generation ─────────────────────────────────────────────────────
@@ -630,6 +660,141 @@ export const importSubjects = async (schoolId, rows) => {
   return results;
 };
 
+export const importAdmissions = async (schoolId, rows) => {
+  const results = { created: 0, skipped: 0, errors: [] };
+
+  const classes = await SchoolClass.find({ schoolId });
+  const academicYears = await AcademicYear.find({ schoolId });
+
+  const classNameMap = new Map();
+  classes.forEach((c) => classNameMap.set(c.name.toLowerCase(), c));
+
+  const yearNameMap = new Map();
+  academicYears.forEach((y) => yearNameMap.set(y.name.toLowerCase(), y));
+
+  let currentCount = await Admission.countDocuments({ schoolId });
+
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const rowNum = i + 2;
+    const errors = [];
+
+    const firstName = trimOrNull(row.firstName);
+    const middleName = trimOrNull(row.middleName);
+    const lastName = trimOrNull(row.lastName);
+    const gender = trimOrNull(row.gender)?.toLowerCase();
+    const dateOfBirth = parseDate(row.dateOfBirth);
+    const bloodGroup = trimOrNull(row.bloodGroup);
+    const aadhaarId = trimOrNull(row.aadhaarId);
+    const address = trimOrNull(row.address);
+    const city = trimOrNull(row.city);
+    const state = trimOrNull(row.state);
+    const pincode = trimOrNull(row.pincode);
+    const previousSchool = trimOrNull(row.previousSchool);
+    const previousClass = trimOrNull(row.previousClass);
+    const className = trimOrNull(row.applyingForClass);
+    const academicSessionName = trimOrNull(row.academicSession);
+    const parentPhone = trimOrNull(row.parentPhone);
+    const parentEmail = trimOrNull(row.parentEmail);
+
+    const fatherName = trimOrNull(row.fatherName);
+    const fatherPhone = trimOrNull(row.fatherPhone);
+    const fatherEmail = trimOrNull(row.fatherEmail);
+    const fatherOccupation = trimOrNull(row.fatherOccupation);
+
+    const motherName = trimOrNull(row.motherName);
+    const motherPhone = trimOrNull(row.motherPhone);
+    const motherEmail = trimOrNull(row.motherEmail);
+    const motherOccupation = trimOrNull(row.motherOccupation);
+
+    if (!firstName) errors.push({ field: 'firstName', message: 'First name is required' });
+    if (!lastName) errors.push({ field: 'lastName', message: 'Last name is required' });
+    if (!gender || !['male', 'female', 'other'].includes(gender)) {
+      errors.push({ field: 'gender', message: 'Gender must be male, female, or other' });
+    }
+    if (!dateOfBirth) errors.push({ field: 'dateOfBirth', message: 'Valid date of birth is required (YYYY-MM-DD)' });
+    if (!parentPhone) errors.push({ field: 'parentPhone', message: 'Parent phone number is required' });
+
+    // Validate class
+    let classId = null;
+    if (className) {
+      const cls = classNameMap.get(className.toLowerCase());
+      if (!cls) {
+        errors.push({ field: 'applyingForClass', message: `Class "${className}" not found` });
+      } else {
+        classId = cls._id;
+      }
+    } else {
+      errors.push({ field: 'applyingForClass', message: 'Applying class is required' });
+    }
+
+    // Validate academic session
+    let academicYearId = null;
+    let yearName = new Date().getFullYear().toString();
+    if (academicSessionName) {
+      const yr = yearNameMap.get(academicSessionName.toLowerCase());
+      if (!yr) {
+        errors.push({ field: 'academicSession', message: `Academic session "${academicSessionName}" not found` });
+      } else {
+        academicYearId = yr._id;
+        yearName = yr.name.slice(0, 4) || yearName;
+      }
+    } else {
+      errors.push({ field: 'academicSession', message: 'Academic session is required' });
+    }
+
+    if (errors.length > 0) {
+      results.errors.push({ row: rowNum, errors });
+      results.skipped++;
+      continue;
+    }
+
+    try {
+      const applicationNo = `ADM-${yearName}-${(currentCount + 1).toString().padStart(5, '0')}`;
+      const applicantName = [firstName, middleName, lastName].filter(Boolean).join(' ');
+
+      await Admission.create({
+        schoolId,
+        firstName,
+        middleName,
+        lastName,
+        applicantName,
+        dateOfBirth,
+        gender,
+        bloodGroup,
+        aadhaarId,
+        address,
+        city,
+        state,
+        pincode,
+        previousSchool,
+        previousClass,
+        applyingForClass: classId,
+        academicSession: academicYearId,
+        parentPhone,
+        parentEmail,
+        father: fatherName ? { name: fatherName, phone: fatherPhone || parentPhone, email: fatherEmail, occupation: fatherOccupation } : undefined,
+        mother: motherName ? { name: motherName, phone: motherPhone, email: motherEmail, occupation: motherOccupation } : undefined,
+        workflowStatus: 'submitted',
+        applicationNo,
+        history: [{
+          status: 'submitted',
+          remarks: 'Application imported via Excel',
+          updatedAt: new Date()
+        }]
+      });
+
+      currentCount++;
+      results.created++;
+    } catch (err) {
+      results.errors.push({ row: rowNum, errors: [{ field: 'general', message: err.message }] });
+      results.skipped++;
+    }
+  }
+
+  return results;
+};
+
 // ─── Dispatcher ──────────────────────────────────────────────────────────────
 
 const importHandlers = {
@@ -638,6 +803,7 @@ const importHandlers = {
   classes: importClasses,
   sections: importSections,
   subjects: importSubjects,
+  admissions: importAdmissions,
 };
 
 export const importData = async (type, schoolId, rows) => {
