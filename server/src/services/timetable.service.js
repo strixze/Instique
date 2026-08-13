@@ -434,10 +434,57 @@ export const publishTimetable = async (id, schoolId, status) => {
   return timetable;
 };
 
+export const publishClassTimetables = async (schoolId, classId, academicYearId, status) => {
+  if (!academicYearId) throw new ApiError(400, 'Academic year is required');
+  if (!status) throw new ApiError(400, 'Status is required');
+  const result = await Timetable.updateMany(
+    {
+      schoolId,
+      schoolClass: classId,
+      academicYear: academicYearId,
+    },
+    { status }
+  );
+  return { updatedCount: result.modifiedCount };
+};
+
+export const publishSchoolTimetables = async (schoolId, academicYearId, status) => {
+  if (!academicYearId) throw new ApiError(400, 'Academic year is required');
+  if (!status) throw new ApiError(400, 'Status is required');
+  const result = await Timetable.updateMany(
+    {
+      schoolId,
+      academicYear: academicYearId,
+    },
+    { status }
+  );
+  return { updatedCount: result.modifiedCount };
+};
+
+
 export const deleteTimetable = async (id, schoolId) => {
   const timetable = await Timetable.findOneAndDelete({ _id: id, schoolId });
   if (!timetable) throw new ApiError(404, 'Timetable not found');
   return true;
+};
+
+export const deleteClassTimetables = async (schoolId, classId, academicYearId) => {
+  if (!academicYearId) throw new ApiError(400, 'Academic year is required');
+  const result = await Timetable.deleteMany({
+    schoolId,
+    schoolClass: classId,
+    academicYear: academicYearId
+  });
+  return { deletedCount: result.deletedCount };
+};
+
+export const deleteSchoolTimetables = async (schoolId, academicYearId) => {
+  if (!academicYearId) throw new ApiError(400, 'Academic year is required');
+  const result = await Timetable.deleteMany({
+    schoolId,
+    academicYear: academicYearId
+  });
+  return { deletedCount: result.deletedCount };
 };
 
 export const getTeacherTimetable = async (schoolId, teacherId) => {

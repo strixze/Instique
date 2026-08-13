@@ -11,7 +11,11 @@ import {
   lockPeriods,
   regeneratePartial,
   publishTimetable,
+  publishClassTimetables,
+  publishSchoolTimetables,
   deleteTimetable,
+  deleteClassTimetables,
+  deleteSchoolTimetables,
   getTeacherTimetable,
   getSubjectTimetable,
   getDailyView,
@@ -33,6 +37,10 @@ import {
   swapPeriodsSchema,
   lockPeriodsSchema,
   publishTimetableSchema,
+  deleteClassTimetablesSchema,
+  deleteSchoolTimetablesSchema,
+  bulkPublishClassSchema,
+  bulkPublishSchoolSchema,
 } from '../validators/timetable.validator.js';
 
 const router = Router();
@@ -54,7 +62,11 @@ router.put('/:id/periods', requireRole('school_admin'), validate(updateTimetable
 router.put('/:id/edit', requireRole('school_admin'), validate(manualEditSchema), manualEdit);
 router.put('/:id/swap', requireRole('school_admin'), validate(swapPeriodsSchema), swapPeriods);
 router.put('/:id/lock', requireRole('school_admin'), validate(lockPeriodsSchema), lockPeriods);
+router.put('/bulk/school/status', requireRole('school_admin'), validate(bulkPublishSchoolSchema), publishSchoolTimetables);
+router.put('/bulk/class/:classId/status', requireRole('school_admin'), validate(bulkPublishClassSchema), publishClassTimetables);
 router.put('/:id/status', requireRole('school_admin'), validate(publishTimetableSchema), publishTimetable);
+router.delete('/bulk/school', requireRole('school_admin'), validate(deleteSchoolTimetablesSchema, 'query'), deleteSchoolTimetables);
+router.delete('/bulk/class/:classId', requireRole('school_admin'), validate(deleteClassTimetablesSchema, 'query'), deleteClassTimetables);
 router.delete('/:id', requireRole('school_admin'), deleteTimetable);
 
 // Sub-views for specific entities

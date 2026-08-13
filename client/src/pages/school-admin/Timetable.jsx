@@ -48,6 +48,16 @@ export default function Timetable() {
  const [generating, setGenerating] = useState(false);
  const [form, setForm] = useState({ schoolClass: '', section: '', academicYear: '' });
 
+ // Bulk Delete Modal
+ const [openDeleteModal, setOpenDeleteModal] = useState(false);
+ const [deleteForm, setDeleteForm] = useState({ type: 'class', schoolClass: '', academicYear: '' });
+ const [deletingBulk, setDeletingBulk] = useState(false);
+
+ // Bulk Publish Modal
+ const [openPublishModal, setOpenPublishModal] = useState(false);
+ const [publishForm, setPublishForm] = useState({ type: 'class', schoolClass: '', academicYear: '', status: 'published' });
+ const [publishingBulk, setPublishingBulk] = useState(false);
+
  // Grid Editor State
  const [activeTimetable, setActiveTimetable] = useState(null);
  const [gridPeriods, setGridPeriods] = useState([]);
@@ -238,29 +248,140 @@ export default function Timetable() {
  }
  };
 
- const handleDelete = (timetable) => {
- Swal.fire({
- title: 'Delete timetable?',
- text: 'This timetable will be permanently removed.',
- icon: 'warning',
- showCancelButton: true,
- confirmButtonText: 'Delete',
- cancelButtonText: 'Cancel',
- confirmButtonColor: '#dc2626',
- }).then(async (result) => {
- if (!result.isConfirmed) return;
- try {
- await timetableApi.delete(timetable._id);
- toast.success('Timetable deleted');
- if (activeTimetable && activeTimetable._id === timetable._id) {
- setActiveTimetable(null);
- }
- setReload((r) => r + 1);
- } catch (e) {
- toast.error(e?.message || 'Failed to delete timetable');
- }
- });
- };
+  const handleDelete = (timetable) => {
+  Swal.fire({
+  title: 'Delete timetable?',
+  text: 'This timetable will be permanently removed.',
+  icon: 'warning',
+  showCancelButton: true,
+  confirmButtonText: 'Delete',
+  cancelButtonText: 'Cancel',
+  confirmButtonColor: '#dc2626',
+  }).then(async (result) => {
+  if (!result.isConfirmed) return;
+  try {
+  await timetableApi.delete(timetable._id);
+  toast.success('Timetable deleted');
+  if (activeTimetable && activeTimetable._id === timetable._id) {
+  setActiveTimetable(null);
+  }
+  setReload((r) => r + 1);
+  } catch (e) {
+  toast.error(e?.message || 'Failed to delete timetable');
+  }
+  });
+  };
+
+  const handleBulkDelete = async () => {
+    if (!deleteForm.academicYear) {
+      toast.error('Please select an Academic Year');
+      return;
+    }
+    if (deleteForm.type === 'class' && !deleteForm.schoolClass) {
+      toast.error('Please select a Class');
+      return;
+    }
+
+    const titleText = deleteForm.type === 'class' 
+      ? 'Delete Class Timetables?' 
+      : 'Delete School Timetables?';
+    const textDesc = deleteForm.type === 'class'
+      ? 'This will delete all timetables (drafts and published) for all sections of the selected class in this academic year.'
+      : 'This will delete all timetables (drafts and published) for all classes in this academic year.';
+
+    Swal.fire({
+      title: titleText,
+      text: textDesc,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, delete all',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#dc2626',
+    }).then(async (result) => {
+      if (!result.isConfirmed) return;
+      setDeletingBulk(true);
+      try {
+        if (deleteForm.type === 'class') {
+          await timetableApi.deleteClass(deleteForm.schoolClass, deleteForm.academicYear);
+          toast.success('Class timetables deleted successfully');
+        } else {
+          await timetableApi.deleteSchool(deleteForm.academicYear);
+          toast.success('School timetables deleted successfully');
+        }
+        setOpenDeleteModal(false);
+        setActiveTimetable(null);
+        setReload((r) => r + 1);
+      } catch (e) {
+        toast.error(e?.message || 'Bulk delete failed');
+      } finally {
+        setDeletingBulk(false);
+      }
+    });
+  };
+
+  const handleBulkPublish = async () => {
+    if (!publishForm.academicYear) {
+      toast.error('Please select an Academic Year');
+      return;
+    }
+    if (publishForm.type === 'class' && !publishForm.schoolClass) {
+      toast.error('Please select a Class');
+      return;
+    }
+    if (!publishForm.status) {
+      toast.error('Please select a Status');
+      return;
+    }
+
+    const actionWord = publishForm.status === 'published' ? 'Publish' : 'Unpublish (Draft)';
+    const titleText = publishForm.type === 'class' 
+      ? `${actionWord} Class Timetables?` 
+      : `${actionWord} School Timetables?`;
+    const textDesc = publishForm.type === 'class'
+      ? `This will update the status of all timetables for all sections of the selected class in this academic year to "${publishForm.status}".`
+      : `This will update the status of all timetables for all classes in this academic year to "${publishForm.status}".`;
+
+    Swal.fire({
+      title: titleText,
+      text: textDesc,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: `Yes, ${actionWord.toLowerCase()}`,
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#4f46e5',
+    }).then(async (result) => {
+      if (!result.isConfirmed) return;
+      setPublishingBulk(true);
+      try {
+        if (publishForm.type === 'class') {
+          await timetableApi.bulkPublishClass(publishForm.schoolClass, {
+            academicYear: publishForm.academicYear,
+            status: publishForm.status,
+          });
+          toast.success(`Class timetables status updated to ${publishForm.status} successfully`);
+        } else {
+          await timetableApi.bulkPublishSchool({
+            academicYear: publishForm.academicYear,
+            status: publishForm.status,
+          });
+          toast.success(`School timetables status updated to ${publishForm.status} successfully`);
+        }
+        setOpenPublishModal(false);
+        if (activeTimetable) {
+          const isAffected = publishForm.type === 'school' || (publishForm.type === 'class' && (activeTimetable.schoolClass._id === publishForm.schoolClass || activeTimetable.schoolClass === publishForm.schoolClass));
+          if (isAffected) {
+            setActiveTimetable((prev) => ({ ...prev, status: publishForm.status }));
+          }
+        }
+        setReload((r) => r + 1);
+      } catch (e) {
+        toast.error(e?.message || 'Bulk status update failed');
+      } finally {
+        setPublishingBulk(false);
+      }
+    });
+  };
+
 
  const handlePartialRegenerate = async () => {
  if (!activeTimetable) return;
@@ -475,13 +596,19 @@ export default function Timetable() {
 
  const filteredSections = sections.filter((s) => !form.schoolClass || s.schoolClass === form.schoolClass);
 
- return (
+return (
  <div className="space-y-6 pb-12">
  <PageHeader
  title="Timetable Manager"
  description="Configure constraints, auto-generate schedules, and perform drag & drop adjustments."
  action={
  <div className="flex gap-3">
+ <Button variant="outline" onClick={() => setOpenPublishModal(true)} className="border-indigo-200 text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300">
+ <Send size={16} className="mr-2"/> Bulk Publish
+ </Button>
+ <Button variant="outline" onClick={() => setOpenDeleteModal(true)} className="border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300">
+ <Trash2 size={16} className="mr-2"/> Bulk Delete
+ </Button>
  <Button onClick={() => setOpenGen(true)}>
  <Plus size={16} className="mr-2"/> Generate Timetable
  </Button>
@@ -845,6 +972,134 @@ export default function Timetable() {
  </div>
  </div>
  </Modal>
+
+ {/* Bulk Delete Timetable Modal */}
+ <Modal isOpen={openDeleteModal} onClose={() => setOpenDeleteModal(false)} title="Bulk Delete Timetables">
+    <div className="space-y-4">
+      <Select
+        label="Delete Scope *"
+        options={[
+          { value: 'class', label: 'Class Timetables (All Sections)' },
+          { value: 'school', label: 'Entire School Timetables' },
+        ]}
+        value={deleteForm.type}
+        onChange={(e) => setDeleteForm((f) => ({ ...f, type: e.target.value }))}
+      />
+
+      <Select
+        label="Academic Year *"
+        options={years.map((y) => ({ value: y._id, label: y.name }))}
+        value={deleteForm.academicYear}
+        onChange={(e) => setDeleteForm((f) => ({ ...f, academicYear: e.target.value }))}
+        placeholder="Select Academic Year"
+      />
+
+      {deleteForm.type === 'class' && (
+        <Select
+          label="Class *"
+          options={classes.map((c) => ({ value: c._id, label: c.name }))}
+          value={deleteForm.schoolClass}
+          onChange={(e) => setDeleteForm((f) => ({ ...f, schoolClass: e.target.value }))}
+          placeholder="Select Class"
+        />
+      )}
+
+      <div className="bg-red-500/10 border border-red-500/20 p-3.5 rounded-xl text-xs text-red-600 space-y-1.5 mt-2">
+        <h5 className="font-semibold flex items-center gap-1.5">
+          <AlertCircle size={14} /> Action Cannot Be Undone
+        </h5>
+        <p className="leading-relaxed opacity-95">
+          {deleteForm.type === 'class'
+            ? 'This will permanently remove both Draft and Published timetables for all sections of the selected class.'
+            : 'This will permanently remove both Draft and Published timetables for all classes in the selected academic year.'
+          }
+        </p>
+      </div>
+
+      <div className="flex justify-end gap-3 pt-4 border-t border-border">
+        <Button variant="ghost" onClick={() => setOpenDeleteModal(false)}>
+          Cancel
+        </Button>
+        <Button 
+          onClick={handleBulkDelete} 
+          loading={deletingBulk} 
+          className="bg-red-600 hover:bg-red-700 text-white"
+          disabled={!deleteForm.academicYear || (deleteForm.type === 'class' && !deleteForm.schoolClass)}
+        >
+          Confirm Delete
+        </Button>
+      </div>
+    </div>
+  </Modal>
+
+  {/* Bulk Publish / Unpublish Timetables Modal */}
+  <Modal isOpen={openPublishModal} onClose={() => setOpenPublishModal(false)} title="Bulk Publish / Unpublish Timetables">
+    <div className="space-y-4">
+      <Select
+        label="Scope *"
+        options={[
+          { value: 'class', label: 'Class Timetables (All Sections)' },
+          { value: 'school', label: 'Entire School Timetables' },
+        ]}
+        value={publishForm.type}
+        onChange={(e) => setPublishForm((f) => ({ ...f, type: e.target.value }))}
+      />
+
+      <Select
+        label="Academic Year *"
+        options={years.map((y) => ({ value: y._id, label: y.name }))}
+        value={publishForm.academicYear}
+        onChange={(e) => setPublishForm((f) => ({ ...f, academicYear: e.target.value }))}
+        placeholder="Select Academic Year"
+      />
+
+      {publishForm.type === 'class' && (
+        <Select
+          label="Class *"
+          options={classes.map((c) => ({ value: c._id, label: c.name }))}
+          value={publishForm.schoolClass}
+          onChange={(e) => setPublishForm((f) => ({ ...f, schoolClass: e.target.value }))}
+          placeholder="Select Class"
+        />
+      )}
+
+      <Select
+        label="Target Status *"
+        options={[
+          { value: 'published', label: 'Published (Make active)' },
+          { value: 'draft', label: 'Draft (Unpublish / Under review)' },
+        ]}
+        value={publishForm.status}
+        onChange={(e) => setPublishForm((f) => ({ ...f, status: e.target.value }))}
+      />
+
+      <div className="bg-indigo-500/10 border border-indigo-500/20 p-3.5 rounded-xl text-xs text-indigo-600 space-y-1.5 mt-2">
+        <h5 className="font-semibold flex items-center gap-1.5 text-indigo-700">
+          <AlertCircle size={14} /> Bulk Update Timetables
+        </h5>
+        <p className="leading-relaxed opacity-95 text-indigo-600/90">
+          {publishForm.type === 'class'
+            ? `This will update the status of all timetables for all sections of the selected class to "${publishForm.status}".`
+            : `This will update the status of all timetables for all classes in the selected academic year to "${publishForm.status}".`
+          }
+        </p>
+      </div>
+
+      <div className="flex justify-end gap-3 pt-4 border-t border-border">
+        <Button variant="ghost" onClick={() => setOpenPublishModal(false)}>
+          Cancel
+        </Button>
+        <Button 
+          onClick={handleBulkPublish} 
+          loading={publishingBulk} 
+          disabled={!publishForm.academicYear || (publishForm.type === 'class' && !publishForm.schoolClass)}
+        >
+          Confirm Status Update
+        </Button>
+      </div>
+    </div>
+  </Modal>
+
 
  {/* Reports & Analytics Modal */}
  <Modal isOpen={showReports} onClose={() => setShowReports(false)} title="Timetable Analytical Reports"size="xl">

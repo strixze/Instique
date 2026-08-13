@@ -13,6 +13,11 @@ export const timetableApi = {
   lockPeriods: (id, lockData) => api.put(`/timetables/${id}/lock`, lockData),
   publish: (id, status) => api.put(`/timetables/${id}/status`, { status }),
   delete: (id) => api.delete(`/timetables/${id}`),
+  deleteClass: (classId, academicYear) => api.delete(`/timetables/bulk/class/${classId}`, { params: { academicYear } }),
+  deleteSchool: (academicYear) => api.delete('/timetables/bulk/school', { params: { academicYear } }),
+  bulkPublishClass: (classId, data) => api.put(`/timetables/bulk/class/${classId}/status`, data),
+  bulkPublishSchool: (data) => api.put('/timetables/bulk/school/status', data),
+
   
   // Custom views
   getTeacherTimetable: (teacherId) => api.get(`/timetables/teacher/${teacherId}`),
