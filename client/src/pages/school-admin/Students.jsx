@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
-import { Plus, Trash2, Upload } from 'lucide-react';
+import { Plus, Trash2, Upload, ArrowRight } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 import DataTable from '../../components/ui/DataTable';
 import Button from '../../components/ui/Button';
@@ -11,6 +11,7 @@ import Select from '../../components/ui/Select';
 import Badge from '../../components/ui/Badge';
 import { studentApi } from '../../api/student.api';
 import { academicApi } from '../../api/academic.api';
+import { feeApi } from '../../api/fee.api';
 import BulkImportModal from '../../components/ui/BulkImportModal';
 
 const emptyForm = {
@@ -23,6 +24,7 @@ const emptyForm = {
  currentSection: '',
  phone: '',
  email: '',
+ feeStructure: '',
 };
 
 export default function Students() {
@@ -38,10 +40,12 @@ export default function Students() {
  const [saving, setSaving] = useState(false);
  const [form, setForm] = useState(emptyForm);
  const [bulkOpen, setBulkOpen] = useState(false);
+ const [feeStructures, setFeeStructures] = useState([]);
 
  useEffect(() => {
  academicApi.getClasses({ limit: 100 }).then((res) => setClasses(res.data)).catch(() => {});
  academicApi.getSections({ limit: 100 }).then((res) => setSections(res.data)).catch(() => {});
+ feeApi.getStructures({ limit: 100 }).then((res) => setFeeStructures(res.data)).catch(() => {});
  }, []);
 
  useEffect(() => {
@@ -85,6 +89,7 @@ export default function Students() {
  currentClass: form.currentClass || undefined,
  currentSection: form.currentSection || undefined,
  contact: { phone: form.phone || undefined, email: form.email || undefined },
+ feeStructure: form.feeStructure || undefined,
  });
  toast.success('Student created');
  resetAndClose();
@@ -199,10 +204,16 @@ export default function Students() {
  onChange={(e) => setField('currentSection', e.target.value)}
  />
  <Input label="Phone"value={form.phone} onChange={(e) => setField('phone', e.target.value)} placeholder="+91 90000 00000"/>
- <Input label="Email"type="email"value={form.email} onChange={(e) => setField('email', e.target.value)} placeholder="student@school.edu"/>
+ <Input label="Email" type="email" value={form.email} onChange={(e) => setField('email', e.target.value)} placeholder="student@school.edu"/>
+ <Select
+ label="Fee Structure"
+ options={[{ value: '', label: 'None' }, ...feeStructures.map(f => ({ value: f._id, label: `${f.name} — ₹${f.totalAmount?.toLocaleString('en-IN') || 0}` }))]}
+ value={form.feeStructure}
+ onChange={(e) => setField('feeStructure', e.target.value)}
+ />
  </div>
  <div className="flex justify-end gap-3 mt-6">
- <Button variant="ghost"onClick={resetAndClose}>Cancel</Button>
+ <Button variant="ghost" onClick={resetAndClose}>Cancel</Button>
  <Button onClick={handleCreate} loading={saving}>Create Student</Button>
  </div>
  </Modal>

@@ -61,6 +61,7 @@ export const assignFeeStructureSchema = z.object({
   feeStructureId: z.string().min(1, 'Fee structure is required'),
   discountName: z.string().optional(),
   discountValue: z.number().or(z.string()).optional(),
+  installments: z.array(z.number().positive()).optional(),
 });
 
 export const recordManualPaymentSchema = z.object({

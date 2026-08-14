@@ -16,6 +16,8 @@ const studentSchema = new mongoose.Schema({
   contact: { phone: String, email: String, address: String },
   emergencyContacts: [{ name: String, relation: String, phone: String }],
   documents: [{ name: String, type: String, url: String, uploadedAt: Date }],
+  feeStructure: { type: mongoose.Schema.Types.ObjectId, ref: 'FeeStructure' },
+  installments: { type: [Number], default: [100] },
   status: { type: String, enum: ['active', 'promoted', 'transferred', 'archived'], default: 'active' },
   statusHistory: [{ from: String, to: String, date: Date, reason: String }],
 }, { timestamps: true });

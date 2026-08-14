@@ -18,6 +18,8 @@ const admissionSchema = new mongoose.Schema({
   city: String,
   state: String,
   pincode: String,
+  parentPhone: { type: String, required: true },
+  parentEmail: String,
 
   // Academic History
   previousSchool: String,
@@ -79,6 +81,7 @@ const admissionSchema = new mongoose.Schema({
     value: { type: Number, default: 0 }, // Discount value
   },
   feeTransactions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'FeeTransaction' }],
+  installments: { type: [Number], default: [100] },
   studentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Student' },
 
   // History & Audit Trail

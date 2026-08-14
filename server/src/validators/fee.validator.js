@@ -14,6 +14,7 @@ export const createFeeStructureSchema = z.object({
   schoolClass: z.array(z.string()).min(1),
   categories: z.array(feeCategorySchema).min(1),
   lateFeePerDay: z.number().optional(),
+  installments: z.array(z.number().positive()).optional(),
 });
 
 export const recordPaymentSchema = z.object({
@@ -24,5 +25,11 @@ export const recordPaymentSchema = z.object({
   paidAmount: z.number().positive(),
   paymentMethod: z.enum(['cash', 'cheque', 'online', 'bank_transfer']),
   transactionId: z.string().optional(),
+  remarks: z.string().optional(),
+});
+
+export const payPendingFeeSchema = z.object({
+  amountPaid: z.number().positive(),
+  paymentMethod: z.enum(['cash', 'cheque', 'online', 'bank_transfer']),
   remarks: z.string().optional(),
 });

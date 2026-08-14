@@ -7,6 +7,7 @@ import SchoolClass from '../models/SchoolClass.js';
 import FeeStructure from '../models/FeeStructure.js';
 import FeeTransaction from '../models/FeeTransaction.js';
 import AcademicYear from '../models/AcademicYear.js';
+import InstallmentConfig from '../models/InstallmentConfig.js';
 import ApiError from '../utils/ApiError.js';
 import { paginate } from '../utils/pagination.js';
 
@@ -139,10 +140,10 @@ export const allocateClassSection = async (id, schoolId, { assignedClassId, assi
   const admission = await Admission.findOne({ _id: id, schoolId });
   if (!admission) throw new ApiError(404, 'Admission not found');
 
-  // Verify application approved
-  const allowedStatuses = ['approved', 'class_allocated', 'fee_assigned', 'payment_pending', 'partially_paid', 'paid'];
+  // Verify application status allows allocation
+  const allowedStatuses = ['submitted', 'document_verification', 'under_review', 'approved', 'class_allocated', 'fee_assigned', 'payment_pending', 'partially_paid', 'paid'];
   if (!allowedStatuses.includes(admission.workflowStatus)) {
-    throw new ApiError(400, 'Application must be approved before class allocation.');
+    throw new ApiError(400, 'Application is not in a valid stage for class allocation.');
   }
 
   const cls = await SchoolClass.findOne({ _id: assignedClassId, schoolId });
@@ -177,7 +178,7 @@ export const allocateClassSection = async (id, schoolId, { assignedClassId, assi
   return admission;
 };
 
-export const assignFeeStructure = async (id, schoolId, { feeStructureId, discountName, discountValue }, userId) => {
+export const assignFeeStructure = async (id, schoolId, { feeStructureId, discountName, discountValue, installments }, userId) => {
   const admission = await Admission.findOne({ _id: id, schoolId });
   if (!admission) throw new ApiError(404, 'Admission not found');
 
@@ -188,16 +189,20 @@ export const assignFeeStructure = async (id, schoolId, { feeStructureId, discoun
   const structure = await FeeStructure.findOne({ _id: feeStructureId, schoolId });
   if (!structure) throw new ApiError(404, 'Fee structure not found');
 
+  // Use custom installments if provided, otherwise use the structure's defaults
+  const finalInstallments = (installments && installments.length > 0) ? installments : (structure.installments || [100]);
+
   admission.feeStructure = feeStructureId;
   admission.feeDiscount = {
     name: discountName || undefined,
     value: Number(discountValue) || 0
   };
+  admission.installments = finalInstallments;
   admission.workflowStatus = 'fee_assigned';
 
   admission.history.push({
     status: 'fee_assigned',
-    remarks: `Assigned fee structure: "${structure.name}" with discount/concession: ${discountName || 'None'} (₹${discountValue || 0})`,
+    remarks: `Assigned fee structure: "${structure.name}" with discount/concession: ${discountName || 'None'} (₹${discountValue || 0}). Installments: ${finalInstallments.join('% → ')}%`,
     updatedBy: userId,
     updatedAt: new Date()
   });
@@ -227,6 +232,33 @@ export const recordManualPayment = async (id, schoolId, paymentData, userId) => 
   // Find or create transaction
   let transaction = admission.feeTransactions[0];
   const netRequiredAmount = Math.max(0, admission.feeStructure.totalAmount - (admission.feeDiscount?.value || 0));
+
+  // Validate minimum payment criteria (must be >= first installment)
+  let firstPercentage = 100;
+  if (admission.installments && admission.installments.length > 0 && admission.installments[0] !== 100) {
+    firstPercentage = admission.installments[0];
+  } else {
+    const installmentConfig = await InstallmentConfig.findOne({ isActive: true });
+    firstPercentage = installmentConfig?.percentages?.[0] ?? 100;
+  }
+
+  const minRequiredForAdmission = (netRequiredAmount * firstPercentage) / 100;
+  const currentPaid = transaction ? (transaction.paidAmount || 0) : 0;
+  const totalCumulativePaid = currentPaid + numAmountPaid;
+
+  if (totalCumulativePaid < minRequiredForAdmission) {
+    throw new ApiError(
+      400,
+      `Payment amount of ₹${numAmountPaid} is insufficient. The first installment requires at least ${firstPercentage}% of total fees (₹${minRequiredForAdmission}). Total paid: ₹${totalCumulativePaid}`
+    );
+  }
+
+  if (totalCumulativePaid > netRequiredAmount) {
+    throw new ApiError(
+      400,
+      `Payment amount of ₹${numAmountPaid} exceeds the remaining balance of ₹${netRequiredAmount - currentPaid}. Total fee: ₹${netRequiredAmount}, Paid so far: ₹${currentPaid}`
+    );
+  }
 
   if (!transaction) {
     const balance = Math.max(0, netRequiredAmount - numAmountPaid);
@@ -291,7 +323,8 @@ export const confirmAdmission = async (id, schoolId, userId) => {
   const admission = await Admission.findOne({ _id: id, schoolId })
     .populate('feeTransactions')
     .populate('applyingForClass')
-    .populate('academicSession');
+    .populate('academicSession')
+    .populate('feeStructure');
 
   if (!admission) throw new ApiError(404, 'Admission not found');
 
@@ -299,13 +332,28 @@ export const confirmAdmission = async (id, schoolId, userId) => {
     throw new ApiError(400, 'Admission already confirmed. Student record already exists.');
   }
 
-  // Confirm condition checks
-  if (admission.workflowStatus !== 'paid') {
-    // If they have a transaction and it is paid, we can proceed
-    const paidTx = admission.feeTransactions.find(t => t.status === 'paid');
-    if (!paidTx) {
-      throw new ApiError(400, 'Admission fee payment must be fully satisfied before confirmation.');
-    }
+  // Check installment eligibility
+  // Priority: admission-level installments > global InstallmentConfig > default 100%
+  let firstPercentage = 100;
+  if (admission.installments && admission.installments.length > 0 && admission.installments[0] !== 100) {
+    firstPercentage = admission.installments[0];
+  } else {
+    const installmentConfig = await InstallmentConfig.findOne({ isActive: true });
+    firstPercentage = installmentConfig?.percentages?.[0] ?? 100;
+  }
+
+  const totalAmount = admission.feeStructure?.totalAmount || 0;
+  const netRequiredAmount = Math.max(0, totalAmount - (admission.feeDiscount?.value || 0));
+  const minRequiredForAdmission = (netRequiredAmount * firstPercentage) / 100;
+
+  const transaction = admission.feeTransactions[0];
+  const totalPaid = transaction ? (transaction.paidAmount || 0) : 0;
+
+  if (totalPaid < minRequiredForAdmission) {
+    throw new ApiError(
+      400,
+      `Admission fee payment of at least the first installment (${firstPercentage}%: ₹${minRequiredForAdmission}) is required before confirmation. Current paid: ₹${totalPaid}`
+    );
   }
 
   if (!admission.assignedClass || !admission.assignedSection) {
@@ -343,7 +391,7 @@ export const confirmAdmission = async (id, schoolId, userId) => {
     // 3. Find or Create Parent
     let parent = await Parent.findOne({
       schoolId,
-      'contact.phone': admission.father?.phone || admission.mother?.phone || admission.guardian?.phone
+      'contact.phone': admission.father?.phone || admission.mother?.phone || admission.guardian?.phone || admission.parentPhone
     }).session(session);
 
     if (!parent) {
@@ -397,6 +445,8 @@ export const confirmAdmission = async (id, schoolId, userId) => {
         address: [admission.address, admission.city, admission.state, admission.pincode].filter(Boolean).join(', ')
       },
       documents: studentDocs,
+      feeStructure: admission.feeStructure?._id || admission.feeStructure || undefined,
+      installments: admission.installments || [100],
       status: 'active'
     }], { session });
     const student = studentArr[0];

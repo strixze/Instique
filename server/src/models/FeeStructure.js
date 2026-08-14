@@ -18,6 +18,7 @@ const feeStructureSchema = new mongoose.Schema({
   totalAmount: { type: Number, required: true },
   lateFeePerDay: { type: Number, default: 0 },
   discountRules: [{ name: String, type: String, value: Number }],
+  installments: { type: [Number], default: [100] },
   isActive: { type: Boolean, default: true },
 }, { timestamps: true });
 

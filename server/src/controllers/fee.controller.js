@@ -55,3 +55,8 @@ export const importFeeStructures = asyncHandler(async (req, res) => {
   const result = await feeService.importFeeStructures(req.schoolId, req.file.path);
   res.status(200).json(new ApiResponse(200, result, 'Fee structures imported successfully'));
 });
+
+export const payPendingFee = asyncHandler(async (req, res) => {
+  const transaction = await feeService.payPendingFee(req.schoolId, req.params.id, req.body, req.user._id);
+  res.status(200).json(new ApiResponse(200, transaction, 'Payment recorded successfully'));
+});

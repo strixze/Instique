@@ -4,7 +4,7 @@ import Swal from 'sweetalert2';
 import {
   Plus, Eye, FileCheck, CheckCircle2, XCircle, UserPlus,
   Building2, CreditCard, Receipt, ArrowRight, Upload, Clock,
-  ChevronRight, Filter, RotateCcw, FileText, X
+  ChevronRight, Filter, RotateCcw, FileText, X, Trash2
 } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 import DataTable from '../../components/ui/DataTable';
@@ -306,7 +306,11 @@ export default function Admissions() {
     }
     setActionSaving(true);
     try {
-      await admissionApi.assignFeeStructure(selectedAdmission._id, feeForm);
+      await admissionApi.assignFeeStructure(selectedAdmission._id, {
+        feeStructureId: feeForm.feeStructureId,
+        discountName: feeForm.discountName,
+        discountValue: feeForm.discountValue
+      });
       toast.success('Fee structure assigned');
       setActionModal(null);
       setFeeForm({ feeStructureId: '', discountName: '', discountValue: '' });
@@ -394,9 +398,23 @@ export default function Admissions() {
   /* ──────────────────────── Workflow Progress Bar ──────────────────────── */
 
   const WorkflowProgress = ({ status }) => {
-    const steps = ['submitted', 'document_verification', 'approved', 'class_allocated', 'fee_assigned', 'paid', 'student_created'];
-    const stepLabels = ['Applied', 'Docs', 'Approved', 'Class', 'Fees', 'Paid', 'Enrolled'];
-    const currentIdx = steps.indexOf(status);
+    const steps = ['submitted', 'document_verification', 'class_allocated', 'fee_assigned', 'paid', 'student_created'];
+    const stepLabels = ['Applied', 'Docs Verified', 'Class Allocated', 'Fees Assigned', 'Paid (Installment)', 'Enrolled'];
+
+    const statusToStepMap = {
+      draft: 0,
+      submitted: 0,
+      under_review: 0,
+      document_verification: 1,
+      class_allocated: 2,
+      fee_assigned: 3,
+      payment_pending: 3,
+      partially_paid: 4,
+      paid: 4,
+      admitted: 5,
+      student_created: 5
+    };
+    const currentIdx = statusToStepMap[status] ?? 0;
     const isRejected = status === 'rejected';
 
     return (
@@ -441,11 +459,7 @@ export default function Admissions() {
     if (s === 'submitted' || s === 'document_verification') {
       actions.push({ label: 'Move to Review', status: 'under_review', variant: 'secondary', icon: Clock });
     }
-    if (['submitted', 'document_verification', 'under_review'].includes(s)) {
-      actions.push({ label: 'Approve', status: 'approved', variant: 'primary', icon: CheckCircle2 });
-      actions.push({ label: 'Reject', status: 'rejected', variant: 'danger', icon: XCircle });
-    }
-    if (s === 'approved' || s === 'class_allocated') {
+    if (['submitted', 'document_verification', 'under_review', 'approved', 'class_allocated'].includes(s)) {
       actions.push({ label: 'Allocate Class & Section', action: 'allocate', variant: 'primary', icon: Building2 });
     }
     if (s === 'class_allocated' || s === 'fee_assigned') {
@@ -454,7 +468,7 @@ export default function Admissions() {
     if (['fee_assigned', 'payment_pending', 'partially_paid'].includes(s)) {
       actions.push({ label: 'Record Payment', action: 'payment', variant: 'primary', icon: Receipt });
     }
-    if (s === 'paid') {
+    if (s === 'paid' || s === 'partially_paid') {
       actions.push({ label: 'Confirm Admission & Create Student', action: 'confirm', variant: 'primary', icon: UserPlus });
     }
 
@@ -837,6 +851,7 @@ export default function Admissions() {
           />
           <Input label="Discount / Concession Name" value={feeForm.discountName} onChange={e => setFeeForm(f => ({ ...f, discountName: e.target.value }))} placeholder="e.g. Sibling discount, Staff ward" />
           <Input label="Discount Amount (₹)" type="number" value={feeForm.discountValue} onChange={e => setFeeForm(f => ({ ...f, discountValue: e.target.value }))} placeholder="0" />
+
           <div className="flex justify-end gap-3 mt-6">
             <Button variant="ghost" onClick={() => setActionModal(null)}>Cancel</Button>
             <Button onClick={handleAssignFee} loading={actionSaving}>Assign Fee</Button>
