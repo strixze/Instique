@@ -45,7 +45,7 @@ export default function Login() {
  <Button type="submit"loading={loading} className="w-full">Sign in</Button>
 
  <div className="text-xs text-muted text-center">
- Demo: admin@instique.com / password123
+ Demo: admin1@gmail.com / 12345678
  </div>
  <div className="text-sm text-muted text-center">
  Don't have an account? <Link to="/register"className="text-forest hover:underline">Sign up</Link>

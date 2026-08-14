@@ -135,3 +135,27 @@ export const deleteSubject = async (id, schoolId) => {
   await SchoolClass.updateMany({ subjects: id }, { $pull: { subjects: id } });
   return true;
 };
+
+export const bulkEditSubjects = async (schoolId, { field, value, subjectIds }) => {
+  const allowedFields = ['maxMarks', 'passMarks', 'weeklyPeriods', 'type'];
+  if (!allowedFields.includes(field)) {
+    throw new ApiError(400, `Field "${field}" is not allowed for bulk editing.`);
+  }
+
+  let parsedValue = value;
+  if (['maxMarks', 'passMarks', 'weeklyPeriods'].includes(field)) {
+    parsedValue = Number(value);
+    if (isNaN(parsedValue)) {
+      throw new ApiError(400, `Value for "${field}" must be a number.`);
+    }
+  }
+
+  const query = { schoolId };
+  if (Array.isArray(subjectIds) && subjectIds.length > 0) {
+    query._id = { $in: subjectIds };
+  }
+
+  const result = await Subject.updateMany(query, { $set: { [field]: parsedValue } });
+  return result;
+};
+

@@ -26,6 +26,8 @@ export const createStudent = async (schoolId, data) => {
     ...data,
     currentSection: sectionId || undefined,
     schoolId,
+    feeStructure: data.feeStructure || undefined,
+    installments: data.installments || [100],
   });
   return student;
 };

@@ -20,7 +20,7 @@ const periodSchema = z.object({
 
 export const generateTimetableSchema = z.object({
   schoolClass: z.string().min(1),
-  section: z.string().min(1),
+  section: z.string().optional(),
   academicYear: z.string().min(1),
   configId: z.string().optional(),
 });
@@ -54,3 +54,23 @@ export const lockPeriodsSchema = z.object({
 export const publishTimetableSchema = z.object({
   status: z.enum(['draft', 'published']),
 });
+
+export const deleteClassTimetablesSchema = z.object({
+  academicYear: z.string().min(1),
+});
+
+export const deleteSchoolTimetablesSchema = z.object({
+  academicYear: z.string().min(1),
+});
+
+export const bulkPublishClassSchema = z.object({
+  academicYear: z.string().min(1),
+  status: z.enum(['draft', 'published']),
+});
+
+export const bulkPublishSchoolSchema = z.object({
+  academicYear: z.string().min(1),
+  status: z.enum(['draft', 'published']),
+});
+
+

@@ -46,27 +46,31 @@ const buildGlobalSchedules = async (schoolId, academicYear, excludeTimetableId =
 };
 
 export const generateTimetable = async (schoolId, data) => {
-  // Check if timetable already exists for this class/section
-  const existing = await Timetable.findOne({
+  // Check for published timetables in this class
+  const publishedCheck = await Timetable.findOne({
     schoolId,
     schoolClass: data.schoolClass,
-    section: data.section,
+    academicYear: data.academicYear,
+    status: 'published',
+  });
+
+  if (publishedCheck) {
+    throw new ApiError(409, 'A published timetable exists for a section in this class. Unpublish or delete it first.');
+  }
+
+  const result = await generateDeterministicTimetables(schoolId, {
+    schoolClass: data.schoolClass,
     academicYear: data.academicYear,
   });
 
-  if (existing && existing.status === 'published') {
-    throw new ApiError(409, 'A published timetable already exists for this class/section. Unpublish or delete it first.');
-  }
-
-  const result = await generateDeterministicTimetables(schoolId, data);
   if (!result.success) {
     throw new ApiError(400, result.message || 'Generation failed', result.errors);
   }
 
-  const timetable = await Timetable.findOne({
+  // Fetch all generated timetables for this class
+  const timetables = await Timetable.find({
     schoolId,
     schoolClass: data.schoolClass,
-    section: data.section,
     academicYear: data.academicYear,
   })
     .populate('schoolClass', 'name')
@@ -75,7 +79,7 @@ export const generateTimetable = async (schoolId, data) => {
     .populate('periods.subject', 'name code category')
     .populate('periods.teacher', 'firstName lastName');
 
-  return { timetable, conflicts: [], success: true };
+  return { timetables, conflicts: [], success: true };
 };
 
 export const generateBulkTimetables = async (schoolId, { academicYear }) => {
@@ -111,14 +115,16 @@ export const generateBulkTimetables = async (schoolId, { academicYear }) => {
 
   const results = [];
   drafts.forEach(d => {
+    const logs = d.generationLog || [];
+    const hasError = logs.some(l => l.severity === 'error');
     results.push({
       classId: d.schoolClass._id,
       className: d.schoolClass.name,
       sectionId: d.section._id,
       sectionName: d.section.name,
-      success: true,
-      status: 'generated',
-      conflicts: [],
+      success: !hasError,
+      status: hasError ? 'failed' : 'generated',
+      conflicts: logs,
     });
   });
 
@@ -135,14 +141,17 @@ export const generateBulkTimetables = async (schoolId, { academicYear }) => {
     });
   });
 
+  const generatedCount = results.filter(r => r.status === 'generated').length;
+  const failedCount = results.filter(r => r.status === 'failed').length;
+
   return {
     success: true,
     phase: 'generation',
     summary: {
       total: results.length,
-      generated: drafts.length,
+      generated: generatedCount,
       skipped: published.length,
-      failed: 0,
+      failed: failedCount,
     },
     preValidationWarnings: [],
     results,
@@ -425,10 +434,57 @@ export const publishTimetable = async (id, schoolId, status) => {
   return timetable;
 };
 
+export const publishClassTimetables = async (schoolId, classId, academicYearId, status) => {
+  if (!academicYearId) throw new ApiError(400, 'Academic year is required');
+  if (!status) throw new ApiError(400, 'Status is required');
+  const result = await Timetable.updateMany(
+    {
+      schoolId,
+      schoolClass: classId,
+      academicYear: academicYearId,
+    },
+    { status }
+  );
+  return { updatedCount: result.modifiedCount };
+};
+
+export const publishSchoolTimetables = async (schoolId, academicYearId, status) => {
+  if (!academicYearId) throw new ApiError(400, 'Academic year is required');
+  if (!status) throw new ApiError(400, 'Status is required');
+  const result = await Timetable.updateMany(
+    {
+      schoolId,
+      academicYear: academicYearId,
+    },
+    { status }
+  );
+  return { updatedCount: result.modifiedCount };
+};
+
+
 export const deleteTimetable = async (id, schoolId) => {
   const timetable = await Timetable.findOneAndDelete({ _id: id, schoolId });
   if (!timetable) throw new ApiError(404, 'Timetable not found');
   return true;
+};
+
+export const deleteClassTimetables = async (schoolId, classId, academicYearId) => {
+  if (!academicYearId) throw new ApiError(400, 'Academic year is required');
+  const result = await Timetable.deleteMany({
+    schoolId,
+    schoolClass: classId,
+    academicYear: academicYearId
+  });
+  return { deletedCount: result.deletedCount };
+};
+
+export const deleteSchoolTimetables = async (schoolId, academicYearId) => {
+  if (!academicYearId) throw new ApiError(400, 'Academic year is required');
+  const result = await Timetable.deleteMany({
+    schoolId,
+    academicYear: academicYearId
+  });
+  return { deletedCount: result.deletedCount };
 };
 
 export const getTeacherTimetable = async (schoolId, teacherId) => {
@@ -582,7 +638,7 @@ export const exportToPdf = async (id, schoolId) => {
   const timetable = await getTimetableById(id, schoolId);
   
   const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  const workingDays = timetable.configSnapshot?.workingDays || [1, 2, 3, 4, 5];
+  const workingDays = timetable.configSnapshot?.workingDays || [1, 2, 3, 4, 5, 6];
   const maxPeriods = timetable.totalPeriodsPerDay || 8;
 
   // Build HTML table for pdf rendering
@@ -660,7 +716,7 @@ export const exportToExcel = async (id, schoolId) => {
   const worksheet = workbook.addWorksheet(`${timetable.schoolClass.name} - ${timetable.section.name}`);
 
   const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  const workingDays = timetable.configSnapshot?.workingDays || [1, 2, 3, 4, 5];
+  const workingDays = timetable.configSnapshot?.workingDays || [1, 2, 3, 4, 5, 6];
   const maxPeriods = timetable.totalPeriodsPerDay || 8;
 
   // Add headers

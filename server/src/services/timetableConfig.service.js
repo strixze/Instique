@@ -34,13 +34,13 @@ export const getConfig = async (schoolId, academicYear) => {
     return await TimetableConfig.create({
       schoolId,
       academicYear,
-      workingDays: [1, 2, 3, 4, 5],
+      workingDays: [1, 2, 3, 4, 5, 6],
       periodsPerDay: 8,
       periodTimings: defaultTimings,
       schoolStartTime: '08:00',
       schoolEndTime: '14:30',
       lunchBreaks: [{ afterPeriod: 4, durationMinutes: 45 }],
-      assemblyConfig: { enabled: false, periodNo: 1, days: [1, 2, 3, 4, 5], durationMinutes: 15 },
+      assemblyConfig: { enabled: false, periodNo: 1, days: [1, 2, 3, 4, 5, 6], durationMinutes: 15 },
       fixedEvents: [],
     });
   }

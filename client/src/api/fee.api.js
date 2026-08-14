@@ -8,6 +8,7 @@ export const feeApi = {
   deleteStructure: (id) => api.delete(`/fees/structures/${id}`),
   getTransactions: (params) => api.get('/fees/transactions', { params }),
   recordPayment: (data) => api.post('/fees/payments', data),
+  payPendingFee: (id, data) => api.put(`/fees/transactions/${id}/pay`, data),
   getStudentStatus: (studentId) => api.get(`/fees/student/${studentId}`),
   getReport: () => api.get('/fees/report'),
   importStructures: (formData) => api.post('/fees/structures/import', formData, {

@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const feeTransactionSchema = new mongoose.Schema({
   schoolId: { type: mongoose.Schema.Types.ObjectId, ref: 'School', required: true },
-  student: { type: mongoose.Schema.Types.ObjectId, ref: 'Student', required: true },
+  student: { type: mongoose.Schema.Types.ObjectId, ref: 'Student' },
   feeStructure: { type: mongoose.Schema.Types.ObjectId, ref: 'FeeStructure', required: true },
   academicYear: { type: mongoose.Schema.Types.ObjectId, ref: 'AcademicYear', required: true },
   amount: { type: Number, required: true },

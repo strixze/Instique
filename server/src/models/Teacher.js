@@ -17,7 +17,7 @@ const teacherSchema = new mongoose.Schema({
   classTeacherSection: { type: mongoose.Schema.Types.ObjectId, ref: 'Section' },
   weeklyTeachingLimit: { type: Number, default: 30 },
   dailyTeachingLimit: { type: Number, default: 6 },
-  availableWorkingDays: { type: [Number], default: [1, 2, 3, 4, 5] },
+  availableWorkingDays: { type: [Number], default: [1, 2, 3, 4, 5, 6] },
   unavailablePeriods: [{
     day: { type: Number, min: 0, max: 6 },
     periodNo: { type: Number, min: 1 },

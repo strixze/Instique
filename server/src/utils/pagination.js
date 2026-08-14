@@ -16,9 +16,32 @@ export const paginate = async (model, query = {}, options = {}) => {
   const filterQuery = { ...query };
 
   if (search && searchFields.length > 0) {
-    filterQuery.$or = searchFields.map((field) => ({
+    const searchConditions = searchFields.map((field) => ({
       [field]: { $regex: search, $options: 'i' },
     }));
+
+    if (searchFields.includes('firstName') && searchFields.includes('lastName')) {
+      searchConditions.push({
+        $expr: {
+          $regexMatch: {
+            input: { $concat: ['$firstName', ' ', '$lastName'] },
+            regex: search,
+            options: 'i',
+          },
+        },
+      });
+      searchConditions.push({
+        $expr: {
+          $regexMatch: {
+            input: { $concat: ['$lastName', ' ', '$firstName'] },
+            regex: search,
+            options: 'i',
+          },
+        },
+      });
+    }
+
+    filterQuery.$or = searchConditions;
   }
 
   if (filter && typeof filter === 'object') {

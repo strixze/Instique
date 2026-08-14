@@ -58,9 +58,36 @@ export const publishTimetable = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponse(200, timetable, `Timetable status updated to ${req.body.status}`));
 });
 
+export const publishClassTimetables = asyncHandler(async (req, res) => {
+  const { classId } = req.params;
+  const { academicYear, status } = req.body;
+  const result = await timetableService.publishClassTimetables(req.schoolId, classId, academicYear, status);
+  res.status(200).json(new ApiResponse(200, result, `Updated ${result.updatedCount} timetable(s) to ${status} status`));
+});
+
+export const publishSchoolTimetables = asyncHandler(async (req, res) => {
+  const { academicYear, status } = req.body;
+  const result = await timetableService.publishSchoolTimetables(req.schoolId, academicYear, status);
+  res.status(200).json(new ApiResponse(200, result, `Updated ${result.updatedCount} timetable(s) to ${status} status`));
+});
+
+
 export const deleteTimetable = asyncHandler(async (req, res) => {
   await timetableService.deleteTimetable(req.params.id, req.schoolId);
   res.status(200).json(new ApiResponse(200, null, 'Timetable deleted'));
+});
+
+export const deleteClassTimetables = asyncHandler(async (req, res) => {
+  const { classId } = req.params;
+  const { academicYear } = req.query;
+  const result = await timetableService.deleteClassTimetables(req.schoolId, classId, academicYear);
+  res.status(200).json(new ApiResponse(200, result, `Deleted ${result.deletedCount} timetable(s) for class`));
+});
+
+export const deleteSchoolTimetables = asyncHandler(async (req, res) => {
+  const { academicYear } = req.query;
+  const result = await timetableService.deleteSchoolTimetables(req.schoolId, academicYear);
+  res.status(200).json(new ApiResponse(200, result, `Deleted ${result.deletedCount} timetable(s) for school`));
 });
 
 export const getTeacherTimetable = asyncHandler(async (req, res) => {

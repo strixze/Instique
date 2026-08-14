@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
-import { Plus, Trash2, Wallet, Upload } from 'lucide-react';
+import { Plus, Trash2, Wallet, Upload, ArrowRight } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 import DataTable from '../../components/ui/DataTable';
 import Button from '../../components/ui/Button';
@@ -38,6 +38,7 @@ function Structures() {
  schoolClass: '',
  lateFeePerDay: 0,
  categories: [{ name: '', type: 'tuition', amount: 100, frequency: 'monthly' }],
+ installments: [100],
  });
 
  useEffect(() => {
@@ -94,10 +95,24 @@ function Structures() {
  academicYear: years[0]?._id || '',
  schoolClass: classes[0]?._id || '',
  lateFeePerDay: 0,
- categories: [{ name: '', type: 'tuition', amount: 100, frequency: 'monthly' }]
+ categories: [{ name: '', type: 'tuition', amount: 100, frequency: 'monthly' }],
+ installments: [100],
  });
  setOpen(false);
  };
+
+ const instSum = form.installments.reduce((s, v) => s + v, 0);
+ const isValidInst = Math.round(instSum) === 100;
+
+ const handleInstChange = (idx, val) => {
+ setForm(f => {
+ const next = [...f.installments];
+ next[idx] = Number(val) || 0;
+ return { ...f, installments: next };
+ });
+ };
+ const addInst = () => setForm(f => ({ ...f, installments: [...f.installments, 0] }));
+ const removeInst = (idx) => setForm(f => ({ ...f, installments: f.installments.filter((_, i) => i !== idx) }));
 
  const handleCreate = async () => {
  if (!form.name || !form.academicYear || !form.schoolClass) {
@@ -107,6 +122,10 @@ function Structures() {
  const categories = form.categories.filter((c) => c.name && c.amount > 0);
  if (categories.length === 0) {
  toast.error('Add at least one fee category');
+ return;
+ }
+ if (!isValidInst) {
+ toast.error('Installment percentages must sum to exactly 100%');
  return;
  }
  setSaving(true);
@@ -122,6 +141,7 @@ function Structures() {
  amount: Number(c.amount),
  frequency: c.frequency,
  })),
+ installments: form.installments,
  });
  toast.success('Fee structure created');
  resetAndClose();
@@ -298,9 +318,41 @@ function Structures() {
  </div>
  </div>
 
+ {/* Installments Section */}
+ <div className="mt-6">
+ <div className="flex items-center justify-between mb-3">
+ <h3 className="text-sm font-medium text-secondary">Installments (in %)</h3>
+ <Button variant="outline" size="sm" onClick={addInst}><Plus size={14} className="mr-1"/>Add Installment</Button>
+ </div>
+ <div className="space-y-2">
+ {form.installments.map((pct, idx) => (
+ <div key={idx} className="flex items-center gap-2">
+ <div className="relative flex-1">
+ <Input
+ type="number"
+ value={pct === 0 ? '' : pct}
+ onChange={(e) => handleInstChange(idx, e.target.value)}
+ placeholder={`Installment ${idx + 1}`}
+ className="pr-8"
+ />
+ <span className="absolute right-3 top-[9px] text-sm text-muted">%</span>
+ </div>
+ {form.installments.length > 1 && (
+ <button onClick={() => removeInst(idx)} className="p-2 text-muted hover:text-danger rounded-lg hover:bg-danger-light transition-colors"><Trash2 size={16}/></button>
+ )}
+ </div>
+ ))}
+ </div>
+ <div className="flex items-center gap-2 mt-3 p-2 rounded-lg border text-xs font-medium" style={{ borderColor: isValidInst ? '#22c55e33' : '#ef444433', background: isValidInst ? '#f0fdf4' : '#fef2f2', color: isValidInst ? '#166534' : '#991b1b' }}>
+ <span>Total: {instSum}%</span>
+ {isValidInst ? <span>✓ Valid</span> : <span>⚠ Must equal 100%</span>}
+ <span className="ml-auto flex items-center gap-1">{form.installments.map((p, i) => (<span key={i} className="flex items-center gap-1">{p}%{i < form.installments.length - 1 && <ArrowRight size={10}/>}</span>))}</span>
+ </div>
+ </div>
+
  <div className="flex justify-end gap-3 mt-6">
- <Button variant="ghost"onClick={resetAndClose}>Cancel</Button>
- <Button onClick={handleCreate} loading={saving}>Create Structure</Button>
+ <Button variant="ghost" onClick={resetAndClose}>Cancel</Button>
+ <Button onClick={handleCreate} loading={saving} disabled={!isValidInst}>Create Structure</Button>
  </div>
  </Modal>
  </>
@@ -409,8 +461,8 @@ function Transactions() {
  };
 
  const columns = [
- { key: 'student', label: 'Student', render: (r) => studentMap[r.student] || '—' },
- { key: 'feeStructure', label: 'Structure', render: (r) => structureMap[r.feeStructure] || '—' },
+ { key: 'student', label: 'Student', render: (r) => r.student ? (typeof r.student === 'object' ? `${r.student.firstName} ${r.student.lastName}` : studentMap[r.student] || '—') : '—' },
+ { key: 'feeStructure', label: 'Structure', render: (r) => r.feeStructure ? (typeof r.feeStructure === 'object' ? r.feeStructure.name : structureMap[r.feeStructure] || '—') : '—' },
  { key: 'amount', label: 'Amount', render: (r) => `₹${r.amount?.toLocaleString()}` },
  { key: 'paidAmount', label: 'Paid', render: (r) => <span className="text-success-text">₹{r.paidAmount?.toLocaleString()}</span> },
  { key: 'balance', label: 'Balance', render: (r) => <span className="text-danger-text">₹{r.balance?.toLocaleString()}</span> },
@@ -456,45 +508,213 @@ function Transactions() {
  );
 }
 
+function PendingFees() {
+  const [data, setData] = useState([]);
+  const [meta, setMeta] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState('');
+  const [reload, setReload] = useState(0);
+  const [open, setOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [selectedTx, setSelectedTx] = useState(null);
+  const [form, setForm] = useState({ amountPaid: '', paymentMethod: 'cash', remarks: '' });
+
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      try {
+        const res = await feeApi.getTransactions({ page, limit: 10, search: search || undefined, pendingOnly: 'true' });
+        if (!active) return;
+        setData(res.data);
+        setMeta(res.meta);
+      } catch (e) {
+        if (active) toast.error(e?.message || 'Failed to load pending transactions');
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+    load();
+    return () => { active = false; };
+  }, [page, search, reload]);
+
+  const handlePayClick = (tx) => {
+    setSelectedTx(tx);
+    setForm({
+      amountPaid: tx.balance || 0,
+      paymentMethod: 'cash',
+      remarks: ''
+    });
+    setOpen(true);
+  };
+
+  const resetAndClose = () => {
+    setSelectedTx(null);
+    setForm({ amountPaid: '', paymentMethod: 'cash', remarks: '' });
+    setOpen(false);
+  };
+
+  const handlePayment = async () => {
+    if (!form.amountPaid) {
+      toast.error('Please enter paid amount');
+      return;
+    }
+    setSaving(true);
+    try {
+      await feeApi.payPendingFee(selectedTx._id, {
+        amountPaid: Number(form.amountPaid),
+        paymentMethod: form.paymentMethod,
+        remarks: form.remarks || undefined
+      });
+      toast.success('Payment recorded successfully');
+      resetAndClose();
+      setPage(1);
+      setLoading(true);
+      setReload((r) => r + 1);
+      window.dispatchEvent(new CustomEvent('refreshFeeReport'));
+    } catch (e) {
+      toast.error(e?.message || 'Failed to record payment');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const columns = [
+    { key: 'student', label: 'Student', render: (r) => r.student ? `${r.student.firstName} ${r.student.lastName} (${r.student.admissionNo})` : '—' },
+    { key: 'feeStructure', label: 'Structure', render: (r) => r.feeStructure?.name || '—' },
+    { key: 'amount', label: 'Total Amount', render: (r) => `₹${r.amount?.toLocaleString()}` },
+    { key: 'paidAmount', label: 'Paid', render: (r) => <span className="text-success-text font-medium">₹{r.paidAmount?.toLocaleString()}</span> },
+    { key: 'balance', label: 'Pending Balance', render: (r) => <span className="text-danger-text font-bold">₹{r.balance?.toLocaleString()}</span> },
+    { key: 'status', label: 'Status', render: (r) => <Badge color={statusColors[r.status] || 'gray'}>{r.status}</Badge> },
+    {
+      key: 'actions',
+      label: '',
+      render: (r) => (
+        <Button variant="outline" size="sm" onClick={() => handlePayClick(r)}>
+          <Wallet size={14} className="mr-1"/> Pay
+        </Button>
+      )
+    }
+  ];
+
+  return (
+    <>
+      <PageHeader
+        title="Pending Fees"
+        description="Track and pay outstanding fee balances for students"
+      />
+      <DataTable columns={columns} data={data} loading={loading} meta={meta} onPageChange={(p) => { setLoading(true); setPage(p); }} onSearch={(s) => { setLoading(true); setSearch(s); setPage(1); }} searchPlaceholder="Search pending fees..."/>
+      
+      <Modal isOpen={open} onClose={resetAndClose} title={selectedTx ? `Record Payment: ${selectedTx.student?.firstName} ${selectedTx.student?.lastName}` : 'Record Payment'} size="lg">
+        {selectedTx && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-3 gap-4 p-4 bg-sage-soft border border-border rounded-xl text-center">
+              <div>
+                <span className="text-xs text-muted block uppercase">Total Fee</span>
+                <span className="text-lg font-bold text-deep">₹{selectedTx.amount?.toLocaleString()}</span>
+              </div>
+              <div>
+                <span className="text-xs text-muted block uppercase">Already Paid</span>
+                <span className="text-lg font-bold text-success-text">₹{selectedTx.paidAmount?.toLocaleString()}</span>
+              </div>
+              <div>
+                <span className="text-xs text-muted block uppercase">Pending Balance</span>
+                <span className="text-lg font-bold text-danger-text">₹{selectedTx.balance?.toLocaleString()}</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Input
+                label="Amount to Pay *"
+                type="number"
+                value={form.amountPaid}
+                onChange={(e) => setForm(f => ({ ...f, amountPaid: e.target.value }))}
+                placeholder="Enter payment amount"
+              />
+              <Select
+                label="Payment Method *"
+                options={[
+                  { value: 'cash', label: 'Cash' },
+                  { value: 'cheque', label: 'Cheque' },
+                  { value: 'online', label: 'Online' },
+                  { value: 'bank_transfer', label: 'Bank Transfer' },
+                ]}
+                value={form.paymentMethod}
+                onChange={(e) => setForm(f => ({ ...f, paymentMethod: e.target.value }))}
+              />
+              <div className="col-span-2">
+                <Input
+                  label="Remarks"
+                  value={form.remarks}
+                  onChange={(e) => setForm(f => ({ ...f, remarks: e.target.value }))}
+                  placeholder="e.g. Next installment payment"
+                />
+              </div>
+            </div>
+            
+            <div className="flex justify-end gap-3 mt-6">
+              <Button variant="ghost" onClick={resetAndClose}>Cancel</Button>
+              <Button onClick={handlePayment} loading={saving}>Record Payment</Button>
+            </div>
+          </div>
+        )}
+      </Modal>
+    </>
+  );
+}
+
 export default function Fees() {
- const [active, setActive] = useState('structures');
- const [report, setReport] = useState(null);
+  const [active, setActive] = useState('structures');
+  const [report, setReport] = useState(null);
+  const [reloadReport, setReloadReport] = useState(0);
 
- useEffect(() => {
- feeApi.getReport().then((res) => setReport(res.data)).catch(() => {});
- }, [active]);
+  useEffect(() => {
+    feeApi.getReport().then((res) => setReport(res.data)).catch(() => {});
+  }, [active, reloadReport]);
 
- return (
- <div className="space-y-6">
- <PageHeader title="Fees"description="Manage fee structures, payments, and collections"/>
+  useEffect(() => {
+    const handleRefresh = () => setReloadReport(r => r + 1);
+    window.addEventListener('refreshFeeReport', handleRefresh);
+    return () => window.removeEventListener('refreshFeeReport', handleRefresh);
+  }, []);
 
- <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
- <div className="p-5 bg-white border border-border rounded-xl">
- <p className="text-sm text-muted">Total Collected</p>
- <p className="text-2xl font-bold text-success-text mt-1">₹{report?.totalCollected?.toLocaleString() ?? '-'}</p>
- </div>
- <div className="p-5 bg-white border border-border rounded-xl">
- <p className="text-sm text-muted">Pending Payments</p>
- <p className="text-2xl font-bold text-danger-text mt-1">{report?.pendingCount ?? '-'}</p>
- </div>
- </div>
+  return (
+    <div className="space-y-6">
+      <PageHeader title="Fees" description="Manage fee structures, payments, and collections"/>
 
- <div className="flex gap-1 p-1 bg-white border border-border rounded-xl w-fit">
- <button
- onClick={() => setActive('structures')}
- className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${active === 'structures' ? 'bg-forest text-white' : 'text-muted hover:text-deep'}`}
- >
- Structures
- </button>
- <button
- onClick={() => setActive('transactions')}
- className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${active === 'transactions' ? 'bg-forest text-white' : 'text-muted hover:text-deep'}`}
- >
- Transactions
- </button>
- </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="p-5 bg-white border border-border rounded-xl">
+          <p className="text-sm text-muted">Total Collected</p>
+          <p className="text-2xl font-bold text-success-text mt-1">₹{report?.totalCollected?.toLocaleString() ?? '-'}</p>
+        </div>
+        <div className="p-5 bg-white border border-border rounded-xl">
+          <p className="text-sm text-muted">Total Pending Fees</p>
+          <p className="text-2xl font-bold text-danger-text mt-1">₹{report?.totalPending?.toLocaleString() ?? '-'}</p>
+        </div>
+      </div>
 
- {active === 'structures' ? <Structures /> : <Transactions />}
- </div>
- );
+      <div className="flex gap-1 p-1 bg-white border border-border rounded-xl w-fit">
+        <button
+          onClick={() => setActive('structures')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${active === 'structures' ? 'bg-forest text-white' : 'text-muted hover:text-deep'}`}
+        >
+          Structures
+        </button>
+        <button
+          onClick={() => setActive('transactions')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${active === 'transactions' ? 'bg-forest text-white' : 'text-muted hover:text-deep'}`}
+        >
+          Transactions
+        </button>
+        <button
+          onClick={() => setActive('pending')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${active === 'pending' ? 'bg-forest text-white' : 'text-muted hover:text-deep'}`}
+        >
+          Pending Fees
+        </button>
+      </div>
+
+      {active === 'structures' ? <Structures /> : active === 'transactions' ? <Transactions /> : <PendingFees />}
+    </div>
+  );
 }

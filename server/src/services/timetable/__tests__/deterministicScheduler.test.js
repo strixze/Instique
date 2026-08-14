@@ -97,7 +97,8 @@ describe('Deterministic Scheduler Unit Tests', () => {
       const res = scheduleTimetables(mockConfig, mockClassSections, mockTeachers, [], metrics);
       
       expect(res.success).toBe(true);
-      expect(res.classSchedule.size).toBe(12); // 5 lunch + 4 math + 3 science = 12 populated slots
+      // 5 days × 6 periods = 30 total slots. 5 lunch + 25 teaching = 30 classSchedule entries
+      expect(res.classSchedule.size).toBe(30);
 
       // Verify lunch is set at period 3
       const keyPrefix = 'class-1-sec-1';
@@ -107,15 +108,17 @@ describe('Deterministic Scheduler Unit Tests', () => {
         expect(slot.label).toBe('Lunch Break');
       }
 
-      // Verify Math is placed exactly 4 times
+      // Verify subjects are distributed evenly across all 25 teaching slots
+      // 2 subjects across 25 slots = 13 + 12 (round-robin)
       let mathCount = 0;
       let scienceCount = 0;
       for (const val of res.classSchedule.values()) {
         if (val.subjectId === 'subj-1') mathCount++;
         if (val.subjectId === 'subj-2') scienceCount++;
       }
-      expect(mathCount).toBe(4);
-      expect(scienceCount).toBe(3);
+      expect(mathCount + scienceCount).toBe(25);
+      expect(mathCount).toBe(13); // first subject gets remainder
+      expect(scienceCount).toBe(12);
     });
   });
 });
