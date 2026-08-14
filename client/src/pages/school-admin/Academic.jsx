@@ -381,7 +381,7 @@ function Sections() {
  const [classes, setClasses] = useState([]);
  const [open, setOpen] = useState(false);
  const [saving, setSaving] = useState(false);
- const [form, setForm] = useState({ name: '', schoolClass: '', roomNo: '' });
+ const [form, setForm] = useState({ name: '', schoolClass: '', roomNo: '', strength: '' });
  const [bulkOpen, setBulkOpen] = useState(false);
 
  useEffect(() => {
@@ -416,7 +416,7 @@ function Sections() {
  const setField = (key, value) => setForm((f) => ({ ...f, [key]: value }));
  const resetAndClose = () => {
  const defaultClass = classes[0]?._id || '';
- setForm({ name: '', schoolClass: defaultClass, roomNo: '' });
+ setForm({ name: '', schoolClass: defaultClass, roomNo: '', strength: '' });
  setOpen(false);
  };
 
@@ -424,7 +424,12 @@ function Sections() {
  if (!form.name || !form.schoolClass) { toast.error('Section name and class are required'); return; }
  setSaving(true);
  try {
- await academicApi.createSection({ name: form.name, schoolClass: form.schoolClass, roomNo: form.roomNo || undefined });
+ await academicApi.createSection({ 
+    name: form.name, 
+    schoolClass: form.schoolClass, 
+    roomNo: form.roomNo || undefined, 
+    strength: form.strength ? Number(form.strength) : undefined 
+ });
  toast.success('Section created');
  resetAndClose();
  setPage(1);
@@ -504,6 +509,7 @@ function Sections() {
  onChange={(e) => setField('schoolClass', e.target.value)}
  />
  <Input label="Room no"value={form.roomNo} onChange={(e) => setField('roomNo', e.target.value)} placeholder="201"/>
+ <Input label="Strength / Capacity" type="number" value={form.strength} onChange={(e) => setField('strength', e.target.value)} placeholder="40"/>
  </div>
  <div className="flex justify-end gap-3 mt-6">
  <Button variant="ghost"onClick={resetAndClose}>Cancel</Button>

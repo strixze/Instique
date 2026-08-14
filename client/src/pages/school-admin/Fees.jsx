@@ -461,8 +461,8 @@ function Transactions() {
  };
 
  const columns = [
- { key: 'student', label: 'Student', render: (r) => studentMap[r.student] || '—' },
- { key: 'feeStructure', label: 'Structure', render: (r) => structureMap[r.feeStructure] || '—' },
+ { key: 'student', label: 'Student', render: (r) => r.student ? (typeof r.student === 'object' ? `${r.student.firstName} ${r.student.lastName}` : studentMap[r.student] || '—') : '—' },
+ { key: 'feeStructure', label: 'Structure', render: (r) => r.feeStructure ? (typeof r.feeStructure === 'object' ? r.feeStructure.name : structureMap[r.feeStructure] || '—') : '—' },
  { key: 'amount', label: 'Amount', render: (r) => `₹${r.amount?.toLocaleString()}` },
  { key: 'paidAmount', label: 'Paid', render: (r) => <span className="text-success-text">₹{r.paidAmount?.toLocaleString()}</span> },
  { key: 'balance', label: 'Balance', render: (r) => <span className="text-danger-text">₹{r.balance?.toLocaleString()}</span> },

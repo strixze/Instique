@@ -18,6 +18,7 @@ export const createSectionSchema = z.object({
   name: z.string().min(1, 'Section name is required'),
   schoolClass: z.string().min(1, 'Class is required'),
   roomNo: z.string().optional(),
+  strength: z.number().nonnegative().optional(),
 });
 
 export const createSubjectSchema = z.object({

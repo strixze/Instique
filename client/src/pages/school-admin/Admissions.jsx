@@ -448,32 +448,67 @@ export default function Admissions() {
 
   /* ──────────────────────── Action Buttons for Detail View ──────────────────────── */
 
-  const getAvailableActions = useCallback(() => {
-    if (!selectedAdmission) return [];
+  const getNextAction = () => {
+    if (!selectedAdmission) return null;
     const s = selectedAdmission.workflowStatus;
-    const actions = [];
 
-    if (s === 'submitted') {
-      actions.push({ label: 'Move to Document Verification', status: 'document_verification', variant: 'secondary', icon: FileCheck });
+    if (s === 'submitted' || s === 'under_review') {
+      return {
+        label: 'Document Verification',
+        onClick: () => handleStatusUpdate('document_verification')
+      };
     }
-    if (s === 'submitted' || s === 'document_verification') {
-      actions.push({ label: 'Move to Review', status: 'under_review', variant: 'secondary', icon: Clock });
+    if (s === 'document_verification') {
+      return {
+        label: 'Allocate Class',
+        onClick: () => setActionModal('allocate')
+      };
     }
-    if (['submitted', 'document_verification', 'under_review', 'approved', 'class_allocated'].includes(s)) {
-      actions.push({ label: 'Allocate Class & Section', action: 'allocate', variant: 'primary', icon: Building2 });
+    if (s === 'class_allocated') {
+      return {
+        label: 'Assign Fees',
+        onClick: () => setActionModal('fee')
+      };
     }
-    if (s === 'class_allocated' || s === 'fee_assigned') {
-      actions.push({ label: 'Assign Fee Structure', action: 'fee', variant: 'primary', icon: CreditCard });
-    }
-    if (['fee_assigned', 'payment_pending', 'partially_paid'].includes(s)) {
-      actions.push({ label: 'Record Payment', action: 'payment', variant: 'primary', icon: Receipt });
+    if (s === 'fee_assigned' || s === 'payment_pending') {
+      return {
+        label: 'Record Payment',
+        onClick: () => setActionModal('payment')
+      };
     }
     if (s === 'paid' || s === 'partially_paid') {
-      actions.push({ label: 'Confirm Admission & Create Student', action: 'confirm', variant: 'primary', icon: UserPlus });
+      return {
+        label: 'Confirm Admission',
+        onClick: handleConfirmAdmission
+      };
     }
+    return null;
+  };
 
-    return actions;
-  }, [selectedAdmission]);
+  const getBackAction = () => {
+    if (!selectedAdmission) return null;
+    const s = selectedAdmission.workflowStatus;
+
+    if (s === 'document_verification') {
+      return {
+        label: 'Applied',
+        onClick: () => handleStatusUpdate('submitted')
+      };
+    }
+    if (s === 'class_allocated') {
+      return {
+        label: 'Docs',
+        onClick: () => handleStatusUpdate('document_verification')
+      };
+    }
+    if (s === 'fee_assigned' || s === 'payment_pending') {
+      return {
+        label: 'Class',
+        onClick: () => handleStatusUpdate('class_allocated')
+      };
+    }
+    return null;
+  };
 
   /* ──────────────────────── Create Form Steps ──────────────────────── */
 
@@ -789,26 +824,33 @@ export default function Admissions() {
 
             {/* Action Buttons */}
             {selectedAdmission.workflowStatus !== 'student_created' && selectedAdmission.workflowStatus !== 'rejected' && (
-              <div className="flex flex-wrap gap-2 pt-2 border-t border-border">
-                {getAvailableActions().map((act, i) => {
-                  const Icon = act.icon;
-                  return (
-                    <Button
-                      key={i}
-                      variant={act.variant}
-                      size="sm"
-                      onClick={() => {
-                        if (act.action === 'allocate') setActionModal('allocate');
-                        else if (act.action === 'fee') setActionModal('fee');
-                        else if (act.action === 'payment') setActionModal('payment');
-                        else if (act.action === 'confirm') handleConfirmAdmission();
-                        else handleStatusUpdate(act.status);
-                      }}
-                    >
-                      <Icon size={14} className="mr-1" /> {act.label}
-                    </Button>
-                  );
-                })}
+              <div className="flex flex-wrap gap-3 pt-4 border-t border-border justify-between items-center w-full">
+                <div>
+                  {(() => {
+                    const backAct = getBackAction();
+                    if (backAct) {
+                      return (
+                        <Button variant="ghost" size="sm" onClick={backAct.onClick}>
+                          ← Back to {backAct.label}
+                        </Button>
+                      );
+                    }
+                    return null;
+                  })()}
+                </div>
+                <div>
+                  {(() => {
+                    const nextAct = getNextAction();
+                    if (nextAct) {
+                      return (
+                        <Button variant="primary" size="sm" onClick={nextAct.onClick}>
+                          Next Step: {nextAct.label} →
+                        </Button>
+                      );
+                    }
+                    return null;
+                  })()}
+                </div>
               </div>
             )}
           </div>

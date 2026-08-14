@@ -137,13 +137,15 @@ export const getStudentFeeStatus = async (schoolId, studentId) => {
 };
 
 export const getFeeReport = async (schoolId) => {
+  const schoolIdObj = new mongoose.Types.ObjectId(schoolId.toString());
+
   const totalCollected = await FeeTransaction.aggregate([
-    { $match: { schoolId: mongoose.Types.ObjectId.createFromHexString(schoolId), status: { $in: ['paid', 'partial'] } } },
+    { $match: { schoolId: schoolIdObj, status: { $in: ['paid', 'partial'] } } },
     { $group: { _id: null, total: { $sum: '$paidAmount' } } },
   ]);
 
   const totalPending = await FeeTransaction.aggregate([
-    { $match: { schoolId: mongoose.Types.ObjectId.createFromHexString(schoolId), status: { $in: ['pending', 'partial', 'overdue'] } } },
+    { $match: { schoolId: schoolIdObj, status: { $in: ['pending', 'partial', 'overdue'] } } },
     { $group: { _id: null, total: { $sum: '$balance' } } },
   ]);
 
