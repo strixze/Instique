@@ -15,6 +15,7 @@ import SchoolClass from '../../models/SchoolClass.js';
 import FeeStructure from '../../models/FeeStructure.js';
 import FeeTransaction from '../../models/FeeTransaction.js';
 import AcademicYear from '../../models/AcademicYear.js';
+import mongoose from 'mongoose';
 
 describe('Admission Service MVP Flow Unit Tests', () => {
   let originalAcademicYearFindById;
@@ -30,6 +31,7 @@ describe('Admission Service MVP Flow Unit Tests', () => {
   let originalFeeStructureFindOne;
   let originalFeeTransactionCreate;
   let originalFeeTransactionUpdateMany;
+  let originalStartSession;
 
   beforeAll(() => {
     originalAcademicYearFindById = AcademicYear.findById;
@@ -45,6 +47,7 @@ describe('Admission Service MVP Flow Unit Tests', () => {
     originalFeeStructureFindOne = FeeStructure.findOne;
     originalFeeTransactionCreate = FeeTransaction.create;
     originalFeeTransactionUpdateMany = FeeTransaction.updateMany;
+    originalStartSession = mongoose.startSession;
   });
 
   afterAll(() => {
@@ -61,6 +64,7 @@ describe('Admission Service MVP Flow Unit Tests', () => {
     FeeStructure.findOne = originalFeeStructureFindOne;
     FeeTransaction.create = originalFeeTransactionCreate;
     FeeTransaction.updateMany = originalFeeTransactionUpdateMany;
+    mongoose.startSession = originalStartSession;
   });
 
   test('createAdmission should generate correct ADM-YYYY-XXXXX format', async () => {
@@ -155,5 +159,74 @@ describe('Admission Service MVP Flow Unit Tests', () => {
     await expect(
       allocateClassSection('adm-42', 'school-1', { assignedClassId: 'class-1', assignedSectionId: 'sec-1' }, 'admin-1')
     ).rejects.toThrow('Section "A" is full');
+  });
+
+  test('confirmAdmission should handle single-word parent names without throwing validation errors', async () => {
+    const mockSession = {
+      startTransaction: async () => {},
+      commitTransaction: async () => {},
+      abortTransaction: async () => {},
+      endSession: async () => {}
+    };
+    mongoose.startSession = async () => mockSession;
+
+    const mockAdmission = {
+      _id: 'adm-42',
+      firstName: 'Aarav',
+      lastName: 'Patil',
+      dateOfBirth: new Date(),
+      gender: 'male',
+      father: { name: 'Robert', phone: '9000000000', email: 'robert@gmail.com' },
+      mother: { name: '' },
+      guardian: { name: '' },
+      parentPhone: '9000000000',
+      parentEmail: 'parent@gmail.com',
+      address: '123 Main St',
+      city: 'Pune',
+      state: 'MH',
+      pincode: '411001',
+      documents: [],
+      workflowStatus: 'paid',
+      feeTransactions: [{ status: 'paid' }],
+      assignedClass: 'class-1',
+      assignedSection: 'sec-1',
+      academicSession: { _id: 'year-123', name: '2026-2027' },
+      history: [],
+      save: async function() { return this; }
+    };
+
+    Admission.findOne = () => ({
+      populate: () => ({
+        populate: () => ({
+          populate: async () => mockAdmission
+        })
+      })
+    });
+
+    Student.countDocuments = () => ({
+      session: async () => 5
+    });
+
+    Parent.findOne = () => ({
+      session: async () => null
+    });
+
+    let createdParentData = null;
+    Parent.create = async (data, opts) => {
+      createdParentData = data[0];
+      return [{ ...createdParentData, _id: 'parent-123', save: async function() { return this; } }];
+    };
+
+    Student.create = async (data, opts) => {
+      return [{ ...data[0], _id: 'student-123' }];
+    };
+
+    FeeTransaction.updateMany = async () => ({});
+
+    await confirmAdmission('adm-42', 'school-1', 'admin-1');
+
+    expect(createdParentData).not.toBeNull();
+    expect(createdParentData.firstName).toBe('Robert');
+    expect(createdParentData.lastName).toBe('Patil');
   });
 });

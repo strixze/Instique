@@ -349,7 +349,10 @@ export const confirmAdmission = async (id, schoolId, userId) => {
     if (!parent) {
       // Create father as primary parent if available, mother or guardian otherwise
       const parentFirstName = admission.father?.name?.split(' ')[0] || admission.mother?.name?.split(' ')[0] || admission.guardian?.name?.split(' ')[0] || 'Parent';
-      const parentLastName = admission.father?.name?.split(' ').slice(1).join(' ') || admission.mother?.name?.split(' ').slice(1).join(' ') || admission.guardian?.name?.split(' ').slice(1).join(' ') || '';
+      const fatherLastName = admission.father?.name ? admission.father.name.split(' ').slice(1).join(' ').trim() : '';
+      const motherLastName = admission.mother?.name ? admission.mother.name.split(' ').slice(1).join(' ').trim() : '';
+      const guardianLastName = admission.guardian?.name ? admission.guardian.name.split(' ').slice(1).join(' ').trim() : '';
+      const parentLastName = fatherLastName || motherLastName || guardianLastName || admission.lastName || '-';
 
       parent = await Parent.create([{
         schoolId,
