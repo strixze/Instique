@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, GraduationCap, Users, BookOpen, Calendar, DollarSign,
   Bell, Settings, ChevronLeft, School, FileText, ClipboardList, Trophy,
-  MessageSquare, LogOut, Menu, ClipboardCheck,
+  MessageSquare, LogOut, Menu, ClipboardCheck, Award,
 } from 'lucide-react';
 import { useUserStore } from '../../store/userStore';
 import { useAppStore } from '../../store/appStore';
@@ -28,6 +28,7 @@ const navSections = {
         { to: '/attendance', icon: ClipboardList, label: 'Attendance' },
         { to: '/exams', icon: Trophy, label: 'Exams' },
         { to: '/marks-entry', icon: ClipboardCheck, label: 'Marks Entry' },
+        { to: '/leaderboard', icon: Award, label: 'Leaderboard' },
       ],
     },
     {
@@ -80,6 +81,7 @@ const navSections = {
         { to: '/homework', icon: BookOpen, label: 'Homework' },
         { to: '/exams', icon: Trophy, label: 'Exams' },
         { to: '/marks-entry', icon: ClipboardCheck, label: 'Marks Entry' },
+        { to: '/leaderboard', icon: Award, label: 'Leaderboard' },
         { to: '/syllabus', icon: FileText, label: 'Syllabus' },
         { to: '/recognition', icon: Trophy, label: 'Recognition' },
       ],
@@ -106,6 +108,7 @@ const navSections = {
         { to: '/attendance', icon: ClipboardList, label: 'Attendance' },
         { to: '/homework', icon: BookOpen, label: 'Homework' },
         { to: '/exams', icon: Trophy, label: 'Results' },
+        { to: '/leaderboard', icon: Award, label: 'Leaderboard' },
       ],
     },
     {
@@ -131,6 +134,7 @@ const navSections = {
         { to: '/attendance', icon: ClipboardList, label: 'Attendance' },
         { to: '/homework', icon: BookOpen, label: 'Homework' },
         { to: '/exams', icon: Trophy, label: 'Results' },
+        { to: '/leaderboard', icon: Award, label: 'Leaderboard' },
         { to: '/timetable', icon: Calendar, label: 'Timetable' },
       ],
     },

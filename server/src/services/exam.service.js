@@ -332,6 +332,10 @@ export const getExamResults = async (schoolId, examId) => {
     ? Math.round((completePcts.reduce((a, b) => a + b, 0) / completePcts.length) * 100) / 100
     : null;
   const highestPercentage = completePcts.length > 0 ? Math.max(...completePcts) : null;
+  const lowestPercentage = completePcts.length > 0 ? Math.min(...completePcts) : null;
+  const passPercentage = completedCount > 0
+    ? Math.round((passedCount / completedCount) * 10000) / 100
+    : null;
 
   return {
     exam: {
@@ -354,6 +358,8 @@ export const getExamResults = async (schoolId, examId) => {
       failed: failedCount,
       classAverage,
       highestPercentage,
+      lowestPercentage,
+      passPercentage,
     },
     results,
   };

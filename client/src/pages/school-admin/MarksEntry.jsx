@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import {
   Trophy, Save, Send, Search, Filter, ArrowUpDown, Users, CheckCircle,
@@ -37,6 +37,7 @@ const gradeColor = (grade) => {
 
 export default function MarksEntry() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const preselectedExamId = searchParams.get('examId');
 
   // State
@@ -402,6 +403,15 @@ export default function MarksEntry() {
       <PageHeader
         title="Marks Entry"
         description="Enter subject-wise marks for exams with automatic calculation"
+        action={
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate('/leaderboard' + (selectedExamId ? `?examId=${selectedExamId}` : ''))}
+          >
+            <Award size={14} className="mr-1.5" /> View Leaderboard
+          </Button>
+        }
       />
 
       {/* Exam Selector */}
@@ -477,6 +487,12 @@ export default function MarksEntry() {
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${viewMode === 'results' ? 'bg-white text-forest shadow-card' : 'text-muted hover:text-deep'}`}
                   >
                     <Eye size={13} /> Results
+                  </button>
+                  <button
+                    onClick={() => navigate('/leaderboard' + (selectedExamId ? `?examId=${selectedExamId}` : ''))}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-muted hover:text-deep transition-all"
+                  >
+                    <Award size={13} /> Leaderboard
                   </button>
                 </div>
 

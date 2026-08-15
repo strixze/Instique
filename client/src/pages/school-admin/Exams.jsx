@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
-import { Plus, Trash2, Send, Trophy, ClipboardCheck } from 'lucide-react';
+import { Plus, Trash2, Send, Trophy, ClipboardCheck, Award } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 import DataTable from '../../components/ui/DataTable';
 import Button from '../../components/ui/Button';
@@ -186,6 +186,9 @@ export default function Exams() {
   <button onClick={() => navigate(`/marks-entry?examId=${r._id}`)} className="p-2 text-muted hover:text-forest rounded-lg hover:bg-sage-soft transition-colors" title="Marks Entry">
   <ClipboardCheck size={16} />
   </button>
+  <button onClick={() => navigate(`/leaderboard?examId=${r._id}`)} className="p-2 text-muted hover:text-forest rounded-lg hover:bg-sage-soft transition-colors" title="Leaderboard">
+  <Award size={16} />
+  </button>
   <button onClick={() => openMarks(r)} className="p-2 text-muted hover:text-forest rounded-lg hover:bg-sage-soft transition-colors" title="View marks summary">
   <Trophy size={16} />
   </button>
@@ -211,6 +214,9 @@ export default function Exams() {
  description="Create exams, manage schedules, and publish results"
  action={
     <div className="flex items-center gap-2">
+      <Button variant="outline" onClick={() => navigate('/leaderboard')}>
+        <Award size={16} className="mr-2" />Leaderboard
+      </Button>
       <Button variant="secondary" onClick={() => navigate('/marks-entry')}>
         <ClipboardCheck size={16} className="mr-2" />Marks Entry
       </Button>

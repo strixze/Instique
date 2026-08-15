@@ -17,7 +17,7 @@ router.put('/:id', requireRole('school_admin'), updateExam);
 router.delete('/:id', requireRole('school_admin'), deleteExam);
 
 router.get('/:examId/students', requireRole('school_admin', 'teacher'), getExamStudents);
-router.get('/:examId/results', requireRole('school_admin', 'teacher'), getExamResults);
+router.get('/:examId/results', requireRole('school_admin', 'teacher', 'student', 'parent'), getExamResults);
 router.get('/:examId/marks', requireRole('school_admin', 'teacher'), getMarksByExam);
 router.post('/:examId/marks/bulk', requireRole('teacher', 'school_admin'), validate(saveMarksSchema), saveMarksBulk);
 router.post('/marks', requireRole('teacher', 'school_admin'), validate(enterMarkSchema), enterMark);
