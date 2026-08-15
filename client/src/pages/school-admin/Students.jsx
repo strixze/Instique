@@ -33,10 +33,7 @@ export default function Students() {
  const [loading, setLoading] = useState(true);
  const [page, setPage] = useState(1);
  const [search, setSearch] = useState('');
-<<<<<<< HEAD
  const [sort, setSort] = useState('-createdAt');
-=======
->>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
  const [reload, setReload] = useState(0);
  const [classes, setClasses] = useState([]);
  const [sections, setSections] = useState([]);
@@ -56,11 +53,7 @@ export default function Students() {
  let active = true;
  const load = async () => {
  try {
-<<<<<<< HEAD
  const res = await studentApi.getAll({ page, limit: 10, search: search || undefined, sort });
-=======
- const res = await studentApi.getAll({ page, limit: 10, search: search || undefined });
->>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
  if (!active) return;
  setData(res.data);
  setMeta(res.meta);
@@ -72,11 +65,7 @@ export default function Students() {
  };
  load();
  return () => { active = false; };
-<<<<<<< HEAD
  }, [page, search, reload, sort]);
-=======
- }, [page, search, reload]);
->>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
 
  const classMap = Object.fromEntries(classes.map((c) => [c._id, c.name]));
  const sectionMap = Object.fromEntries(sections.map((s) => [s._id, s.name]));
@@ -139,19 +128,11 @@ export default function Students() {
 
  const columns = [
  { key: 'admissionNo', label: 'Admission No', sortable: true },
-<<<<<<< HEAD
  { key: 'firstName', label: 'Name', sortable: true, render: (r) => <span className="font-medium text-deep">{r.firstName} {r.lastName}</span> },
  { key: 'gender', label: 'Gender', sortable: true, render: (r) => <span className="capitalize">{r.gender}</span> },
  { key: 'currentClass', label: 'Class', sortable: true, render: (r) => classMap[r.currentClass] || '—' },
  { key: 'currentSection', label: 'Section', sortable: true, render: (r) => sectionMap[r.currentSection] || '—' },
  { key: 'status', label: 'Status', sortable: true, render: (r) => <Badge color={r.status === 'active' ? 'success' : 'gray'}>{r.status}</Badge> },
-=======
- { key: 'name', label: 'Name', render: (r) => <span className="font-medium text-deep">{r.firstName} {r.lastName}</span> },
- { key: 'gender', label: 'Gender', render: (r) => <span className="capitalize">{r.gender}</span> },
- { key: 'currentClass', label: 'Class', render: (r) => classMap[r.currentClass] || '—' },
- { key: 'currentSection', label: 'Section', render: (r) => sectionMap[r.currentSection] || '—' },
- { key: 'status', label: 'Status', render: (r) => <Badge color={r.status === 'active' ? 'success' : 'gray'}>{r.status}</Badge> },
->>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
  {
  key: 'actions',
  label: '',
@@ -192,10 +173,7 @@ export default function Students() {
  meta={meta}
  onPageChange={(p) => { setLoading(true); setPage(p); }}
  onSearch={(s) => { setLoading(true); setSearch(s); setPage(1); }}
-<<<<<<< HEAD
  onSort={(field, order) => { setSort(`${order === 'desc' ? '-' : ''}${field}`); setPage(1); setLoading(true); }}
-=======
->>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
  searchPlaceholder="Search by name or admission no..."
  />
 

@@ -28,10 +28,7 @@ export default function Notices() {
  const [loading, setLoading] = useState(true);
  const [page, setPage] = useState(1);
  const [search, setSearch] = useState('');
-<<<<<<< HEAD
  const [sort, setSort] = useState('-createdAt');
-=======
->>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
  const [reload, setReload] = useState(0);
  const [open, setOpen] = useState(false);
  const [saving, setSaving] = useState(false);
@@ -41,11 +38,7 @@ export default function Notices() {
  let active = true;
  const load = async () => {
  try {
-<<<<<<< HEAD
  const res = await noticeApi.getAll({ page, limit: 10, search: search || undefined, sort });
-=======
- const res = await noticeApi.getAll({ page, limit: 10, search: search || undefined });
->>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
  if (!active) return;
  setData(res.data);
  setMeta(res.meta);
@@ -57,11 +50,7 @@ export default function Notices() {
  };
  load();
  return () => { active = false; };
-<<<<<<< HEAD
  }, [page, search, reload, sort]);
-=======
- }, [page, search, reload]);
->>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
 
  const setField = (key, value) => setForm((f) => ({ ...f, [key]: value }));
  const resetAndClose = () => { setForm(emptyForm); setOpen(false); };
@@ -138,17 +127,10 @@ export default function Notices() {
  </div>
  ),
  },
-<<<<<<< HEAD
  { key: 'category', label: 'Category', sortable: true, render: (r) => <Badge color={categoryColors[r.category] || 'gray'}>{r.category}</Badge> },
  { key: 'scope', label: 'Scope', sortable: true, render: (r) => <span className="capitalize">{r.scope}</span> },
  { key: 'status', label: 'Status', sortable: true, render: (r) => <Badge color={r.status === 'published' ? 'success' : 'warning'}>{r.status}</Badge> },
  { key: 'createdAt', label: 'Created', sortable: true, render: (r) => new Date(r.createdAt).toLocaleDateString() },
-=======
- { key: 'category', label: 'Category', render: (r) => <Badge color={categoryColors[r.category] || 'gray'}>{r.category}</Badge> },
- { key: 'scope', label: 'Scope', render: (r) => <span className="capitalize">{r.scope}</span> },
- { key: 'status', label: 'Status', render: (r) => <Badge color={r.status === 'published' ? 'success' : 'warning'}>{r.status}</Badge> },
- { key: 'createdAt', label: 'Created', render: (r) => new Date(r.createdAt).toLocaleDateString() },
->>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
  {
  key: 'actions',
  label: '',
@@ -173,11 +155,7 @@ export default function Notices() {
  action={<Button onClick={() => setOpen(true)}><Plus size={16} className="mr-2"/>New Notice</Button>}
  />
 
-<<<<<<< HEAD
  <DataTable columns={columns} data={data} loading={loading} meta={meta} onPageChange={(p) => { setLoading(true); setPage(p); }} onSearch={(s) => { setLoading(true); setSearch(s); setPage(1); }} onSort={(field, order) => { setSort(`${order === 'desc' ? '-' : ''}${field}`); setPage(1); setLoading(true); }} searchPlaceholder="Search notices..."/>
-=======
- <DataTable columns={columns} data={data} loading={loading} meta={meta} onPageChange={(p) => { setLoading(true); setPage(p); }} onSearch={(s) => { setLoading(true); setSearch(s); setPage(1); }} searchPlaceholder="Search notices..."/>
->>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
 
  <Modal isOpen={open} onClose={resetAndClose} title="New Notice"size="lg">
  <div className="space-y-4">

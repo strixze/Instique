@@ -58,10 +58,7 @@ export default function Admissions() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
-<<<<<<< HEAD
   const [sort, setSort] = useState('-createdAt');
-=======
->>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
   const [reload, setReload] = useState(0);
   const [statusFilter, setStatusFilter] = useState('');
 
@@ -118,11 +115,7 @@ export default function Admissions() {
     let active = true;
     const load = async () => {
       try {
-<<<<<<< HEAD
         const params = { page, limit: 10, search: search || undefined, sort };
-=======
-        const params = { page, limit: 10, search: search || undefined };
->>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
         if (statusFilter) params.workflowStatus = statusFilter;
         const res = await admissionApi.getAll(params);
         if (!active) return;
@@ -136,11 +129,7 @@ export default function Admissions() {
     };
     load();
     return () => { active = false; };
-<<<<<<< HEAD
   }, [page, search, reload, statusFilter, sort]);
-=======
-  }, [page, search, reload, statusFilter]);
->>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
 
   // Load sections when allocateForm.assignedClassId changes
   useEffect(() => {
@@ -389,30 +378,17 @@ export default function Admissions() {
     { key: 'applicationNo', label: 'App No', sortable: true, render: r => (
       <span className="font-mono text-xs font-semibold text-forest">{r.applicationNo}</span>
     )},
-<<<<<<< HEAD
     { key: 'applicantName', label: 'Applicant', sortable: true, render: r => (
       <span className="font-medium text-deep">{r.applicantName}</span>
     )},
     { key: 'gender', label: 'Gender', sortable: true, render: r => <span className="capitalize">{r.gender}</span> },
     { key: 'applyingForClass', label: 'Class', sortable: true, render: r => r.applyingForClass?.name || classMap[r.applyingForClass] || '—' },
     { key: 'workflowStatus', label: 'Status', sortable: true, render: r => (
-=======
-    { key: 'applicantName', label: 'Applicant', render: r => (
-      <span className="font-medium text-deep">{r.applicantName}</span>
-    )},
-    { key: 'gender', label: 'Gender', render: r => <span className="capitalize">{r.gender}</span> },
-    { key: 'applyingForClass', label: 'Class', render: r => r.applyingForClass?.name || classMap[r.applyingForClass] || '—' },
-    { key: 'workflowStatus', label: 'Status', render: r => (
->>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
       <Badge color={statusColorMap[r.workflowStatus] || 'gray'}>
         {statusLabelMap[r.workflowStatus] || r.workflowStatus?.replace(/_/g, ' ')}
       </Badge>
     )},
-<<<<<<< HEAD
     { key: 'createdAt', label: 'Applied', sortable: true, render: r => r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-IN') : '—' },
-=======
-    { key: 'createdAt', label: 'Applied', render: r => r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-IN') : '—' },
->>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
     { key: 'actions', label: '', render: r => (
       <Button variant="ghost" size="sm" onClick={() => openDetail(r)}>
         <Eye size={14} className="mr-1" /> View
@@ -654,10 +630,7 @@ export default function Admissions() {
         meta={meta}
         onPageChange={p => { setLoading(true); setPage(p); }}
         onSearch={s => { setLoading(true); setSearch(s); setPage(1); }}
-<<<<<<< HEAD
         onSort={(field, order) => { setSort(`${order === 'desc' ? '-' : ''}${field}`); setPage(1); setLoading(true); }}
-=======
->>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
         searchPlaceholder="Search by applicant name or application no..."
       />
 

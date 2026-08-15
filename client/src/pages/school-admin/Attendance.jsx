@@ -25,10 +25,7 @@ export default function Attendance() {
  const [loading, setLoading] = useState(true);
  const [page, setPage] = useState(1);
  const [search, setSearch] = useState('');
-<<<<<<< HEAD
  const [sort, setSort] = useState('-date');
-=======
->>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
  const [reload, setReload] = useState(0);
 
  // Entities
@@ -74,10 +71,7 @@ export default function Attendance() {
  page,
  limit: 10,
  search: search || undefined,
-<<<<<<< HEAD
  sort,
-=======
->>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
  filter: {
  ...(filterActive && date ? { date } : {}),
  ...(filterActive && classFilter ? { schoolClass: classFilter } : {}),
@@ -94,11 +88,7 @@ export default function Attendance() {
  };
  load();
  return () => { active = false; };
-<<<<<<< HEAD
  }, [page, search, reload, filterActive, date, classFilter, activeTab, sort]);
-=======
- }, [page, search, reload, filterActive, date, classFilter, activeTab]);
->>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
 
  const classMap = Object.fromEntries(classes.map((c) => [c._id, c.name]));
  const sectionMap = Object.fromEntries(sections.map((s) => [s._id, s.name]));
@@ -226,11 +216,7 @@ export default function Attendance() {
  { key: 'date', label: 'Date', sortable: true, render: (r) => new Date(r.date).toLocaleDateString() },
  { key: 'schoolClass', label: 'Class', render: (r) => r.schoolClass?.name || classMap[r.schoolClass] || '—' },
  { key: 'section', label: 'Section', render: (r) => r.section?.name || sectionMap[r.section] || '—' },
-<<<<<<< HEAD
  { key: 'source', label: 'Source', sortable: true, render: (r) => <Badge color={r.source === 'bulk' ? 'info' : 'gray'}>{r.source || 'manual'}</Badge> },
-=======
- { key: 'source', label: 'Source', render: (r) => <Badge color={r.source === 'bulk' ? 'info' : 'gray'}>{r.source || 'manual'}</Badge> },
->>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
  { key: 'summary', label: 'Present / Total', render: (r) => `${r.summary?.present ?? 0} / ${r.summary?.total ?? 0}` },
  { key: 'summary2', label: 'Absent', render: (r) => <span className="text-red-400">{r.summary?.absent ?? 0}</span> },
  ];
@@ -434,10 +420,7 @@ export default function Attendance() {
  meta={meta}
  onPageChange={(p) => { setLoading(true); setPage(p); }}
  onSearch={(s) => { setLoading(true); setSearch(s); setPage(1); }}
-<<<<<<< HEAD
  onSort={(field, order) => { setSort(`${order === 'desc' ? '-' : ''}${field}`); setPage(1); setLoading(true); }}
-=======
->>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
  searchPlaceholder="Search attendance..."
  />
  </div>

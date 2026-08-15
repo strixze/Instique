@@ -30,10 +30,7 @@ export default function Leaves() {
  const [loading, setLoading] = useState(true);
  const [page, setPage] = useState(1);
  const [search, setSearch] = useState('');
-<<<<<<< HEAD
  const [sort, setSort] = useState('-createdAt');
-=======
->>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
  const [reload, setReload] = useState(0);
  const [processing, setProcessing] = useState(null);
  const [saving, setSaving] = useState(false);
@@ -44,11 +41,7 @@ export default function Leaves() {
  let active = true;
  const load = async () => {
  try {
-<<<<<<< HEAD
  const res = await leaveApi.getAll({ page, limit: 10, search: search || undefined, sort });
-=======
- const res = await leaveApi.getAll({ page, limit: 10 });
->>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
  if (!active) return;
  setData(res.data);
  setMeta(res.meta);
@@ -60,11 +53,7 @@ export default function Leaves() {
  };
  load();
  return () => { active = false; };
-<<<<<<< HEAD
  }, [page, search, reload, sort]);
-=======
- }, [page, search, reload]);
->>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
 
  const handleApprove = async (leave) => {
  setProcessing(leave._id);
@@ -98,19 +87,11 @@ export default function Leaves() {
 
  const columns = [
  { key: 'requester', label: 'Requester', render: (r) => <span className="font-medium text-deep">{r.requester?.name || r.requester || '—'}</span> },
-<<<<<<< HEAD
  { key: 'requesterModel', label: 'Type', sortable: true, render: (r) => <Badge color="info">{r.requesterModel}</Badge> },
  { key: 'type', label: 'Leave Type', sortable: true, render: (r) => typeLabels[r.type] || r.type },
  { key: 'startDate', label: 'Start', sortable: true, render: (r) => new Date(r.startDate).toLocaleDateString() },
  { key: 'endDate', label: 'End', sortable: true, render: (r) => new Date(r.endDate).toLocaleDateString() },
  { key: 'status', label: 'Status', sortable: true, render: (r) => <Badge color={statusColors[r.status] || 'gray'}>{r.status}</Badge> },
-=======
- { key: 'requesterModel', label: 'Type', render: (r) => <Badge color="info">{r.requesterModel}</Badge> },
- { key: 'type', label: 'Leave Type', render: (r) => typeLabels[r.type] || r.type },
- { key: 'startDate', label: 'Start', render: (r) => new Date(r.startDate).toLocaleDateString() },
- { key: 'endDate', label: 'End', render: (r) => new Date(r.endDate).toLocaleDateString() },
- { key: 'status', label: 'Status', render: (r) => <Badge color={statusColors[r.status] || 'gray'}>{r.status}</Badge> },
->>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
  {
  key: 'actions',
  label: '',
@@ -139,11 +120,7 @@ export default function Leaves() {
  <div className="space-y-6">
  <PageHeader title="Leave Management"description="Review and process student and teacher leave requests"/>
 
-<<<<<<< HEAD
  <DataTable columns={columns} data={data} loading={loading} meta={meta} onPageChange={(p) => { setLoading(true); setPage(p); }} onSearch={(s) => { setLoading(true); setSearch(s); setPage(1); }} onSort={(field, order) => { setSort(`${order === 'desc' ? '-' : ''}${field}`); setPage(1); setLoading(true); }} searchPlaceholder="Search leave requests..."/>
-=======
- <DataTable columns={columns} data={data} loading={loading} meta={meta} onPageChange={(p) => { setLoading(true); setPage(p); }} onSearch={(s) => { setLoading(true); setSearch(s); setPage(1); }} searchPlaceholder="Search leave requests..."/>
->>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
 
  <Modal isOpen={!!rejectOpen} onClose={() => setRejectOpen(null)} title={`Reject Leave — ${rejectOpen?.requester?.name || ''}`}>
  <Input
