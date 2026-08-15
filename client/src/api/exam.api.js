@@ -10,4 +10,7 @@ export const examApi = {
   getMarks: (params) => api.get('/exams/marks/all', { params }),
   getMarksByExam: (examId) => api.get(`/exams/${examId}/marks`),
   publishResults: (examId) => api.put(`/exams/${examId}/publish`),
+  getExamStudents: (examId) => api.get(`/exams/${examId}/students`),
+  saveMarksBulk: (examId, data) => api.post(`/exams/${examId}/marks/bulk`, data),
+  getExamResults: (examId) => api.get(`/exams/${examId}/results`),
 };

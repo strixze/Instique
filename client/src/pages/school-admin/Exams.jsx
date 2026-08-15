@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
-import { Plus, Trash2, Send, Trophy } from 'lucide-react';
+import { Plus, Trash2, Send, Trophy, ClipboardCheck } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 import DataTable from '../../components/ui/DataTable';
 import Button from '../../components/ui/Button';
@@ -20,6 +21,7 @@ const statusColors = {
 };
 
 export default function Exams() {
+ const navigate = useNavigate();
  const [data, setData] = useState([]);
  const [meta, setMeta] = useState(null);
  const [loading, setLoading] = useState(true);
@@ -177,25 +179,28 @@ export default function Exams() {
  { key: 'endDate', label: 'End', render: (r) => new Date(r.endDate).toLocaleDateString() },
  { key: 'status', label: 'Status', render: (r) => <Badge color={statusColors[r.status] || 'gray'}>{r.status}</Badge> },
  {
- key: 'actions',
- label: '',
- render: (r) => (
- <div className="flex items-center gap-1">
- <button onClick={() => openMarks(r)} className="p-2 text-muted hover:text-forest rounded-lg hover:bg-sage-soft transition-colors"title="View marks">
- <Trophy size={16} />
- </button>
- {r.status !== 'published' && (
- <button onClick={() => handlePublish(r)} className="p-2 text-muted hover:text-success rounded-lg hover:bg-success-light transition-colors"title="Publish results">
- <Send size={16} />
- </button>
- )}
- <button onClick={() => handleDelete(r)} className="p-2 text-muted hover:text-danger rounded-lg hover:bg-danger-light transition-colors"title="Delete">
- <Trash2 size={16} />
- </button>
- </div>
- ),
- },
- ];
+  key: 'actions',
+  label: '',
+  render: (r) => (
+  <div className="flex items-center gap-1">
+  <button onClick={() => navigate(`/marks-entry?examId=${r._id}`)} className="p-2 text-muted hover:text-forest rounded-lg hover:bg-sage-soft transition-colors" title="Marks Entry">
+  <ClipboardCheck size={16} />
+  </button>
+  <button onClick={() => openMarks(r)} className="p-2 text-muted hover:text-forest rounded-lg hover:bg-sage-soft transition-colors" title="View marks summary">
+  <Trophy size={16} />
+  </button>
+  {r.status !== 'published' && (
+  <button onClick={() => handlePublish(r)} className="p-2 text-muted hover:text-success rounded-lg hover:bg-success-light transition-colors" title="Publish results">
+  <Send size={16} />
+  </button>
+  )}
+  <button onClick={() => handleDelete(r)} className="p-2 text-muted hover:text-danger rounded-lg hover:bg-danger-light transition-colors" title="Delete">
+  <Trash2 size={16} />
+  </button>
+  </div>
+  ),
+  },
+  ];
 
  const subjectOptions = subjects.map((s) => ({ value: s._id, label: `${s.name} (${s.code})` }));
 
@@ -204,7 +209,16 @@ export default function Exams() {
  <PageHeader
  title="Examinations"
  description="Create exams, manage schedules, and publish results"
- action={<Button onClick={() => setOpen(true)}><Plus size={16} className="mr-2"/>Create Exam</Button>}
+ action={
+    <div className="flex items-center gap-2">
+      <Button variant="secondary" onClick={() => navigate('/marks-entry')}>
+        <ClipboardCheck size={16} className="mr-2" />Marks Entry
+      </Button>
+      <Button onClick={() => setOpen(true)}>
+        <Plus size={16} className="mr-2" />Create Exam
+      </Button>
+    </div>
+  }
  />
 
  <DataTable columns={columns} data={data} loading={loading} meta={meta} onPageChange={(p) => { setLoading(true); setPage(p); }} onSearch={(s) => { setLoading(true); setSearch(s); setPage(1); }} searchPlaceholder="Search exams..."/>

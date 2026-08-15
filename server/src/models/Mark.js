@@ -11,6 +11,7 @@ const markSchema = new mongoose.Schema({
   grade: { type: String },
   percentage: { type: Number },
   remarks: String,
+  status: { type: String, enum: ['draft', 'submitted'], default: 'draft' },
   enteredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 }, { timestamps: true });
 

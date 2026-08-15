@@ -1,10 +1,10 @@
 import { Router } from 'express';
-import { createExam, getExams, getExamById, updateExam, deleteExam, enterMark, getMarks, getMarksByExam, publishResults } from '../controllers/exam.controller.js';
+import { createExam, getExams, getExamById, updateExam, deleteExam, enterMark, getMarks, getMarksByExam, publishResults, getExamStudents, saveMarksBulk, getExamResults } from '../controllers/exam.controller.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
 import { requireRole } from '../middlewares/rbac.middleware.js';
 import tenantMiddleware from '../middlewares/tenant.middleware.js';
 import validate from '../middlewares/validate.middleware.js';
-import { createExamSchema, enterMarkSchema } from '../validators/exam.validator.js';
+import { createExamSchema, enterMarkSchema, saveMarksSchema } from '../validators/exam.validator.js';
 
 const router = Router();
 
@@ -16,7 +16,10 @@ router.post('/', requireRole('school_admin'), validate(createExamSchema), create
 router.put('/:id', requireRole('school_admin'), updateExam);
 router.delete('/:id', requireRole('school_admin'), deleteExam);
 
+router.get('/:examId/students', requireRole('school_admin', 'teacher'), getExamStudents);
+router.get('/:examId/results', requireRole('school_admin', 'teacher'), getExamResults);
 router.get('/:examId/marks', requireRole('school_admin', 'teacher'), getMarksByExam);
+router.post('/:examId/marks/bulk', requireRole('teacher', 'school_admin'), validate(saveMarksSchema), saveMarksBulk);
 router.post('/marks', requireRole('teacher', 'school_admin'), validate(enterMarkSchema), enterMark);
 router.get('/marks/all', requireRole('school_admin', 'teacher', 'student', 'parent'), getMarks);
 router.put('/:examId/publish', requireRole('school_admin'), publishResults);

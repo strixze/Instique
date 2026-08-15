@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, GraduationCap, Users, BookOpen, Calendar, DollarSign,
   Bell, Settings, ChevronLeft, School, FileText, ClipboardList, Trophy,
-  MessageSquare, LogOut, Menu,
+  MessageSquare, LogOut, Menu, ClipboardCheck,
 } from 'lucide-react';
 import { useUserStore } from '../../store/userStore';
 import { useAppStore } from '../../store/appStore';
@@ -27,6 +27,7 @@ const navSections = {
         { to: '/timetable', icon: Calendar, label: 'Timetable' },
         { to: '/attendance', icon: ClipboardList, label: 'Attendance' },
         { to: '/exams', icon: Trophy, label: 'Exams' },
+        { to: '/marks-entry', icon: ClipboardCheck, label: 'Marks Entry' },
       ],
     },
     {
@@ -78,6 +79,7 @@ const navSections = {
         { to: '/attendance', icon: ClipboardList, label: 'Attendance' },
         { to: '/homework', icon: BookOpen, label: 'Homework' },
         { to: '/exams', icon: Trophy, label: 'Exams' },
+        { to: '/marks-entry', icon: ClipboardCheck, label: 'Marks Entry' },
         { to: '/syllabus', icon: FileText, label: 'Syllabus' },
         { to: '/recognition', icon: Trophy, label: 'Recognition' },
       ],
