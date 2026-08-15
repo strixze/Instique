@@ -10,34 +10,37 @@ html, body, #root {
 
 body {
   @apply bg-page text-deep antialiased;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #0F172A;
+  background-color: #F8FAFC;
 }
 
 @layer utilities {
   .scrollbar-thin::-webkit-scrollbar {
-    width: 6px;
+    width: 5px;
+    height: 5px;
   }
   .scrollbar-thin::-webkit-scrollbar-track {
     background: transparent;
   }
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: #DCE4DE;
-    border-radius: 3px;
+    background: #CBD5E1;
+    border-radius: 4px;
   }
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: #B8C5BB;
+    background: #94A3B8;
   }
 }
 
 /* Selection */
 ::selection {
-  background: #DCE8DF;
-  color: #1F2A23;
+  background: #D8F3DC;
+  color: #1B4332;
 }
 
 /* Focus ring utility */
 .focus-ring {
-  @apply focus:outline-none focus:ring-2 focus:ring-forest/30 focus:ring-offset-1 focus:ring-offset-white;
+  @apply focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest;
 }
 
 @keyframes scale-in {

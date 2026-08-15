@@ -2844,3 +2844,174 @@ Stack Trace: Error: Authentication required
 Details: []
 ================================================================================
 
+
+================================================================================
+Timestamp: 2026-08-15T12:13:21.289Z
+Method: GET
+URL: /api/v1/notifications/unread-count
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///F:/Coding/Production%20grade%20Projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///F:/Coding/Production%20grade%20Projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (F:\Coding\Production grade Projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:342:13)
+    at F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (F:\Coding\Production grade Projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:342:13)
+    at F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (F:\Coding\Production grade Projects\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:524:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-15T12:13:21.349Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Invalid refresh token
+Stack Trace: Error: Invalid refresh token
+    at Module.refreshUserToken (file:///F:/Coding/Production%20grade%20Projects/Instique/server/src/services/auth.service.js:103:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///F:/Coding/Production%20grade%20Projects/Instique/server/src/controllers/auth.controller.js:58:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-15T12:13:21.922Z
+Method: GET
+URL: /api/v1/auth/profile
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///F:/Coding/Production%20grade%20Projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///F:/Coding/Production%20grade%20Projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (F:\Coding\Production grade Projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (F:\Coding\Production grade Projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (F:\Coding\Production grade Projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (F:\Coding\Production grade Projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (F:\Coding\Production grade Projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:342:13)
+    at F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:582:12)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-15T12:13:21.927Z
+Method: GET
+URL: /api/v1/auth/profile
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///F:/Coding/Production%20grade%20Projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///F:/Coding/Production%20grade%20Projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (F:\Coding\Production grade Projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (F:\Coding\Production grade Projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (F:\Coding\Production grade Projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (F:\Coding\Production grade Projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (F:\Coding\Production grade Projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:342:13)
+    at F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:582:12)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-15T12:13:21.971Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Invalid refresh token
+Stack Trace: Error: Invalid refresh token
+    at Module.refreshUserToken (file:///F:/Coding/Production%20grade%20Projects/Instique/server/src/services/auth.service.js:103:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///F:/Coding/Production%20grade%20Projects/Instique/server/src/controllers/auth.controller.js:58:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-15T12:13:21.977Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Invalid refresh token
+Stack Trace: Error: Invalid refresh token
+    at Module.refreshUserToken (file:///F:/Coding/Production%20grade%20Projects/Instique/server/src/services/auth.service.js:103:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///F:/Coding/Production%20grade%20Projects/Instique/server/src/controllers/auth.controller.js:58:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-15T12:30:21.294Z
+Method: GET
+URL: /api/v1/notifications/unread-count
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///F:/Coding/Production%20grade%20Projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///F:/Coding/Production%20grade%20Projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (F:\Coding\Production grade Projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:342:13)
+    at F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (F:\Coding\Production grade Projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:342:13)
+    at F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (F:\Coding\Production grade Projects\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:524:28)
+Details: []
+================================================================================
+

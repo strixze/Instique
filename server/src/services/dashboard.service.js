@@ -14,15 +14,95 @@ import Timetable from '../models/Timetable.js';
 import CalendarEvent from '../models/CalendarEvent.js';
 import Syllabus from '../models/Syllabus.js';
 
+import User from '../models/User.js';
+import AuditLog from '../models/AuditLog.js';
+
 export const getSuperAdminDashboard = async () => {
-  const totalSchools = await School.countDocuments();
-  const activeSubscriptions = await Subscription.countDocuments({ status: 'active' });
-  const trialSchools = await Subscription.countDocuments({ status: 'trial' });
-  const totalRevenue = await FeeTransaction.aggregate([
-    { $group: { _id: null, total: { $sum: '$paidAmount' } } },
+  const [
+    totalSchools,
+    activeSchools,
+    inactiveSchools,
+    totalStudents,
+    totalTeachers,
+    totalUsers,
+    totalSubscriptions,
+    activeSubscriptions,
+    trialSubscriptions,
+    expiredSubscriptions,
+    totalRevenueAgg,
+    planDistribution,
+    monthlyRevenueAgg,
+    recentSchools,
+    recentAuditLogs,
+  ] = await Promise.all([
+    School.countDocuments(),
+    School.countDocuments({ status: 'active' }),
+    School.countDocuments({ status: { $in: ['inactive', 'suspended'] } }),
+    Student.countDocuments({ status: 'active' }),
+    Teacher.countDocuments({ status: 'active' }),
+    User.countDocuments({ isActive: true }),
+    Subscription.countDocuments(),
+    Subscription.countDocuments({ status: 'active' }),
+    Subscription.countDocuments({ status: 'trial' }),
+    Subscription.countDocuments({ status: { $in: ['expired', 'cancelled', 'suspended'] } }),
+    FeeTransaction.aggregate([
+      { $match: { status: 'paid' } },
+      { $group: { _id: null, total: { $sum: '$paidAmount' } } },
+    ]),
+    Subscription.aggregate([
+      { $group: { _id: '$plan', count: { $sum: 1 } } },
+    ]),
+    FeeTransaction.aggregate([
+      { $match: { status: 'paid' } },
+      {
+        $group: {
+          _id: { $dateToString: { format: '%b', date: '$createdAt' } },
+          monthIndex: { $first: { $month: '$createdAt' } },
+          revenue: { $sum: '$paidAmount' },
+          transactions: { $sum: 1 },
+        },
+      },
+      { $sort: { monthIndex: 1 } },
+    ]),
+    School.find()
+      .sort({ createdAt: -1 })
+      .limit(6)
+      .populate('subscription', 'plan status currentPeriodEnd')
+      .select('name code address contact status createdAt subscription'),
+    AuditLog.find()
+      .sort({ createdAt: -1 })
+      .limit(6)
+      .populate('actor', 'name email role')
+      .populate('schoolId', 'name')
+      .select('actor action entity ip createdAt schoolId'),
   ]);
 
-  return { totalSchools, activeSubscriptions, trialSchools, totalRevenue: totalRevenue[0]?.total || 0 };
+  return {
+    stats: {
+      totalSchools,
+      activeSchools,
+      inactiveSchools,
+      totalStudents,
+      totalTeachers,
+      totalUsers,
+      totalSubscriptions,
+      activeSubscriptions,
+      trialSubscriptions,
+      expiredSubscriptions,
+      totalRevenue: totalRevenueAgg[0]?.total || 0,
+    },
+    planDistribution: planDistribution.map((p) => ({
+      plan: p._id || 'free_trial',
+      count: p.count,
+    })),
+    monthlyRevenue: monthlyRevenueAgg.map((m) => ({
+      month: m._id,
+      revenue: m.revenue,
+      transactions: m.transactions,
+    })),
+    recentSchools,
+    recentAuditLogs,
+  };
 };
 
 export const getSchoolAdminDashboard = async (schoolId) => {
