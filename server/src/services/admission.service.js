@@ -42,15 +42,39 @@ export const createAdmission = async (schoolId, data, userId) => {
   return admission;
 };
 
+export const getAdmissionStats = async (schoolId) => {
+  const [total, submitted, underReview, approved, enrolled, rejected] = await Promise.all([
+    Admission.countDocuments({ schoolId }),
+    Admission.countDocuments({ schoolId, workflowStatus: 'submitted' }),
+    Admission.countDocuments({ schoolId, workflowStatus: { $in: ['under_review', 'document_verification'] } }),
+    Admission.countDocuments({ schoolId, workflowStatus: { $in: ['approved', 'class_allocated', 'fee_assigned', 'payment_pending', 'partially_paid', 'paid'] } }),
+    Admission.countDocuments({ schoolId, workflowStatus: { $in: ['admitted', 'student_created'] } }),
+    Admission.countDocuments({ schoolId, workflowStatus: 'rejected' }),
+  ]);
+
+  return { total, submitted, underReview, approved, enrolled, rejected };
+};
+
 export const getAdmissions = async (schoolId, options) => {
   const filter = { schoolId };
 
   if (options.academicSession) filter.academicSession = options.academicSession;
   if (options.applyingForClass) filter.applyingForClass = options.applyingForClass;
-  if (options.workflowStatus) filter.workflowStatus = options.workflowStatus;
+  if (options.workflowStatus && options.workflowStatus !== 'all') filter.workflowStatus = options.workflowStatus;
+  if (options.gender && options.gender !== 'all') filter.gender = options.gender;
+
+  if (options.startDate || options.endDate) {
+    filter.createdAt = {};
+    if (options.startDate) filter.createdAt.$gte = new Date(options.startDate);
+    if (options.endDate) {
+      const end = new Date(options.endDate);
+      end.setHours(23, 59, 59, 999);
+      filter.createdAt.$lte = end;
+    }
+  }
 
   // Search filter
-  const searchFields = ['applicantName', 'applicationNo', 'parentPhone'];
+  const searchFields = ['applicantName', 'applicationNo', 'parentPhone', 'father.name', 'mother.name'];
 
   return paginate(Admission, filter, {
     ...options,

@@ -3015,3 +3015,61 @@ Stack Trace: Error: Authentication required
 Details: []
 ================================================================================
 
+
+================================================================================
+Timestamp: 2026-08-15T12:42:07.550Z
+Method: POST
+URL: /api/v1/roles
+User ID: 6a71e2ba663eadf9b14383ae
+Query: {}
+Body: {"name":"Accountant","permissions":{"students":["create","update","read"],"teachers":[],"admissions":["read","create","update"],"classes":[],"timetable":[],"attendance":[],"exams":[],"fees":[],"notices":[],"leaves":[],"complaints":[]}}
+Error Name: TypeError
+Error Message: Cannot read properties of undefined (reading 'map')
+Stack Trace: TypeError: Cannot read properties of undefined (reading 'map')
+    at file:///F:/Coding/Production%20grade%20Projects/Instique/server/src/middlewares/validate.middleware.js:7:42
+    at Layer.handleRequest (F:\Coding\Production grade Projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (F:\Coding\Production grade Projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///F:/Coding/Production%20grade%20Projects/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (F:\Coding\Production grade Projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (F:\Coding\Production grade Projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (F:\Coding\Production grade Projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (F:\Coding\Production grade Projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:291:5)
+    at tenantMiddleware (file:///F:/Coding/Production%20grade%20Projects/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (F:\Coding\Production grade Projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:342:13)
+    at F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:297:9
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-15T12:42:17.716Z
+Method: POST
+URL: /api/v1/roles
+User ID: 6a71e2ba663eadf9b14383ae
+Query: {}
+Body: {"name":"Accountant","description":"accountant","permissions":{"students":["create","update","read"],"teachers":[],"admissions":["read","create","update"],"classes":[],"timetable":[],"attendance":[],"exams":[],"fees":[],"notices":[],"leaves":[],"complaints":[]}}
+Error Name: TypeError
+Error Message: Cannot read properties of undefined (reading 'map')
+Stack Trace: TypeError: Cannot read properties of undefined (reading 'map')
+    at file:///F:/Coding/Production%20grade%20Projects/Instique/server/src/middlewares/validate.middleware.js:7:42
+    at Layer.handleRequest (F:\Coding\Production grade Projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (F:\Coding\Production grade Projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///F:/Coding/Production%20grade%20Projects/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (F:\Coding\Production grade Projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (F:\Coding\Production grade Projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (F:\Coding\Production grade Projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (F:\Coding\Production grade Projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:291:5)
+    at tenantMiddleware (file:///F:/Coding/Production%20grade%20Projects/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (F:\Coding\Production grade Projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:342:13)
+    at F:\Coding\Production grade Projects\Instique\server\node_modules\router\index.js:297:9
+================================================================================
+
