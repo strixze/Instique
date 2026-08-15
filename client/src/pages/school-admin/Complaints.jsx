@@ -23,7 +23,10 @@ export default function Complaints() {
  const [loading, setLoading] = useState(true);
  const [page, setPage] = useState(1);
  const [search, setSearch] = useState('');
+<<<<<<< HEAD
  const [sort, setSort] = useState('-createdAt');
+=======
+>>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
  const [reload, setReload] = useState(0);
  const [processing, setProcessing] = useState(null);
  const [saving, setSaving] = useState(false);
@@ -33,7 +36,11 @@ export default function Complaints() {
  let active = true;
  const load = async () => {
  try {
+<<<<<<< HEAD
  const res = await complaintApi.getAll({ page, limit: 10, search: search || undefined, sort });
+=======
+ const res = await complaintApi.getAll({ page, limit: 10, search: search || undefined });
+>>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
  if (!active) return;
  setData(res.data);
  setMeta(res.meta);
@@ -45,7 +52,11 @@ export default function Complaints() {
  };
  load();
  return () => { active = false; };
+<<<<<<< HEAD
  }, [page, search, reload, sort]);
+=======
+ }, [page, search, reload]);
+>>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
 
  const openProcess = (complaint) => {
  setProcessing(complaint);
@@ -73,9 +84,15 @@ export default function Complaints() {
  const columns = [
  { key: 'subject', label: 'Subject', sortable: true, render: (r) => <span className="font-medium text-deep">{r.subject}</span> },
  { key: 'complainant', label: 'Complainant', render: (r) => r.isAnonymous ? <Badge color="gray">Anonymous</Badge> : (r.complainantName || '—') },
+<<<<<<< HEAD
  { key: 'type', label: 'Type', sortable: true, render: (r) => <span className="capitalize">{r.type}</span> },
  { key: 'status', label: 'Status', sortable: true, render: (r) => <Badge color={statusColors[r.status] || 'gray'}>{r.status.replace('_', ' ')}</Badge> },
  { key: 'createdAt', label: 'Submitted', sortable: true, render: (r) => new Date(r.createdAt).toLocaleDateString() },
+=======
+ { key: 'type', label: 'Type', render: (r) => <span className="capitalize">{r.type}</span> },
+ { key: 'status', label: 'Status', render: (r) => <Badge color={statusColors[r.status] || 'gray'}>{r.status.replace('_', ' ')}</Badge> },
+ { key: 'createdAt', label: 'Submitted', render: (r) => new Date(r.createdAt).toLocaleDateString() },
+>>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
  {
  key: 'actions',
  label: '',
@@ -91,7 +108,11 @@ export default function Complaints() {
  <div className="space-y-6">
  <PageHeader title="Complaints & Feedback"description="Review and resolve complaints from students and parents"/>
 
+<<<<<<< HEAD
  <DataTable columns={columns} data={data} loading={loading} meta={meta} onPageChange={(p) => { setLoading(true); setPage(p); }} onSearch={(s) => { setLoading(true); setSearch(s); setPage(1); }} onSort={(field, order) => { setSort(`${order === 'desc' ? '-' : ''}${field}`); setPage(1); setLoading(true); }} searchPlaceholder="Search complaints..."/>
+=======
+ <DataTable columns={columns} data={data} loading={loading} meta={meta} onPageChange={(p) => { setLoading(true); setPage(p); }} onSearch={(s) => { setLoading(true); setSearch(s); setPage(1); }} searchPlaceholder="Search complaints..."/>
+>>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
 
  <Modal isOpen={!!processing} onClose={() => setProcessing(null)} title={`Process Complaint — ${processing?.subject || ''}`}>
  <div className="space-y-4">

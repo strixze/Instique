@@ -31,7 +31,10 @@ export default function Teachers() {
  const [loading, setLoading] = useState(true);
  const [page, setPage] = useState(1);
  const [search, setSearch] = useState('');
+<<<<<<< HEAD
  const [sort, setSort] = useState('-createdAt');
+=======
+>>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
  const [reload, setReload] = useState(0);
  const [open, setOpen] = useState(false);
  const [saving, setSaving] = useState(false);
@@ -50,7 +53,11 @@ export default function Teachers() {
  let active = true;
  const load = async () => {
  try {
+<<<<<<< HEAD
  const res = await teacherApi.getAll({ page, limit: 10, search: search || undefined, sort });
+=======
+ const res = await teacherApi.getAll({ page, limit: 10, search: search || undefined });
+>>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
  if (!active) return;
  setData(res.data);
  setMeta(res.meta);
@@ -62,7 +69,11 @@ export default function Teachers() {
  };
  load();
  return () => { active = false; };
+<<<<<<< HEAD
  }, [page, search, reload, sort]);
+=======
+ }, [page, search, reload]);
+>>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
 
  const subjectMap = Object.fromEntries(allSubjects.map((s) => [s._id, s.name]));
 
@@ -171,8 +182,13 @@ export default function Teachers() {
 
  const columns = [
  { key: 'employeeId', label: 'Employee ID', sortable: true },
+<<<<<<< HEAD
  { key: 'firstName', label: 'Name', sortable: true, render: (r) => <span className="font-medium text-deep">{r.firstName} {r.lastName}</span> },
  { key: 'department', label: 'Department', sortable: true, render: (r) => r.department || '—' },
+=======
+ { key: 'name', label: 'Name', render: (r) => <span className="font-medium text-deep">{r.firstName} {r.lastName}</span> },
+ { key: 'department', label: 'Department', render: (r) => r.department || '—' },
+>>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
  {
  key: 'subjects',
  label: 'Subjects',
@@ -189,7 +205,11 @@ export default function Teachers() {
  );
  },
  },
+<<<<<<< HEAD
  { key: 'status', label: 'Status', sortable: true, render: (r) => <Badge color={r.status === 'active' ? 'success' : 'gray'}>{r.status}</Badge> },
+=======
+ { key: 'status', label: 'Status', render: (r) => <Badge color={r.status === 'active' ? 'success' : 'gray'}>{r.status}</Badge> },
+>>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
  {
  key: 'actions',
  label: '',
@@ -234,7 +254,10 @@ export default function Teachers() {
  meta={meta}
  onPageChange={(p) => { setLoading(true); setPage(p); }}
  onSearch={(s) => { setLoading(true); setSearch(s); setPage(1); }}
+<<<<<<< HEAD
  onSort={(field, order) => { setSort(`${order === 'desc' ? '-' : ''}${field}`); setPage(1); setLoading(true); }}
+=======
+>>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
  searchPlaceholder="Search by name or employee ID..."
  />
 

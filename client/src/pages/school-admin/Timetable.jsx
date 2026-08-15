@@ -34,7 +34,10 @@ export default function Timetable() {
  const [loading, setLoading] = useState(true);
  const [page, setPage] = useState(1);
  const [search, setSearch] = useState('');
+<<<<<<< HEAD
  const [sort, setSort] = useState('-createdAt');
+=======
+>>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
  const [reload, setReload] = useState(0);
 
  // Entities
@@ -98,7 +101,11 @@ export default function Timetable() {
  let active = true;
  const load = async () => {
  try {
+<<<<<<< HEAD
  const res = await timetableApi.getAll({ page, limit: 10, search: search || undefined, sort });
+=======
+ const res = await timetableApi.getAll({ page, limit: 10 });
+>>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
  if (!active) return;
  setTimetables(res.data);
  setMeta(res.meta);
@@ -110,7 +117,11 @@ export default function Timetable() {
  };
  load();
  return () => { active = false; };
+<<<<<<< HEAD
  }, [page, search, reload, sort]);
+=======
+ }, [page, search, reload]);
+>>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
 
  // Maps for display
  const classMap = Object.fromEntries(classes.map((c) => [c._id, c.name]));
@@ -568,11 +579,19 @@ export default function Timetable() {
 
  // Table lists columns
  const listColumns = [
+<<<<<<< HEAD
  { key: 'class', label: 'Class', sortable: true, render: (r) => r.schoolClass?.name || classMap[r.schoolClass?._id || r.schoolClass] || '—' },
  { key: 'section', label: 'Section', sortable: true, render: (r) => r.section?.name || sectionMap[r.section?._id || r.section] || '—' },
  { key: 'academicYear', label: 'Academic Year', sortable: true, render: (r) => r.academicYear?.name || yearMap[r.academicYear?._id || r.academicYear] || '—' },
  { key: 'periods', label: 'Periods', render: (r) => Array.isArray(r.periods) ? r.periods.length : '—' },
  { key: 'status', label: 'Status', sortable: true, render: (r) => <Badge color={r.status === 'published' ? 'success' : 'warning'}>{r.status}</Badge> },
+=======
+ { key: 'class', label: 'Class', render: (r) => r.schoolClass?.name || classMap[r.schoolClass?._id || r.schoolClass] || '—' },
+ { key: 'section', label: 'Section', render: (r) => r.section?.name || sectionMap[r.section?._id || r.section] || '—' },
+ { key: 'academicYear', label: 'Academic Year', render: (r) => r.academicYear?.name || yearMap[r.academicYear?._id || r.academicYear] || '—' },
+ { key: 'periods', label: 'Periods', render: (r) => Array.isArray(r.periods) ? r.periods.length : '—' },
+ { key: 'status', label: 'Status', render: (r) => <Badge color={r.status === 'published' ? 'success' : 'warning'}>{r.status}</Badge> },
+>>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
  {
  key: 'actions',
  label: 'Actions',
@@ -889,7 +908,10 @@ return (
  meta={meta}
  onPageChange={(p) => { setLoading(true); setPage(p); }}
  onSearch={(s) => { setLoading(true); setSearch(s); setPage(1); }}
+<<<<<<< HEAD
  onSort={(field, order) => { setSort(`${order === 'desc' ? '-' : ''}${field}`); setPage(1); setLoading(true); }}
+=======
+>>>>>>> ad3272f98243adbe43ffe771357689a90b09f452
  searchPlaceholder="Search timetables..."
  />
  </div>
