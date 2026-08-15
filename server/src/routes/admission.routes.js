@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { 
   createAdmission, 
   getAdmissions, 
+  getAdmissionStats,
   getAdmissionById, 
   updateAdmissionStatus, 
   uploadDocuments,
@@ -29,6 +30,7 @@ const router = Router();
 
 router.use(authMiddleware, tenantMiddleware);
 
+router.get('/stats', requireRole('school_admin'), getAdmissionStats);
 router.get('/', requireRole('school_admin'), getAdmissions);
 router.get('/:id', requireRole('school_admin'), getAdmissionById);
 router.post('/', requireRole('school_admin'), validate(createAdmissionSchema), createAdmission);

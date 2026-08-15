@@ -7,60 +7,73 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Brand
+        // Institutional Brand Green (Exact match to reference)
         forest: {
-          DEFAULT: '#35583F',
-          dark: '#294632',
-          light: '#3F7652',
+          DEFAULT: '#2D6A4F',
+          dark: '#1B4332',
+          hover: '#22543D',
+          light: '#40916C',
+          soft: '#E8F3EB',
         },
-        // Text
-        deep: '#1F2A23',
-        secondary: '#66736A',
-        muted: '#7B877F',
-        // Surfaces
-        page: '#F3F7F4',
+        // Professional Typography Hierarchy (Slate-based neutrals)
+        deep: '#0F172A',
+        body: '#334155',
+        secondary: '#475569',
+        muted: '#64748B',
+        subtle: '#94A3B8',
+        // Background Surfaces
+        page: '#F8FAFC',
         card: '#FFFFFF',
-        surface: '#EEF3EF',
+        surface: '#F1F5F9',
         sage: {
-          DEFAULT: '#DCE8DF',
-          soft: '#E8F0EA',
+          DEFAULT: '#E8F3EB',
+          soft: '#F4F9F5',
+          border: '#D1E7D7',
+          text: '#2D6A4F',
         },
-        // Border
-        border: '#DCE4DE',
-        // Semantic
+        // Clean System Borders
+        border: '#E2E8F0',
+        'border-subtle': '#EEF2F6',
+        // Semantic Operational Colors
         success: {
-          DEFAULT: '#3F7652',
+          DEFAULT: '#16A34A',
           light: '#E8F5EC',
-          text: '#2D5A3D',
+          text: '#15803D',
+          dark: '#166534',
         },
         warning: {
-          DEFAULT: '#C49A32',
-          light: '#FEF6E0',
-          text: '#8B6D1F',
+          DEFAULT: '#D97706',
+          light: '#FEF3C7',
+          text: '#B45309',
+          dark: '#92400E',
         },
         danger: {
-          DEFAULT: '#C85B55',
-          light: '#FDE8E7',
-          text: '#A13F3A',
+          DEFAULT: '#DC2626',
+          light: '#FEE2E2',
+          text: '#B91C1C',
+          dark: '#991B1B',
         },
         info: {
-          DEFAULT: '#6B8F8A',
-          light: '#E4F0EE',
-          text: '#4A6D68',
+          DEFAULT: '#2563EB',
+          light: '#EFF6FF',
+          text: '#1D4ED8',
+          dark: '#1E40AF',
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
       },
       borderRadius: {
         DEFAULT: '8px',
         'card': '12px',
+        'card-lg': '16px',
+        'pill': '9999px',
       },
       boxShadow: {
-        'card': '0 1px 3px rgba(0,0,0,0.04)',
-        'card-hover': '0 4px 12px rgba(0,0,0,0.06)',
-        'dropdown': '0 4px 16px rgba(0,0,0,0.08)',
-        'modal': '0 8px 32px rgba(0,0,0,0.12)',
+        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.02)',
+        'card-hover': '0 4px 12px 0 rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.03)',
+        'dropdown': '0 4px 16px -2px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.04)',
+        'modal': '0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.05)',
       },
     },
   },
