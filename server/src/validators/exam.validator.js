@@ -26,3 +26,12 @@ export const enterMarkSchema = z.object({
   marksObtained: z.number().min(0),
   remarks: z.string().optional(),
 });
+
+export const saveMarksSchema = z.object({
+  marks: z.array(z.object({
+    student: z.string().min(1),
+    subject: z.string().min(1),
+    marksObtained: z.number().min(0),
+  })).min(1),
+  status: z.enum(['draft', 'submitted']).optional(),
+});

@@ -46,3 +46,18 @@ export const publishResults = asyncHandler(async (req, res) => {
   const exam = await examService.publishResults(req.schoolId, req.params.examId);
   res.status(200).json(new ApiResponse(200, exam, 'Results published'));
 });
+
+export const getExamStudents = asyncHandler(async (req, res) => {
+  const students = await examService.getExamStudents(req.schoolId, req.params.examId);
+  res.status(200).json(new ApiResponse(200, students, 'Exam students fetched'));
+});
+
+export const saveMarksBulk = asyncHandler(async (req, res) => {
+  const result = await examService.saveMarks(req.schoolId, req.params.examId, req.body.marks, req.body.status, req.user._id);
+  res.status(200).json(new ApiResponse(200, result, 'Marks saved'));
+});
+
+export const getExamResults = asyncHandler(async (req, res) => {
+  const results = await examService.getExamResults(req.schoolId, req.params.examId);
+  res.status(200).json(new ApiResponse(200, results, 'Exam results fetched'));
+});

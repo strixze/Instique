@@ -2,6 +2,7 @@ import api from './axios';
 
 export const admissionApi = {
   getAll: (params) => api.get('/admissions', { params }),
+  getStats: () => api.get('/admissions/stats'),
   getById: (id) => api.get(`/admissions/${id}`),
   create: (data) => api.post('/admissions', data),
   updateStatus: (id, data) => api.put(`/admissions/${id}/status`, data),

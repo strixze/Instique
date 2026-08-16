@@ -26,7 +26,10 @@ import Leaves from '../pages/school-admin/Leaves';
 import Complaints from '../pages/school-admin/Complaints';
 import Roles from '../pages/school-admin/Roles';
 import Settings from '../pages/school-admin/Settings';
-import Profile from '../pages/profile/Profile';
+import MarksEntry from '../pages/school-admin/MarksEntry';
+import Leaderboard from '../pages/school-admin/Leaderboard';
+import RecentActivity from '../pages/school-admin/RecentActivity';
+import Events from '../pages/school-admin/Events';
 
 function RoleDashboard() {
   const user = useUserStore((s) => s.user);
@@ -80,10 +83,15 @@ export default function AppRouter() {
       <Route path="/timetable-config" element={<ModulePage><TimetableConfig /></ModulePage>} />
       <Route path="/attendance" element={<ModulePage><Attendance /></ModulePage>} />
       <Route path="/exams" element={<ModulePage><Exams /></ModulePage>} />
+      <Route path="/marks-entry" element={<ModulePage><MarksEntry /></ModulePage>} />
+      <Route path="/leaderboard" element={<ModulePage><Leaderboard /></ModulePage>} />
       <Route path="/fees" element={<ModulePage><Fees /></ModulePage>} />
       <Route path="/notices" element={<ModulePage><Notices /></ModulePage>} />
       <Route path="/leaves" element={<ModulePage><Leaves /></ModulePage>} />
       <Route path="/complaints" element={<ModulePage><Complaints /></ModulePage>} />
+      <Route path="/events" element={<ModulePage><Events /></ModulePage>} />
+      <Route path="/recent-activity" element={<ModulePage><RecentActivity /></ModulePage>} />
+      <Route path="/audit-logs" element={<ModulePage><RecentActivity /></ModulePage>} />
       <Route path="/roles" element={<ModulePage><Roles /></ModulePage>} />
       <Route path="/settings" element={<ModulePage><Settings /></ModulePage>} />
       <Route path="/profile" element={<ModulePage><Profile /></ModulePage>} />

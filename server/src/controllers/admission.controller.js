@@ -7,6 +7,11 @@ export const createAdmission = asyncHandler(async (req, res) => {
   res.status(201).json(new ApiResponse(201, admission, 'Admission application submitted'));
 });
 
+export const getAdmissionStats = asyncHandler(async (req, res) => {
+  const stats = await admissionService.getAdmissionStats(req.schoolId);
+  res.status(200).json(new ApiResponse(200, stats, 'Admission statistics fetched'));
+});
+
 export const getAdmissions = asyncHandler(async (req, res) => {
   const result = await admissionService.getAdmissions(req.schoolId, req.query);
   res.status(200).json(new ApiResponse(200, result.data, 'Admissions fetched', result.meta));

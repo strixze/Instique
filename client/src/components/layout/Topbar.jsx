@@ -1,4 +1,4 @@
-import { Bell, Clock, Menu, User } from 'lucide-react';
+import { Bell, Calendar, Menu, Search, User } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useUserStore } from '../../store/userStore';
 import { notificationApi } from '../../api/notification.api';
@@ -8,18 +8,13 @@ export default function Topbar({ setMobileOpen }) {
   const user = useUserStore((s) => s.user);
   const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState(0);
-  const [time, setTime] = useState(new Date());
-
-  useEffect(() => {
-    const timer = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
+  const [globalSearch, setGlobalSearch] = useState('');
 
   useEffect(() => {
     const fetchCount = async () => {
       try {
         const res = await notificationApi.getUnreadCount();
-        setUnreadCount(res.data.count);
+        setUnreadCount(res.data?.count || 0);
       } catch {}
     };
     fetchCount();
@@ -27,47 +22,87 @@ export default function Topbar({ setMobileOpen }) {
     return () => clearInterval(interval);
   }, []);
 
-  const formattedDateTime = time.toLocaleString('en-US', {
+  const todayFormatted = new Date().toLocaleDateString('en-US', {
     weekday: 'short',
-    day: 'numeric',
     month: 'short',
+    day: 'numeric',
     year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: true
   });
 
+  const handleGlobalSearchKeyDown = (e) => {
+    if (e.key === 'Enter' && globalSearch.trim()) {
+      navigate(`/students?search=${encodeURIComponent(globalSearch.trim())}`);
+    }
+  };
+
+  const getInitial = (name = 'Admin') => {
+    return name.trim().charAt(0).toUpperCase() || 'A';
+  };
+
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between h-14 px-4 lg:px-6 bg-white/80 backdrop-blur-md border-b border-border">
+    <header className="sticky top-0 z-30 flex items-center justify-between h-14 px-4 lg:px-6 bg-white border-b border-border">
+      {/* Mobile Toggle */}
       <div className="flex items-center gap-3">
-        <button className="lg:hidden p-2 text-secondary hover:text-deep rounded-lg hover:bg-sage-soft transition-colors" onClick={() => setMobileOpen?.(true)}>
-          <Menu size={20} />
+        <button
+          className="lg:hidden p-1.5 text-secondary hover:text-deep rounded-lg hover:bg-surface transition-colors"
+          onClick={() => setMobileOpen?.(true)}
+          title="Open menu"
+        >
+          <Menu size={19} />
         </button>
       </div>
 
-      <div className="flex items-center gap-3">
-        <div className="hidden sm:flex items-center gap-2 text-xs font-semibold text-secondary bg-sage-soft border border-forest/10 rounded-lg px-3 py-1.5 shadow-sm">
-          <Clock size={14} className="text-forest animate-pulse" />
-          <span>{formattedDateTime}</span>
+      {/* Right Actions */}
+      <div className="flex items-center gap-2.5 sm:gap-3 ml-auto">
+        {/* Global Search Input */}
+        <div className="relative hidden md:block">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+          <input
+            type="text"
+            placeholder="Search students, classes, fees..."
+            value={globalSearch}
+            onChange={(e) => setGlobalSearch(e.target.value)}
+            onKeyDown={handleGlobalSearchKeyDown}
+            className="w-60 lg:w-72 pl-9 pr-3 py-1.5 bg-white border border-border rounded-lg text-xs text-deep placeholder-muted focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest transition-all"
+          />
         </div>
 
-        <button className="relative p-2 text-secondary hover:text-deep rounded-lg hover:bg-sage-soft transition-colors" onClick={() => navigate('/notifications')}>
-          <Bell size={20} />
+        {/* Date Badge */}
+        <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-white border border-border rounded-lg text-xs font-medium text-secondary shadow-2xs">
+          <Calendar size={13} className="text-muted" />
+          <span>{todayFormatted}</span>
+        </div>
+
+        {/* Notifications */}
+        <button
+          className="relative p-2 text-secondary hover:text-deep rounded-lg hover:bg-surface transition-colors"
+          onClick={() => navigate('/notices')}
+          title="Notifications"
+        >
+          <Bell size={18} />
           {unreadCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white bg-danger rounded-full">
+            <span className="absolute 1.5 top-1 right-1 flex items-center justify-center min-w-4 h-4 px-1 text-[9px] font-bold text-white bg-danger rounded-full ring-2 ring-white">
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
         </button>
 
-        <div onClick={() => navigate('/profile')} className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg hover:bg-sage-soft cursor-pointer transition-colors">
-          <div className="w-8 h-8 rounded-full bg-forest flex items-center justify-center">
-            <User size={15} className="text-white" />
+        {/* User Profile Chip */}
+        <div
+          onClick={() => navigate('/settings')}
+          className="flex items-center gap-2.5 pl-1.5 pr-2 py-1 rounded-lg hover:bg-surface cursor-pointer transition-colors"
+          title="User profile"
+        >
+          <div className="w-8 h-8 rounded-full bg-forest-dark text-white flex items-center justify-center text-xs font-bold shadow-xs">
+            {getInitial(user?.name)}
           </div>
-          <div className="hidden sm:block">
-            <p className="text-sm font-medium text-deep leading-tight">{user?.name}</p>
-            <p className="text-xs text-muted capitalize">{user?.role?.replace('_', ' ')}</p>
+          <div className="hidden md:block text-left">
+            <p className="text-xs font-semibold text-deep leading-tight truncate max-w-[120px]">
+              {user?.name || 'Admin'}
+            </p>
+            <p className="text-[10px] text-muted capitalize leading-tight">
+              {user?.role?.replace('_', ' ') || 'School Admin'}
+            </p>
           </div>
         </div>
       </div>
