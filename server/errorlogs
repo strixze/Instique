@@ -199,3 +199,449 @@ Stack Trace: Error: Authentication required
 Details: []
 ================================================================================
 
+
+================================================================================
+Timestamp: 2026-08-16T12:48:22.985Z
+Method: GET
+URL: /api/v1/notifications/unread-count
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/temp%202/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/temp%202/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 2\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\temp 2\Instique\server\node_modules\router\index.js:342:13)
+    at D:\temp 2\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\temp 2\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\temp 2\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\temp 2\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\temp 2\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\temp 2\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\temp 2\Instique\server\node_modules\router\index.js:342:13)
+    at D:\temp 2\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\temp 2\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\temp 2\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\temp 2\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-16T12:48:23.038Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Invalid refresh token
+Stack Trace: Error: Invalid refresh token
+    at Module.refreshUserToken (file:///D:/temp%202/Instique/server/src/services/auth.service.js:103:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/temp%202/Instique/server/src/controllers/auth.controller.js:58:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-16T12:48:23.504Z
+Method: GET
+URL: /api/v1/auth/profile
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/temp%202/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/temp%202/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 2\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 2\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\temp 2\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\temp 2\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\temp 2\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\temp 2\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\temp 2\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\temp 2\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\temp 2\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\temp 2\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\temp 2\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\temp 2\Instique\server\node_modules\router\index.js:342:13)
+    at D:\temp 2\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\temp 2\Instique\server\node_modules\router\index.js:582:12)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-16T12:48:23.507Z
+Method: GET
+URL: /api/v1/auth/profile
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/temp%202/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/temp%202/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 2\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 2\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\temp 2\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\temp 2\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\temp 2\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\temp 2\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\temp 2\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\temp 2\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\temp 2\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\temp 2\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\temp 2\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\temp 2\Instique\server\node_modules\router\index.js:342:13)
+    at D:\temp 2\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\temp 2\Instique\server\node_modules\router\index.js:582:12)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-16T12:48:23.551Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Invalid refresh token
+Stack Trace: Error: Invalid refresh token
+    at Module.refreshUserToken (file:///D:/temp%202/Instique/server/src/services/auth.service.js:103:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/temp%202/Instique/server/src/controllers/auth.controller.js:58:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-16T12:48:23.556Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Invalid refresh token
+Stack Trace: Error: Invalid refresh token
+    at Module.refreshUserToken (file:///D:/temp%202/Instique/server/src/services/auth.service.js:103:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/temp%202/Instique/server/src/controllers/auth.controller.js:58:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-16T12:56:30.892Z
+Method: POST
+URL: /api/v1/gallery/albums/6a81b35eeeecd693998b0ded/photos
+User ID: 6a71e2ba663eadf9b14383ae
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: ENOENT: no such file or directory, open 'D:\temp 2\Instique\server\public\uploads\1786884990889-615989707.png'
+Stack Trace: Error: ENOENT: no such file or directory, open 'D:\temp 2\Instique\server\public\uploads\1786884990889-615989707.png'
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-16T12:56:59.120Z
+Method: POST
+URL: /api/v1/gallery/albums/6a81b35eeeecd693998b0ded/photos
+User ID: 6a71e2ba663eadf9b14383ae
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: ENOENT: no such file or directory, open 'D:\temp 2\Instique\server\public\uploads\1786885019118-529622987.png'
+Stack Trace: Error: ENOENT: no such file or directory, open 'D:\temp 2\Instique\server\public\uploads\1786885019118-529622987.png'
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-16T12:57:35.587Z
+Method: POST
+URL: /api/v1/gallery/albums/6a81b35eeeecd693998b0ded/photos
+User ID: 6a71e2ba663eadf9b14383ae
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: ENOENT: no such file or directory, open 'D:\temp 2\Instique\server\public\uploads\1786885055585-572153513.png'
+Stack Trace: Error: ENOENT: no such file or directory, open 'D:\temp 2\Instique\server\public\uploads\1786885055585-572153513.png'
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-16T12:57:56.525Z
+Method: POST
+URL: /api/v1/gallery/albums/6a81b35eeeecd693998b0ded/photos
+User ID: 6a71e2ba663eadf9b14383ae
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: ENOENT: no such file or directory, open 'D:\temp 2\Instique\server\public\uploads\1786885076523-474244526.png'
+Stack Trace: Error: ENOENT: no such file or directory, open 'D:\temp 2\Instique\server\public\uploads\1786885076523-474244526.png'
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-16T13:06:22.984Z
+Method: GET
+URL: /api/v1/notifications/unread-count
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/temp%202/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/temp%202/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 2\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\temp 2\Instique\server\node_modules\router\index.js:342:13)
+    at D:\temp 2\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\temp 2\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\temp 2\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\temp 2\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\temp 2\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\temp 2\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\temp 2\Instique\server\node_modules\router\index.js:342:13)
+    at D:\temp 2\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\temp 2\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\temp 2\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\temp 2\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-16T13:22:22.983Z
+Method: GET
+URL: /api/v1/notifications/unread-count
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/temp%202/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/temp%202/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 2\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\temp 2\Instique\server\node_modules\router\index.js:342:13)
+    at D:\temp 2\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\temp 2\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\temp 2\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\temp 2\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\temp 2\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\temp 2\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\temp 2\Instique\server\node_modules\router\index.js:342:13)
+    at D:\temp 2\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\temp 2\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\temp 2\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\temp 2\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-16T13:22:23.026Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Invalid refresh token
+Stack Trace: Error: Invalid refresh token
+    at Module.refreshUserToken (file:///D:/temp%202/Instique/server/src/services/auth.service.js:103:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/temp%202/Instique/server/src/controllers/auth.controller.js:58:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-16T13:22:23.274Z
+Method: GET
+URL: /api/v1/auth/profile
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/temp%202/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/temp%202/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 2\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 2\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\temp 2\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\temp 2\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\temp 2\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\temp 2\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\temp 2\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\temp 2\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\temp 2\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\temp 2\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\temp 2\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\temp 2\Instique\server\node_modules\router\index.js:342:13)
+    at D:\temp 2\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\temp 2\Instique\server\node_modules\router\index.js:582:12)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-16T13:22:23.276Z
+Method: GET
+URL: /api/v1/auth/profile
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/temp%202/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/temp%202/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 2\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 2\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\temp 2\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\temp 2\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\temp 2\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\temp 2\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\temp 2\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\temp 2\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\temp 2\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\temp 2\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\temp 2\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\temp 2\Instique\server\node_modules\router\index.js:342:13)
+    at D:\temp 2\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\temp 2\Instique\server\node_modules\router\index.js:582:12)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-16T13:22:23.362Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Invalid refresh token
+Stack Trace: Error: Invalid refresh token
+    at Module.refreshUserToken (file:///D:/temp%202/Instique/server/src/services/auth.service.js:103:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/temp%202/Instique/server/src/controllers/auth.controller.js:58:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-16T13:22:23.385Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Invalid refresh token
+Stack Trace: Error: Invalid refresh token
+    at Module.refreshUserToken (file:///D:/temp%202/Instique/server/src/services/auth.service.js:103:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/temp%202/Instique/server/src/controllers/auth.controller.js:58:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-16T14:31:22.553Z
+Method: POST
+URL: /api/v1/gallery/albums
+User ID: 6a71e2ba663eadf9b14383ae
+Query: {}
+Body: {"title":"ngpanchmi","description":"tyftyffvygt","event":"","date":"2026-08-17"}
+Error Name: ValidationError
+Error Message: GalleryAlbum validation failed: event: Cast to ObjectId failed for value "" (type string) at path "event" because of "BSONError"
+Stack Trace: ValidationError: GalleryAlbum validation failed: event: Cast to ObjectId failed for value "" (type string) at path "event" because of "BSONError"
+    at Document.invalidate (D:\temp 2\Instique\server\node_modules\mongoose\lib\document.js:3379:32)
+    at model.$set (D:\temp 2\Instique\server\node_modules\mongoose\lib\document.js:1504:12)
+    at model.$set (D:\temp 2\Instique\server\node_modules\mongoose\lib\document.js:1158:16)
+    at model.Document (D:\temp 2\Instique\server\node_modules\mongoose\lib\document.js:178:12)
+    at model.Model (D:\temp 2\Instique\server\node_modules\mongoose\lib\model.js:129:12)
+    at new model (D:\temp 2\Instique\server\node_modules\mongoose\lib\model.js:4668:15)
+    at D:\temp 2\Instique\server\node_modules\mongoose\lib\model.js:2711:20
+    at Array.map (<anonymous>)
+    at Function.create (D:\temp 2\Instique\server\node_modules\mongoose\lib\model.js:2699:34)
+    at Module.createAlbum (file:///D:/temp%202/Instique/server/src/services/gallery.service.js:49:36)
+    at file:///D:/temp%202/Instique/server/src/controllers/gallery.controller.js:11:38
+    at file:///D:/temp%202/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 2\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 2\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///D:/temp%202/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (D:\temp 2\Instique\server\node_modules\router\lib\layer.js:152:17)
+Details: {
+  "event": {
+    "stringValue": "\"\"",
+    "valueType": "string",
+    "kind": "ObjectId",
+    "value": "",
+    "path": "event",
+    "reason": {},
+    "name": "CastError",
+    "message": "Cast to ObjectId failed for value \"\" (type string) at path \"event\" because of \"BSONError\""
+  }
+}
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-16T14:31:29.845Z
+Method: POST
+URL: /api/v1/gallery/albums
+User ID: 6a71e2ba663eadf9b14383ae
+Query: {}
+Body: {"title":"ngpanchmi","description":"tyftyffvygt","event":"","date":"2026-08-17"}
+Error Name: ValidationError
+Error Message: GalleryAlbum validation failed: event: Cast to ObjectId failed for value "" (type string) at path "event" because of "BSONError"
+Stack Trace: ValidationError: GalleryAlbum validation failed: event: Cast to ObjectId failed for value "" (type string) at path "event" because of "BSONError"
+    at Document.invalidate (D:\temp 2\Instique\server\node_modules\mongoose\lib\document.js:3379:32)
+    at model.$set (D:\temp 2\Instique\server\node_modules\mongoose\lib\document.js:1504:12)
+    at model.$set (D:\temp 2\Instique\server\node_modules\mongoose\lib\document.js:1158:16)
+    at model.Document (D:\temp 2\Instique\server\node_modules\mongoose\lib\document.js:178:12)
+    at model.Model (D:\temp 2\Instique\server\node_modules\mongoose\lib\model.js:129:12)
+    at new model (D:\temp 2\Instique\server\node_modules\mongoose\lib\model.js:4668:15)
+    at D:\temp 2\Instique\server\node_modules\mongoose\lib\model.js:2711:20
+    at Array.map (<anonymous>)
+    at Function.create (D:\temp 2\Instique\server\node_modules\mongoose\lib\model.js:2699:34)
+    at Module.createAlbum (file:///D:/temp%202/Instique/server/src/services/gallery.service.js:49:36)
+    at file:///D:/temp%202/Instique/server/src/controllers/gallery.controller.js:11:38
+    at file:///D:/temp%202/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 2\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 2\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///D:/temp%202/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (D:\temp 2\Instique\server\node_modules\router\lib\layer.js:152:17)
+Details: {
+  "event": {
+    "stringValue": "\"\"",
+    "valueType": "string",
+    "kind": "ObjectId",
+    "value": "",
+    "path": "event",
+    "reason": {},
+    "name": "CastError",
+    "message": "Cast to ObjectId failed for value \"\" (type string) at path \"event\" because of \"BSONError\""
+  }
+}
+================================================================================
+

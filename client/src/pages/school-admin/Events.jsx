@@ -7,7 +7,7 @@ import {
   MoreVertical, MapPin, Clock, Users, Flag, Trophy, BookOpen,
   Palette, UserCheck, AlertCircle, CheckCircle2, ChevronLeft,
   ChevronRight, ArrowRight, Eye, Edit3, Trash2, Send, XCircle,
-  FileText, Sparkles, Building, Layers
+  FileText, Sparkles, Building, Layers, Image as ImageIcon, Camera
 } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
@@ -19,6 +19,7 @@ import Skeleton from '../../components/ui/Skeleton';
 import { eventApi } from '../../api/event.api';
 import { academicApi } from '../../api/academic.api';
 import { useUserStore } from '../../store/userStore';
+import GalleryView from '../../components/events/GalleryView';
 
 // ── Event Types & Categories Config ──
 const EVENT_TYPES = [
@@ -55,6 +56,9 @@ function getStatusBadge(status, startDate) {
 export default function Events() {
   const user = useUserStore((s) => s.user);
   const isSchoolAdmin = user?.role === 'school_admin' || user?.role === 'super_admin';
+
+  // ── Main Module Navigation Tab ──
+  const [mainModuleTab, setMainModuleTab] = useState('events'); // 'events' | 'gallery'
 
   // ── Main State ──
   const [loading, setLoading] = useState(true);
@@ -365,6 +369,34 @@ export default function Events() {
         )}
       </div>
 
+      {/* ── Sub Navigation Tabs ── */}
+      <div className="flex items-center gap-2 border-b border-border pb-1">
+        <button
+          onClick={() => setMainModuleTab('events')}
+          className={`px-4 py-2 text-xs font-bold rounded-lg transition-colors flex items-center gap-2 cursor-pointer ${
+            mainModuleTab === 'events'
+              ? 'bg-forest text-white shadow-xs'
+              : 'bg-white border border-border text-secondary hover:text-deep hover:bg-surface'
+          }`}
+        >
+          <CalendarIcon size={14} /> Events & Schedule
+        </button>
+        <button
+          onClick={() => setMainModuleTab('gallery')}
+          className={`px-4 py-2 text-xs font-bold rounded-lg transition-colors flex items-center gap-2 cursor-pointer ${
+            mainModuleTab === 'gallery'
+              ? 'bg-forest text-white shadow-xs'
+              : 'bg-white border border-border text-secondary hover:text-deep hover:bg-surface'
+          }`}
+        >
+          <Camera size={14} /> Event Gallery
+        </button>
+      </div>
+
+      {mainModuleTab === 'gallery' ? (
+        <GalleryView isSchoolAdmin={isSchoolAdmin} />
+      ) : (
+        <>
       {/* ── 2. Summary Statistics (4 Cards) ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Upcoming Events */}
@@ -819,6 +851,8 @@ export default function Events() {
 
         </div>
       </div>
+      </>
+      )}
 
       {/* ── 5. Create / Edit Event Modal ── */}
       <Modal
@@ -993,36 +1027,44 @@ export default function Events() {
             )}
 
             <div className="flex items-center justify-between pt-3 border-t border-border">
-              <span className="text-[11px] text-muted">
-                Created: {new Date(viewEvent.createdAt).toLocaleDateString()}
-              </span>
+              <button
+                onClick={() => {
+                  setViewEvent(null);
+                  setMainModuleTab('gallery');
+                }}
+                className="text-xs font-semibold text-forest hover:underline flex items-center gap-1.5"
+              >
+                <Camera size={14} /> View Event Gallery
+              </button>
 
-              {isSchoolAdmin && (
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      const evToEdit = viewEvent;
-                      setViewEvent(null);
-                      openFormModal(evToEdit);
-                    }}
-                  >
-                    Edit Event
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => {
-                      const evToDelete = viewEvent;
-                      setViewEvent(null);
-                      handleDeleteEvent(evToDelete);
-                    }}
-                  >
-                    Delete
-                  </Button>
-                </div>
-              )}
+              <div className="flex items-center gap-2">
+                {isSchoolAdmin && (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const evToEdit = viewEvent;
+                        setViewEvent(null);
+                        openFormModal(evToEdit);
+                      }}
+                    >
+                      Edit Event
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => {
+                        const evToDelete = viewEvent;
+                        setViewEvent(null);
+                        handleDeleteEvent(evToDelete);
+                      }}
+                    >
+                      Delete
+                    </Button>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </Modal>
