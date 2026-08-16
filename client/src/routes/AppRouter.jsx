@@ -26,6 +26,7 @@ import Leaves from '../pages/school-admin/Leaves';
 import Complaints from '../pages/school-admin/Complaints';
 import Roles from '../pages/school-admin/Roles';
 import Settings from '../pages/school-admin/Settings';
+import Profile from '../pages/profile/Profile';
 
 function RoleDashboard() {
   const user = useUserStore((s) => s.user);
@@ -85,6 +86,7 @@ export default function AppRouter() {
       <Route path="/complaints" element={<ModulePage><Complaints /></ModulePage>} />
       <Route path="/roles" element={<ModulePage><Roles /></ModulePage>} />
       <Route path="/settings" element={<ModulePage><Settings /></ModulePage>} />
+      <Route path="/profile" element={<ModulePage><Profile /></ModulePage>} />
 
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

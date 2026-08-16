@@ -61,7 +61,7 @@ export default function Topbar({ setMobileOpen }) {
           )}
         </button>
 
-        <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg hover:bg-sage-soft cursor-pointer transition-colors">
+        <div onClick={() => navigate('/profile')} className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg hover:bg-sage-soft cursor-pointer transition-colors">
           <div className="w-8 h-8 rounded-full bg-forest flex items-center justify-center">
             <User size={15} className="text-white" />
           </div>
