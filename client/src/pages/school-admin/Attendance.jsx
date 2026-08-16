@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { CheckCheck, BarChart3, Users, Send, RefreshCw } from 'lucide-react';
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import PageHeader from '../../components/ui/PageHeader';
 import DataTable from '../../components/ui/DataTable';
 import Button from '../../components/ui/Button';
@@ -37,8 +38,20 @@ export default function Attendance() {
  const [classFilter, setClassFilter] = useState('');
  const [filterActive, setFilterActive] = useState(false);
 
- // Active tab: 'history' | 'mark'
+ // Active tab: 'history' | 'mark' | 'analytics'
  const [activeTab, setActiveTab] = useState('mark');
+
+ // Analytics state
+ const [analyticsClass, setAnalyticsClass] = useState('');
+ const [analyticsSection, setAnalyticsSection] = useState('');
+ const [analyticsStartDate, setAnalyticsStartDate] = useState(() => {
+   const d = new Date();
+   d.setDate(1);
+   return d.toISOString().split('T')[0];
+ });
+ const [analyticsEndDate, setAnalyticsEndDate] = useState(new Date().toISOString().split('T')[0]);
+ const [analyticsData, setAnalyticsData] = useState(null);
+ const [analyticsLoading, setAnalyticsLoading] = useState(false);
 
  // Mark Attendance state
  const [markDate, setMarkDate] = useState(new Date().toISOString().split('T')[0]);
@@ -206,6 +219,43 @@ export default function Attendance() {
  }
  };
 
+ const handleGenerateAnalytics = async () => {
+   if (!analyticsClass || !analyticsStartDate || !analyticsEndDate) {
+     toast.error('Please select class and date range');
+     return;
+   }
+   setAnalyticsLoading(true);
+   try {
+     const [reportRes, studentsRes] = await Promise.all([
+       attendanceApi.getReport({
+         classId: analyticsClass,
+         sectionId: analyticsSection || undefined,
+         startDate: analyticsStartDate,
+         endDate: analyticsEndDate,
+       }),
+       attendanceApi.getStudentsByClassSection({
+         classId: analyticsClass,
+         sectionId: analyticsSection || undefined
+       })
+     ]);
+
+     const students = studentsRes.data || [];
+     const studentWise = students.map(s => {
+       const stats = reportRes.data?.studentStats?.[s._id] || { present: 0, absent: 0, late: 0, leave: 0 };
+       return { ...s, ...stats };
+     });
+
+     setAnalyticsData({
+       summary: reportRes.data,
+       students: studentWise
+     });
+   } catch (e) {
+     toast.error(e?.message || 'Failed to generate analytics');
+   } finally {
+     setAnalyticsLoading(false);
+   }
+ };
+
  // Summary counts
  const summaryPresent = Object.values(studentStatuses).filter((s) => s === 'present').length;
  const summaryAbsent = Object.values(studentStatuses).filter((s) => s === 'absent').length;
@@ -254,6 +304,12 @@ export default function Attendance() {
  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'history' ? 'bg-forest text-white' : 'text-muted hover:text-deep'}`}
  >
  History
+ </button>
+ <button
+ onClick={() => setActiveTab('analytics')}
+ className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'analytics' ? 'bg-forest text-white' : 'text-muted hover:text-deep'}`}
+ >
+ <BarChart3 size={14} className="inline mr-1.5 -mt-0.5"/>Analytics
  </button>
  </div>
 
@@ -396,7 +452,7 @@ export default function Attendance() {
  </div>
  )}
  </div>
- ) : (
+ ) : activeTab === 'history' ? (
  /* History Tab */
  <div className="space-y-4 animate-scale-in">
  <div className="flex flex-wrap items-end gap-3 p-4 bg-white border border-border rounded-xl">
@@ -423,6 +479,123 @@ export default function Attendance() {
  onSort={(field, order) => { setSort(`${order === 'desc' ? '-' : ''}${field}`); setPage(1); setLoading(true); }}
  searchPlaceholder="Search attendance..."
  />
+ </div>
+ ) : (
+ /* Analytics Tab */
+ <div className="space-y-6 animate-scale-in">
+ {/* Filter Bar */}
+ <div className="flex flex-wrap items-end gap-3 p-5 bg-white border border-border rounded-2xl">
+ <div className="w-44">
+ <Select
+ label="Class"
+ options={classes.map((c) => ({ value: c._id, label: c.name }))}
+ value={analyticsClass}
+ onChange={(e) => { setAnalyticsClass(e.target.value); setAnalyticsSection(''); }}
+ placeholder="Select class..."
+ />
+ </div>
+ <div className="w-44">
+ <Select
+ label="Section"
+ options={sections.filter(s => !analyticsClass || s.schoolClass === analyticsClass).map((s) => ({ value: s._id, label: s.name }))}
+ value={analyticsSection}
+ onChange={(e) => setAnalyticsSection(e.target.value)}
+ placeholder="All Sections"
+ />
+ </div>
+ <div className="w-40">
+ <Input label="Start Date" type="date" value={analyticsStartDate} onChange={(e) => setAnalyticsStartDate(e.target.value)} />
+ </div>
+ <div className="w-40">
+ <Input label="End Date" type="date" value={analyticsEndDate} onChange={(e) => setAnalyticsEndDate(e.target.value)} />
+ </div>
+ <Button onClick={handleGenerateAnalytics} loading={analyticsLoading}>
+ Generate
+ </Button>
+ </div>
+
+ {analyticsData && (
+ <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+ {/* Pie Chart */}
+ <div className="bg-white p-6 rounded-2xl border border-border flex flex-col items-center">
+ <h3 className="text-lg font-bold text-deep w-full mb-4">Overall Attendance</h3>
+ <div className="w-full h-[300px]">
+ <ResponsiveContainer width="100%" height="100%">
+ <PieChart>
+ <Pie
+ data={[
+ { name: 'Present', value: analyticsData.summary?.present || 0, color: '#10b981' },
+ { name: 'Absent', value: analyticsData.summary?.absent || 0, color: '#ef4444' },
+ { name: 'Late', value: analyticsData.summary?.late || 0, color: '#f59e0b' },
+ { name: 'Leave', value: analyticsData.summary?.leave || 0, color: '#3b82f6' },
+ ].filter(d => d.value > 0)}
+ cx="50%" cy="50%" innerRadius={60} outerRadius={100}
+ paddingAngle={2} dataKey="value"
+ >
+ {
+ [
+ { name: 'Present', value: analyticsData.summary?.present || 0, color: '#10b981' },
+ { name: 'Absent', value: analyticsData.summary?.absent || 0, color: '#ef4444' },
+ { name: 'Late', value: analyticsData.summary?.late || 0, color: '#f59e0b' },
+ { name: 'Leave', value: analyticsData.summary?.leave || 0, color: '#3b82f6' },
+ ].filter(d => d.value > 0).map((entry, index) => (
+ <Cell key={`cell-${index}`} fill={entry.color} />
+ ))
+ }
+ </Pie>
+ <Tooltip />
+ <Legend />
+ </PieChart>
+ </ResponsiveContainer>
+ </div>
+ </div>
+
+ {/* Student Table */}
+ <div className="lg:col-span-2 bg-white rounded-2xl border border-border overflow-hidden flex flex-col">
+ <div className="p-5 border-b border-border">
+ <h3 className="text-lg font-bold text-deep">Student Wise Attendance</h3>
+ </div>
+ <div className="flex-1 overflow-auto max-h-[400px]">
+ <table className="w-full text-sm text-left">
+ <thead className="text-xs text-muted uppercase bg-surface sticky top-0 z-10">
+ <tr>
+ <th className="px-6 py-3">Student</th>
+ <th className="px-6 py-3 text-center">Present</th>
+ <th className="px-6 py-3 text-center">Absent</th>
+ <th className="px-6 py-3 text-center">Late</th>
+ <th className="px-6 py-3 text-center">Leave</th>
+ <th className="px-6 py-3 text-center">%</th>
+ </tr>
+ </thead>
+ <tbody>
+ {analyticsData.students?.map((student, idx) => {
+ const total = (student.present || 0) + (student.absent || 0) + (student.late || 0) + (student.leave || 0);
+ const percentage = total === 0 ? 0 : Math.round(((student.present || 0) / total) * 100);
+ return (
+ <tr key={student._id || idx} className="border-b border-border/50 hover:bg-surface/50">
+ <td className="px-6 py-4 font-medium text-deep">
+ {student.firstName} {student.lastName}
+ <span className="block text-xs text-muted mt-0.5">{student.admissionNo || student.rollNo}</span>
+ </td>
+ <td className="px-6 py-4 text-center font-medium text-emerald-600">{student.present || 0}</td>
+ <td className="px-6 py-4 text-center font-medium text-red-600">{student.absent || 0}</td>
+ <td className="px-6 py-4 text-center font-medium text-amber-600">{student.late || 0}</td>
+ <td className="px-6 py-4 text-center font-medium text-blue-600">{student.leave || 0}</td>
+ <td className="px-6 py-4 text-center font-bold text-deep">{percentage}%</td>
+ </tr>
+ );
+ })}
+ {(!analyticsData.students || analyticsData.students.length === 0) && (
+ <tr>
+ <td colSpan="6" className="px-6 py-8 text-center text-muted">No student data available</td>
+ </tr>
+ )}
+ </tbody>
+ </table>
+ </div>
+ </div>
+ </div>
+ )}
  </div>
  )}
 
