@@ -19,6 +19,7 @@ function AcademicYears() {
  const [loading, setLoading] = useState(true);
  const [page, setPage] = useState(1);
  const [search, setSearch] = useState('');
+ const [sort, setSort] = useState('-startDate');
  const [reload, setReload] = useState(0);
  const [open, setOpen] = useState(false);
  const [saving, setSaving] = useState(false);
@@ -28,7 +29,7 @@ function AcademicYears() {
  let active = true;
  const load = async () => {
  try {
- const res = await academicApi.getAcademicYears({ page, limit: 10, search: search || undefined });
+ const res = await academicApi.getAcademicYears({ page, limit: 10, search: search || undefined, sort });
  if (!active) return;
  setData(res.data);
  setMeta(res.meta);
@@ -40,7 +41,7 @@ function AcademicYears() {
  };
  load();
  return () => { active = false; };
- }, [page, search, reload]);
+ }, [page, search, reload, sort]);
 
  const setField = (key, value) => setForm((f) => ({ ...f, [key]: value }));
  const resetAndClose = () => { setForm({ name: '', startDate: '', endDate: '', isCurrent: false }); setOpen(false); };
@@ -86,9 +87,9 @@ function AcademicYears() {
 
  const columns = [
  { key: 'name', label: 'Name', sortable: true, render: (r) => <span className="font-medium text-deep">{r.name}</span> },
- { key: 'startDate', label: 'Start', render: (r) => new Date(r.startDate).toLocaleDateString() },
- { key: 'endDate', label: 'End', render: (r) => new Date(r.endDate).toLocaleDateString() },
- { key: 'isCurrent', label: 'Status', render: (r) => r.isCurrent ? <Badge color="success">Current</Badge> : <Badge color="gray">Previous</Badge> },
+ { key: 'startDate', label: 'Start', sortable: true, render: (r) => new Date(r.startDate).toLocaleDateString() },
+ { key: 'endDate', label: 'End', sortable: true, render: (r) => new Date(r.endDate).toLocaleDateString() },
+ { key: 'isCurrent', label: 'Status', sortable: true, render: (r) => r.isCurrent ? <Badge color="success">Current</Badge> : <Badge color="gray">Previous</Badge> },
  {
  key: 'actions',
  label: '',
@@ -107,7 +108,7 @@ function AcademicYears() {
  description="Manage academic years, classes, sections, and subjects"
  action={<Button onClick={() => setOpen(true)}><Plus size={16} className="mr-2"/>Add Academic Year</Button>}
  />
- <DataTable columns={columns} data={data} loading={loading} meta={meta} onPageChange={(p) => { setLoading(true); setPage(p); }} onSearch={(s) => { setLoading(true); setSearch(s); setPage(1); }} searchPlaceholder="Search academic years..."/>
+ <DataTable columns={columns} data={data} loading={loading} meta={meta} onPageChange={(p) => { setLoading(true); setPage(p); }} onSearch={(s) => { setLoading(true); setSearch(s); setPage(1); }} onSort={(field, order) => { setSort(`${order === 'desc' ? '-' : ''}${field}`); setPage(1); setLoading(true); }} searchPlaceholder="Search academic years..."/>
  <Modal isOpen={open} onClose={resetAndClose} title="Add Academic Year">
  <div className="space-y-4">
  <Input label="Name *"value={form.name} onChange={(e) => setField('name', e.target.value)} placeholder="2026-2027"/>
@@ -133,6 +134,7 @@ function Classes() {
  const [loading, setLoading] = useState(true);
  const [page, setPage] = useState(1);
  const [search, setSearch] = useState('');
+ const [sort, setSort] = useState('-createdAt');
  const [reload, setReload] = useState(0);
  const [years, setYears] = useState([]);
  const [teachers, setTeachers] = useState([]);
@@ -160,7 +162,7 @@ function Classes() {
  let active = true;
  const load = async () => {
  try {
- const res = await academicApi.getClasses({ page, limit: 10, search: search || undefined });
+ const res = await academicApi.getClasses({ page, limit: 10, search: search || undefined, sort });
  if (!active) return;
  setData(res.data);
  setMeta(res.meta);
@@ -172,7 +174,7 @@ function Classes() {
  };
  load();
  return () => { active = false; };
- }, [page, search, reload]);
+ }, [page, search, reload, sort]);
 
  const yearMap = Object.fromEntries(years.map((y) => [y._id, y.name]));
  const teacherMap = Object.fromEntries(teachers.map((t) => [t._id, `${t.firstName} ${t.lastName}`]));
@@ -259,8 +261,8 @@ function Classes() {
 
  const columns = [
  { key: 'name', label: 'Class', sortable: true, render: (r) => <span className="font-medium text-deep">{r.name}</span> },
- { key: 'academicYear', label: 'Academic Year', render: (r) => yearMap[r.academicYear] || '—' },
- { key: 'classTeacher', label: 'Class Teacher', render: (r) => teacherMap[r.classTeacher] || '—' },
+ { key: 'academicYear', label: 'Academic Year', sortable: true, render: (r) => yearMap[r.academicYear] || '—' },
+ { key: 'classTeacher', label: 'Class Teacher', sortable: true, render: (r) => teacherMap[r.classTeacher] || '—' },
  { key: 'sections', label: 'Sections', render: (r) => Array.isArray(r.sections) ? r.sections.length : '—' },
  { key: 'subjects', label: 'Subjects', render: (r) => Array.isArray(r.subjects) ? r.subjects.length : '—' },
  {
@@ -291,7 +293,7 @@ function Classes() {
  </div>
  }
  />
- <DataTable columns={columns} data={data} loading={loading} meta={meta} onPageChange={(p) => { setLoading(true); setPage(p); }} onSearch={(s) => { setLoading(true); setSearch(s); setPage(1); }} searchPlaceholder="Search classes..."/>
+ <DataTable columns={columns} data={data} loading={loading} meta={meta} onPageChange={(p) => { setLoading(true); setPage(p); }} onSearch={(s) => { setLoading(true); setSearch(s); setPage(1); }} onSort={(field, order) => { setSort(`${order === 'desc' ? '-' : ''}${field}`); setPage(1); setLoading(true); }} searchPlaceholder="Search classes..."/>
  <Modal isOpen={open} onClose={resetAndClose} title={editingId ? 'Edit Class' : 'Add Class'} size="lg">
  <div className="space-y-4">
  {years.length === 0 && (
@@ -377,6 +379,7 @@ function Sections() {
  const [loading, setLoading] = useState(true);
  const [page, setPage] = useState(1);
  const [search, setSearch] = useState('');
+ const [sort, setSort] = useState('-createdAt');
  const [reload, setReload] = useState(0);
  const [classes, setClasses] = useState([]);
  const [open, setOpen] = useState(false);
@@ -398,7 +401,7 @@ function Sections() {
  let active = true;
  const load = async () => {
  try {
- const res = await academicApi.getSections({ page, limit: 10, search: search || undefined });
+ const res = await academicApi.getSections({ page, limit: 10, search: search || undefined, sort });
  if (!active) return;
  setData(res.data);
  setMeta(res.meta);
@@ -410,7 +413,7 @@ function Sections() {
  };
  load();
  return () => { active = false; };
- }, [page, search, reload]);
+ }, [page, search, reload, sort]);
 
  const classMap = Object.fromEntries(classes.map((c) => [c._id, c.name]));
  const setField = (key, value) => setForm((f) => ({ ...f, [key]: value }));
@@ -466,9 +469,9 @@ function Sections() {
 
  const columns = [
  { key: 'name', label: 'Section', sortable: true, render: (r) => <span className="font-medium text-deep">{r.name}</span> },
- { key: 'schoolClass', label: 'Class', render: (r) => classMap[r.schoolClass] || '—' },
- { key: 'roomNo', label: 'Room No', render: (r) => r.roomNo || '—' },
- { key: 'strength', label: 'Strength', render: (r) => r.strength ?? '—' },
+ { key: 'schoolClass', label: 'Class', sortable: true, render: (r) => classMap[r.schoolClass] || '—' },
+ { key: 'roomNo', label: 'Room No', sortable: true, render: (r) => r.roomNo || '—' },
+ { key: 'strength', label: 'Strength', sortable: true, render: (r) => r.strength ?? '—' },
  {
  key: 'actions',
  label: '',
@@ -492,7 +495,7 @@ function Sections() {
  </div>
  }
  />
- <DataTable columns={columns} data={data} loading={loading} meta={meta} onPageChange={(p) => { setLoading(true); setPage(p); }} onSearch={(s) => { setLoading(true); setSearch(s); setPage(1); }} searchPlaceholder="Search sections..."/>
+ <DataTable columns={columns} data={data} loading={loading} meta={meta} onPageChange={(p) => { setLoading(true); setPage(p); }} onSearch={(s) => { setLoading(true); setSearch(s); setPage(1); }} onSort={(field, order) => { setSort(`${order === 'desc' ? '-' : ''}${field}`); setPage(1); setLoading(true); }} searchPlaceholder="Search sections..."/>
  <Modal isOpen={open} onClose={resetAndClose} title="Add Section">
  <div className="space-y-4">
  {classes.length === 0 && (
@@ -533,6 +536,7 @@ function Subjects() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
+  const [sort, setSort] = useState('-createdAt');
   const [reload, setReload] = useState(0);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -546,7 +550,7 @@ function Subjects() {
     let active = true;
     const load = async () => {
       try {
-        const res = await academicApi.getSubjects({ page, limit: 10, search: search || undefined });
+        const res = await academicApi.getSubjects({ page, limit: 10, search: search || undefined, sort });
         if (!active) return;
         setData(res.data);
         setMeta(res.meta);
@@ -558,7 +562,7 @@ function Subjects() {
     };
     load();
     return () => { active = false; };
-  }, [page, search, reload]);
+  }, [page, search, reload, sort]);
 
   const setField = (key, value) => setForm((f) => ({ ...f, [key]: value }));
   
@@ -658,8 +662,8 @@ function Subjects() {
   const columns = [
     { key: 'code', label: 'Code', sortable: true, render: (r) => <span className="font-medium text-deep">{r.code}</span> },
     { key: 'name', label: 'Name', sortable: true },
-    { key: 'type', label: 'Type', render: (r) => <Badge color={r.type === 'core' ? 'primary' : 'gray'}>{r.type}</Badge> },
-    { key: 'maxMarks', label: 'Max Marks', render: (r) => r.maxMarks ?? '—' },
+    { key: 'type', label: 'Type', sortable: true, render: (r) => <Badge color={r.type === 'core' ? 'primary' : 'gray'}>{r.type}</Badge> },
+    { key: 'maxMarks', label: 'Max Marks', sortable: true, render: (r) => r.maxMarks ?? '—' },
     {
       key: 'actions',
       label: '',
@@ -689,7 +693,7 @@ function Subjects() {
           </div>
         }
       />
-      <DataTable columns={columns} data={data} loading={loading} meta={meta} onPageChange={(p) => { setLoading(true); setPage(p); }} onSearch={(s) => { setLoading(true); setSearch(s); setPage(1); }} searchPlaceholder="Search subjects..." />
+      <DataTable columns={columns} data={data} loading={loading} meta={meta} onPageChange={(p) => { setLoading(true); setPage(p); }} onSearch={(s) => { setLoading(true); setSearch(s); setPage(1); }} onSort={(field, order) => { setSort(`${order === 'desc' ? '-' : ''}${field}`); setPage(1); setLoading(true); }} searchPlaceholder="Search subjects..." />
       
       <Modal isOpen={open} onClose={resetAndClose} title={editingId ? 'Edit Subject' : 'Add Subject'}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

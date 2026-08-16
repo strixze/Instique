@@ -76,6 +76,7 @@ export default function Admissions() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
+  const [sort, setSort] = useState('-createdAt');
   const [reload, setReload] = useState(0);
 
   // Filters state matching visual reference

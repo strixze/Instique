@@ -27,6 +27,7 @@ function Structures() {
  const [loading, setLoading] = useState(true);
  const [page, setPage] = useState(1);
  const [search, setSearch] = useState('');
+ const [sort, setSort] = useState('-createdAt');
  const [reload, setReload] = useState(0);
  const [years, setYears] = useState([]);
  const [classes, setClasses] = useState([]);
@@ -60,7 +61,7 @@ function Structures() {
  let active = true;
  const load = async () => {
  try {
- const res = await feeApi.getStructures({ page, limit: 10, search: search || undefined });
+ const res = await feeApi.getStructures({ page, limit: 10, search: search || undefined, sort });
  if (!active) return;
  setData(res.data);
  setMeta(res.meta);
@@ -72,7 +73,7 @@ function Structures() {
  };
  load();
  return () => { active = false; };
- }, [page, search, reload]);
+ }, [page, search, reload, sort]);
 
  const yearMap = Object.fromEntries(years.map((y) => [y._id, y.name]));
  const classMap = Object.fromEntries(classes.map((c) => [c._id, c.name]));
@@ -215,10 +216,11 @@ function Structures() {
 
  const columns = [
  { key: 'name', label: 'Structure', sortable: true, render: (r) => <span className="font-medium text-deep">{r.name}</span> },
- { key: 'academicYear', label: 'Academic Year', render: (r) => r.academicYear?.name || yearMap[r.academicYear?._id || r.academicYear] || '—' },
+ { key: 'academicYear', label: 'Academic Year', sortable: true, render: (r) => r.academicYear?.name || yearMap[r.academicYear?._id || r.academicYear] || '—' },
  {
  key: 'schoolClass',
  label: 'Class',
+ sortable: true,
  render: (r) => {
  if (!Array.isArray(r.schoolClass) || r.schoolClass.length === 0) return '—';
  return r.schoolClass.map((c) => c?.name || classMap[c?._id || c] || '—').join(', ');
@@ -227,7 +229,7 @@ function Structures() {
  { key: 'categories', label: 'Categories', render: (r) => Array.isArray(r.categories) ? r.categories.length : '—' },
  { key: 'totalAmount', label: 'Total Amount', render: (r) => <span className="text-forest">₹{r.totalAmount?.toLocaleString()}</span> },
  { key: 'lateFeePerDay', label: 'Late Fee / Day', render: (r) => `₹${r.lateFeePerDay || 0}` },
- { key: 'isActive', label: 'Status', render: (r) => <Badge color={r.isActive ? 'success' : 'gray'}>{r.isActive ? 'Active' : 'Inactive'}</Badge> },
+ { key: 'isActive', label: 'Status', sortable: true, render: (r) => <Badge color={r.isActive ? 'success' : 'gray'}>{r.isActive ? 'Active' : 'Inactive'}</Badge> },
  {
  key: 'actions',
  label: '',
@@ -260,7 +262,7 @@ function Structures() {
  </div>
  }
  />
- <DataTable columns={columns} data={data} loading={loading} meta={meta} onPageChange={(p) => { setLoading(true); setPage(p); }} onSearch={(s) => { setLoading(true); setSearch(s); setPage(1); }} searchPlaceholder="Search structures..."/>
+ <DataTable columns={columns} data={data} loading={loading} meta={meta} onPageChange={(p) => { setLoading(true); setPage(p); }} onSearch={(s) => { setLoading(true); setSearch(s); setPage(1); }} onSort={(field, order) => { setSort(`${order === 'desc' ? '-' : ''}${field}`); setPage(1); setLoading(true); }} searchPlaceholder="Search structures..."/>
  <Modal isOpen={open} onClose={resetAndClose} title="Add Fee Structure"size="lg">
  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
  <Input label="Name *"value={form.name} onChange={(e) => setField('name', e.target.value)} placeholder="Annual Fees 2026"/>
@@ -365,6 +367,7 @@ function Transactions() {
  const [loading, setLoading] = useState(true);
  const [page, setPage] = useState(1);
  const [search, setSearch] = useState('');
+ const [sort, setSort] = useState('-createdAt');
  const [reload, setReload] = useState(0);
  const [students, setStudents] = useState([]);
  const [structures, setStructures] = useState([]);
@@ -400,7 +403,7 @@ function Transactions() {
  let active = true;
  const load = async () => {
  try {
- const res = await feeApi.getTransactions({ page, limit: 10 });
+ const res = await feeApi.getTransactions({ page, limit: 10, search: search || undefined, sort });
  if (!active) return;
  setData(res.data);
  setMeta(res.meta);
@@ -412,7 +415,7 @@ function Transactions() {
  };
  load();
  return () => { active = false; };
- }, [page, search, reload]);
+ }, [page, search, reload, sort]);
 
  const studentMap = Object.fromEntries(students.map((s) => [s._id, `${s.firstName} ${s.lastName}`]));
  const structureMap = Object.fromEntries(structures.map((s) => [s._id, s.name]));
@@ -463,11 +466,11 @@ function Transactions() {
  const columns = [
  { key: 'student', label: 'Student', render: (r) => r.student ? (typeof r.student === 'object' ? `${r.student.firstName} ${r.student.lastName}` : studentMap[r.student] || '—') : '—' },
  { key: 'feeStructure', label: 'Structure', render: (r) => r.feeStructure ? (typeof r.feeStructure === 'object' ? r.feeStructure.name : structureMap[r.feeStructure] || '—') : '—' },
- { key: 'amount', label: 'Amount', render: (r) => `₹${r.amount?.toLocaleString()}` },
- { key: 'paidAmount', label: 'Paid', render: (r) => <span className="text-success-text">₹{r.paidAmount?.toLocaleString()}</span> },
- { key: 'balance', label: 'Balance', render: (r) => <span className="text-danger-text">₹{r.balance?.toLocaleString()}</span> },
- { key: 'status', label: 'Status', render: (r) => <Badge color={statusColors[r.status] || 'gray'}>{r.status}</Badge> },
- { key: 'paymentDate', label: 'Payment Date', render: (r) => r.paymentDate ? new Date(r.paymentDate).toLocaleDateString() : '—' },
+ { key: 'amount', label: 'Amount', sortable: true, render: (r) => `₹${r.amount?.toLocaleString()}` },
+ { key: 'paidAmount', label: 'Paid', sortable: true, render: (r) => <span className="text-success-text">₹{r.paidAmount?.toLocaleString()}</span> },
+ { key: 'balance', label: 'Balance', sortable: true, render: (r) => <span className="text-danger-text">₹{r.balance?.toLocaleString()}</span> },
+ { key: 'status', label: 'Status', sortable: true, render: (r) => <Badge color={statusColors[r.status] || 'gray'}>{r.status}</Badge> },
+ { key: 'paymentDate', label: 'Payment Date', sortable: true, render: (r) => r.paymentDate ? new Date(r.paymentDate).toLocaleDateString() : '—' },
  ];
 
  return (
@@ -477,7 +480,7 @@ function Transactions() {
  description="Track payments and outstanding balances"
  action={<Button onClick={() => setOpen(true)}><Wallet size={16} className="mr-2"/>Record Payment</Button>}
  />
- <DataTable columns={columns} data={data} loading={loading} meta={meta} onPageChange={(p) => { setLoading(true); setPage(p); }} onSearch={(s) => { setLoading(true); setSearch(s); setPage(1); }} searchPlaceholder="Search transactions..."/>
+ <DataTable columns={columns} data={data} loading={loading} meta={meta} onPageChange={(p) => { setLoading(true); setPage(p); }} onSearch={(s) => { setLoading(true); setSearch(s); setPage(1); }} onSort={(field, order) => { setSort(`${order === 'desc' ? '-' : ''}${field}`); setPage(1); setLoading(true); }} searchPlaceholder="Search transactions..."/>
  <Modal isOpen={open} onClose={resetAndClose} title="Record Payment"size="lg">
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
  <Select label="Student *"options={students.map((s) => ({ value: s._id, label: `${s.firstName} ${s.lastName}` }))} value={form.student} onChange={(e) => setField('student', e.target.value)} />
@@ -514,6 +517,7 @@ function PendingFees() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
+  const [sort, setSort] = useState('-createdAt');
   const [reload, setReload] = useState(0);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -524,7 +528,7 @@ function PendingFees() {
     let active = true;
     const load = async () => {
       try {
-        const res = await feeApi.getTransactions({ page, limit: 10, search: search || undefined, pendingOnly: 'true' });
+        const res = await feeApi.getTransactions({ page, limit: 10, search: search || undefined, pendingOnly: 'true', sort });
         if (!active) return;
         setData(res.data);
         setMeta(res.meta);
@@ -536,7 +540,7 @@ function PendingFees() {
     };
     load();
     return () => { active = false; };
-  }, [page, search, reload]);
+  }, [page, search, reload, sort]);
 
   const handlePayClick = (tx) => {
     setSelectedTx(tx);
@@ -582,10 +586,10 @@ function PendingFees() {
   const columns = [
     { key: 'student', label: 'Student', render: (r) => r.student ? `${r.student.firstName} ${r.student.lastName} (${r.student.admissionNo})` : '—' },
     { key: 'feeStructure', label: 'Structure', render: (r) => r.feeStructure?.name || '—' },
-    { key: 'amount', label: 'Total Amount', render: (r) => `₹${r.amount?.toLocaleString()}` },
-    { key: 'paidAmount', label: 'Paid', render: (r) => <span className="text-success-text font-medium">₹{r.paidAmount?.toLocaleString()}</span> },
-    { key: 'balance', label: 'Pending Balance', render: (r) => <span className="text-danger-text font-bold">₹{r.balance?.toLocaleString()}</span> },
-    { key: 'status', label: 'Status', render: (r) => <Badge color={statusColors[r.status] || 'gray'}>{r.status}</Badge> },
+    { key: 'amount', label: 'Total Amount', sortable: true, render: (r) => `₹${r.amount?.toLocaleString()}` },
+    { key: 'paidAmount', label: 'Paid', sortable: true, render: (r) => <span className="text-success-text font-medium">₹{r.paidAmount?.toLocaleString()}</span> },
+    { key: 'balance', label: 'Pending Balance', sortable: true, render: (r) => <span className="text-danger-text font-bold">₹{r.balance?.toLocaleString()}</span> },
+    { key: 'status', label: 'Status', sortable: true, render: (r) => <Badge color={statusColors[r.status] || 'gray'}>{r.status}</Badge> },
     {
       key: 'actions',
       label: '',
@@ -603,7 +607,7 @@ function PendingFees() {
         title="Pending Fees"
         description="Track and pay outstanding fee balances for students"
       />
-      <DataTable columns={columns} data={data} loading={loading} meta={meta} onPageChange={(p) => { setLoading(true); setPage(p); }} onSearch={(s) => { setLoading(true); setSearch(s); setPage(1); }} searchPlaceholder="Search pending fees..."/>
+      <DataTable columns={columns} data={data} loading={loading} meta={meta} onPageChange={(p) => { setLoading(true); setPage(p); }} onSearch={(s) => { setLoading(true); setSearch(s); setPage(1); }} onSort={(field, order) => { setSort(`${order === 'desc' ? '-' : ''}${field}`); setPage(1); setLoading(true); }} searchPlaceholder="Search pending fees..."/>
       
       <Modal isOpen={open} onClose={resetAndClose} title={selectedTx ? `Record Payment: ${selectedTx.student?.firstName} ${selectedTx.student?.lastName}` : 'Record Payment'} size="lg">
         {selectedTx && (

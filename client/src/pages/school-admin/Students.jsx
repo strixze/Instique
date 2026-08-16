@@ -33,6 +33,7 @@ export default function Students() {
  const [loading, setLoading] = useState(true);
  const [page, setPage] = useState(1);
  const [search, setSearch] = useState('');
+ const [sort, setSort] = useState('-createdAt');
  const [reload, setReload] = useState(0);
  const [classes, setClasses] = useState([]);
  const [sections, setSections] = useState([]);
@@ -52,7 +53,7 @@ export default function Students() {
  let active = true;
  const load = async () => {
  try {
- const res = await studentApi.getAll({ page, limit: 10, search: search || undefined });
+ const res = await studentApi.getAll({ page, limit: 10, search: search || undefined, sort });
  if (!active) return;
  setData(res.data);
  setMeta(res.meta);
@@ -64,7 +65,7 @@ export default function Students() {
  };
  load();
  return () => { active = false; };
- }, [page, search, reload]);
+ }, [page, search, reload, sort]);
 
  const classMap = Object.fromEntries(classes.map((c) => [c._id, c.name]));
  const sectionMap = Object.fromEntries(sections.map((s) => [s._id, s.name]));
@@ -127,11 +128,11 @@ export default function Students() {
 
  const columns = [
  { key: 'admissionNo', label: 'Admission No', sortable: true },
- { key: 'name', label: 'Name', render: (r) => <span className="font-medium text-deep">{r.firstName} {r.lastName}</span> },
- { key: 'gender', label: 'Gender', render: (r) => <span className="capitalize">{r.gender}</span> },
- { key: 'currentClass', label: 'Class', render: (r) => classMap[r.currentClass] || '—' },
- { key: 'currentSection', label: 'Section', render: (r) => sectionMap[r.currentSection] || '—' },
- { key: 'status', label: 'Status', render: (r) => <Badge color={r.status === 'active' ? 'success' : 'gray'}>{r.status}</Badge> },
+ { key: 'firstName', label: 'Name', sortable: true, render: (r) => <span className="font-medium text-deep">{r.firstName} {r.lastName}</span> },
+ { key: 'gender', label: 'Gender', sortable: true, render: (r) => <span className="capitalize">{r.gender}</span> },
+ { key: 'currentClass', label: 'Class', sortable: true, render: (r) => classMap[r.currentClass] || '—' },
+ { key: 'currentSection', label: 'Section', sortable: true, render: (r) => sectionMap[r.currentSection] || '—' },
+ { key: 'status', label: 'Status', sortable: true, render: (r) => <Badge color={r.status === 'active' ? 'success' : 'gray'}>{r.status}</Badge> },
  {
  key: 'actions',
  label: '',
@@ -172,6 +173,7 @@ export default function Students() {
  meta={meta}
  onPageChange={(p) => { setLoading(true); setPage(p); }}
  onSearch={(s) => { setLoading(true); setSearch(s); setPage(1); }}
+ onSort={(field, order) => { setSort(`${order === 'desc' ? '-' : ''}${field}`); setPage(1); setLoading(true); }}
  searchPlaceholder="Search by name or admission no..."
  />
 

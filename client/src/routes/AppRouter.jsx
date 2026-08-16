@@ -94,6 +94,7 @@ export default function AppRouter() {
       <Route path="/audit-logs" element={<ModulePage><RecentActivity /></ModulePage>} />
       <Route path="/roles" element={<ModulePage><Roles /></ModulePage>} />
       <Route path="/settings" element={<ModulePage><Settings /></ModulePage>} />
+      <Route path="/profile" element={<ModulePage><Profile /></ModulePage>} />
 
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
