@@ -22,13 +22,30 @@ export const updateEvent = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponse(200, event, 'Event updated'));
 });
 
+export const publishEvent = asyncHandler(async (req, res) => {
+  const event = await eventService.publishEvent(req.params.id, req.schoolId);
+  res.status(200).json(new ApiResponse(200, event, 'Event published'));
+});
+
+export const cancelEvent = asyncHandler(async (req, res) => {
+  const event = await eventService.cancelEvent(req.params.id, req.schoolId);
+  res.status(200).json(new ApiResponse(200, event, 'Event cancelled'));
+});
+
 export const deleteEvent = asyncHandler(async (req, res) => {
   await eventService.deleteEvent(req.params.id, req.schoolId);
   res.status(200).json(new ApiResponse(200, null, 'Event deleted'));
 });
 
 export const getCalendar = asyncHandler(async (req, res) => {
-  const { month, year } = req.query;
-  const events = await eventService.getCalendar(req.schoolId, parseInt(month), parseInt(year));
+  const now = new Date();
+  const month = req.query.month ? parseInt(req.query.month) : now.getMonth() + 1;
+  const year = req.query.year ? parseInt(req.query.year) : now.getFullYear();
+  const events = await eventService.getCalendar(req.schoolId, month, year);
   res.status(200).json(new ApiResponse(200, events));
+});
+
+export const getEventStats = asyncHandler(async (req, res) => {
+  const stats = await eventService.getEventStats(req.schoolId);
+  res.status(200).json(new ApiResponse(200, stats, 'Event stats fetched'));
 });

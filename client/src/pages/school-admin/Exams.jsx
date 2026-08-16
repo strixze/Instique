@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
-import { Plus, Trash2, Send, Trophy, ClipboardCheck, Award } from 'lucide-react';
+import { Plus, Trash2, Send, Trophy, ClipboardCheck, Award, FileText } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 import DataTable from '../../components/ui/DataTable';
 import Button from '../../components/ui/Button';
@@ -12,6 +12,7 @@ import Select from '../../components/ui/Select';
 import Badge from '../../components/ui/Badge';
 import { examApi } from '../../api/exam.api';
 import { academicApi } from '../../api/academic.api';
+import ReportCardModal from '../../components/exams/ReportCardModal';
 
 const statusColors = {
  upcoming: 'info',
@@ -43,6 +44,9 @@ export default function Exams() {
  const [marksFor, setMarksFor] = useState(null);
  const [marks, setMarks] = useState([]);
  const [marksLoading, setMarksLoading] = useState(false);
+
+ const [reportCardExam, setReportCardExam] = useState(null);
+ const [reportCardStudentId, setReportCardStudentId] = useState(null);
 
  useEffect(() => {
  academicApi.getClasses({ limit: 100 }).then((res) => setClasses(res.data)).catch(() => {});
@@ -183,6 +187,9 @@ export default function Exams() {
   label: '',
   render: (r) => (
   <div className="flex items-center gap-1">
+  <button onClick={() => { setReportCardExam(r); setReportCardStudentId(null); }} className="p-2 text-muted hover:text-forest rounded-lg hover:bg-sage-soft transition-colors" title="Generate Report Cards">
+  <FileText size={16} />
+  </button>
   <button onClick={() => navigate(`/marks-entry?examId=${r._id}`)} className="p-2 text-muted hover:text-forest rounded-lg hover:bg-sage-soft transition-colors" title="Marks Entry">
   <ClipboardCheck size={16} />
   </button>
@@ -211,7 +218,7 @@ export default function Exams() {
  <div className="space-y-6">
  <PageHeader
  title="Examinations"
- description="Create exams, manage schedules, and publish results"
+ description="Create exams, manage schedules, generate report cards, and publish results"
  action={
     <div className="flex items-center gap-2">
       <Button variant="outline" onClick={() => navigate('/leaderboard')}>
@@ -300,7 +307,7 @@ export default function Exams() {
  </div>
  </Modal>
 
- <Modal isOpen={!!marksFor} onClose={() => setMarksFor(null)} title={`Marks — ${marksFor?.name || ''}`} size="lg">
+ <Modal isOpen={!!marksFor} onClose={() => setMarksFor(null)} title={`Marks Summary — ${marksFor?.name || ''}`} size="lg">
  {marksLoading ? (
  <div className="h-32 flex items-center justify-center text-muted">Loading marks...</div>
  ) : marks.length === 0 ? (
@@ -314,15 +321,27 @@ export default function Exams() {
  <th className="px-3 py-2 text-left text-xs font-medium text-muted uppercase tracking-wider">Subject</th>
  <th className="px-3 py-2 text-left text-xs font-medium text-muted uppercase tracking-wider">Marks</th>
  <th className="px-3 py-2 text-left text-xs font-medium text-muted uppercase tracking-wider">Grade</th>
+ <th className="px-3 py-2 text-right text-xs font-medium text-muted uppercase tracking-wider">Report Card</th>
  </tr>
  </thead>
  <tbody className="divide-y divide-border/50">
  {marks.map((m) => (
  <tr key={m._id}>
- <td className="px-3 py-2 text-deep">{m.student?.firstName} {m.student?.lastName}</td>
+ <td className="px-3 py-2 text-deep font-semibold">{m.student?.firstName} {m.student?.lastName}</td>
  <td className="px-3 py-2 text-secondary">{m.subject?.name}</td>
  <td className="px-3 py-2 text-secondary">{m.marksObtained} / {m.maxMarks}</td>
  <td className="px-3 py-2"><Badge color={m.grade === 'F' ? 'danger' : 'success'}>{m.grade}</Badge></td>
+ <td className="px-3 py-2 text-right">
+ <button
+   onClick={() => {
+     setReportCardExam(marksFor);
+     setReportCardStudentId(m.student?._id);
+   }}
+   className="px-2.5 py-1 text-xs bg-forest-soft text-forest hover:bg-forest hover:text-white font-semibold rounded-lg transition-colors inline-flex items-center gap-1"
+ >
+   <FileText size={12} /> Generate
+ </button>
+ </td>
  </tr>
  ))}
  </tbody>
@@ -330,6 +349,13 @@ export default function Exams() {
  </div>
  )}
  </Modal>
+
+ <ReportCardModal
+   isOpen={!!reportCardExam}
+   onClose={() => { setReportCardExam(null); setReportCardStudentId(null); }}
+   exam={reportCardExam}
+   studentId={reportCardStudentId}
+ />
  </div>
  );
 }
