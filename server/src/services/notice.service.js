@@ -3,12 +3,33 @@ import ApiError from '../utils/ApiError.js';
 import { paginate } from '../utils/pagination.js';
 
 export const createNotice = async (schoolId, data, userId) => {
-  const notice = await Notice.create({ ...data, schoolId, createdBy: userId });
+  const notice = await Notice.create({ 
+    ...data, 
+    schoolId, 
+    createdBy: userId,
+  });
   return notice;
 };
 
 export const getNotices = async (schoolId, options) => {
-  return paginate(Notice, { schoolId }, { ...options, searchFields: ['title'] });
+  const query = { schoolId };
+
+  if (options.filter && options.filter.tab) {
+    const tab = options.filter.tab;
+    const now = new Date();
+
+    if (tab === 'active') {
+      query.$or = [
+        { 'schedule.expireAt': null },
+        { 'schedule.expireAt': { $gt: now } }
+      ];
+    } else if (tab === 'history') {
+      query['schedule.expireAt'] = { $lt: now };
+    }
+    delete options.filter.tab;
+  }
+
+  return paginate(Notice, query, { ...options, searchFields: ['title'] });
 };
 
 export const getNoticeById = async (id, schoolId) => {

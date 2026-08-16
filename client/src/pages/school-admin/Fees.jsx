@@ -27,6 +27,7 @@ function Structures() {
  const [loading, setLoading] = useState(true);
  const [page, setPage] = useState(1);
  const [search, setSearch] = useState('');
+ const [sort, setSort] = useState('-createdAt');
  const [reload, setReload] = useState(0);
  const [years, setYears] = useState([]);
  const [classes, setClasses] = useState([]);
