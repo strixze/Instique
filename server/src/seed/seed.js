@@ -22,6 +22,7 @@ import CalendarEvent from '../models/CalendarEvent.js';
 import RecognitionPoint from '../models/RecognitionPoint.js';
 import Badge from '../models/Badge.js';
 import Complaint from '../models/Complaint.js';
+import ParentMeeting from '../models/ParentMeeting.js';
 import Setting from '../models/Setting.js';
 import Subscription from '../models/Subscription.js';
 import Syllabus from '../models/Syllabus.js';
@@ -340,7 +341,71 @@ async function seed() {
     { schoolId: school._id, title: 'Annual Sports Day', type: 'sports_day', startDate: new Date('2024-12-15'), isFullDay: true, createdBy: users[1]._id },
     { schoolId: school._id, title: 'Parent-Teacher Meeting', type: 'ptm', startDate: new Date('2024-11-15'), isFullDay: false, createdBy: users[1]._id },
   ]);
-  console.log('Calendar events created');
+  // Create Parent Meetings
+  const ptmDate1 = new Date(); ptmDate1.setDate(ptmDate1.getDate() + 5);
+  const ptmDate2 = new Date(); ptmDate2.setDate(ptmDate2.getDate() - 10);
+
+  await ParentMeeting.create([
+    {
+      schoolId: school._id,
+      title: 'Term 1 Parent Teacher Meeting',
+      type: 'ptm',
+      description: 'Discussion regarding student academic progress and upcoming mid-term preparations.',
+      date: ptmDate1,
+      startTime: '10:00 AM',
+      endTime: '02:00 PM',
+      location: 'School Auditorium',
+      instructions: 'Parents should bring student diary and previous report cards.',
+      status: 'published',
+      targetClasses: [classes[0]._id, classes[1]._id],
+      assignedTeachers: [teachers[0]._id, teachers[1]._id],
+      invitedParents: [parents[0]._id, parents[1]._id],
+      rsvps: [
+        { parentId: parents[0]._id, studentId: students[0]._id, response: 'going', respondedAt: new Date() },
+        { parentId: parents[1]._id, studentId: students[1]._id, response: 'maybe', respondedAt: new Date() },
+      ],
+      attendance: [
+        { parentId: parents[0]._id, studentId: students[0]._id, status: 'pending' },
+        { parentId: parents[1]._id, studentId: students[1]._id, status: 'pending' },
+      ],
+      notes: [
+        {
+          studentId: students[0]._id,
+          teacherId: teachers[0]._id,
+          academicNotes: 'Good progress in Mathematics.',
+          behaviourNotes: 'Participates actively in class activities.',
+          improvementNotes: 'Needs focus on reading speed.',
+          actionItems: 'Read English stories 15 mins daily.',
+          visibility: 'parent_visible',
+        },
+      ],
+      publishedAt: new Date(),
+      createdBy: users[1]._id,
+    },
+    {
+      schoolId: school._id,
+      title: 'Academic Progress Review',
+      type: 'academic_review',
+      description: 'Review meeting for Class 1 and Class 2 parents.',
+      date: ptmDate2,
+      startTime: '09:00 AM',
+      endTime: '01:00 PM',
+      location: 'Main Conference Room',
+      status: 'completed',
+      targetClasses: [classes[0]._id],
+      assignedTeachers: [teachers[0]._id],
+      invitedParents: [parents[0]._id],
+      rsvps: [
+        { parentId: parents[0]._id, studentId: students[0]._id, response: 'going', respondedAt: ptmDate2 },
+      ],
+      attendance: [
+        { parentId: parents[0]._id, studentId: students[0]._id, status: 'attended', markedBy: users[2]._id, markedAt: ptmDate2 },
+      ],
+      publishedAt: ptmDate2,
+      createdBy: users[1]._id,
+    },
+  ]);
+  console.log('Parent Meetings created');
 
   // Create Recognition
   for (const student of students.slice(0, 5)) {
@@ -364,6 +429,7 @@ async function seed() {
   // Create Complaint
   await Complaint.create({
     schoolId: school._id,
+    referenceNo: 'CMP-2024-001',
     type: 'parent',
     isAnonymous: true,
     subject: 'Canteen food quality',

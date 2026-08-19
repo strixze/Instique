@@ -28,8 +28,16 @@ import Roles from '../pages/school-admin/Roles';
 import Settings from '../pages/school-admin/Settings';
 import MarksEntry from '../pages/school-admin/MarksEntry';
 import Leaderboard from '../pages/school-admin/Leaderboard';
-import RecentActivity from '../pages/school-admin/RecentActivity';
 import Events from '../pages/school-admin/Events';
+import RecentActivity from '../pages/school-admin/RecentActivity';
+import ParentMeetings from '../pages/school-admin/ParentMeetings';
+import ParentMeetingsView from '../components/meetings/ParentMeetingsView';
+
+function UnifiedParentMeetings() {
+  const user = useUserStore((s) => s.user);
+  if (user?.role === 'school_admin' || user?.role === 'super_admin') return <ParentMeetings />;
+  return <ParentMeetingsView />;
+}
 
 function RoleDashboard() {
   const user = useUserStore((s) => s.user);
@@ -90,10 +98,12 @@ export default function AppRouter() {
       <Route path="/leaves" element={<ModulePage><Leaves /></ModulePage>} />
       <Route path="/complaints" element={<ModulePage><Complaints /></ModulePage>} />
       <Route path="/events" element={<ModulePage><Events /></ModulePage>} />
+      <Route path="/parent-meetings" element={<ModulePage><UnifiedParentMeetings /></ModulePage>} />
       <Route path="/recent-activity" element={<ModulePage><RecentActivity /></ModulePage>} />
       <Route path="/audit-logs" element={<ModulePage><RecentActivity /></ModulePage>} />
       <Route path="/roles" element={<ModulePage><Roles /></ModulePage>} />
       <Route path="/settings" element={<ModulePage><Settings /></ModulePage>} />
+
 
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

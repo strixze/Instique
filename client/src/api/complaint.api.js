@@ -5,4 +5,5 @@ export const complaintApi = {
   getById: (id) => api.get(`/complaints/${id}`),
   create: (data) => api.post('/complaints', data),
   process: (id, data) => api.put(`/complaints/${id}/process`, data),
+  getStats: () => api.get('/complaints/stats'),
 };

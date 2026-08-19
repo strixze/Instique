@@ -102,8 +102,9 @@ const navSections = {
       ],
     },
     {
-      title: 'ADMINISTRATION',
+      title: 'COMMUNICATION & ADMIN',
       items: [
+        { to: '/parent-meetings', icon: Users, label: 'Parent Meetings' },
         { to: '/leaves', icon: Calendar, label: 'Leaves' },
         { to: '/notices', icon: Bell, label: 'Notices' },
       ],
@@ -153,8 +154,9 @@ const navSections = {
       ],
     },
     {
-      title: 'SERVICES',
+      title: 'SERVICES & MEETINGS',
       items: [
+        { to: '/parent-meetings', icon: Users, label: 'Parent Meetings' },
         { to: '/fees', icon: DollarSign, label: 'Fees' },
         { to: '/notices', icon: Bell, label: 'Notices' },
         { to: '/complaints', icon: MessageSquare, label: 'Complaints' },
