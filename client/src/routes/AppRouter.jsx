@@ -28,6 +28,7 @@ import Roles from '../pages/school-admin/Roles';
 import Settings from '../pages/school-admin/Settings';
 import MarksEntry from '../pages/school-admin/MarksEntry';
 import Leaderboard from '../pages/school-admin/Leaderboard';
+import Events from '../pages/school-admin/Events';
 
 function RoleDashboard() {
   const user = useUserStore((s) => s.user);
@@ -85,6 +86,7 @@ export default function AppRouter() {
       <Route path="/leaderboard" element={<ModulePage><Leaderboard /></ModulePage>} />
       <Route path="/fees" element={<ModulePage><Fees /></ModulePage>} />
       <Route path="/notices" element={<ModulePage><Notices /></ModulePage>} />
+      <Route path="/events" element={<ModulePage><Events /></ModulePage>} />
       <Route path="/leaves" element={<ModulePage><Leaves /></ModulePage>} />
       <Route path="/complaints" element={<ModulePage><Complaints /></ModulePage>} />
       <Route path="/roles" element={<ModulePage><Roles /></ModulePage>} />
