@@ -11,6 +11,7 @@ import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
 import Select from '../../components/ui/Select';
+import UserAvatar from '../../components/ui/UserAvatar';
 import { examApi } from '../../api/exam.api';
 
 // ── Helpers ──
@@ -611,10 +612,23 @@ export default function MarksEntry() {
 
                           {/* Student Name */}
                           <td className="px-3 py-2">
-                            <div className="font-medium text-deep text-[13px]">
-                              {row.student.firstName} {row.student.lastName}
+                            <div className="flex items-center gap-2.5">
+                              <UserAvatar
+                                type="student"
+                                gender={row.student.gender}
+                                id={row.student._id}
+                                admissionNo={row.student.admissionNo}
+                                name={`${row.student.firstName} ${row.student.lastName}`}
+                                size="sm"
+                                className="shrink-0 ring-1 ring-border/50"
+                              />
+                              <div>
+                                <div className="font-medium text-deep text-[13px]">
+                                  {row.student.firstName} {row.student.lastName}
+                                </div>
+                                <div className="text-[11px] text-muted">{row.student.admissionNo}</div>
+                              </div>
                             </div>
-                            <div className="text-[11px] text-muted">{row.student.admissionNo}</div>
                           </td>
 
                           {/* Subject Marks */}

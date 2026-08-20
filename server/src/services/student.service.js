@@ -33,7 +33,12 @@ export const createStudent = async (schoolId, data) => {
 };
 
 export const getStudents = async (schoolId, options) => {
-  return paginate(Student, { schoolId }, { ...options, searchFields: ['firstName', 'lastName', 'admissionNo'] });
+  const { status, currentClass, gender, ...rest } = options;
+  const filter = {};
+  if (status) filter.status = status;
+  if (currentClass) filter.currentClass = currentClass;
+  if (gender) filter.gender = gender;
+  return paginate(Student, { schoolId }, { ...rest, searchFields: ['firstName', 'lastName', 'admissionNo'], filter });
 };
 
 export const getStudentById = async (id, schoolId) => {

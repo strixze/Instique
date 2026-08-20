@@ -352,10 +352,9 @@ export default function Timetable() {
 
     setDeletingBulk(true);
     try {
-      const res = await timetableApi.deleteBulk({
-        academicYear: deleteForm.academicYear,
-        schoolClass: deleteForm.type === 'class' ? deleteForm.schoolClass : undefined,
-      });
+      const res = deleteForm.type === 'class'
+        ? await timetableApi.deleteClass(deleteForm.schoolClass, deleteForm.academicYear)
+        : await timetableApi.deleteSchool(deleteForm.academicYear);
       toast.success(`Deleted ${res.data.deletedCount} timetable(s)`);
       setOpenDeleteModal(false);
       if (activeTimetable) setActiveTimetable(null);
@@ -374,12 +373,10 @@ export default function Timetable() {
     }
     setPublishingBulk(true);
     try {
-      const res = await timetableApi.publishBulk({
-        academicYear: publishForm.academicYear,
-        schoolClass: publishForm.type === 'class' ? publishForm.schoolClass : undefined,
-        status: publishForm.status,
-      });
-      toast.success(`Updated ${res.data.modifiedCount} timetable(s) to ${publishForm.status}`);
+      const res = publishForm.type === 'class'
+        ? await timetableApi.bulkPublishClass(publishForm.schoolClass, { academicYear: publishForm.academicYear, status: publishForm.status })
+        : await timetableApi.bulkPublishSchool({ academicYear: publishForm.academicYear, status: publishForm.status });
+      toast.success(`Updated ${res.data.updatedCount} timetable(s) to ${publishForm.status}`);
       setOpenPublishModal(false);
       triggerReload();
     } catch (e) {
@@ -392,7 +389,7 @@ export default function Timetable() {
   const handleLoadReports = async () => {
     try {
       const [wRes, dRes] = await Promise.all([
-        timetableApi.getWorkloadReport(),
+        timetableApi.getTeacherWorkloadReport(),
         timetableApi.getSubjectDistributionReport(),
       ]);
       setWorkloadReport(wRes.data || []);

@@ -23,6 +23,7 @@ import {
 } from 'lucide-react'
 import { userAuthStore } from '../../store/userStore'
 import { socket } from '../../socket/socket'
+import UserAvatar from '../ui/UserAvatar'
 import { socketEvents } from '../../constants/socketEvents'
 import { useChatStore } from '../../store/useChatStore'
 import { href } from 'react-router-dom'
@@ -495,13 +496,15 @@ function MessageInfoModalGroup({ show, onClose, msg, seenBy }) {
  : null
  return (
  <div key={member.id || i} className="flex items-center gap-3 px-3 py-[9px] rounded-[12px] hover:bg-white/[0.04] transition-colors group">
- <div className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0 ring-1 ring-white/[0.08]"
- style={{ background: color.bg, color: color.text }}>
- {member.avtar
- ? <img src={member.avtar} alt={member.name} className="w-full h-full rounded-full object-cover"/>
- : getInitials(member.name)
- }
- </div>
+ <UserAvatar
+    src={member.avtar || member.avatar}
+    role={member.role || 'user'}
+    gender={member.gender}
+    id={member.id || member._id}
+    name={member.name}
+    size="sm"
+    className="shrink-0 ring-1 ring-white/[0.08]"
+  />
  <div className="flex flex-col min-w-0 flex-1">
  <span className="text-[13px] text-[#dde0f5] font-medium truncate leading-tight">{member.name || 'Unknown'}</span>
  {member.role && (

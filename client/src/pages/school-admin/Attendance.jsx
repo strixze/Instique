@@ -11,6 +11,8 @@ import Select from '../../components/ui/Select';
 import Badge from '../../components/ui/Badge';
 import { attendanceApi } from '../../api/attendance.api';
 import { academicApi } from '../../api/academic.api';
+import { studentApi } from '../../api/student.api';
+import UserAvatar from '../../components/ui/UserAvatar';
 
 const STATUS_OPTIONS = [
   { key: 'present', label: 'P', color: 'bg-emerald-600 text-white', hoverColor: 'hover:bg-emerald-700' },
@@ -353,7 +355,20 @@ export default function Attendance() {
                       return (
                         <tr key={student._id} className="hover:bg-surface/30 transition-colors">
                           <td className="px-4 py-2.5 text-muted font-mono">{idx + 1}</td>
-                          <td className="px-4 py-2.5 font-bold text-deep">{student.firstName} {student.lastName}</td>
+                          <td className="px-4 py-2.5">
+                            <div className="flex items-center gap-2.5">
+                              <UserAvatar
+                                type="student"
+                                gender={student.gender}
+                                id={student._id}
+                                admissionNo={student.admissionNo}
+                                name={`${student.firstName} ${student.lastName}`}
+                                size="sm"
+                                className="shrink-0 ring-1 ring-border/50"
+                              />
+                              <span className="font-bold text-deep">{student.firstName} {student.lastName}</span>
+                            </div>
+                          </td>
                           <td className="px-4 py-2.5 text-muted font-mono">{student.admissionNo || student.rollNo || '—'}</td>
                           <td className="px-4 py-2.5">
                             <div className="flex items-center justify-center gap-1.5">

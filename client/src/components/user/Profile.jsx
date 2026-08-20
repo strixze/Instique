@@ -8,6 +8,7 @@ import { userApi } from '../../api/user.api'
 import { useNavigate } from 'react-router-dom'
 import { socket } from '../../socket/socket'
 import { socketEvents } from '../../constants/socketEvents'
+import UserAvatar from '../ui/UserAvatar'
 
 function Profile({ setActivePanel = () => {} }) {
 
@@ -159,10 +160,14 @@ function MainView({ user, setActivePanel, setView }) {
             {/* Avatar + info */}
             <div className="flex flex-col items-center gap-3 px-5 pt-5 pb-5">
                 <div className="relative">
-                    <img
+                    <UserAvatar
                         src={user?.avtar || user?.avatar}
-                        alt={user?.username}
-                        className="w-20 h-20 rounded-full object-cover border-[3px]"
+                        role={user?.role || 'admin'}
+                        gender={user?.gender}
+                        id={user?._id || user?.id}
+                        name={user?.username || user?.name}
+                        size="xl"
+                        className="rounded-full object-cover border-[3px]"
                         style={{ borderColor: 'rgba(99,102,241,0.5)', boxShadow: '0 0 24px rgba(99,102,241,0.25)' }}
                     />
                     <div className="absolute bottom-0.5 right-0.5 w-4 h-4 rounded-full bg-[#22d3a0] border-2 border-[#0e1018]" />

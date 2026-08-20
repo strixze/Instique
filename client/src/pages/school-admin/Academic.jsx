@@ -4,7 +4,7 @@ import Swal from 'sweetalert2';
 import {
   Plus, Trash2, Edit2, Upload, BookOpen, Layers, Calendar, CheckCircle2,
   Search, RotateCcw, Filter, MoreVertical, ChevronLeft, ChevronRight,
-  ChevronUp, ChevronDown, ChevronsUpDown, Award, Sparkles, BookMarked
+  ChevronUp, ChevronDown, ChevronsUpDown, Award, Sparkles, BookMarked, UserCheck, UserX, GraduationCap
 } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
@@ -269,9 +269,9 @@ function Classes() {
         const defaultYear = fetchedYears.find((y) => y.isCurrent)?._id || fetchedYears[0]._id;
         setForm((f) => ({ ...f, academicYear: f.academicYear || defaultYear }));
       }
-    }).catch(() => {});
-    teacherApi.getAll({ limit: 100 }).then((res) => setTeachers(res.data || [])).catch(() => {});
-    academicApi.getSubjects({ limit: 100 }).then((res) => setAllSubjects(res.data || [])).catch(() => {});
+    }).catch(() => { });
+    teacherApi.getAll({ limit: 100 }).then((res) => setTeachers(res.data || [])).catch(() => { });
+    academicApi.getSubjects({ limit: 100 }).then((res) => setAllSubjects(res.data || [])).catch(() => { });
   }, []);
 
   useEffect(() => {
@@ -566,7 +566,7 @@ function Sections() {
       const fetchedClasses = res.data || [];
       setClasses(fetchedClasses);
       if (fetchedClasses.length > 0) setForm((f) => ({ ...f, schoolClass: f.schoolClass || fetchedClasses[0]._id }));
-    }).catch(() => {});
+    }).catch(() => { });
   }, []);
 
   useEffect(() => {
@@ -1000,11 +1000,10 @@ export default function Academic() {
           <button
             key={t.key}
             onClick={() => setActiveTab(t.key)}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-              activeTab === t.key
-                ? 'bg-forest text-white shadow-2xs'
-                : 'text-secondary hover:bg-surface hover:text-deep font-medium'
-            }`}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${activeTab === t.key
+              ? 'bg-forest text-white shadow-2xs'
+              : 'text-secondary hover:bg-surface hover:text-deep font-medium'
+              }`}
           >
             {t.label}
           </button>

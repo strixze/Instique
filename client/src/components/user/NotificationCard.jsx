@@ -1,6 +1,7 @@
 import React from "react"
 import { UserPlus, AtSign, MessageCircle, ShieldCheck, Bell, Check, X } from "lucide-react"
 import { useNavigate } from "react-router-dom"
+import UserAvatar from "../ui/UserAvatar"
 
 // ─── Config ────────────────────────────────────────────────────────────────────
 
@@ -64,42 +65,15 @@ function timeAgo(dateStr) {
 }
 
 function Avatar({ src, username, size = 36 }) {
-  const initials = username
-    ?.split(" ")
-    .map(w => w[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase() || "?"
-
-  return src ? (
-    <img
+  return (
+    <UserAvatar
       src={src}
-      alt={username}
-      style={{ width: size, height: size }}
-      className="rounded-full object-cover flex-shrink-0"
-      onError={e => { e.currentTarget.style.display = "none" }}
+      name={username}
+      role="user"
+      size="sm"
+      className="shrink-0"
     />
-  ) : (
-    <div
-      //   style={{ width: size, height: size, fontSize: size * 0.36 }}
-      className="rounded-full flex-shrink-0 flex items-center justify-center font-semibold"
-      style={{
-        width: size,
-        height: size,
-        fontSize: size * 0.36,
-        background: "rgba(124,131,229,0.2)",
-        color: "#c4c6e7",
-        flexShrink: 0,
-        borderRadius: "50%",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontWeight: 600,
-      }}
-    >
-      {initials}
-    </div>
-  )
+  );
 }
 
 // ─── Main Component ────────────────────────────────────────────────────────────

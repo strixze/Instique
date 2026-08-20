@@ -14,6 +14,7 @@ import Badge from '../../components/ui/Badge';
 import { teacherApi } from '../../api/teacher.api';
 import { academicApi } from '../../api/academic.api';
 import BulkImportModal from '../../components/ui/BulkImportModal';
+import UserAvatar from '../../components/ui/UserAvatar';
 
 /* ──────────────────────── Helpers ──────────────────────── */
 
@@ -376,14 +377,20 @@ export default function Teachers() {
                       <td className="px-3.5 py-2.5 font-bold text-xs text-deep font-mono">{row.employeeId || '—'}</td>
                       <td className="px-3.5 py-2.5">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-7 h-7 rounded-full bg-blue-50 text-blue-700 text-[11px] font-bold flex items-center justify-center shrink-0">
-                            {getInitials(row.firstName, row.lastName)}
-                          </div>
-                          <div>
-                            <p className="font-bold text-xs text-deep leading-tight">{row.firstName} {row.lastName}</p>
-                            {row.contact?.email && <p className="text-[11px] text-muted leading-tight mt-0.5">{row.contact.email}</p>}
-                          </div>
+                        <UserAvatar
+                          type="teacher"
+                          gender={row.gender}
+                          id={row._id}
+                          employeeId={row.employeeId}
+                          name={`${row.firstName} ${row.lastName}`}
+                          size="sm"
+                          className="shrink-0 ring-1 ring-border/50"
+                        />
+                        <div>
+                          <p className="font-bold text-xs text-deep leading-tight">{row.firstName} {row.lastName}</p>
+                          {row.contact?.email && <p className="text-[11px] text-muted leading-tight mt-0.5">{row.contact.email}</p>}
                         </div>
+                      </div>
                       </td>
                       <td className="px-3.5 py-2.5">{renderGender(row.gender)}</td>
                       <td className="px-3.5 py-2.5 text-xs text-secondary font-medium">{row.department || '—'}</td>
