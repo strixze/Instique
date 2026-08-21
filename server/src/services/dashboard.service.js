@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import School from '../models/School.js';
 import Student from '../models/Student.js';
 import Teacher from '../models/Teacher.js';
@@ -13,7 +14,6 @@ import Subscription from '../models/Subscription.js';
 import Timetable from '../models/Timetable.js';
 import CalendarEvent from '../models/CalendarEvent.js';
 import Syllabus from '../models/Syllabus.js';
-
 import User from '../models/User.js';
 import AuditLog from '../models/AuditLog.js';
 import SchoolClass from '../models/SchoolClass.js';
@@ -494,34 +494,246 @@ export const getSchoolAdminDashboard = async (schoolId, query = {}) => {
   };
 };
 
+// ── Teacher Dashboard ─────────────────────────────────────────────────────────
+
 export const getTeacherDashboard = async (teacherId, schoolId) => {
-  const [todayTimetable, pendingAttendance, pendingHomework, upcomingExams, syllabusProgress, recognitionActivity] = await Promise.all([
-    Timetable.findOne({ schoolId, 'periods.teacher': teacherId, status: 'published' }),
-    Attendance.countDocuments({ schoolId, date: new Date().toISOString().split('T')[0], 'students.status': { $exists: true } }),
-    Homework.countDocuments({ schoolId, teacher: teacherId }),
-    Exam.find({ schoolId, status: 'upcoming' }).sort('startDate').limit(5),
-    Syllabus.find({ schoolId }).select('totalCompletion subject'),
-    RecognitionPoint.countDocuments({ schoolId, awardedBy: teacherId }),
+  const sid = new mongoose.Types.ObjectId(schoolId);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayDayOfWeek = today.getDay();
+
+  // Find teacher doc via User.profileId (User.profileModel = 'Teacher')
+  const userDoc = await User.findById(teacherId).select('profileId profileModel').lean();
+  const teacherDocId = userDoc?.profileModel === 'Teacher' ? userDoc?.profileId : null;
+
+  const [
+    todayTimetable,
+    pendingHomework,
+    upcomingExams,
+    syllabusProgress,
+    recognitionActivity,
+    pendingLeaveRequests,
+    todayAttendanceMarked,
+  ] = await Promise.all([
+    // Today's timetable periods for this teacher
+    teacherDocId
+      ? Timetable.find({ schoolId: sid, 'periods.teacher': teacherDocId })
+          .populate('schoolClass', 'name')
+          .populate('section', 'name')
+          .populate('periods.subject', 'name')
+          .populate('periods.teacher', 'firstName lastName')
+          .select('periods schoolClass section')
+      : Promise.resolve([]),
+
+    // Pending homework assigned by teacher
+    teacherDocId
+      ? Homework.countDocuments({ schoolId: sid, teacher: teacherDocId })
+      : Promise.resolve(0),
+
+    // Upcoming exams
+    Exam.find({ schoolId: sid, status: 'upcoming' }).sort('startDate').limit(5).select('name startDate endDate status type'),
+
+    // Syllabus progress for classes where teacher is creator
+    teacherDocId
+      ? Syllabus.find({ schoolId: sid, createdBy: teacherDocId }).select('totalCompletion subject').populate('subject', 'name')
+      : Promise.resolve([]),
+
+    // Recognition points awarded by teacher
+    teacherDocId
+      ? RecognitionPoint.countDocuments({ schoolId: sid, awardedBy: teacherDocId })
+      : Promise.resolve(0),
+
+    // Pending leave requests from this teacher (by user id)
+    Leave.countDocuments({ schoolId: sid, requester: teacherId, status: 'pending' }),
+
+    // Classes where attendance was already marked today
+    Attendance.distinct('schoolClass', { schoolId: sid, date: today, markedBy: teacherId }),
   ]);
 
-  return { todayTimetable, pendingAttendance, pendingHomework, upcomingExams, syllabusProgress, recognitionActivity };
+  // Extract today's periods for this teacher
+  const getTeacherPeriodsForDay = (dayNum) => {
+    const list = [];
+    if (teacherDocId) {
+      todayTimetable.forEach((tt) => {
+        const periods = (tt.periods || []).filter((p) => {
+          if (Number(p.day) !== Number(dayNum)) return false;
+          const tId = p.teacher?._id || p.teacher;
+          return tId?.toString() === teacherDocId.toString();
+        });
+        periods.forEach((p) => {
+          list.push({
+            periodNo: p.periodNo || 1,
+            startTime: p.startTime || '',
+            endTime: p.endTime || '',
+            subject: p.subject?.name || p.label || 'Period',
+            className: tt.schoolClass?.name || '',
+            section: tt.section?.name || '',
+            room: p.room || null,
+            attendanceMarked: todayAttendanceMarked.some(
+              (cid) => cid.toString() === tt.schoolClass?._id?.toString()
+            ),
+          });
+        });
+      });
+      list.sort((a, b) => (a.periodNo || 0) - (b.periodNo || 0) || (a.startTime || '').localeCompare(b.startTime || ''));
+    }
+    return list;
+  };
+
+  let todayClasses = getTeacherPeriodsForDay(todayDayOfWeek);
+  if (todayClasses.length === 0) {
+    for (let d = 1; d <= 6; d++) {
+      const cand = getTeacherPeriodsForDay(d);
+      if (cand.length > 0) {
+        todayClasses = cand;
+        break;
+      }
+    }
+  }
+
+  const pendingAttendanceCount = todayClasses.filter((c) => !c.attendanceMarked).length;
+
+  return {
+    todayClasses,
+    todayClassesCount: todayClasses.length,
+    pendingAttendance: pendingAttendanceCount,
+    pendingHomework,
+    upcomingExams,
+    syllabusProgress,
+    recognitionActivity,
+    pendingLeaveRequests,
+  };
 };
 
-export const getStudentDashboard = async (studentId, schoolId) => {
-  const [attendance, homework, fees, results, notices, recognition, timetable, events] = await Promise.all([
-    Attendance.find({ schoolId, 'students.student': studentId }).sort('-date').limit(30),
-    Homework.find({ schoolId, schoolClass: (await Student.findById(studentId))?.currentClass }).sort('-createdAt').limit(5),
-    FeeTransaction.find({ schoolId, student: studentId }),
-    Exam.find({ schoolId, status: 'published' }),
-    Notice.find({ schoolId, status: 'published' }).sort('-createdAt').limit(5),
-    RecognitionPoint.find({ schoolId, student: studentId }).sort('-createdAt'),
-    Timetable.findOne({ schoolId, status: 'published' }),
-    CalendarEvent.find({ schoolId, startDate: { $gte: new Date() } }).sort('startDate').limit(5),
+// ── Student Dashboard ─────────────────────────────────────────────────────────
+
+export const getStudentDashboard = async (userId, schoolId) => {
+  const sid = new mongoose.Types.ObjectId(schoolId);
+
+  // Find student doc via User.profileId (User.profileModel = 'Student')
+  const userDoc = await User.findById(userId).select('profileId profileModel').lean();
+  const studentId = userDoc?.profileModel === 'Student' ? userDoc?.profileId : null;
+
+  if (!studentId) {
+    return { attendance: null, homework: [], fees: [], results: [], notices: [], recognition: 0, timetable: null, events: [] };
+  }
+
+  const studentDoc = await Student.findById(studentId).select('currentClass').lean();
+  const classId = studentDoc?.currentClass;
+
+  // Last 30 days attendance
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const [
+    attendanceDocs,
+    homework,
+    fees,
+    results,
+    notices,
+    recognitionCount,
+    timetable,
+    events,
+  ] = await Promise.all([
+    Attendance.find({ schoolId: sid, 'students.student': studentId, date: { $gte: thirtyDaysAgo } })
+      .sort('-date')
+      .select('date students'),
+
+    classId
+      ? Homework.find({ schoolId: sid, schoolClass: classId }).sort('-createdAt').limit(5).select('title subject dueDate submissions')
+      : Promise.resolve([]),
+
+    FeeTransaction.find({ schoolId: sid, student: studentId })
+      .select('amount paidAmount balance status dueDate paymentDate receiptNo'),
+
+    Exam.find({ schoolId: sid, status: { $in: ['upcoming', 'published'] } })
+      .sort('startDate')
+      .limit(5)
+      .select('name startDate endDate status type'),
+
+    Notice.find({ schoolId: sid, status: 'published' })
+      .sort('-createdAt')
+      .limit(5)
+      .select('title content createdAt'),
+
+    RecognitionPoint.countDocuments({ schoolId: sid, student: studentId }),
+
+    classId
+      ? Timetable.findOne({ schoolId: sid, schoolClass: classId })
+          .populate('periods.subject', 'name')
+          .populate('periods.teacher', 'firstName lastName')
+          .select('periods')
+      : Promise.resolve(null),
+
+    CalendarEvent.find({ schoolId: sid, startDate: { $gte: new Date() } })
+      .sort('startDate')
+      .limit(5)
+      .select('title startDate endDate type'),
   ]);
 
-  return { attendance, homework, fees, results, notices, recognition, timetable, events };
+  // Summarize attendance
+  let presentCount = 0;
+  let totalCount = 0;
+  attendanceDocs.forEach((doc) => {
+    const studentEntry = doc.students?.find(
+      (s) => s.student?.toString() === studentId.toString()
+    );
+    if (studentEntry) {
+      totalCount++;
+      if (studentEntry.status === 'present' || studentEntry.status === 'late') {
+        presentCount++;
+      }
+    }
+  });
+  const attendancePercentage =
+    totalCount > 0 ? Math.round((presentCount / totalCount) * 1000) / 10 : null;
+
+  // Fee summary
+  const totalFees = fees.reduce((s, f) => s + (f.amount || 0), 0);
+  const paidFees = fees.reduce((s, f) => s + (f.paidAmount || 0), 0);
+  const pendingFees = fees.reduce((s, f) => s + (f.balance || 0), 0);
+  const overdueFees = fees.filter((f) => f.status === 'overdue').length;
+
+  return {
+    attendance: {
+      present: presentCount,
+      total: totalCount,
+      percentage: attendancePercentage,
+      recentDays: attendanceDocs.slice(0, 10).map((doc) => {
+        const entry = doc.students?.find((s) => s.student?.toString() === studentId.toString());
+        return { date: doc.date, status: entry?.status || 'unknown' };
+      }),
+    },
+    homework: homework.map((h) => {
+      const submission = h.submissions?.find(
+        (s) => s.student?.toString() === studentId.toString()
+      );
+      return {
+        id: h._id,
+        title: h.title,
+        dueDate: h.dueDate,
+        submittedAt: submission?.submittedAt || null,
+        submissionStatus: submission?.status || null,
+      };
+    }),
+    fees: {
+      total: totalFees,
+      paid: paidFees,
+      pending: pendingFees,
+      overdue: overdueFees,
+      transactions: fees.length,
+    },
+    results,
+    notices,
+    recognition: recognitionCount,
+    timetable,
+    events,
+  };
 };
+
+// ── Parent Dashboard ──────────────────────────────────────────────────────────
 
 export const getParentDashboard = async (parentId, schoolId) => {
+  // Parent dashboard: aggregate across all linked children
   return { /* parent multi-child data aggregated */ };
 };

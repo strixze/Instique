@@ -5,7 +5,7 @@ import {
   Trophy, Award, Users, CheckCircle, XCircle, AlertCircle, TrendingUp,
   BarChart3, Search, Filter, ArrowUpDown, ArrowUp, ArrowDown,
   Printer, Download, Edit3, ChevronRight, School, Calendar, BookOpen,
-  UserCheck, RefreshCw,
+  UserCheck, RefreshCw, FileText,
 } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 import Card from '../../components/ui/Card';
@@ -15,6 +15,7 @@ import Select from '../../components/ui/Select';
 import UserAvatar from '../../components/ui/UserAvatar';
 import { examApi } from '../../api/exam.api';
 import { useUserStore } from '../../store/userStore';
+import ReportCardModal from '../../components/exams/ReportCardModal';
 
 // ── Helpers ──
 
@@ -52,6 +53,10 @@ export default function Leaderboard() {
   const [loading, setLoading] = useState(false);
   const [examLoading, setExamLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Report Card Modal State
+  const [reportCardExam, setReportCardExam] = useState(null);
+  const [reportCardStudentId, setReportCardStudentId] = useState(null);
 
   // Filters & Sorting
   const [searchTerm, setSearchTerm] = useState('');
@@ -645,12 +650,15 @@ export default function Leaderboard() {
                     <th className="px-4 py-3 text-center text-xs font-semibold text-muted uppercase tracking-wider w-24">
                       Result
                     </th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold text-muted uppercase tracking-wider w-28">
+                      Report Card
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/40 bg-white">
                   {processedResults.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="px-4 py-12 text-center text-muted">
+                      <td colSpan={8} className="px-4 py-12 text-center text-muted">
                         No students match the current filters.
                       </td>
                     </tr>
@@ -680,10 +688,10 @@ export default function Leaderboard() {
                               : isThird
                               ? 'bg-amber-50/20 hover:bg-amber-50/40'
                               : isFailed
-                              ? 'hover:bg-danger-light/30'
+                              ? 'hover:bg-rose-50/20'
                               : isIncomplete
                               ? 'hover:bg-surface/50 text-secondary'
-                              : 'hover:bg-sage-soft/40'
+                              : 'hover:bg-surface/50'
                           }`}
                         >
                           {/* Rank Column */}
@@ -786,6 +794,20 @@ export default function Leaderboard() {
                             {row.result === 'fail' && <Badge color="danger">FAIL</Badge>}
                             {row.result === 'incomplete' && <Badge color="warning">Incomplete</Badge>}
                           </td>
+                          
+                          {/* Report Card Generator Button */}
+                          <td className="px-4 py-3 text-right">
+                            <button
+                              onClick={() => {
+                                setReportCardExam(examData.exam);
+                                setReportCardStudentId(row.student._id);
+                              }}
+                              className="px-2.5 py-1 text-xs bg-forest-soft text-forest hover:bg-forest hover:text-white font-semibold rounded-lg transition-colors inline-flex items-center gap-1"
+                              title="Generate Report Card"
+                            >
+                              <FileText size={12} /> Card
+                            </button>
+                          </td>
                         </tr>
                       );
                     })
@@ -806,6 +828,13 @@ export default function Leaderboard() {
           </Card>
         </>
       )}
+
+      <ReportCardModal
+        isOpen={!!reportCardExam}
+        onClose={() => { setReportCardExam(null); setReportCardStudentId(null); }}
+        exam={reportCardExam}
+        studentId={reportCardStudentId}
+      />
     </div>
   );
 }

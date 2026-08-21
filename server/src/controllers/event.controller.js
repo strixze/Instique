@@ -22,6 +22,16 @@ export const updateEvent = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponse(200, event, 'Event updated successfully'));
 });
 
+export const publishEvent = asyncHandler(async (req, res) => {
+  const event = await eventService.publishEvent(req.params.id, req.schoolId);
+  res.status(200).json(new ApiResponse(200, event, 'Event published'));
+});
+
+export const cancelEvent = asyncHandler(async (req, res) => {
+  const event = await eventService.cancelEvent(req.params.id, req.schoolId);
+  res.status(200).json(new ApiResponse(200, event, 'Event cancelled'));
+});
+
 export const deleteEvent = asyncHandler(async (req, res) => {
   await eventService.deleteEvent(req.params.id, req.schoolId);
   res.status(200).json(new ApiResponse(200, null, 'Event and all gallery photos deleted successfully'));
@@ -66,4 +76,9 @@ export const updatePhotoCaption = asyncHandler(async (req, res) => {
 export const setEventCoverPhoto = asyncHandler(async (req, res) => {
   const event = await eventService.setEventCoverPhoto(req.schoolId, req.params.id, req.params.photoId);
   res.status(200).json(new ApiResponse(200, event, 'Cover photo updated'));
+});
+
+export const getEventStats = asyncHandler(async (req, res) => {
+  const stats = await eventService.getEventStats(req.schoolId);
+  res.status(200).json(new ApiResponse(200, stats, 'Event stats fetched'));
 });

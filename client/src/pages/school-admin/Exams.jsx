@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
-import { Plus, Trash2, Send, Trophy, ClipboardCheck, Award } from 'lucide-react';
+import { Plus, Trash2, Send, Trophy, ClipboardCheck, Award, FileText } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 import DataTable from '../../components/ui/DataTable';
 import Button from '../../components/ui/Button';
@@ -12,6 +12,7 @@ import Select from '../../components/ui/Select';
 import Badge from '../../components/ui/Badge';
 import { examApi } from '../../api/exam.api';
 import { academicApi } from '../../api/academic.api';
+import ReportCardModal from '../../components/exams/ReportCardModal';
 
 const statusColors = {
   upcoming: 'info',

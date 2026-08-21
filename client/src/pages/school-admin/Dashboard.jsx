@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Users, GraduationCap, DollarSign, ClipboardCheck, TrendingUp, TrendingDown,
   Clock, BookOpen, AlertCircle, ChevronRight, CheckCircle2, UserCheck,
-  FileCheck, ShieldAlert, Coffee, ArrowUpRight, ChevronDown,
+  FileCheck, ShieldAlert, Coffee, ChevronDown, Activity,
 } from 'lucide-react';
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -12,8 +12,7 @@ import {
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
-import { studentApi } from '../../api/student.api';
-import { teacherApi } from '../../api/teacher.api';
+import Skeleton from '../../components/ui/Skeleton';
 import { dashboardApi } from '../../api/dashboard.api';
 import { useUserStore } from '../../store/userStore';
 
@@ -33,6 +32,32 @@ function getGreeting() {
   if (h < 17) return 'Good afternoon';
   return 'Good evening';
 }
+
+/** Format a number as Indian lakhs/crores short string */
+function formatINR(amount) {
+  if (!amount || amount === 0) return '₹0';
+  if (amount >= 10000000) return `₹${(amount / 10000000).toFixed(1)}Cr`;
+  if (amount >= 100000) return `₹${(amount / 100000).toFixed(1)}L`;
+  if (amount >= 1000) return `₹${(amount / 1000).toFixed(1)}K`;
+  return `₹${amount}`;
+}
+
+/** Convert "HH:MM" 24h to "HH:MM AM/PM" */
+function formatTime(timeStr) {
+  if (!timeStr) return '';
+  const [h, m] = timeStr.split(':').map(Number);
+  const period = h >= 12 ? 'PM' : 'AM';
+  const hour = h % 12 || 12;
+  return `${String(hour).padStart(2, '0')}:${String(m).padStart(2, '0')} ${period}`;
+}
+
+const PERIOD_COLORS = [
+  'border-l-forest',
+  'border-l-info',
+  'border-l-warning',
+  'border-l-border',
+  'border-l-danger',
+];
 
 export default function SchoolAdminDashboard() {
   const user = useUserStore((s) => s.user);
@@ -71,11 +96,11 @@ export default function SchoolAdminDashboard() {
 
   const [attendancePeriod, setAttendancePeriod] = useState('This Week');
   const [classAttendancePeriod, setClassAttendancePeriod] = useState('This Week');
-  const [feePeriod, setFeePeriod] = useState('This Month');
 
   useEffect(() => {
     let active = true;
     const fetchDashboard = async () => {
+      setLoading(true);
       try {
         const [dashRes, studentRes, teacherRes] = await Promise.all([
           dashboardApi.getSchoolAdmin({
@@ -114,12 +139,11 @@ export default function SchoolAdminDashboard() {
           recentActivities: dashData.recentActivities || [],
         });
       } catch (e) {
-        // preserve fallback metrics
+        // error handled gracefully – show empty states
       } finally {
         if (active) setLoading(false);
       }
     };
-
     fetchDashboard();
     return () => { active = false; };
   }, [attendancePeriod, classAttendancePeriod, feePeriod]);
@@ -191,6 +215,43 @@ export default function SchoolAdminDashboard() {
       color: 'bg-indigo-50 text-indigo-700',
     },
   ];
+  const hasAnyFees = feeStats.totalBilled > 0;
+
+  // ── Class attendance table based on selected period ──
+  const currentClassAttendance =
+    classAttendancePeriod === 'Today'
+      ? data?.classAttendanceOverview?.today || []
+      : classAttendancePeriod === 'This Month'
+      ? data?.classAttendanceOverview?.month || []
+      : data?.classAttendanceOverview?.week || data?.classAttendance || [];
+
+  // ── Today's schedule ──
+  const todaySchedule = data?.todaySchedule || [];
+
+  // ── Recent activity from audit logs ──
+  const recentActivity = data?.recentActivity || [];
+
+  // ── Activity icon/color mapper ──
+  function getActivityStyle(action, entity) {
+    const a = (action || '').toLowerCase();
+    const e = (entity || '').toLowerCase();
+    if (a.includes('create') || a.includes('approve') || e.includes('admission')) {
+      return { Icon: UserCheck, color: 'bg-forest-soft text-forest' };
+    }
+    if (e.includes('fee') || e.includes('transaction')) {
+      return { Icon: DollarSign, color: 'bg-info-light text-info-text' };
+    }
+    if (e.includes('leave')) {
+      return { Icon: CheckCircle2, color: 'bg-surface text-secondary' };
+    }
+    if (e.includes('exam') || e.includes('mark') || e.includes('result')) {
+      return { Icon: FileCheck, color: 'bg-sage text-forest' };
+    }
+    if (e.includes('homework') || e.includes('assignment')) {
+      return { Icon: BookOpen, color: 'bg-indigo-50 text-indigo-700' };
+    }
+    return { Icon: Activity, color: 'bg-surface text-muted' };
+  }
 
   const attentionTotal = (data.needsAttention.lowAttendanceCount ? 1 : 0) +
     (data.needsAttention.admissionApplications ? 1 : 0) +
@@ -210,7 +271,7 @@ export default function SchoolAdminDashboard() {
         </p>
       </div>
 
-      {/* ── Row 1: 4 Contextual Operational KPI Cards ── */}
+      {/* ── Row 1: 4 KPI Cards ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Students */}
         <div className="bg-white border border-border rounded-xl p-4 shadow-2xs hover:shadow-card transition-shadow">
@@ -227,7 +288,8 @@ export default function SchoolAdminDashboard() {
           </div>
           <div className="mt-3.5 pt-3 border-t border-border flex items-center justify-between text-xs">
             <span className="inline-flex items-center gap-1 font-semibold text-success text-[11px]">
-              <TrendingUp size={13} /> 4.8% <span className="font-normal text-muted">this month</span>
+              <TrendingUp size={13} />
+              <span className="font-normal text-muted">This month</span>
             </span>
             <div className="text-right">
               <span className="font-bold text-deep text-xs">{data.newAdmissionsMonth || 12}</span>{' '}
@@ -251,7 +313,8 @@ export default function SchoolAdminDashboard() {
           </div>
           <div className="mt-3.5 pt-3 border-t border-border flex items-center justify-between text-xs">
             <span className="inline-flex items-center gap-1 font-semibold text-success text-[11px]">
-              <TrendingUp size={13} /> 3.6% <span className="font-normal text-muted">this month</span>
+              <TrendingUp size={13} />
+              <span className="font-normal text-muted">Active staff</span>
             </span>
             <div className="text-right">
               <span className="font-bold text-deep text-xs">{data.teachersOnLeaveToday || 4}</span>{' '}
@@ -291,7 +354,7 @@ export default function SchoolAdminDashboard() {
               ₹
             </div>
             <div>
-              <p className="text-xs font-semibold text-secondary">Fees Collected (This Session)</p>
+              <p className="text-xs font-semibold text-secondary">Fees Collected</p>
               <p className="text-2xl font-bold text-deep leading-tight mt-0.5">
                 ₹{data.feeStats?.collectedLakhs ? `${data.feeStats.collectedLakhs}L` : '24.8L'}
               </p>
@@ -513,7 +576,7 @@ export default function SchoolAdminDashboard() {
         </Card>
       </div>
 
-      {/* ── Row 3: Bottom Operations Row (3 Columns) ── */}
+      {/* ── Row 3: Class Attendance | Fee Donut | Recent Activity ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Attendance by Class */}
         <Card padding={false} className="flex flex-col h-full">
@@ -561,8 +624,8 @@ export default function SchoolAdminDashboard() {
                     {row.change}
                   </span>
                 </div>
-              ))}
-            </div>
+              </>
+            )}
           </div>
         </Card>
 
@@ -639,7 +702,7 @@ export default function SchoolAdminDashboard() {
           <div className="p-3.5 px-4 flex items-center justify-between border-b border-border">
             <h3 className="text-xs font-bold text-deep uppercase tracking-wider">Recent Activity</h3>
             <button
-              onClick={() => navigate('/notices')}
+              onClick={() => navigate('/recent-activity')}
               className="text-xs font-semibold text-forest hover:underline"
             >
               View All

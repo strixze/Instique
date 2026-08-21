@@ -100,8 +100,12 @@ export default function AppRouter() {
       <Route path="/parent-meetings" element={<ModulePage><UnifiedParentMeetings /></ModulePage>} />
       <Route path="/leaves" element={<ModulePage><Leaves /></ModulePage>} />
       <Route path="/complaints" element={<ModulePage><Complaints /></ModulePage>} />
+      <Route path="/events" element={<ModulePage><Events /></ModulePage>} />
+      <Route path="/recent-activity" element={<ModulePage><RecentActivity /></ModulePage>} />
+      <Route path="/audit-logs" element={<ModulePage><RecentActivity /></ModulePage>} />
       <Route path="/roles" element={<ModulePage><Roles /></ModulePage>} />
       <Route path="/settings" element={<ModulePage><Settings /></ModulePage>} />
+      <Route path="/profile" element={<ModulePage><Profile /></ModulePage>} />
 
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

@@ -29,6 +29,7 @@ router.use(authMiddleware, tenantMiddleware);
 
 // Calendar & List Queries
 router.get('/calendar', requireRole('school_admin', 'teacher', 'student', 'parent'), getCalendar);
+router.get('/stats', requireRole('school_admin', 'teacher', 'student', 'parent'), getEventStats);
 router.get('/', requireRole('school_admin', 'teacher', 'student', 'parent'), getEvents);
 
 // Event CRUD

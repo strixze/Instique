@@ -23,6 +23,7 @@ export default function Roles() {
  const [loading, setLoading] = useState(true);
  const [page, setPage] = useState(1);
  const [search, setSearch] = useState('');
+ const [sort, setSort] = useState('-createdAt');
  const [reload, setReload] = useState(0);
  const [open, setOpen] = useState(false);
  const [saving, setSaving] = useState(false);
@@ -32,7 +33,7 @@ export default function Roles() {
  let active = true;
  const load = async () => {
  try {
- const res = await roleApi.getAll({ page, limit: 10, search: search || undefined });
+ const res = await roleApi.getAll({ page, limit: 10, search: search || undefined, sort });
  if (!active) return;
  setData(res.data);
  setMeta(res.meta);
@@ -44,7 +45,7 @@ export default function Roles() {
  };
  load();
  return () => { active = false; };
- }, [page, search, reload]);
+ }, [page, search, reload, sort]);
 
  const setField = (key, value) => setForm((f) => ({ ...f, [key]: value }));
 
@@ -151,7 +152,7 @@ export default function Roles() {
  action={<Button onClick={() => setOpen(true)}><Plus size={16} className="mr-2"/>Create Role</Button>}
  />
 
- <DataTable columns={columns} data={data} loading={loading} meta={meta} onPageChange={(p) => { setLoading(true); setPage(p); }} onSearch={(s) => { setLoading(true); setSearch(s); setPage(1); }} searchPlaceholder="Search roles..."/>
+ <DataTable columns={columns} data={data} loading={loading} meta={meta} onPageChange={(p) => { setLoading(true); setPage(p); }} onSearch={(s) => { setLoading(true); setSearch(s); setPage(1); }} onSort={(field, order) => { setSort(`${order === 'desc' ? '-' : ''}${field}`); setPage(1); setLoading(true); }} searchPlaceholder="Search roles..."/>
 
  <Modal isOpen={open} onClose={resetAndClose} title="Create Custom Role"size="lg">
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
