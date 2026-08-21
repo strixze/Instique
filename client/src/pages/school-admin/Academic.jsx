@@ -989,25 +989,32 @@ export default function Academic() {
   const [activeTab, setActiveTab] = useState('years');
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Headline & Subtitle */}
-      <div className="flex flex-col sm:flex-row sm:flex-items-center sm:justify-between gap-3 pb-1">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-2 border-b border-border/40">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-deep tracking-tight">Academic Structure</h1>
           <p className="text-secondary text-xs sm:text-sm mt-0.5">Manage academic sessions, classes, sections, and subjects offered</p>
         </div>
-        {TABS.map((t) => (
-          <button
-            key={t.key}
-            onClick={() => setActiveTab(t.key)}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${activeTab === t.key
-              ? 'bg-forest text-white shadow-2xs'
-              : 'text-secondary hover:bg-surface hover:text-deep font-medium'
-              }`}
-          >
-            {t.label}
-          </button>
-        ))}
+
+        <div className="inline-flex p-1 bg-surface border border-border rounded-xl shadow-2xs self-start md:self-auto flex-wrap">
+          {TABS.map((t) => {
+            const isActive = activeTab === t.key;
+            return (
+              <button
+                key={t.key}
+                onClick={() => setActiveTab(t.key)}
+                className={`px-3.5 py-1.5 rounded-lg text-xs transition-all duration-200 ${
+                  isActive
+                    ? 'bg-forest text-white shadow-xs font-bold'
+                    : 'text-secondary hover:text-deep hover:bg-white/60 font-medium'
+                }`}
+              >
+                {t.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Active Tab Component */}

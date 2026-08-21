@@ -550,25 +550,40 @@ export default function Timetable() {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-2 border-b border-border/40">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-deep tracking-tight">Timetable Management</h1>
           <p className="text-secondary text-xs sm:text-sm mt-0.5">
             Auto-generate, inspect, and optimize school class schedules with conflict prevention
           </p>
         </div>
-        <div className="flex sm:flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <Button variant="outline" size="sm" onClick={handleLoadReports} className="gap-1.5 text-xs">
-            <BarChart3 size={14} /> Analytics & Reports
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleLoadReports}
+            className="gap-1.5 text-xs font-semibold text-secondary hover:text-deep hover:bg-surface border-border transition-colors"
+          >
+            <BarChart3 size={14} className="text-forest" /> Analytics & Reports
           </Button>
-          <Button variant="outline" size="sm" onClick={() => setOpenPublishModal(true)} className="gap-1.5 text-xs">
-            <Lock size={14} /> Bulk Publish
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setOpenPublishModal(true)}
+            className="gap-1.5 text-xs font-semibold text-secondary hover:text-deep hover:bg-surface border-border transition-colors"
+          >
+            <Lock size={14} className="text-amber-600" /> Bulk Publish
           </Button>
-          <Button variant="outline" size="sm" onClick={() => setOpenDeleteModal(true)} className="gap-1.5 text-xs text-red-600 border-red-200 hover:bg-red-50">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setOpenDeleteModal(true)}
+            className="gap-1.5 text-xs font-semibold text-danger hover:bg-danger-light border-danger/30 transition-colors"
+          >
             <Trash2 size={14} /> Bulk Delete
           </Button>
-          <Button onClick={() => setOpenGen(true)} className="gap-1.5 text-xs">
-            <Plus size={16} /> Generate Timetable <ChevronDown size={14} className="opacity-70 ml-0.5" />
+          <Button onClick={() => setOpenGen(true)} className="gap-1.5 text-xs font-semibold shadow-xs">
+            <Plus size={15} /> Generate Timetable <ChevronDown size={14} className="opacity-70 ml-0.5" />
           </Button>
         </div>
       </div>

@@ -6392,3 +6392,1180 @@ Stack Trace: Error: Authentication required
 Details: []
 ================================================================================
 
+
+================================================================================
+Timestamp: 2026-08-21T08:52:09.071Z
+Method: GET
+URL: /api/v1/dashboards/school-admin
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/temp%201/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/temp%201/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\temp 1\Instique\server\node_modules\router\index.js:342:13)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\temp 1\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\temp 1\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\temp 1\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\temp 1\Instique\server\node_modules\router\index.js:342:13)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\temp 1\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\temp 1\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T08:52:09.078Z
+Method: GET
+URL: /api/v1/students?limit=1
+User ID: Unauthenticated
+Query: {"limit":"1"}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/temp%201/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/temp%201/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\temp 1\Instique\server\node_modules\router\index.js:342:13)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\temp 1\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\temp 1\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\temp 1\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\temp 1\Instique\server\node_modules\router\index.js:342:13)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\temp 1\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\temp 1\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T08:52:09.080Z
+Method: GET
+URL: /api/v1/teachers?limit=1
+User ID: Unauthenticated
+Query: {"limit":"1"}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/temp%201/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/temp%201/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\temp 1\Instique\server\node_modules\router\index.js:342:13)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\temp 1\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\temp 1\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\temp 1\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\temp 1\Instique\server\node_modules\router\index.js:342:13)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\temp 1\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\temp 1\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T08:52:10.303Z
+Method: GET
+URL: /api/v1/dashboards/school-admin
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {}
+Body: 
+Error Name: ReferenceError
+Error Message: SchoolClass is not defined
+Stack Trace: ReferenceError: SchoolClass is not defined
+    at Module.getSchoolAdminDashboard (file:///D:/temp%201/Instique/server/src/services/dashboard.service.js:184:5)
+    at file:///D:/temp%201/Instique/server/src/controllers/dashboard.controller.js:11:39
+    at file:///D:/temp%201/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///D:/temp%201/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at tenantMiddleware (file:///D:/temp%201/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\temp 1\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\temp 1\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T08:57:52.219Z
+Method: GET
+URL: /api/v1/dashboards/school-admin
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {}
+Body: 
+Error Name: ReferenceError
+Error Message: SchoolClass is not defined
+Stack Trace: ReferenceError: SchoolClass is not defined
+    at Module.getSchoolAdminDashboard (file:///D:/temp%201/Instique/server/src/services/dashboard.service.js:184:5)
+    at file:///D:/temp%201/Instique/server/src/controllers/dashboard.controller.js:11:39
+    at file:///D:/temp%201/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///D:/temp%201/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at tenantMiddleware (file:///D:/temp%201/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\temp 1\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\temp 1\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T08:57:52.315Z
+Method: GET
+URL: /api/v1/dashboards/school-admin
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {}
+Body: 
+Error Name: ReferenceError
+Error Message: SchoolClass is not defined
+Stack Trace: ReferenceError: SchoolClass is not defined
+    at Module.getSchoolAdminDashboard (file:///D:/temp%201/Instique/server/src/services/dashboard.service.js:184:5)
+    at file:///D:/temp%201/Instique/server/src/controllers/dashboard.controller.js:11:39
+    at file:///D:/temp%201/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///D:/temp%201/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at tenantMiddleware (file:///D:/temp%201/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\temp 1\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\temp 1\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:07:15.038Z
+Method: GET
+URL: /api/v1/notifications/unread-count
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/temp%201/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/temp%201/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\temp 1\Instique\server\node_modules\router\index.js:342:13)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\temp 1\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\temp 1\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\temp 1\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\temp 1\Instique\server\node_modules\router\index.js:342:13)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\temp 1\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\temp 1\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:07:15.100Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Invalid refresh token
+Stack Trace: Error: Invalid refresh token
+    at Module.refreshUserToken (file:///D:/temp%201/Instique/server/src/services/auth.service.js:103:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/temp%201/Instique/server/src/controllers/auth.controller.js:58:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:07:15.417Z
+Method: GET
+URL: /api/v1/auth/profile
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/temp%201/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/temp%201/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\temp 1\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\temp 1\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\temp 1\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\temp 1\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\temp 1\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\temp 1\Instique\server\node_modules\router\index.js:342:13)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:07:15.423Z
+Method: GET
+URL: /api/v1/auth/profile
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/temp%201/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/temp%201/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\temp 1\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\temp 1\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\temp 1\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\temp 1\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\temp 1\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\temp 1\Instique\server\node_modules\router\index.js:342:13)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:07:15.562Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Invalid refresh token
+Stack Trace: Error: Invalid refresh token
+    at Module.refreshUserToken (file:///D:/temp%201/Instique/server/src/services/auth.service.js:103:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/temp%201/Instique/server/src/controllers/auth.controller.js:58:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:07:15.566Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Invalid refresh token
+Stack Trace: Error: Invalid refresh token
+    at Module.refreshUserToken (file:///D:/temp%201/Instique/server/src/services/auth.service.js:103:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/temp%201/Instique/server/src/controllers/auth.controller.js:58:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:07:27.034Z
+Method: GET
+URL: /api/v1/dashboards/school-admin
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {}
+Body: 
+Error Name: ReferenceError
+Error Message: SchoolClass is not defined
+Stack Trace: ReferenceError: SchoolClass is not defined
+    at Module.getSchoolAdminDashboard (file:///D:/temp%201/Instique/server/src/services/dashboard.service.js:184:5)
+    at file:///D:/temp%201/Instique/server/src/controllers/dashboard.controller.js:11:39
+    at file:///D:/temp%201/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///D:/temp%201/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at tenantMiddleware (file:///D:/temp%201/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\temp 1\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\temp 1\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:07:27.159Z
+Method: GET
+URL: /api/v1/dashboards/school-admin
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {}
+Body: 
+Error Name: ReferenceError
+Error Message: SchoolClass is not defined
+Stack Trace: ReferenceError: SchoolClass is not defined
+    at Module.getSchoolAdminDashboard (file:///D:/temp%201/Instique/server/src/services/dashboard.service.js:184:5)
+    at file:///D:/temp%201/Instique/server/src/controllers/dashboard.controller.js:11:39
+    at file:///D:/temp%201/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///D:/temp%201/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at tenantMiddleware (file:///D:/temp%201/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\temp 1\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\temp 1\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:07:51.904Z
+Method: GET
+URL: /api/v1/dashboards/school-admin
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {}
+Body: 
+Error Name: ReferenceError
+Error Message: SchoolClass is not defined
+Stack Trace: ReferenceError: SchoolClass is not defined
+    at Module.getSchoolAdminDashboard (file:///D:/temp%201/Instique/server/src/services/dashboard.service.js:184:5)
+    at file:///D:/temp%201/Instique/server/src/controllers/dashboard.controller.js:11:39
+    at file:///D:/temp%201/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///D:/temp%201/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at tenantMiddleware (file:///D:/temp%201/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\temp 1\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\temp 1\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:07:52.568Z
+Method: GET
+URL: /api/v1/dashboards/school-admin
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {}
+Body: 
+Error Name: ReferenceError
+Error Message: SchoolClass is not defined
+Stack Trace: ReferenceError: SchoolClass is not defined
+    at Module.getSchoolAdminDashboard (file:///D:/temp%201/Instique/server/src/services/dashboard.service.js:184:5)
+    at file:///D:/temp%201/Instique/server/src/controllers/dashboard.controller.js:11:39
+    at file:///D:/temp%201/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///D:/temp%201/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at tenantMiddleware (file:///D:/temp%201/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\temp 1\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\temp 1\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:08:30.109Z
+Method: GET
+URL: /api/v1/dashboards/school-admin
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {}
+Body: 
+Error Name: ReferenceError
+Error Message: SchoolClass is not defined
+Stack Trace: ReferenceError: SchoolClass is not defined
+    at Module.getSchoolAdminDashboard (file:///D:/temp%201/Instique/server/src/services/dashboard.service.js:184:5)
+    at file:///D:/temp%201/Instique/server/src/controllers/dashboard.controller.js:11:39
+    at file:///D:/temp%201/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///D:/temp%201/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at tenantMiddleware (file:///D:/temp%201/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\temp 1\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\temp 1\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:08:31.134Z
+Method: GET
+URL: /api/v1/dashboards/school-admin
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {}
+Body: 
+Error Name: ReferenceError
+Error Message: SchoolClass is not defined
+Stack Trace: ReferenceError: SchoolClass is not defined
+    at Module.getSchoolAdminDashboard (file:///D:/temp%201/Instique/server/src/services/dashboard.service.js:184:5)
+    at file:///D:/temp%201/Instique/server/src/controllers/dashboard.controller.js:11:39
+    at file:///D:/temp%201/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///D:/temp%201/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at tenantMiddleware (file:///D:/temp%201/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\temp 1\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\temp 1\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:09:00.839Z
+Method: GET
+URL: /api/v1/dashboards/school-admin
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {}
+Body: 
+Error Name: ReferenceError
+Error Message: SchoolClass is not defined
+Stack Trace: ReferenceError: SchoolClass is not defined
+    at Module.getSchoolAdminDashboard (file:///D:/temp%201/Instique/server/src/services/dashboard.service.js:184:5)
+    at file:///D:/temp%201/Instique/server/src/controllers/dashboard.controller.js:11:39
+    at file:///D:/temp%201/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///D:/temp%201/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at tenantMiddleware (file:///D:/temp%201/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\temp 1\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\temp 1\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:09:00.938Z
+Method: GET
+URL: /api/v1/dashboards/school-admin
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {}
+Body: 
+Error Name: ReferenceError
+Error Message: SchoolClass is not defined
+Stack Trace: ReferenceError: SchoolClass is not defined
+    at Module.getSchoolAdminDashboard (file:///D:/temp%201/Instique/server/src/services/dashboard.service.js:184:5)
+    at file:///D:/temp%201/Instique/server/src/controllers/dashboard.controller.js:11:39
+    at file:///D:/temp%201/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///D:/temp%201/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at tenantMiddleware (file:///D:/temp%201/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\temp 1\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\temp 1\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:18:07.946Z
+Method: POST
+URL: /api/v1/auth/login
+User ID: Unauthenticated
+Query: {}
+Body: {"email":"admin1@gamil.com","password":"12345678"}
+Error Name: Error
+Error Message: Invalid email or password
+Stack Trace: Error: Invalid email or password
+    at Module.loginUser (file:///D:/temp%201/Instique/server/src/services/auth.service.js:56:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/temp%201/Instique/server/src/controllers/auth.controller.js:36:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:18:14.091Z
+Method: POST
+URL: /api/v1/auth/login
+User ID: Unauthenticated
+Query: {}
+Body: {"email":"admin1@gamil.com","password":"12345678"}
+Error Name: Error
+Error Message: Invalid email or password
+Stack Trace: Error: Invalid email or password
+    at Module.loginUser (file:///D:/temp%201/Instique/server/src/services/auth.service.js:56:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/temp%201/Instique/server/src/controllers/auth.controller.js:36:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:18:17.782Z
+Method: POST
+URL: /api/v1/auth/login
+User ID: Unauthenticated
+Query: {}
+Body: {"email":"admin1@gamil.com","password":"12345678"}
+Error Name: Error
+Error Message: Invalid email or password
+Stack Trace: Error: Invalid email or password
+    at Module.loginUser (file:///D:/temp%201/Instique/server/src/services/auth.service.js:56:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/temp%201/Instique/server/src/controllers/auth.controller.js:36:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:18:18.390Z
+Method: POST
+URL: /api/v1/auth/login
+User ID: Unauthenticated
+Query: {}
+Body: {"email":"admin1@gamil.com","password":"12345678"}
+Error Name: Error
+Error Message: Invalid email or password
+Stack Trace: Error: Invalid email or password
+    at Module.loginUser (file:///D:/temp%201/Instique/server/src/services/auth.service.js:56:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/temp%201/Instique/server/src/controllers/auth.controller.js:36:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:18:19.005Z
+Method: POST
+URL: /api/v1/auth/login
+User ID: Unauthenticated
+Query: {}
+Body: {"email":"admin1@gamil.com","password":"12345678"}
+Error Name: Error
+Error Message: Invalid email or password
+Stack Trace: Error: Invalid email or password
+    at Module.loginUser (file:///D:/temp%201/Instique/server/src/services/auth.service.js:56:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/temp%201/Instique/server/src/controllers/auth.controller.js:36:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:18:23.204Z
+Method: POST
+URL: /api/v1/auth/login
+User ID: Unauthenticated
+Query: {}
+Body: {"email":"admin1@gamil.com","password":"12345678"}
+Error Name: Error
+Error Message: Invalid email or password
+Stack Trace: Error: Invalid email or password
+    at Module.loginUser (file:///D:/temp%201/Instique/server/src/services/auth.service.js:56:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/temp%201/Instique/server/src/controllers/auth.controller.js:36:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:18:24.334Z
+Method: POST
+URL: /api/v1/auth/login
+User ID: Unauthenticated
+Query: {}
+Body: {"email":"admin1@gamil.com","password":"12345678"}
+Error Name: Error
+Error Message: Invalid email or password
+Stack Trace: Error: Invalid email or password
+    at Module.loginUser (file:///D:/temp%201/Instique/server/src/services/auth.service.js:56:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/temp%201/Instique/server/src/controllers/auth.controller.js:36:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:18:24.842Z
+Method: POST
+URL: /api/v1/auth/login
+User ID: Unauthenticated
+Query: {}
+Body: {"email":"admin1@gamil.com","password":"12345678"}
+Error Name: Error
+Error Message: Invalid email or password
+Stack Trace: Error: Invalid email or password
+    at Module.loginUser (file:///D:/temp%201/Instique/server/src/services/auth.service.js:56:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/temp%201/Instique/server/src/controllers/auth.controller.js:36:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:18:24.943Z
+Method: POST
+URL: /api/v1/auth/login
+User ID: Unauthenticated
+Query: {}
+Body: {"email":"admin1@gamil.com","password":"12345678"}
+Error Name: Error
+Error Message: Invalid email or password
+Stack Trace: Error: Invalid email or password
+    at Module.loginUser (file:///D:/temp%201/Instique/server/src/services/auth.service.js:56:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/temp%201/Instique/server/src/controllers/auth.controller.js:36:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:18:25.149Z
+Method: POST
+URL: /api/v1/auth/login
+User ID: Unauthenticated
+Query: {}
+Body: {"email":"admin1@gamil.com","password":"12345678"}
+Error Name: Error
+Error Message: Invalid email or password
+Stack Trace: Error: Invalid email or password
+    at Module.loginUser (file:///D:/temp%201/Instique/server/src/services/auth.service.js:56:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/temp%201/Instique/server/src/controllers/auth.controller.js:36:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:18:25.456Z
+Method: POST
+URL: /api/v1/auth/login
+User ID: Unauthenticated
+Query: {}
+Body: {"email":"admin1@gamil.com","password":"12345678"}
+Error Name: Error
+Error Message: Invalid email or password
+Stack Trace: Error: Invalid email or password
+    at Module.loginUser (file:///D:/temp%201/Instique/server/src/services/auth.service.js:56:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/temp%201/Instique/server/src/controllers/auth.controller.js:36:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:18:25.763Z
+Method: POST
+URL: /api/v1/auth/login
+User ID: Unauthenticated
+Query: {}
+Body: {"email":"admin1@gamil.com","password":"12345678"}
+Error Name: Error
+Error Message: Invalid email or password
+Stack Trace: Error: Invalid email or password
+    at Module.loginUser (file:///D:/temp%201/Instique/server/src/services/auth.service.js:56:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/temp%201/Instique/server/src/controllers/auth.controller.js:36:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:18:25.968Z
+Method: POST
+URL: /api/v1/auth/login
+User ID: Unauthenticated
+Query: {}
+Body: {"email":"admin1@gamil.com","password":"12345678"}
+Error Name: Error
+Error Message: Invalid email or password
+Stack Trace: Error: Invalid email or password
+    at Module.loginUser (file:///D:/temp%201/Instique/server/src/services/auth.service.js:56:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/temp%201/Instique/server/src/controllers/auth.controller.js:36:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:18:47.072Z
+Method: GET
+URL: /api/v1/dashboards/school-admin
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {}
+Body: 
+Error Name: ReferenceError
+Error Message: SchoolClass is not defined
+Stack Trace: ReferenceError: SchoolClass is not defined
+    at Module.getSchoolAdminDashboard (file:///D:/temp%201/Instique/server/src/services/dashboard.service.js:184:5)
+    at file:///D:/temp%201/Instique/server/src/controllers/dashboard.controller.js:11:39
+    at file:///D:/temp%201/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///D:/temp%201/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at tenantMiddleware (file:///D:/temp%201/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\temp 1\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\temp 1\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:18:47.176Z
+Method: GET
+URL: /api/v1/dashboards/school-admin
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {}
+Body: 
+Error Name: ReferenceError
+Error Message: SchoolClass is not defined
+Stack Trace: ReferenceError: SchoolClass is not defined
+    at Module.getSchoolAdminDashboard (file:///D:/temp%201/Instique/server/src/services/dashboard.service.js:184:5)
+    at file:///D:/temp%201/Instique/server/src/controllers/dashboard.controller.js:11:39
+    at file:///D:/temp%201/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///D:/temp%201/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at tenantMiddleware (file:///D:/temp%201/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\temp 1\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\temp 1\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:20:23.732Z
+Method: GET
+URL: /api/v1/dashboards/school-admin
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {}
+Body: 
+Error Name: ReferenceError
+Error Message: SchoolClass is not defined
+Stack Trace: ReferenceError: SchoolClass is not defined
+    at Module.getSchoolAdminDashboard (file:///D:/temp%201/Instique/server/src/services/dashboard.service.js:184:5)
+    at file:///D:/temp%201/Instique/server/src/controllers/dashboard.controller.js:11:39
+    at file:///D:/temp%201/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///D:/temp%201/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at tenantMiddleware (file:///D:/temp%201/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\temp 1\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\temp 1\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:20:23.850Z
+Method: GET
+URL: /api/v1/dashboards/school-admin
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {}
+Body: 
+Error Name: ReferenceError
+Error Message: SchoolClass is not defined
+Stack Trace: ReferenceError: SchoolClass is not defined
+    at Module.getSchoolAdminDashboard (file:///D:/temp%201/Instique/server/src/services/dashboard.service.js:184:5)
+    at file:///D:/temp%201/Instique/server/src/controllers/dashboard.controller.js:11:39
+    at file:///D:/temp%201/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///D:/temp%201/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at tenantMiddleware (file:///D:/temp%201/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\temp 1\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\temp 1\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:22:20.363Z
+Method: GET
+URL: /api/v1/dashboards/school-admin
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {}
+Body: 
+Error Name: ReferenceError
+Error Message: SchoolClass is not defined
+Stack Trace: ReferenceError: SchoolClass is not defined
+    at Module.getSchoolAdminDashboard (file:///D:/temp%201/Instique/server/src/services/dashboard.service.js:184:5)
+    at file:///D:/temp%201/Instique/server/src/controllers/dashboard.controller.js:11:39
+    at file:///D:/temp%201/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///D:/temp%201/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at tenantMiddleware (file:///D:/temp%201/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\temp 1\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\temp 1\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:22:20.474Z
+Method: GET
+URL: /api/v1/dashboards/school-admin
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {}
+Body: 
+Error Name: ReferenceError
+Error Message: SchoolClass is not defined
+Stack Trace: ReferenceError: SchoolClass is not defined
+    at Module.getSchoolAdminDashboard (file:///D:/temp%201/Instique/server/src/services/dashboard.service.js:184:5)
+    at file:///D:/temp%201/Instique/server/src/controllers/dashboard.controller.js:11:39
+    at file:///D:/temp%201/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///D:/temp%201/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at tenantMiddleware (file:///D:/temp%201/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\temp 1\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\temp 1\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:22:37.072Z
+Method: GET
+URL: /api/v1/dashboards/school-admin
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {}
+Body: 
+Error Name: ReferenceError
+Error Message: SchoolClass is not defined
+Stack Trace: ReferenceError: SchoolClass is not defined
+    at Module.getSchoolAdminDashboard (file:///D:/temp%201/Instique/server/src/services/dashboard.service.js:184:5)
+    at file:///D:/temp%201/Instique/server/src/controllers/dashboard.controller.js:11:39
+    at file:///D:/temp%201/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///D:/temp%201/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at tenantMiddleware (file:///D:/temp%201/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\temp 1\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\temp 1\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:22:37.149Z
+Method: GET
+URL: /api/v1/dashboards/school-admin
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {}
+Body: 
+Error Name: ReferenceError
+Error Message: SchoolClass is not defined
+Stack Trace: ReferenceError: SchoolClass is not defined
+    at Module.getSchoolAdminDashboard (file:///D:/temp%201/Instique/server/src/services/dashboard.service.js:184:5)
+    at file:///D:/temp%201/Instique/server/src/controllers/dashboard.controller.js:11:39
+    at file:///D:/temp%201/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///D:/temp%201/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at tenantMiddleware (file:///D:/temp%201/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\temp 1\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\temp 1\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:23:04.401Z
+Method: GET
+URL: /api/v1/dashboards/school-admin
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {}
+Body: 
+Error Name: ReferenceError
+Error Message: SchoolClass is not defined
+Stack Trace: ReferenceError: SchoolClass is not defined
+    at Module.getSchoolAdminDashboard (file:///D:/temp%201/Instique/server/src/services/dashboard.service.js:184:5)
+    at file:///D:/temp%201/Instique/server/src/controllers/dashboard.controller.js:11:39
+    at file:///D:/temp%201/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///D:/temp%201/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at tenantMiddleware (file:///D:/temp%201/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\temp 1\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\temp 1\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:23:04.624Z
+Method: GET
+URL: /api/v1/dashboards/school-admin
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {}
+Body: 
+Error Name: ReferenceError
+Error Message: SchoolClass is not defined
+Stack Trace: ReferenceError: SchoolClass is not defined
+    at Module.getSchoolAdminDashboard (file:///D:/temp%201/Instique/server/src/services/dashboard.service.js:184:5)
+    at file:///D:/temp%201/Instique/server/src/controllers/dashboard.controller.js:11:39
+    at file:///D:/temp%201/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///D:/temp%201/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at tenantMiddleware (file:///D:/temp%201/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\temp 1\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\temp 1\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:23:46.062Z
+Method: GET
+URL: /api/v1/dashboards/school-admin
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {}
+Body: 
+Error Name: ReferenceError
+Error Message: SchoolClass is not defined
+Stack Trace: ReferenceError: SchoolClass is not defined
+    at Module.getSchoolAdminDashboard (file:///D:/temp%201/Instique/server/src/services/dashboard.service.js:184:5)
+    at file:///D:/temp%201/Instique/server/src/controllers/dashboard.controller.js:11:39
+    at file:///D:/temp%201/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///D:/temp%201/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at tenantMiddleware (file:///D:/temp%201/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\temp 1\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\temp 1\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:23:46.161Z
+Method: GET
+URL: /api/v1/dashboards/school-admin
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {}
+Body: 
+Error Name: ReferenceError
+Error Message: SchoolClass is not defined
+Stack Trace: ReferenceError: SchoolClass is not defined
+    at Module.getSchoolAdminDashboard (file:///D:/temp%201/Instique/server/src/services/dashboard.service.js:184:5)
+    at file:///D:/temp%201/Instique/server/src/controllers/dashboard.controller.js:11:39
+    at file:///D:/temp%201/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///D:/temp%201/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at tenantMiddleware (file:///D:/temp%201/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\temp 1\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\temp 1\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:23:50.111Z
+Method: GET
+URL: /api/v1/dashboards/school-admin
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {}
+Body: 
+Error Name: ReferenceError
+Error Message: SchoolClass is not defined
+Stack Trace: ReferenceError: SchoolClass is not defined
+    at Module.getSchoolAdminDashboard (file:///D:/temp%201/Instique/server/src/services/dashboard.service.js:184:5)
+    at file:///D:/temp%201/Instique/server/src/controllers/dashboard.controller.js:11:39
+    at file:///D:/temp%201/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///D:/temp%201/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at tenantMiddleware (file:///D:/temp%201/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\temp 1\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\temp 1\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-21T09:23:50.213Z
+Method: GET
+URL: /api/v1/dashboards/school-admin
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {}
+Body: 
+Error Name: ReferenceError
+Error Message: SchoolClass is not defined
+Stack Trace: ReferenceError: SchoolClass is not defined
+    at Module.getSchoolAdminDashboard (file:///D:/temp%201/Instique/server/src/services/dashboard.service.js:184:5)
+    at file:///D:/temp%201/Instique/server/src/controllers/dashboard.controller.js:11:39
+    at file:///D:/temp%201/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///D:/temp%201/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at tenantMiddleware (file:///D:/temp%201/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\temp 1\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\temp 1\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\temp 1\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\temp 1\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\temp 1\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
+================================================================================
+

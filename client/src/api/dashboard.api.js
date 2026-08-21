@@ -1,7 +1,7 @@
 import api from './axios';
 
 export const dashboardApi = {
-  getSchoolAdmin: () => api.get('/dashboards/school-admin'),
+  getSchoolAdmin: (params) => api.get('/dashboards/school-admin', { params }),
   getSuperAdmin: () => api.get('/dashboards/super-admin'),
   getTeacher: () => api.get('/dashboards/teacher'),
   getStudent: () => api.get('/dashboards/student'),
