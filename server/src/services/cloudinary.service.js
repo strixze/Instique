@@ -1,66 +1,214 @@
-import {v2 as cloudinary} from "cloudinary"
-import fs from "fs"
+import { v2 as cloudinary } from "cloudinary";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import env from "../config/env.js";
 
-cloudinary.config({
-    cloud_name:process.env.CLOUDINARY_CLOUD_NAME,
-    api_key:process.env.CLOUDINARY_API_KEY,
-    api_secret:process.env.CLOUDINARY_API_SECRET
-})
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const uploadsDir = path.join(__dirname, "../../public/uploads/events");
 
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
 
+const cloudName = process.env.CLOUDINARY_CLOUD_NAME || env.CLOUDINARY_CLOUD_NAME;
+const apiKey = process.env.CLOUDINARY_API_KEY || env.CLOUDINARY_API_KEY;
+const apiSecret = process.env.CLOUDINARY_API_SECRET || env.CLOUDINARY_API_SECRET;
+
+const isCloudinaryConfigured = Boolean(cloudName && apiKey && apiSecret);
+
+if (isCloudinaryConfigured) {
+  cloudinary.config({
+    cloud_name: cloudName,
+    api_key: apiKey,
+    api_secret: apiSecret,
+  });
+}
 
 /**
- * @description utility function for cloudinary file upload service 
- * 
+ * Upload a local file to Cloudinary (with automatic local fallback if credentials are unset)
  * @param {String} localFilePath
- * @param {String} resourceType - default (auto)
- * 
- * @returns response Object {uploadInfo , success:true/false}
+ * @param {Object} options - { folder, resource_type, eventId, etc. }
+ * @returns {Promise<Object>}
  */
+const uploadFileOnCloudinary = async function (localFilePath, options = {}) {
+  try {
+    if (!localFilePath || !fs.existsSync(localFilePath)) return null;
 
-const uploadFileOnCloudinary = async function(localFilePath , resourceType="auto"){
+    if (isCloudinaryConfigured) {
+      const uploadOptions = {
+        resource_type: options.resource_type || "auto",
+        folder: options.folder || "instique",
+      };
+      if (options.public_id) uploadOptions.public_id = options.public_id;
+      if (options.tags) uploadOptions.tags = options.tags;
+      if (options.context) uploadOptions.context = options.context;
+      if (options.transformation) uploadOptions.transformation = options.transformation;
+
+      const uploadInfo = await cloudinary.uploader.upload(localFilePath, uploadOptions);
+
+      if (fs.existsSync(localFilePath)) {
+        fs.unlinkSync(localFilePath);
+      }
+
+      return {
+        ...uploadInfo,
+        secure_url: uploadInfo.secure_url,
+        public_id: uploadInfo.public_id,
+        success: true,
+      };
+    }
+
+    // Fallback: Local storage in public/uploads/events
+    const eventFolder = options.eventId
+      ? path.join(uploadsDir, String(options.eventId))
+      : uploadsDir;
+
+    if (!fs.existsSync(eventFolder)) {
+      fs.mkdirSync(eventFolder, { recursive: true });
+    }
+
+    const fileName = path.basename(localFilePath);
+    const destPath = path.join(eventFolder, fileName);
+
+    fs.copyFileSync(localFilePath, destPath);
+    if (fs.existsSync(localFilePath)) {
+      fs.unlinkSync(localFilePath);
+    }
+
+    const stats = fs.statSync(destPath);
+    const relUrl = options.eventId
+      ? `/uploads/events/${options.eventId}/${fileName}`
+      : `/uploads/events/${fileName}`;
+
+    return {
+      secure_url: relUrl,
+      public_id: `local_events_${options.eventId || 'root'}_${fileName}`,
+      bytes: stats.size,
+      format: path.extname(fileName).replace('.', ''),
+      success: true,
+    };
+  } catch (error) {
+    console.error("Cloudinary upload failed, attempting local fallback:", error);
+
     try {
-        if(!localFilePath) return null
+      if (localFilePath && fs.existsSync(localFilePath)) {
+        const fileName = path.basename(localFilePath);
+        const destPath = path.join(uploadsDir, fileName);
+        fs.copyFileSync(localFilePath, destPath);
+        fs.unlinkSync(localFilePath);
 
-        const uploadInfo = await cloudinary.uploader.upload(localFilePath , {
-            resource_type:resourceType
-        })
-
-        fs.unlinkSync(localFilePath)
-        console.log("File Upload Succesfully ",uploadInfo)
-        return {...uploadInfo , success:true};
-
-    } catch (error) {
-        console.log("upload file on cloudinary :: error :: ",error)
         return {
-            success:false,
-            message:"Upload falied",
-            error:error.message
+          secure_url: `/uploads/events/${fileName}`,
+          public_id: `local_events_${fileName}`,
+          bytes: fs.statSync(destPath).size,
+          format: path.extname(fileName).replace('.', ''),
+          success: true,
         };
+      }
+    } catch (fallbackErr) {
+      console.error("Local fallback also failed:", fallbackErr);
     }
-}
 
-const deleteFileFromCloudinary = async function(publicId,resourceType = "image"){
-    try {
-        const result = await cloudinary.uploader.destroy(publicId,{resource_type:resourceType})
-
-        if(result.result !== "ok" && result.result !== "not found"){
-            throw new Error("Cloudinary Deletion Failed")
-        }
-
-        console.log(result)
-        return result
-
-    } catch (error) {
-        return {
-            success:false,
-            message:"deletion from cloudinary failed"
-        }
+    if (localFilePath && fs.existsSync(localFilePath)) {
+      try {
+        fs.unlinkSync(localFilePath);
+      } catch (unlinkErr) {}
     }
-}
 
+    return {
+      success: false,
+      message: error.message || "Upload failed",
+      error: error.message,
+    };
+  }
+};
+
+/**
+ * Delete a single file from Cloudinary or local uploads
+ * @param {String} publicId
+ * @param {String} resourceType
+ * @returns {Promise<Object>}
+ */
+const deleteFileFromCloudinary = async function (publicId, resourceType = "image") {
+  try {
+    if (!publicId) return { success: true };
+
+    if (publicId.startsWith('local_events_')) {
+      const parts = publicId.replace('local_events_', '').split('_');
+      const fileName = parts[parts.length - 1];
+      const eventId = parts.length > 1 ? parts[0] : null;
+
+      const targetPath = eventId
+        ? path.join(uploadsDir, eventId, fileName)
+        : path.join(uploadsDir, fileName);
+
+      if (fs.existsSync(targetPath)) {
+        fs.unlinkSync(targetPath);
+      }
+      return { success: true };
+    }
+
+    if (isCloudinaryConfigured) {
+      const result = await cloudinary.uploader.destroy(publicId, {
+        resource_type: resourceType,
+      });
+      return {
+        success: result.result === "ok" || result.result === "not found",
+        result,
+      };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Cloudinary single deletion error:", error);
+    return {
+      success: false,
+      message: error.message || "Deletion from cloudinary failed",
+    };
+  }
+};
+
+/**
+ * Delete multiple files from Cloudinary or local storage
+ * @param {Array<String>} publicIds
+ * @param {String} resourceType
+ * @returns {Promise<Object>}
+ */
+const deleteMultipleFilesFromCloudinary = async function (publicIds = [], resourceType = "image") {
+  try {
+    const validIds = publicIds.filter(Boolean);
+    if (!validIds.length) return { success: true };
+
+    const localIds = validIds.filter((id) => id.startsWith('local_events_'));
+    const cloudIds = validIds.filter((id) => !id.startsWith('local_events_'));
+
+    for (const localId of localIds) {
+      await deleteFileFromCloudinary(localId);
+    }
+
+    if (cloudIds.length > 0 && isCloudinaryConfigured) {
+      if (cloudinary.api && cloudinary.api.delete_resources) {
+        await cloudinary.api.delete_resources(cloudIds, { resource_type: resourceType });
+      } else {
+        await Promise.allSettled(cloudIds.map((id) => cloudinary.uploader.destroy(id, { resource_type: resourceType })));
+      }
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Cloudinary batch deletion error:", error);
+    return {
+      success: false,
+      message: error.message || "Batch deletion failed",
+    };
+  }
+};
 
 export {
-    uploadFileOnCloudinary,
-    deleteFileFromCloudinary
-}
+  uploadFileOnCloudinary,
+  deleteFileFromCloudinary,
+  deleteMultipleFilesFromCloudinary,
+  cloudinary,
+};

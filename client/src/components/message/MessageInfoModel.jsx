@@ -1,3 +1,6 @@
+import React from 'react';
+import UserAvatar from '../ui/UserAvatar';
+
 function MessageInfoModal({ show, onClose, msg }) {
  if (!show) return null
 
@@ -99,16 +102,16 @@ function MessageInfoModal({ show, onClose, msg }) {
  key={member.id || i}
  className="flex items-center gap-3 px-3 py-[9px] rounded-[12px] hover:bg-white/[0.04] transition-colors group"
  >
- {/* Avatar */}
- <div
- className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0 ring-1 ring-white/[0.08]"
- style={{ background: color.bg, color: color.text }}
- >
- {member.avatar
- ? <img src={member.avatar} alt={member.name} className="w-full h-full rounded-full object-cover"/>
- : getInitials(member.name)
- }
- </div>
+  {/* Avatar */}
+  <UserAvatar
+    src={member.avatar || member.avtar}
+    role={member.role || 'user'}
+    gender={member.gender}
+    id={member.id || member._id}
+    name={member.name}
+    size="sm"
+    className="shrink-0 ring-1 ring-white/[0.08]"
+  />
 
  {/* Name + role */}
  <div className="flex flex-col min-w-0 flex-1">

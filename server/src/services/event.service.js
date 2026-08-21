@@ -1,9 +1,11 @@
-import CalendarEvent from '../models/CalendarEvent.js';
+import Event from '../models/Event.js';
+import EventGalleryPhoto from '../models/EventGalleryPhoto.js';
 import ApiError from '../utils/ApiError.js';
 import { paginate } from '../utils/pagination.js';
+import { uploadFileOnCloudinary, deleteFileFromCloudinary, deleteMultipleFilesFromCloudinary } from './cloudinary.service.js';
 
 export const createEvent = async (schoolId, data, userId) => {
-  const event = await CalendarEvent.create({
+  const event = await Event.create({
     ...data,
     schoolId,
     createdBy: userId,
@@ -13,101 +15,93 @@ export const createEvent = async (schoolId, data, userId) => {
 
 export const getEvents = async (schoolId, options = {}) => {
   const {
-    page = 1,
-    limit = 10,
-    search,
-    status,
     type,
+    status,
     audience,
-    dateRange,
-    startDate,
-    endDate,
+    timeframe,
+    startDateFrom,
+    startDateTo,
+    search,
+    ...paginateOptions
   } = options;
 
-  const query = { schoolId };
+  const filter = { schoolId };
 
-  // Status Filter
-  if (status && status !== 'all') {
-    if (status === 'upcoming') {
-      const now = new Date();
-      now.setHours(0, 0, 0, 0);
-      query.startDate = { $gte: now };
-      query.status = { $ne: 'cancelled' };
-    } else if (status === 'past') {
-      const now = new Date();
-      now.setHours(0, 0, 0, 0);
-      query.startDate = { $lt: now };
-    } else {
-      query.status = status;
-    }
-  }
-
-  // Type Filter
   if (type && type !== 'all') {
-    query.type = type;
+    filter.type = type;
   }
 
-  // Audience Filter
+  if (status && status !== 'all') {
+    filter.status = status;
+  }
+
   if (audience && audience !== 'all') {
-    query.audience = audience;
+    filter.audience = { $in: [audience, 'all'] };
   }
 
-  // Date Range Filters
   const now = new Date();
-  if (dateRange === 'today') {
-    const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const endToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-    query.startDate = { $gte: startToday, $lte: endToday };
-  } else if (dateRange === 'this_week') {
-    const startWeek = new Date(now);
-    startWeek.setDate(now.getDate() - now.getDay());
-    startWeek.setHours(0, 0, 0, 0);
-    const endWeek = new Date(startWeek);
-    endWeek.setDate(startWeek.getDate() + 6);
-    endWeek.setHours(23, 59, 59, 999);
-    query.startDate = { $gte: startWeek, $lte: endWeek };
-  } else if (dateRange === 'this_month') {
-    const startMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const endMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
-    query.startDate = { $gte: startMonth, $lte: endMonth };
-  } else if (dateRange === 'next_30_days') {
-    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const end = new Date(now);
-    end.setDate(now.getDate() + 30);
-    end.setHours(23, 59, 59, 999);
-    query.startDate = { $gte: start, $lte: end };
-  } else if (startDate && endDate) {
-    query.startDate = { $gte: new Date(startDate), $lte: new Date(endDate) };
+  if (timeframe === 'upcoming') {
+    filter.startDate = { $gte: new Date(now.setHours(0, 0, 0, 0)) };
+  } else if (timeframe === 'past') {
+    filter.startDate = { $lt: new Date(now.setHours(0, 0, 0, 0)) };
+  } else if (timeframe === 'today') {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+    filter.startDate = { $gte: startOfDay, $lte: endOfDay };
   }
 
-  return paginate(
-    CalendarEvent,
-    query,
-    {
-      page,
-      limit,
-      search,
-      searchFields: ['title', 'location', 'organizer', 'type', 'description'],
-      populate: [
-        { path: 'targetClasses', select: 'name' },
-        { path: 'createdBy', select: 'name email role' },
-      ],
-      sort: 'startDate',
-    }
-  );
+  if (startDateFrom || startDateTo) {
+    filter.startDate = filter.startDate || {};
+    if (startDateFrom) filter.startDate.$gte = new Date(startDateFrom);
+    if (startDateTo) filter.startDate.$lte = new Date(startDateTo);
+  }
+
+  return paginate(Event, filter, {
+    ...paginateOptions,
+    search,
+    searchFields: ['title', 'location', 'description'],
+    sort: paginateOptions.sort || '-startDate',
+    populate: [
+      { path: 'targetClasses', select: 'name grade' },
+      { path: 'createdBy', select: 'firstName lastName email role' },
+    ],
+  });
 };
 
 export const getEventById = async (id, schoolId) => {
-  const event = await CalendarEvent.findOne({ _id: id, schoolId })
-    .populate('targetClasses', 'name')
-    .populate('createdBy', 'name email role');
-  if (!event) throw new ApiError(404, 'Event not found');
-  return event;
+  const event = await Event.findOne({ _id: id, schoolId })
+    .populate('targetClasses', 'name grade')
+    .populate('createdBy', 'firstName lastName email role');
+
+  if (!event) {
+    throw new ApiError(404, 'Event not found');
+  }
+
+  // Also fetch up to 12 recent photos for preview
+  const recentPhotos = await EventGalleryPhoto.find({ schoolId, eventId: id })
+    .sort({ createdAt: -1 })
+    .limit(12);
+
+  return {
+    ...event.toObject(),
+    recentPhotos,
+  };
 };
 
 export const updateEvent = async (id, schoolId, data) => {
-  const event = await CalendarEvent.findOneAndUpdate({ _id: id, schoolId }, data, { new: true });
-  if (!event) throw new ApiError(404, 'Event not found');
+  const event = await Event.findOneAndUpdate(
+    { _id: id, schoolId },
+    { $set: data },
+    { new: true, runValidators: true }
+  )
+    .populate('targetClasses', 'name grade')
+    .populate('createdBy', 'firstName lastName email role');
+
+  if (!event) {
+    throw new ApiError(404, 'Event not found');
+  }
   return event;
 };
 
@@ -132,73 +126,198 @@ export const cancelEvent = async (id, schoolId) => {
 };
 
 export const deleteEvent = async (id, schoolId) => {
-  const event = await CalendarEvent.findOneAndDelete({ _id: id, schoolId });
-  if (!event) throw new ApiError(404, 'Event not found');
+  const event = await Event.findOne({ _id: id, schoolId });
+  if (!event) {
+    throw new ApiError(404, 'Event not found');
+  }
+
+  // 1. Fetch all gallery photos to delete from Cloudinary
+  const photos = await EventGalleryPhoto.find({ schoolId, eventId: id });
+  const publicIds = photos.map((p) => p.publicId).filter(Boolean);
+
+  if (event.coverImage?.publicId) {
+    publicIds.push(event.coverImage.publicId);
+  }
+
+  // 2. Batch delete assets from Cloudinary
+  if (publicIds.length > 0) {
+    await deleteMultipleFilesFromCloudinary(publicIds);
+  }
+
+  // 3. Delete photo records from DB
+  await EventGalleryPhoto.deleteMany({ schoolId, eventId: id });
+
+  // 4. Delete the event
+  await Event.deleteOne({ _id: id, schoolId });
+
   return true;
 };
 
 export const getCalendar = async (schoolId, month, year) => {
-  const start = new Date(year, month - 1, 1);
-  const end = new Date(year, month, 0, 23, 59, 59, 999);
-  const events = await CalendarEvent.find({ schoolId, startDate: { $gte: start, $lte: end } }).sort('startDate');
+  let start, end;
+  if (month && year) {
+    start = new Date(year, month - 1, 1);
+    end = new Date(year, month, 0, 23, 59, 59, 999);
+  } else {
+    const currentYear = new Date().getFullYear();
+    start = new Date(currentYear, 0, 1);
+    end = new Date(currentYear, 11, 31, 23, 59, 59, 999);
+  }
+
+  const events = await Event.find({
+    schoolId,
+    startDate: { $gte: start, $lte: end },
+  })
+    .sort('startDate')
+    .populate('targetClasses', 'name grade');
+
   return events;
 };
 
-export const getEventStats = async (schoolId) => {
-  const now = new Date();
+// ==========================================
+// EVENT GALLERY PHOTO SERVICES
+// ==========================================
 
-  // Next 30 days
-  const in30Days = new Date(now);
-  in30Days.setDate(now.getDate() + 30);
+export const uploadEventPhotos = async (schoolId, eventId, files = [], userId) => {
+  const event = await Event.findOne({ _id: eventId, schoolId });
+  if (!event) {
+    throw new ApiError(404, 'Event not found');
+  }
 
-  // Today range
-  const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const endToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+  if (!files || files.length === 0) {
+    throw new ApiError(400, 'No photos provided for upload');
+  }
 
-  // Current month range
-  const startMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const endMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+  const uploadedRecords = [];
+  const errors = [];
 
-  const [
-    upcomingCount,
-    todayCount,
-    thisMonthCount,
-    pastCount,
-    categoryAgg,
-  ] = await Promise.all([
-    CalendarEvent.countDocuments({
-      schoolId,
-      startDate: { $gte: startToday, $lte: in30Days },
-      status: { $ne: 'cancelled' },
-    }),
-    CalendarEvent.countDocuments({
-      schoolId,
-      startDate: { $gte: startToday, $lte: endToday },
-    }),
-    CalendarEvent.countDocuments({
-      schoolId,
-      startDate: { $gte: startMonth, $lte: endMonth },
-    }),
-    CalendarEvent.countDocuments({
-      schoolId,
-      startDate: { $lt: startToday },
-    }),
-    CalendarEvent.aggregate([
-      { $match: { schoolId } },
-      { $group: { _id: '$type', count: { $sum: 1 } } },
-    ]),
-  ]);
+  for (const file of files) {
+    try {
+      const uploadResult = await uploadFileOnCloudinary(file.path, {
+        folder: `instique/schools/${schoolId}/events/${eventId}`,
+        resource_type: 'image',
+        eventId,
+      });
 
-  const categoryCounts = {};
-  categoryAgg.forEach((c) => {
-    if (c._id) categoryCounts[c._id] = c.count;
-  });
+      if (!uploadResult || !uploadResult.secure_url) {
+        errors.push({ file: file.originalname, error: uploadResult?.message || 'Upload failed' });
+        continue;
+      }
+
+      const photoDoc = await EventGalleryPhoto.create({
+        schoolId,
+        eventId,
+        url: uploadResult.secure_url,
+        publicId: uploadResult.public_id,
+        width: uploadResult.width,
+        height: uploadResult.height,
+        format: uploadResult.format,
+        bytes: uploadResult.bytes,
+        uploadedBy: userId,
+      });
+
+      uploadedRecords.push(photoDoc);
+    } catch (err) {
+      console.error(`Error processing file ${file.originalname}:`, err);
+      errors.push({ file: file.originalname, error: err.message });
+    }
+  }
+
+  if (uploadedRecords.length === 0 && errors.length > 0) {
+    throw new ApiError(500, `Failed to upload photos: ${errors.map(e => e.error).join(', ')}`);
+  }
+
+  if (uploadedRecords.length > 0) {
+    const totalCount = await EventGalleryPhoto.countDocuments({ schoolId, eventId });
+    const updatePayload = { photoCount: totalCount };
+
+    // If event has no cover image yet, set the first uploaded photo as cover image
+    if (!event.coverImage?.url && uploadedRecords[0]) {
+      updatePayload.coverImage = {
+        url: uploadedRecords[0].url,
+        publicId: uploadedRecords[0].publicId,
+      };
+    }
+
+    await Event.updateOne({ _id: eventId, schoolId }, { $set: updatePayload });
+  }
 
   return {
-    upcomingCount,
-    todayCount,
-    thisMonthCount,
-    pastCount,
-    categoryCounts,
+    photos: uploadedRecords,
+    uploadedCount: uploadedRecords.length,
+    errors,
   };
+};
+
+export const getEventPhotos = async (schoolId, eventId, options = {}) => {
+  const event = await Event.findOne({ _id: eventId, schoolId });
+  if (!event) {
+    throw new ApiError(404, 'Event not found');
+  }
+
+  return paginate(EventGalleryPhoto, { schoolId, eventId }, {
+    ...options,
+    sort: options.sort || '-createdAt',
+    populate: [{ path: 'uploadedBy', select: 'firstName lastName email' }],
+  });
+};
+
+export const deleteEventPhoto = async (schoolId, eventId, photoId) => {
+  const photo = await EventGalleryPhoto.findOne({ _id: photoId, schoolId, eventId });
+  if (!photo) {
+    throw new ApiError(404, 'Gallery photo not found');
+  }
+
+  // 1. Delete from Cloudinary
+  if (photo.publicId) {
+    await deleteFileFromCloudinary(photo.publicId);
+  }
+
+  // 2. Delete from DB
+  await EventGalleryPhoto.deleteOne({ _id: photoId, schoolId, eventId });
+
+  // 3. Update photo count on Event
+  const remainingCount = await EventGalleryPhoto.countDocuments({ schoolId, eventId });
+  const event = await Event.findOne({ _id: eventId, schoolId });
+
+  let updatePayload = { photoCount: remainingCount };
+  if (event && event.coverImage?.publicId === photo.publicId) {
+    const nextPhoto = await EventGalleryPhoto.findOne({ schoolId, eventId }).sort('-createdAt');
+    updatePayload.coverImage = nextPhoto
+      ? { url: nextPhoto.url, publicId: nextPhoto.publicId }
+      : { url: '', publicId: '' };
+  }
+
+  await Event.updateOne({ _id: eventId, schoolId }, { $set: updatePayload });
+
+  return true;
+};
+
+export const updatePhotoCaption = async (schoolId, eventId, photoId, caption) => {
+  const photo = await EventGalleryPhoto.findOneAndUpdate(
+    { _id: photoId, schoolId, eventId },
+    { $set: { caption } },
+    { new: true }
+  ).populate('uploadedBy', 'firstName lastName email');
+
+  if (!photo) {
+    throw new ApiError(404, 'Gallery photo not found');
+  }
+
+  return photo;
+};
+
+export const setEventCoverPhoto = async (schoolId, eventId, photoId) => {
+  const photo = await EventGalleryPhoto.findOne({ _id: photoId, schoolId, eventId });
+  if (!photo) {
+    throw new ApiError(404, 'Gallery photo not found');
+  }
+
+  const event = await Event.findOneAndUpdate(
+    { _id: eventId, schoolId },
+    { $set: { coverImage: { url: photo.url, publicId: photo.publicId } } },
+    { new: true }
+  );
+
+  return event;
 };

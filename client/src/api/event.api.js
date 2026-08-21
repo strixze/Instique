@@ -9,5 +9,18 @@ export const eventApi = {
   cancel: (id) => api.put(`/events/${id}/cancel`),
   delete: (id) => api.delete(`/events/${id}`),
   getCalendar: (params) => api.get('/events/calendar', { params }),
-  getStats: () => api.get('/events/stats'),
+  
+  // Gallery Photo endpoints
+  getPhotos: (eventId, params) => api.get(`/events/${eventId}/photos`, { params }),
+  uploadPhotos: (eventId, formData, onUploadProgress) =>
+    api.post(`/events/${eventId}/photos`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      onUploadProgress,
+    }),
+  updatePhotoCaption: (eventId, photoId, data) =>
+    api.put(`/events/${eventId}/photos/${photoId}`, data),
+  setCoverPhoto: (eventId, photoId) =>
+    api.put(`/events/${eventId}/photos/${photoId}/cover`),
+  deletePhoto: (eventId, photoId) =>
+    api.delete(`/events/${eventId}/photos/${photoId}`),
 };

@@ -1,730 +1,1619 @@
-import { useEffect, useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import {
-  Calendar as CalendarIcon, Plus, Search, Filter, RotateCcw,
-  MoreVertical, MapPin, Clock, Users, Flag, Trophy, BookOpen,
-  Palette, UserCheck, AlertCircle, CheckCircle2, ChevronLeft,
-  ChevronRight, ArrowRight, Eye, Edit3, Trash2, Send, XCircle,
-  FileText, Sparkles, Building, Layers, Image as ImageIcon, Camera
+  Calendar as CalendarIcon,
+  Plus,
+  Search,
+  Filter,
+  Grid,
+  List,
+  CalendarDays,
+  Image as ImageIcon,
+  MapPin,
+  Clock,
+  Users,
+  ChevronLeft,
+  ChevronRight,
+  UploadCloud,
+  X,
+  Trash2,
+  Edit2,
+  Check,
+  Download,
+  Eye,
+  Maximize2,
+  Sparkles,
+  Layers,
+  ArrowRight,
+  ExternalLink,
+  Shield,
+  FileImage,
+  AlertCircle,
+  Camera,
+  Star,
+  MoreVertical,
 } from 'lucide-react';
-import Card from '../../components/ui/Card';
+import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import Input from '../../components/ui/Input';
 import Select from '../../components/ui/Select';
 import Badge from '../../components/ui/Badge';
-import Skeleton from '../../components/ui/Skeleton';
+import Card from '../../components/ui/Card';
+import EmptyState from '../../components/ui/EmptyState';
+import DataTable from '../../components/ui/DataTable';
+import UserAvatar from '../../components/ui/UserAvatar';
+import { useUserStore } from '../../store/userStore';
 import { eventApi } from '../../api/event.api';
 import { academicApi } from '../../api/academic.api';
-import { useUserStore } from '../../store/userStore';
-import GalleryView from '../../components/events/GalleryView';
 
-// ── Event Types & Categories Config ──
+const BACKEND_BASE = import.meta.env.VITE_API_BASE_URL
+  ? import.meta.env.VITE_API_BASE_URL.replace(/\/api\/v1\/?$/, '')
+  : 'http://localhost:5000';
+
+export const getMediaUrl = (url) => {
+  if (!url) return '';
+  if (
+    url.startsWith('http://') ||
+    url.startsWith('https://') ||
+    url.startsWith('blob:') ||
+    url.startsWith('data:')
+  ) {
+    return url;
+  }
+  return `${BACKEND_BASE}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 const EVENT_TYPES = [
-  { value: 'all', label: 'All Types' },
-  { value: 'academic', label: 'Academic', color: 'bg-amber-500', icon: BookOpen, lightBg: 'bg-amber-50 text-amber-600' },
-  { value: 'sports', label: 'Sports', color: 'bg-orange-500', icon: Trophy, lightBg: 'bg-orange-50 text-orange-600' },
-  { value: 'cultural', label: 'Cultural', color: 'bg-purple-500', icon: Palette, lightBg: 'bg-purple-50 text-purple-600' },
-  { value: 'holiday', label: 'Holiday', color: 'bg-emerald-500', icon: CalendarIcon, lightBg: 'bg-emerald-50 text-emerald-600' },
-  { value: 'ptm', label: 'Parent Meeting', color: 'bg-blue-500', icon: Users, lightBg: 'bg-blue-50 text-blue-600' },
-  { value: 'competition', label: 'Competition', color: 'bg-rose-500', icon: Trophy, lightBg: 'bg-rose-50 text-rose-600' },
-  { value: 'workshop', label: 'Workshop', color: 'bg-indigo-500', icon: Sparkles, lightBg: 'bg-indigo-50 text-indigo-600' },
-  { value: 'seminar', label: 'Seminar', color: 'bg-teal-500', icon: FileText, lightBg: 'bg-teal-50 text-teal-600' },
-  { value: 'celebration', label: 'Celebration', color: 'bg-pink-500', icon: Flag, lightBg: 'bg-pink-50 text-pink-600' },
-  { value: 'school_trip', label: 'School Trip', color: 'bg-cyan-500', icon: MapPin, lightBg: 'bg-cyan-50 text-cyan-600' },
-  { value: 'event', label: 'School Event', color: 'bg-forest', icon: Flag, lightBg: 'bg-emerald-50 text-forest' },
-  { value: 'other', label: 'Other', color: 'bg-slate-500', icon: Layers, lightBg: 'bg-slate-100 text-slate-600' },
+  { value: 'cultural', label: 'Cultural', color: '#8b5cf6', bg: 'bg-purple-50 text-purple-700 border-purple-200' },
+  { value: 'sports', label: 'Sports', color: '#10b981', bg: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  { value: 'academic', label: 'Academic', color: '#3b82f6', bg: 'bg-blue-50 text-blue-700 border-blue-200' },
+  { value: 'annual_day', label: 'Annual Day', color: '#f59e0b', bg: 'bg-amber-50 text-amber-700 border-amber-200' },
+  { value: 'sports_day', label: 'Sports Day', color: '#06b6d4', bg: 'bg-cyan-50 text-cyan-700 border-cyan-200' },
+  { value: 'holiday', label: 'Holiday', color: '#ef4444', bg: 'bg-rose-50 text-rose-700 border-rose-200' },
+  { value: 'exam', label: 'Exam', color: '#f97316', bg: 'bg-orange-50 text-orange-700 border-orange-200' },
+  { value: 'ptm', label: 'PTM', color: '#6366f1', bg: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+  { value: 'workshop', label: 'Workshop', color: '#a855f7', bg: 'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200' },
+  { value: 'celebration', label: 'Celebration', color: '#ec4899', bg: 'bg-pink-50 text-pink-700 border-pink-200' },
+  { value: 'competition', label: 'Competition', color: '#eab308', bg: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
+  { value: 'deadline', label: 'Deadline', color: '#64748b', bg: 'bg-slate-50 text-slate-700 border-slate-200' },
+  { value: 'event', label: 'General Event', color: '#10b981', bg: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  { value: 'other', label: 'Other', color: '#6b7280', bg: 'bg-gray-50 text-gray-700 border-gray-200' },
 ];
 
-function getEventTypeInfo(typeKey) {
-  const found = EVENT_TYPES.find((t) => t.value === typeKey);
-  if (found) return found;
-  return { value: typeKey, label: typeKey || 'Event', color: 'bg-forest', icon: Flag, lightBg: 'bg-emerald-50 text-forest' };
-}
+const STATUS_OPTIONS = [
+  { value: 'all', label: 'All Statuses' },
+  { value: 'upcoming', label: 'Upcoming' },
+  { value: 'ongoing', label: 'Ongoing' },
+  { value: 'completed', label: 'Completed' },
+  { value: 'cancelled', label: 'Cancelled' },
+];
 
-function getStatusBadge(status, startDate) {
-  if (status === 'cancelled') return <Badge color="danger">Cancelled</Badge>;
-  if (status === 'draft') return <Badge color="gray">Draft</Badge>;
-  
-  const isFuture = new Date(startDate) > new Date();
-  if (isFuture) return <Badge color="warning">Scheduled</Badge>;
-  return <Badge color="success">Published</Badge>;
-}
+const AUDIENCE_OPTIONS = [
+  { value: 'all', label: 'Entire School' },
+  { value: 'students', label: 'Students Only' },
+  { value: 'teachers', label: 'Teachers Only' },
+  { value: 'parents', label: 'Parents Only' },
+  { value: 'classes', label: 'Specific Classes' },
+];
+
+const initialForm = {
+  title: '',
+  description: '',
+  type: 'event',
+  startDate: new Date().toISOString().split('T')[0],
+  endDate: '',
+  isFullDay: true,
+  startTime: '09:00',
+  endTime: '15:00',
+  location: '',
+  audience: 'all',
+  targetClasses: [],
+  status: 'upcoming',
+  color: '#10b981',
+};
 
 export default function Events() {
   const user = useUserStore((s) => s.user);
-  const isSchoolAdmin = user?.role === 'school_admin' || user?.role === 'super_admin';
+  const isAdmin = user?.role === 'school_admin' || user?.role === 'super_admin';
+  const canManagePhotos = isAdmin || user?.role === 'teacher';
 
-  // ── Main Module Navigation Tab ──
-  const [mainModuleTab, setMainModuleTab] = useState('events'); // 'events' | 'gallery'
-
-  // ── Main State ──
-  const [loading, setLoading] = useState(true);
-  const [statsLoading, setStatsLoading] = useState(true);
+  // Navigation and view states
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'table' | 'calendar'
   const [events, setEvents] = useState([]);
-  const [stats, setStats] = useState({
-    upcomingCount: 0,
-    todayCount: 0,
-    thisMonthCount: 0,
-    pastCount: 0,
-    categoryCounts: {},
-  });
-  const [classesList, setClassesList] = useState([]);
+  const [meta, setMeta] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [reload, setReload] = useState(0);
 
-  // ── Filters & Tabs ──
-  const [activeTab, setActiveTab] = useState('upcoming'); // 'upcoming' | 'past' | 'draft' | 'cancelled'
+  // Filters
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
-  const [audienceFilter, setAudienceFilter] = useState('all');
-  const [dateRangeFilter, setDateRangeFilter] = useState('all');
-  const [selectedCalendarDate, setSelectedCalendarDate] = useState(null);
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [timeframeFilter, setTimeframeFilter] = useState('all');
 
-  // ── Modals State ──
-  const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [editEvent, setEditEvent] = useState(null);
-  const [viewEvent, setViewEvent] = useState(null);
+  // Academic classes for target selection
+  const [classesList, setClassesList] = useState([]);
+
+  // Modals state
+  const [eventModalOpen, setEventModalOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState(null);
+  const [form, setForm] = useState(initialForm);
   const [saving, setSaving] = useState(false);
-  const [actionMenuId, setActionMenuId] = useState(null);
 
-  // ── Calendar Month State ──
-  const [currentCalendarDate, setCurrentCalendarDate] = useState(new Date());
+  // Gallery Modal state
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [galleryModalOpen, setGalleryModalOpen] = useState(false);
+  const [galleryPhotos, setGalleryPhotos] = useState([]);
+  const [galleryLoading, setGalleryLoading] = useState(false);
+  const [galleryPage, setGalleryPage] = useState(1);
+  const [galleryMeta, setGalleryMeta] = useState(null);
 
-  // ── Form State ──
-  const [form, setForm] = useState({
-    title: '',
-    description: '',
-    type: 'event',
-    startDate: new Date().toISOString().split('T')[0],
-    endDate: '',
-    startTime: '08:30 AM',
-    endTime: '12:30 PM',
-    isFullDay: false,
-    location: '',
-    organizer: '',
-    audience: ['students', 'teachers', 'parents'],
-    audienceScope: 'entire_school',
-    targetClasses: [],
-    status: 'published',
-  });
+  // Photo Upload state
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [filePreviews, setFilePreviews] = useState([]);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const fileInputRef = useRef(null);
 
-  // Load Classes for selector
+  // Lightbox state
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [activePhotoIndex, setActivePhotoIndex] = useState(0);
+  const [editingCaption, setEditingCaption] = useState(false);
+  const [captionInput, setCaptionInput] = useState('');
+
+  // Calendar View Month state
+  const [calendarDate, setCalendarDate] = useState(new Date());
+  const [calendarEvents, setCalendarEvents] = useState([]);
+  const [calendarLoading, setCalendarLoading] = useState(false);
+
+  // Fetch classes for class targeting
   useEffect(() => {
-    academicApi.getClasses({ limit: 100 })
-      .then((res) => setClassesList(res.data || []))
-      .catch(() => {});
-  }, []);
+    const fetchClasses = async () => {
+      try {
+        const res = await academicApi.getClasses();
+        setClassesList(res.data || []);
+      } catch (err) {
+        console.error('Failed to fetch classes:', err);
+      }
+    };
+    if (isAdmin) {
+      fetchClasses();
+    }
+  }, [isAdmin]);
 
-  // Fetch Stats
-  const fetchStats = () => {
-    setStatsLoading(true);
-    eventApi.getStats()
-      .then((res) => setStats(res.data || {}))
-      .catch(() => {})
-      .finally(() => setStatsLoading(false));
-  };
-
-  // Fetch Events
-  const fetchEvents = () => {
-    setLoading(true);
-    const params = {
-      limit: 100,
-      status: activeTab,
-      type: typeFilter !== 'all' ? typeFilter : undefined,
-      audience: audienceFilter !== 'all' ? audienceFilter : undefined,
-      dateRange: dateRangeFilter !== 'all' ? dateRangeFilter : undefined,
-      search: search ? search : undefined,
+  // Load events for Grid / Table
+  useEffect(() => {
+    let active = true;
+    const fetchEvents = async () => {
+      setLoading(true);
+      try {
+        const params = {
+          page,
+          limit: 12,
+          search: search || undefined,
+          type: typeFilter !== 'all' ? typeFilter : undefined,
+          status: statusFilter !== 'all' ? statusFilter : undefined,
+          timeframe: timeframeFilter !== 'all' ? timeframeFilter : undefined,
+        };
+        const res = await eventApi.getAll(params);
+        if (active) {
+          setEvents(res.data || []);
+          setMeta(res.meta || null);
+        }
+      } catch (err) {
+        if (active) toast.error(err?.message || 'Failed to load events');
+      } finally {
+        if (active) setLoading(false);
+      }
     };
 
-    eventApi.getAll(params)
-      .then((res) => {
-        setEvents(res.data || []);
-      })
-      .catch((e) => {
-        toast.error(e?.message || 'Failed to load events');
-        setEvents([]);
-      })
-      .finally(() => setLoading(false));
-  };
-
-  useEffect(() => {
-    fetchStats();
-  }, []);
-
-  useEffect(() => {
-    fetchEvents();
-  }, [activeTab, typeFilter, audienceFilter, dateRangeFilter]);
-
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    fetchEvents();
-  };
-
-  const handleResetFilters = () => {
-    setSearch('');
-    setTypeFilter('all');
-    setAudienceFilter('all');
-    setDateRangeFilter('all');
-    setSelectedCalendarDate(null);
-    setActiveTab('upcoming');
-    fetchEvents();
-  };
-
-  const activeFiltersCount = useMemo(() => {
-    let count = 0;
-    if (search) count++;
-    if (typeFilter !== 'all') count++;
-    if (audienceFilter !== 'all') count++;
-    if (dateRangeFilter !== 'all') count++;
-    if (selectedCalendarDate) count++;
-    return count;
-  }, [search, typeFilter, audienceFilter, dateRangeFilter, selectedCalendarDate]);
-
-  // ── Client-side filter for selected calendar date & search ──
-  const filteredEventsList = useMemo(() => {
-    return events.filter((ev) => {
-      // Calendar date filter
-      if (selectedCalendarDate) {
-        const evStart = new Date(ev.startDate).toDateString();
-        const selDate = new Date(selectedCalendarDate).toDateString();
-        if (evStart !== selDate) return false;
-      }
-      // Text Search
-      if (search) {
-        const q = search.toLowerCase();
-        const t = (ev.title || '').toLowerCase();
-        const loc = (ev.location || '').toLowerCase();
-        const org = (ev.organizer || '').toLowerCase();
-        const desc = (ev.description || '').toLowerCase();
-        if (!t.includes(q) && !loc.includes(q) && !org.includes(q) && !desc.includes(q)) {
-          return false;
-        }
-      }
-      return true;
-    });
-  }, [events, selectedCalendarDate, search]);
-
-  // ── Open Create / Edit Form ──
-  const openFormModal = (evToEdit = null) => {
-    if (evToEdit) {
-      setEditEvent(evToEdit);
-      setForm({
-        title: evToEdit.title || '',
-        description: evToEdit.description || '',
-        type: evToEdit.type || 'event',
-        startDate: evToEdit.startDate ? new Date(evToEdit.startDate).toISOString().split('T')[0] : '',
-        endDate: evToEdit.endDate ? new Date(evToEdit.endDate).toISOString().split('T')[0] : '',
-        startTime: evToEdit.startTime || '08:30 AM',
-        endTime: evToEdit.endTime || '12:30 PM',
-        isFullDay: !!evToEdit.isFullDay,
-        location: evToEdit.location || '',
-        organizer: evToEdit.organizer || '',
-        audience: evToEdit.audience || ['students', 'teachers', 'parents'],
-        audienceScope: evToEdit.audienceScope || 'entire_school',
-        targetClasses: evToEdit.targetClasses ? evToEdit.targetClasses.map((c) => c._id || c) : [],
-        status: evToEdit.status || 'published',
-      });
-    } else {
-      setEditEvent(null);
-      setForm({
-        title: '',
-        description: '',
-        type: 'event',
-        startDate: new Date().toISOString().split('T')[0],
-        endDate: '',
-        startTime: '08:30 AM',
-        endTime: '12:30 PM',
-        isFullDay: false,
-        location: '',
-        organizer: '',
-        audience: ['students', 'teachers', 'parents'],
-        audienceScope: 'entire_school',
-        targetClasses: [],
-        status: 'published',
-      });
+    if (viewMode !== 'calendar') {
+      fetchEvents();
     }
-    setCreateModalOpen(true);
+    return () => {
+      active = false;
+    };
+  }, [page, search, typeFilter, statusFilter, timeframeFilter, reload, viewMode]);
+
+  // Load Calendar events when calendar view is active
+  useEffect(() => {
+    let active = true;
+    const fetchCalendar = async () => {
+      setCalendarLoading(true);
+      try {
+        const month = calendarDate.getMonth() + 1;
+        const year = calendarDate.getFullYear();
+        const res = await eventApi.getCalendar({ month, year });
+        if (active) {
+          setCalendarEvents(res.data || []);
+        }
+      } catch (err) {
+        if (active) toast.error('Failed to load calendar events');
+      } finally {
+        if (active) setCalendarLoading(false);
+      }
+    };
+
+    if (viewMode === 'calendar') {
+      fetchCalendar();
+    }
+    return () => {
+      active = false;
+    };
+  }, [calendarDate, viewMode, reload]);
+
+  // Event stats calculation
+  const stats = useMemo(() => {
+    const total = meta?.total || events.length;
+    const upcoming = events.filter((e) => e.status === 'upcoming').length;
+    const completed = events.filter((e) => e.status === 'completed').length;
+    const totalPhotos = events.reduce((sum, e) => sum + (e.photoCount || 0), 0);
+    return { total, upcoming, completed, totalPhotos };
+  }, [events, meta]);
+
+  // Helpers
+  const getTypeMeta = (typeKey) => {
+    return EVENT_TYPES.find((t) => t.value === typeKey) || EVENT_TYPES[EVENT_TYPES.length - 1];
   };
 
-  const handleSaveEvent = async () => {
-    if (!form.title.trim() || !form.startDate) {
-      toast.error('Event title and start date are required');
+  const formatDateRange = (start, end, isFullDay, startTime, endTime) => {
+    if (!start) return '';
+    const s = new Date(start);
+    const options = { month: 'short', day: 'numeric', year: 'numeric' };
+    const startDateStr = s.toLocaleDateString('en-US', options);
+
+    if (end && new Date(end).toDateString() !== s.toDateString()) {
+      const endDateStr = new Date(end).toLocaleDateString('en-US', options);
+      return `${startDateStr} - ${endDateStr}`;
+    }
+
+    if (!isFullDay && startTime) {
+      const timeStr = endTime ? `${startTime} - ${endTime}` : startTime;
+      return `${startDateStr} • ${timeStr}`;
+    }
+
+    return startDateStr;
+  };
+
+  // Open Event Create / Edit modal
+  const handleOpenCreate = () => {
+    setEditingEvent(null);
+    setForm(initialForm);
+    setEventModalOpen(true);
+  };
+
+  const handleOpenEdit = (evt, e) => {
+    if (e) e.stopPropagation();
+    setEditingEvent(evt);
+    setForm({
+      title: evt.title || '',
+      description: evt.description || '',
+      type: evt.type || 'event',
+      startDate: evt.startDate ? new Date(evt.startDate).toISOString().split('T')[0] : '',
+      endDate: evt.endDate ? new Date(evt.endDate).toISOString().split('T')[0] : '',
+      isFullDay: evt.isFullDay ?? true,
+      startTime: evt.startTime || '09:00',
+      endTime: evt.endTime || '15:00',
+      location: evt.location || '',
+      audience: evt.audience || 'all',
+      targetClasses: (evt.targetClasses || []).map((c) => (typeof c === 'object' ? c._id : c)),
+      status: evt.status || 'upcoming',
+      color: evt.color || '#10b981',
+    });
+    setEventModalOpen(true);
+  };
+
+  // Save Event (Create or Update)
+  const handleSaveEvent = async (e) => {
+    e.preventDefault();
+    if (!form.title.trim()) {
+      toast.error('Event title is required');
       return;
     }
+    if (!form.startDate) {
+      toast.error('Start date is required');
+      return;
+    }
+
     setSaving(true);
     try {
-      if (editEvent) {
-        await eventApi.update(editEvent._id, form);
+      const payload = {
+        ...form,
+        targetClasses: form.audience === 'classes' ? form.targetClasses : [],
+      };
+
+      if (editingEvent) {
+        await eventApi.update(editingEvent._id, payload);
         toast.success('Event updated successfully');
       } else {
-        await eventApi.create(form);
+        await eventApi.create(payload);
         toast.success('Event created successfully');
       }
-      setCreateModalOpen(false);
-      fetchEvents();
-      fetchStats();
-    } catch (e) {
-      toast.error(e?.message || 'Failed to save event');
+
+      setEventModalOpen(false);
+      setEditingEvent(null);
+      setReload((r) => r + 1);
+    } catch (err) {
+      toast.error(err?.message || 'Failed to save event');
     } finally {
       setSaving(false);
     }
   };
 
-  const handlePublishEvent = async (evId) => {
-    try {
-      await eventApi.publish(evId);
-      toast.success('Event published');
-      fetchEvents();
-      fetchStats();
-    } catch (e) {
-      toast.error(e?.message || 'Failed to publish event');
-    }
-  };
-
-  const handleCancelEvent = async (evId) => {
-    try {
-      await eventApi.cancel(evId);
-      toast.success('Event cancelled');
-      fetchEvents();
-      fetchStats();
-    } catch (e) {
-      toast.error(e?.message || 'Failed to cancel event');
-    }
-  };
-
-  const handleDeleteEvent = (ev) => {
+  // Delete Event
+  const handleDeleteEvent = (evt, e) => {
+    if (e) e.stopPropagation();
     Swal.fire({
-      title: 'Delete Event?',
-      text: `Are you sure you want to delete "${ev.title}"? This cannot be undone.`,
+      title: 'Delete Event & Gallery?',
+      text: `"${evt.title}" and all its photos will be permanently deleted from Cloudinary and the database.`,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Delete Event',
+      confirmButtonText: 'Yes, delete',
       cancelButtonText: 'Cancel',
       confirmButtonColor: '#dc2626',
     }).then(async (result) => {
       if (!result.isConfirmed) return;
       try {
-        await eventApi.delete(ev._id);
-        toast.success('Event deleted');
-        fetchEvents();
-        fetchStats();
-      } catch (e) {
-        toast.error(e?.message || 'Failed to delete event');
+        await eventApi.delete(evt._id);
+        toast.success('Event and gallery deleted successfully');
+        if (selectedEvent?._id === evt._id) {
+          setGalleryModalOpen(false);
+          setSelectedEvent(null);
+        }
+        setReload((r) => r + 1);
+      } catch (err) {
+        toast.error(err?.message || 'Failed to delete event');
       }
     });
   };
 
-  // ── Calendar Days Calculation ──
-  const calendarMonthData = useMemo(() => {
-    const year = currentCalendarDate.getFullYear();
-    const month = currentCalendarDate.getMonth();
-    const firstDayIndex = new Date(year, month, 1).getDay(); // 0=Sun
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
+  // ==========================================
+  // GALLERY LOGIC & PHOTO UPLOADS
+  // ==========================================
 
-    // Adjusted for Mon-Sun (Mon=0, Sun=6)
-    const adjustedFirstDay = (firstDayIndex + 6) % 7;
+  const handleOpenGallery = async (evt, e) => {
+    if (e) e.stopPropagation();
+    setSelectedEvent(evt);
+    setGalleryModalOpen(true);
+    setGalleryPage(1);
+    setSelectedFiles([]);
+    setFilePreviews([]);
+    loadGalleryPhotos(evt._id, 1);
+  };
+
+  const loadGalleryPhotos = async (eventId, pageNum = 1) => {
+    setGalleryLoading(true);
+    try {
+      const res = await eventApi.getPhotos(eventId, { page: pageNum, limit: 24 });
+      setGalleryPhotos(res.data || []);
+      setGalleryMeta(res.meta || null);
+    } catch (err) {
+      toast.error('Failed to load gallery photos');
+    } finally {
+      setGalleryLoading(false);
+    }
+  };
+
+  // File selection for upload
+  const handleFileSelect = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    // Validate image format & size (max 10MB per image)
+    const validFiles = [];
+    const previews = [];
+
+    for (const file of files) {
+      if (!file.type.startsWith('image/')) {
+        toast.error(`"${file.name}" is not an image file.`);
+        continue;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error(`"${file.name}" exceeds 10MB limit.`);
+        continue;
+      }
+      validFiles.push(file);
+      previews.push(URL.createObjectURL(file));
+    }
+
+    setSelectedFiles((prev) => [...prev, ...validFiles]);
+    setFilePreviews((prev) => [...prev, ...previews]);
+  };
+
+  const removeSelectedFile = (idx) => {
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== idx));
+    setFilePreviews((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  // Perform upload to Cloudinary
+  const handleUploadPhotos = async () => {
+    if (!selectedFiles.length || !selectedEvent) return;
+
+    setUploading(true);
+    setUploadProgress(10);
+
+    const formData = new FormData();
+    selectedFiles.forEach((file) => {
+      formData.append('photos', file);
+    });
+
+    try {
+      const res = await eventApi.uploadPhotos(selectedEvent._id, formData, (progressEvent) => {
+        const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+        setUploadProgress(percent);
+      });
+
+      const uploadedCount = res?.data?.uploadedCount ?? selectedFiles.length;
+      toast.success(`${uploadedCount} photo(s) added to gallery!`);
+      setSelectedFiles([]);
+      setFilePreviews([]);
+      setUploadProgress(0);
+
+      // Refresh gallery photos and event list
+      loadGalleryPhotos(selectedEvent._id, 1);
+      setReload((r) => r + 1);
+    } catch (err) {
+      console.error('Upload error:', err);
+      toast.error(err?.message || err?.error || 'Failed to upload photos');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Lightbox handlers
+  const handleOpenLightbox = (index) => {
+    setActivePhotoIndex(index);
+    setCaptionInput(galleryPhotos[index]?.caption || '');
+    setEditingCaption(false);
+    setLightboxOpen(true);
+  };
+
+  const handleNextPhoto = (e) => {
+    if (e) e.stopPropagation();
+    if (activePhotoIndex < galleryPhotos.length - 1) {
+      const nextIdx = activePhotoIndex + 1;
+      setActivePhotoIndex(nextIdx);
+      setCaptionInput(galleryPhotos[nextIdx]?.caption || '');
+      setEditingCaption(false);
+    }
+  };
+
+  const handlePrevPhoto = (e) => {
+    if (e) e.stopPropagation();
+    if (activePhotoIndex > 0) {
+      const prevIdx = activePhotoIndex - 1;
+      setActivePhotoIndex(prevIdx);
+      setCaptionInput(galleryPhotos[prevIdx]?.caption || '');
+      setEditingCaption(false);
+    }
+  };
+
+  // Keyboard navigation for Lightbox
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!lightboxOpen) return;
+      if (e.key === 'ArrowRight') handleNextPhoto();
+      if (e.key === 'ArrowLeft') handlePrevPhoto();
+      if (e.key === 'Escape') setLightboxOpen(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [lightboxOpen, activePhotoIndex, galleryPhotos]);
+
+  // Delete a Photo
+  const handleDeletePhoto = (photo, e) => {
+    if (e) e.stopPropagation();
+    Swal.fire({
+      title: 'Delete Photo?',
+      text: 'This image will be permanently removed from Cloudinary and this gallery.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#dc2626',
+    }).then(async (result) => {
+      if (!result.isConfirmed) return;
+      try {
+        await eventApi.deletePhoto(selectedEvent._id, photo._id);
+        toast.success('Photo removed');
+
+        // If in lightbox, step back or close
+        if (lightboxOpen) {
+          if (galleryPhotos.length <= 1) {
+            setLightboxOpen(false);
+          } else if (activePhotoIndex >= galleryPhotos.length - 1) {
+            setActivePhotoIndex((prev) => Math.max(0, prev - 1));
+          }
+        }
+
+        loadGalleryPhotos(selectedEvent._id, galleryPage);
+        setReload((r) => r + 1);
+      } catch (err) {
+        toast.error(err?.message || 'Failed to delete photo');
+      }
+    });
+  };
+
+  // Set as Event Cover Photo
+  const handleSetCoverPhoto = async (photo, e) => {
+    if (e) e.stopPropagation();
+    try {
+      await eventApi.setCoverPhoto(selectedEvent._id, photo._id);
+      toast.success('Event cover photo updated!');
+      setReload((r) => r + 1);
+    } catch (err) {
+      toast.error('Failed to set cover photo');
+    }
+  };
+
+  // Save updated photo caption
+  const handleSaveCaption = async () => {
+    const currentPhoto = galleryPhotos[activePhotoIndex];
+    if (!currentPhoto) return;
+
+    try {
+      const updated = await eventApi.updatePhotoCaption(selectedEvent._id, currentPhoto._id, {
+        caption: captionInput,
+      });
+      setGalleryPhotos((prev) =>
+        prev.map((p) => (p._id === currentPhoto._id ? { ...p, caption: captionInput } : p))
+      );
+      setEditingCaption(false);
+      toast.success('Caption updated');
+    } catch (err) {
+      toast.error('Failed to update caption');
+    }
+  };
+
+  // ==========================================
+  // CALENDAR VIEW HELPERS
+  // ==========================================
+
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+
+  const calendarDays = useMemo(() => {
+    const year = calendarDate.getFullYear();
+    const month = calendarDate.getMonth();
+    const firstDayIndex = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const daysInPrevMonth = new Date(year, month, 0).getDate();
 
     const days = [];
-    // Previous month padding
-    const prevMonthDays = new Date(year, month, 0).getDate();
-    for (let i = adjustedFirstDay - 1; i >= 0; i--) {
-      days.push({ day: prevMonthDays - i, isCurrentMonth: false, date: new Date(year, month - 1, prevMonthDays - i) });
-    }
-    // Current month days
-    for (let d = 1; d <= daysInMonth; d++) {
-      days.push({ day: d, isCurrentMonth: true, date: new Date(year, month, d) });
-    }
-    // Next month padding to fill 35 or 42 grid cells
-    const remaining = (7 - (days.length % 7)) % 7;
-    for (let n = 1; n <= remaining; n++) {
-      days.push({ day: n, isCurrentMonth: false, date: new Date(year, month + 1, n) });
-    }
-    return days;
-  }, [currentCalendarDate]);
 
-  const monthYearLabel = currentCalendarDate.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+    // Previous month filler days
+    for (let i = firstDayIndex - 1; i >= 0; i--) {
+      days.push({
+        date: new Date(year, month - 1, daysInPrevMonth - i),
+        isCurrentMonth: false,
+      });
+    }
+
+    // Current month days
+    for (let i = 1; i <= daysInMonth; i++) {
+      days.push({
+        date: new Date(year, month, i),
+        isCurrentMonth: true,
+      });
+    }
+
+    // Next month filler days (to complete 35 or 42 grid cells)
+    const remaining = (7 - (days.length % 7)) % 7;
+    for (let i = 1; i <= remaining; i++) {
+      days.push({
+        date: new Date(year, month + 1, i),
+        isCurrentMonth: false,
+      });
+    }
+
+    return days;
+  }, [calendarDate]);
+
+  const getEventsForDate = (date) => {
+    const dateStr = date.toISOString().split('T')[0];
+    return calendarEvents.filter((e) => {
+      const startStr = new Date(e.startDate).toISOString().split('T')[0];
+      const endStr = e.endDate ? new Date(e.endDate).toISOString().split('T')[0] : startStr;
+      return dateStr >= startStr && dateStr <= endStr;
+    });
+  };
+
+  // Table View columns definition
+  const tableColumns = [
+    {
+      key: 'title',
+      label: 'Event',
+      render: (r) => {
+        const typeMeta = getTypeMeta(r.type);
+        return (
+          <div className="flex items-center gap-3">
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white shadow-xs shrink-0 overflow-hidden"
+              style={{ backgroundColor: typeMeta.color }}
+            >
+              {r.coverImage?.url ? (
+                <img src={getMediaUrl(r.coverImage.url)} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <CalendarIcon size={18} />
+              )}
+            </div>
+            <div>
+              <span className="font-semibold text-deep block text-sm">{r.title}</span>
+              <span className="text-xs text-muted block truncate max-w-xs">{r.description || 'No description'}</span>
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      key: 'type',
+      label: 'Category',
+      render: (r) => {
+        const typeMeta = getTypeMeta(r.type);
+        return <span className={`px-2.5 py-1 text-xs font-semibold rounded-lg border ${typeMeta.bg}`}>{typeMeta.label}</span>;
+      },
+    },
+    {
+      key: 'date',
+      label: 'Date & Time',
+      render: (r) => (
+        <div className="text-xs text-secondary">
+          <div className="font-medium text-deep flex items-center gap-1.5">
+            <Clock size={13} className="text-muted" />
+            {formatDateRange(r.startDate, r.endDate, r.isFullDay, r.startTime, r.endTime)}
+          </div>
+          {r.location && (
+            <div className="text-muted flex items-center gap-1 mt-0.5">
+              <MapPin size={12} /> {r.location}
+            </div>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: 'audience',
+      label: 'Audience',
+      render: (r) => {
+        const audLabels = {
+          all: 'All School',
+          students: 'Students',
+          teachers: 'Teachers',
+          parents: 'Parents',
+          classes: `${r.targetClasses?.length || 0} Classes`,
+        };
+        return (
+          <span className="inline-flex items-center gap-1 text-xs text-secondary font-medium bg-surface px-2.5 py-1 rounded-lg border border-border">
+            <Users size={12} className="text-muted" />
+            {audLabels[r.audience] || 'All'}
+          </span>
+        );
+      },
+    },
+    {
+      key: 'photos',
+      label: 'Gallery',
+      render: (r) => (
+        <button
+          onClick={(e) => handleOpenGallery(r, e)}
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-forest/10 text-forest hover:bg-forest/20 transition-colors"
+        >
+          <ImageIcon size={13} />
+          {r.photoCount || 0} Photos
+        </button>
+      ),
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      render: (r) => {
+        const statusColors = {
+          upcoming: 'primary',
+          ongoing: 'success',
+          completed: 'gray',
+          cancelled: 'danger',
+        };
+        return <Badge color={statusColors[r.status] || 'gray'}>{r.status}</Badge>;
+      },
+    },
+    {
+      key: 'actions',
+      label: '',
+      render: (r) => (
+        <div className="flex items-center justify-end gap-1.5">
+          <button
+            onClick={(e) => handleOpenGallery(r, e)}
+            className="p-1.5 text-muted hover:text-forest rounded-lg hover:bg-surface transition-colors"
+            title="Open Photo Gallery"
+          >
+            <ImageIcon size={16} />
+          </button>
+          {isAdmin && (
+            <>
+              <button
+                onClick={(e) => handleOpenEdit(r, e)}
+                className="p-1.5 text-muted hover:text-deep rounded-lg hover:bg-surface transition-colors"
+                title="Edit Event"
+              >
+                <Edit2 size={16} />
+              </button>
+              <button
+                onClick={(e) => handleDeleteEvent(r, e)}
+                className="p-1.5 text-muted hover:text-danger rounded-lg hover:bg-danger-light transition-colors"
+                title="Delete Event"
+              >
+                <Trash2 size={16} />
+              </button>
+            </>
+          )}
+        </div>
+      ),
+    },
+  ];
 
   return (
-    <div className="space-y-6 pb-10">
-      {/* ── 1. Page Header ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-deep tracking-tight flex items-center gap-2">
-            <CalendarIcon className="text-forest" size={24} />
-            Events
-          </h1>
-          <p className="text-xs sm:text-sm text-secondary mt-0.5">
-            Manage school events and important dates
-          </p>
+    <div className="space-y-6">
+      {/* Header */}
+      <PageHeader
+        title="School Events & Gallery"
+        description="Plan campus celebrations, holidays, academic milestones, and manage photo galleries"
+        action={
+          <div className="flex items-center gap-3">
+            {isAdmin && (
+              <Button onClick={handleOpenCreate} className="shadow-sm">
+                <Plus size={16} className="mr-2" />
+                New Event
+              </Button>
+            )}
+          </div>
+        }
+      />
+
+      {/* Metric Cards Bar */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white border border-border rounded-2xl p-4 shadow-xs flex items-center justify-between">
+          <div>
+            <p className="text-xs font-semibold text-muted uppercase tracking-wider">Total Events</p>
+            <h3 className="text-2xl font-bold text-deep mt-1">{stats.total}</h3>
+          </div>
+          <div className="w-11 h-11 rounded-xl bg-forest/10 text-forest flex items-center justify-center">
+            <CalendarIcon size={20} strokeWidth={2.2} />
+          </div>
         </div>
 
-        {isSchoolAdmin && (
-          <Button
-            onClick={() => openFormModal(null)}
-            className="self-start sm:self-auto flex items-center gap-2 text-xs py-2 bg-forest hover:bg-forest/90 text-white font-semibold rounded-xl shadow-xs"
-          >
-            <Plus size={16} /> Create Event
-          </Button>
+        <div className="bg-white border border-border rounded-2xl p-4 shadow-xs flex items-center justify-between">
+          <div>
+            <p className="text-xs font-semibold text-muted uppercase tracking-wider">Upcoming</p>
+            <h3 className="text-2xl font-bold text-forest mt-1">{stats.upcoming}</h3>
+          </div>
+          <div className="w-11 h-11 rounded-xl bg-forest/10 text-forest flex items-center justify-center">
+            <Sparkles size={20} strokeWidth={2.2} />
+          </div>
+        </div>
+
+        <div className="bg-white border border-border rounded-2xl p-4 shadow-xs flex items-center justify-between">
+          <div>
+            <p className="text-xs font-semibold text-muted uppercase tracking-wider">Completed</p>
+            <h3 className="text-2xl font-bold text-secondary mt-1">{stats.completed}</h3>
+          </div>
+          <div className="w-11 h-11 rounded-xl bg-surface text-secondary flex items-center justify-center">
+            <Check size={20} strokeWidth={2.2} />
+          </div>
+        </div>
+
+        <div className="bg-white border border-border rounded-2xl p-4 shadow-xs flex items-center justify-between">
+          <div>
+            <p className="text-xs font-semibold text-muted uppercase tracking-wider">Gallery Photos</p>
+            <h3 className="text-2xl font-bold text-deep mt-1">{stats.totalPhotos}</h3>
+          </div>
+          <div className="w-11 h-11 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+            <Camera size={20} strokeWidth={2.2} />
+          </div>
+        </div>
+      </div>
+
+      {/* Control Bar: View Switcher, Search, and Filters */}
+      <div className="bg-white border border-border rounded-2xl p-4 shadow-xs space-y-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          {/* View Mode Toggle */}
+          <div className="flex items-center bg-surface p-1 rounded-xl border border-border shrink-0">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                viewMode === 'grid' ? 'bg-white text-forest shadow-xs' : 'text-secondary hover:text-deep'
+              }`}
+            >
+              <Grid size={14} /> Grid
+            </button>
+            <button
+              onClick={() => setViewMode('table')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                viewMode === 'table' ? 'bg-white text-forest shadow-xs' : 'text-secondary hover:text-deep'
+              }`}
+            >
+              <List size={14} /> List
+            </button>
+            <button
+              onClick={() => setViewMode('calendar')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                viewMode === 'calendar' ? 'bg-white text-forest shadow-xs' : 'text-secondary hover:text-deep'
+              }`}
+            >
+              <CalendarDays size={14} /> Calendar
+            </button>
+          </div>
+
+          {/* Search Input (Disabled in Calendar View) */}
+          {viewMode !== 'calendar' && (
+            <div className="relative flex-1 max-w-md">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+              <input
+                type="text"
+                placeholder="Search events by title, venue, or details..."
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1);
+                }}
+                className="w-full pl-9 pr-3 py-2 bg-surface border border-border rounded-xl text-sm text-deep placeholder-muted focus:outline-none focus:ring-2 focus:ring-forest/30 focus:bg-white transition-all"
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Filter Dropdowns */}
+        {viewMode !== 'calendar' && (
+          <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-border/60">
+            <span className="text-xs font-semibold text-muted flex items-center gap-1 mr-1">
+              <Filter size={12} /> Filters:
+            </span>
+
+            {/* Type Filter */}
+            <select
+              value={typeFilter}
+              onChange={(e) => {
+                setTypeFilter(e.target.value);
+                setPage(1);
+              }}
+              className="px-2.5 py-1.5 text-xs font-medium bg-surface border border-border rounded-lg text-deep focus:outline-none focus:ring-1 focus:ring-forest"
+            >
+              <option value="all">All Categories</option>
+              {EVENT_TYPES.map((t) => (
+                <option key={t.value} value={t.value}>
+                  {t.label}
+                </option>
+              ))}
+            </select>
+
+            {/* Status Filter */}
+            <select
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                setPage(1);
+              }}
+              className="px-2.5 py-1.5 text-xs font-medium bg-surface border border-border rounded-lg text-deep focus:outline-none focus:ring-1 focus:ring-forest"
+            >
+              {STATUS_OPTIONS.map((s) => (
+                <option key={s.value} value={s.value}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+
+            {/* Timeframe Filter */}
+            <select
+              value={timeframeFilter}
+              onChange={(e) => {
+                setTimeframeFilter(e.target.value);
+                setPage(1);
+              }}
+              className="px-2.5 py-1.5 text-xs font-medium bg-surface border border-border rounded-lg text-deep focus:outline-none focus:ring-1 focus:ring-forest"
+            >
+              <option value="all">Any Date</option>
+              <option value="upcoming">Upcoming Only</option>
+              <option value="today">Today</option>
+              <option value="past">Past Events</option>
+            </select>
+
+            {(typeFilter !== 'all' || statusFilter !== 'all' || timeframeFilter !== 'all' || search) && (
+              <button
+                onClick={() => {
+                  setTypeFilter('all');
+                  setStatusFilter('all');
+                  setTimeframeFilter('all');
+                  setSearch('');
+                  setPage(1);
+                }}
+                className="text-xs font-semibold text-danger hover:underline ml-auto"
+              >
+                Reset filters
+              </button>
+            )}
+          </div>
         )}
       </div>
 
-      {/* ── Sub Navigation Tabs ── */}
-      <div className="flex items-center gap-2 border-b border-border pb-1">
-        <button
-          onClick={() => setMainModuleTab('events')}
-          className={`px-4 py-2 text-xs font-bold rounded-lg transition-colors flex items-center gap-2 cursor-pointer ${
-            mainModuleTab === 'events'
-              ? 'bg-forest text-white shadow-xs'
-              : 'bg-white border border-border text-secondary hover:text-deep hover:bg-surface'
-          }`}
-        >
-          <CalendarIcon size={14} /> Events & Schedule
-        </button>
-        <button
-          onClick={() => setMainModuleTab('gallery')}
-          className={`px-4 py-2 text-xs font-bold rounded-lg transition-colors flex items-center gap-2 cursor-pointer ${
-            mainModuleTab === 'gallery'
-              ? 'bg-forest text-white shadow-xs'
-              : 'bg-white border border-border text-secondary hover:text-deep hover:bg-surface'
-          }`}
-        >
-          <Camera size={14} /> Event Gallery
-        </button>
-      </div>
-
-      {mainModuleTab === 'gallery' ? (
-        <GalleryView isSchoolAdmin={isSchoolAdmin} />
-      ) : (
+      {/* Main Content Area based on View Mode */}
+      {viewMode === 'grid' && (
         <>
-      {/* ── 2. Summary Statistics (4 Cards) ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Card 1: Upcoming Events */}
-        <Card padding={false} className="p-4 bg-white border border-border rounded-xl flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-emerald-50 text-forest flex items-center justify-center shrink-0">
-            <CalendarIcon size={22} />
-          </div>
-          <div>
-            <span className="text-xs font-semibold text-muted block">Upcoming Events</span>
-            <div className="text-xl font-bold text-deep leading-tight my-0.5">
-              {statsLoading ? <Skeleton className="h-6 w-8 inline-block" /> : stats.upcomingCount || 0}
-            </div>
-            <span className="text-[11px] text-secondary">Next 30 days</span>
-          </div>
-        </Card>
-
-        {/* Card 2: Today's Events */}
-        <Card padding={false} className="p-4 bg-white border border-border rounded-xl flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-            <Clock size={22} />
-          </div>
-          <div>
-            <span className="text-xs font-semibold text-muted block">Today's Events</span>
-            <div className="text-xl font-bold text-deep leading-tight my-0.5">
-              {statsLoading ? <Skeleton className="h-6 w-8 inline-block" /> : stats.todayCount || 0}
-            </div>
-            <span className="text-[11px] text-secondary">
-              {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-            </span>
-          </div>
-        </Card>
-
-        {/* Card 3: This Month */}
-        <Card padding={false} className="p-4 bg-white border border-border rounded-xl flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-            <CheckCircle2 size={22} />
-          </div>
-          <div>
-            <span className="text-xs font-semibold text-muted block">This Month</span>
-            <div className="text-xl font-bold text-deep leading-tight my-0.5">
-              {statsLoading ? <Skeleton className="h-6 w-8 inline-block" /> : stats.thisMonthCount || 0}
-            </div>
-            <span className="text-[11px] text-secondary">
-              {new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' })}
-            </span>
-          </div>
-        </Card>
-
-        {/* Card 4: Past Events */}
-        <Card padding={false} className="p-4 bg-white border border-border rounded-xl flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
-            <CalendarIcon size={22} />
-          </div>
-          <div>
-            <span className="text-xs font-semibold text-muted block">Past Events</span>
-            <div className="text-xl font-bold text-deep leading-tight my-0.5">
-              {statsLoading ? <Skeleton className="h-6 w-8 inline-block" /> : stats.pastCount || 0}
-            </div>
-            <span className="text-[11px] text-secondary">This Academic Year</span>
-          </div>
-        </Card>
-      </div>
-
-      {/* ── 3. Search & Filter Bar ── */}
-      <Card padding={false} className="p-4 bg-white border border-border rounded-xl">
-        <form onSubmit={handleSearchSubmit} className="flex flex-col lg:flex-row items-center gap-3">
-          {/* Search Input */}
-          <div className="relative flex-1 w-full">
-            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search events by title, location or organizer..."
-              className="w-full text-xs bg-surface border border-border rounded-lg pl-9 pr-3 py-2 text-deep focus:outline-none focus:border-forest"
-            />
-          </div>
-
-          {/* Event Type Filter */}
-          <div className="flex items-center gap-1.5 w-full sm:w-auto">
-            <span className="text-xs font-semibold text-muted whitespace-nowrap hidden sm:inline">Event Type:</span>
-            <select
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
-              className="w-full sm:w-auto text-xs bg-surface border border-border rounded-lg px-3 py-2 text-deep focus:outline-none focus:border-forest font-medium cursor-pointer"
-            >
-              {EVENT_TYPES.map((t) => (
-                <option key={t.value} value={t.value}>{t.label}</option>
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="bg-white border border-border rounded-2xl p-5 h-72 animate-pulse" />
               ))}
-            </select>
-          </div>
-
-          {/* Audience Filter */}
-          <div className="flex items-center gap-1.5 w-full sm:w-auto">
-            <span className="text-xs font-semibold text-muted whitespace-nowrap hidden sm:inline">Audience:</span>
-            <select
-              value={audienceFilter}
-              onChange={(e) => setAudienceFilter(e.target.value)}
-              className="w-full sm:w-auto text-xs bg-surface border border-border rounded-lg px-3 py-2 text-deep focus:outline-none focus:border-forest font-medium cursor-pointer"
-            >
-              <option value="all">All Audience</option>
-              <option value="students">Students</option>
-              <option value="parents">Parents</option>
-              <option value="teachers">Teachers</option>
-              <option value="staff">Staff</option>
-            </select>
-          </div>
-
-          {/* Date Range Filter */}
-          <div className="flex items-center gap-1.5 w-full sm:w-auto">
-            <span className="text-xs font-semibold text-muted whitespace-nowrap hidden sm:inline">Date Range:</span>
-            <select
-              value={dateRangeFilter}
-              onChange={(e) => setDateRangeFilter(e.target.value)}
-              className="w-full sm:w-auto text-xs bg-surface border border-border rounded-lg px-3 py-2 text-deep focus:outline-none focus:border-forest font-medium cursor-pointer"
-            >
-              <option value="all">All Dates</option>
-              <option value="today">Today</option>
-              <option value="this_week">This Week</option>
-              <option value="this_month">This Month</option>
-              <option value="next_30_days">Next 30 Days</option>
-            </select>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex items-center gap-2 w-full lg:w-auto">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleResetFilters}
-              className="py-2 px-3 text-xs flex items-center gap-1 shrink-0"
-            >
-              <RotateCcw size={13} /> Reset
-            </Button>
-            <div className="px-3 py-2 bg-forest/10 border border-forest/20 text-forest rounded-lg text-xs font-bold shrink-0 flex items-center gap-1.5">
-              <Filter size={13} /> Filters {activeFiltersCount}
             </div>
-          </div>
-        </form>
-      </Card>
-
-      {/* ── 4. Main Two-Column Layout ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
-        {/* ── Left Column: Event Tabs & Events List (8 Cols) ── */}
-        <div className="lg:col-span-8 space-y-4">
-          <Card padding={false} className="bg-white border border-border rounded-xl overflow-hidden">
-            {/* Tabs Bar */}
-            <div className="flex items-center border-b border-border px-4 bg-surface/30">
-              {[
-                { key: 'upcoming', label: 'Upcoming Events' },
-                { key: 'past', label: 'Past Events' },
-                { key: 'draft', label: 'Drafts' },
-                { key: 'cancelled', label: 'Cancelled' },
-              ].map((tab) => {
-                const isActive = activeTab === tab.key;
+          ) : events.length === 0 ? (
+            <EmptyState
+              title="No events found"
+              description="Create a new event or adjust your search filters to explore school events."
+              action={
+                isAdmin && (
+                  <Button onClick={handleOpenCreate}>
+                    <Plus size={16} className="mr-2" /> New Event
+                  </Button>
+                )
+              }
+            />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {events.map((evt) => {
+                const typeMeta = getTypeMeta(evt.type);
                 return (
-                  <button
-                    key={tab.key}
-                    onClick={() => { setActiveTab(tab.key); setSelectedCalendarDate(null); }}
-                    className={`py-3.5 px-4 text-xs font-semibold border-b-2 transition-all cursor-pointer ${
-                      isActive
-                        ? 'border-forest text-forest font-bold'
-                        : 'border-transparent text-secondary hover:text-deep'
-                    }`}
+                  <div
+                    key={evt._id}
+                    onClick={() => handleOpenGallery(evt)}
+                    className="group bg-white border border-border rounded-2xl overflow-hidden hover:shadow-card-hover transition-all duration-200 flex flex-col cursor-pointer"
                   >
-                    {tab.label}
-                  </button>
+                    {/* Event Banner / Cover Image */}
+                    <div className="relative h-44 bg-surface overflow-hidden">
+                      {evt.coverImage?.url ? (
+                        <img
+                          src={getMediaUrl(evt.coverImage.url)}
+                          alt={evt.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div
+                          className="w-full h-full flex flex-col items-center justify-center text-white"
+                          style={{
+                            background: `linear-gradient(135deg, ${typeMeta.color}dd, ${typeMeta.color}88)`,
+                          }}
+                        >
+                          <CalendarIcon size={36} strokeWidth={1.8} className="opacity-80" />
+                          <span className="text-xs font-semibold mt-2 tracking-wide uppercase opacity-90">
+                            {typeMeta.label}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Top Badges */}
+                      <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
+                        <span className={`px-2.5 py-1 text-xs font-bold rounded-lg backdrop-blur-md shadow-xs ${typeMeta.bg}`}>
+                          {typeMeta.label}
+                        </span>
+
+                        <span
+                          className={`px-2.5 py-1 text-[11px] font-bold rounded-lg backdrop-blur-md shadow-xs capitalize ${
+                            evt.status === 'upcoming'
+                              ? 'bg-forest/90 text-white'
+                              : evt.status === 'ongoing'
+                              ? 'bg-amber-500/90 text-white'
+                              : evt.status === 'completed'
+                              ? 'bg-slate-700/80 text-white'
+                              : 'bg-rose-500/90 text-white'
+                          }`}
+                        >
+                          {evt.status}
+                        </span>
+                      </div>
+
+                      {/* Photo count floating pill */}
+                      <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md text-white text-xs font-medium px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-sm">
+                        <Camera size={13} />
+                        <span>{evt.photoCount || 0} Photos</span>
+                      </div>
+                    </div>
+
+                    {/* Card Body */}
+                    <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                      <div>
+                        <h3 className="font-bold text-base text-deep group-hover:text-forest transition-colors line-clamp-1">
+                          {evt.title}
+                        </h3>
+
+                        {evt.description && (
+                          <p className="text-xs text-secondary line-clamp-2 mt-1 leading-relaxed">
+                            {evt.description}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Metadata Chips */}
+                      <div className="space-y-2 text-xs text-secondary pt-2 border-t border-border/60">
+                        <div className="flex items-center gap-2 text-deep font-medium">
+                          <Clock size={14} className="text-forest shrink-0" />
+                          <span>{formatDateRange(evt.startDate, evt.endDate, evt.isFullDay, evt.startTime, evt.endTime)}</span>
+                        </div>
+
+                        {evt.location && (
+                          <div className="flex items-center gap-2 text-secondary truncate">
+                            <MapPin size={14} className="text-muted shrink-0" />
+                            <span className="truncate">{evt.location}</span>
+                          </div>
+                        )}
+
+                        <div className="flex items-center justify-between pt-1">
+                          <span className="inline-flex items-center gap-1 font-medium text-muted">
+                            <Users size={13} />
+                            {evt.audience === 'all'
+                              ? 'All School'
+                              : evt.audience === 'classes'
+                              ? `${evt.targetClasses?.length || 0} Classes`
+                              : `${evt.audience}`}
+                          </span>
+
+                          {/* Quick Admin Actions */}
+                          {isAdmin && (
+                            <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                              <button
+                                onClick={(e) => handleOpenEdit(evt, e)}
+                                className="p-1.5 text-muted hover:text-deep rounded-lg hover:bg-surface transition-colors"
+                                title="Edit Event"
+                              >
+                                <Edit2 size={14} />
+                              </button>
+                              <button
+                                onClick={(e) => handleDeleteEvent(evt, e)}
+                                className="p-1.5 text-muted hover:text-danger rounded-lg hover:bg-danger-light transition-colors"
+                                title="Delete Event"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 );
               })}
             </div>
+          )}
 
-            {/* Event List Container */}
-            <div className="p-4">
-              {selectedCalendarDate && (
-                <div className="mb-3 px-3 py-2 bg-emerald-50 border border-emerald-200 text-forest rounded-lg text-xs flex items-center justify-between">
-                  <span>Filtered for <strong>{new Date(selectedCalendarDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</strong></span>
-                  <button onClick={() => setSelectedCalendarDate(null)} className="font-bold text-xs hover:underline">Clear Date Filter</button>
+          {/* Pagination */}
+          {meta && meta.totalPages > 1 && (
+            <div className="flex items-center justify-between pt-4 border-t border-border">
+              <span className="text-xs text-muted">
+                Showing {events.length} of {meta.total} events
+              </span>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={!meta.hasPrevPage}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                >
+                  Previous
+                </Button>
+                <span className="text-xs font-semibold text-deep px-2">
+                  Page {meta.page} of {meta.totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={!meta.hasNextPage}
+                  onClick={() => setPage((p) => p + 1)}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Table / List View */}
+      {viewMode === 'table' && (
+        <DataTable
+          columns={tableColumns}
+          data={events}
+          loading={loading}
+          meta={meta}
+          onPageChange={(p) => setPage(p)}
+          onRowClick={(r) => handleOpenGallery(r)}
+        />
+      )}
+
+      {/* Calendar View */}
+      {viewMode === 'calendar' && (
+        <div className="bg-white border border-border rounded-2xl p-5 shadow-xs space-y-4">
+          {/* Calendar Header Navigation */}
+          <div className="flex items-center justify-between pb-3 border-b border-border">
+            <div className="flex items-center gap-3">
+              <h2 className="text-lg font-bold text-deep">
+                {monthNames[calendarDate.getMonth()]} {calendarDate.getFullYear()}
+              </h2>
+              <button
+                onClick={() => setCalendarDate(new Date())}
+                className="px-2.5 py-1 text-xs font-semibold bg-surface hover:bg-border/60 text-secondary rounded-lg transition-colors"
+              >
+                Today
+              </button>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() =>
+                  setCalendarDate(new Date(calendarDate.getFullYear(), calendarDate.getMonth() - 1, 1))
+                }
+                className="p-2 text-secondary hover:text-deep hover:bg-surface rounded-lg transition-colors"
+              >
+                <ChevronLeft size={18} />
+              </button>
+              <button
+                onClick={() =>
+                  setCalendarDate(new Date(calendarDate.getFullYear(), calendarDate.getMonth() + 1, 1))
+                }
+                className="p-2 text-secondary hover:text-deep hover:bg-surface rounded-lg transition-colors"
+              >
+                <ChevronRight size={18} />
+              </button>
+            </div>
+          </div>
+
+          {/* Calendar Grid */}
+          <div className="grid grid-cols-7 gap-px bg-border/60 rounded-xl overflow-hidden border border-border">
+            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+              <div key={day} className="bg-surface py-2 text-center text-xs font-bold text-muted uppercase">
+                {day}
+              </div>
+            ))}
+
+            {calendarDays.map((d, index) => {
+              const dateEvents = getEventsForDate(d.date);
+              const isToday = d.date.toDateString() === new Date().toDateString();
+
+              return (
+                <div
+                  key={index}
+                  className={`min-h-[110px] p-2 bg-white flex flex-col justify-between transition-colors ${
+                    !d.isCurrentMonth ? 'bg-surface/50 text-muted' : 'text-deep'
+                  } ${isToday ? 'ring-2 ring-forest ring-inset' : ''}`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span
+                      className={`text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full ${
+                        isToday ? 'bg-forest text-white' : ''
+                      }`}
+                    >
+                      {d.date.getDate()}
+                    </span>
+
+                    {dateEvents.length > 0 && (
+                      <span className="text-[10px] text-muted font-medium">
+                        {dateEvents.length} event{dateEvents.length > 1 ? 's' : ''}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Event Pills */}
+                  <div className="space-y-1 overflow-y-auto max-h-[80px] scrollbar-thin">
+                    {dateEvents.map((evt) => {
+                      const typeMeta = getTypeMeta(evt.type);
+                      return (
+                        <button
+                          key={evt._id}
+                          onClick={() => handleOpenGallery(evt)}
+                          className="w-full text-left px-2 py-1 rounded text-[11px] font-semibold truncate flex items-center gap-1.5 transition-opacity hover:opacity-85 shadow-2xs"
+                          style={{
+                            backgroundColor: `${typeMeta.color}18`,
+                            color: typeMeta.color,
+                            borderLeft: `3px solid ${typeMeta.color}`,
+                          }}
+                        >
+                          <span className="truncate">{evt.title}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* EVENT CREATE / EDIT MODAL                                */}
+      {/* ======================================================== */}
+      <Modal
+        isOpen={eventModalOpen}
+        onClose={() => setEventModalOpen(false)}
+        title={editingEvent ? 'Edit Event' : 'Create New School Event'}
+        size="lg"
+      >
+        <form onSubmit={handleSaveEvent} className="space-y-4">
+          <Input
+            label="Event Title *"
+            placeholder="e.g. Independence Day Celebration, Annual Sports Meet"
+            value={form.title}
+            onChange={(e) => setForm({ ...form, title: e.target.value })}
+            required
+          />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Select
+              label="Event Category *"
+              value={form.type}
+              onChange={(e) => setForm({ ...form, type: e.target.value })}
+              options={EVENT_TYPES.map((t) => ({ value: t.value, label: t.label }))}
+            />
+
+            <Select
+              label="Status"
+              value={form.status}
+              onChange={(e) => setForm({ ...form, status: e.target.value })}
+              options={STATUS_OPTIONS.filter((s) => s.value !== 'all')}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input
+              type="date"
+              label="Start Date *"
+              value={form.startDate}
+              onChange={(e) => setForm({ ...form, startDate: e.target.value })}
+              required
+            />
+            <Input
+              type="date"
+              label="End Date (Optional)"
+              value={form.endDate}
+              onChange={(e) => setForm({ ...form, endDate: e.target.value })}
+            />
+          </div>
+
+          {/* Time & Full Day Options */}
+          <div className="p-3 bg-surface rounded-xl border border-border space-y-3">
+            <label className="flex items-center gap-2 text-sm font-medium text-deep cursor-pointer">
+              <input
+                type="checkbox"
+                checked={form.isFullDay}
+                onChange={(e) => setForm({ ...form, isFullDay: e.target.checked })}
+                className="w-4 h-4 rounded text-forest focus:ring-forest accent-forest"
+              />
+              Full-Day Event
+            </label>
+
+            {!form.isFullDay && (
+              <div className="grid grid-cols-2 gap-3 pt-1">
+                <Input
+                  type="time"
+                  label="Start Time"
+                  value={form.startTime}
+                  onChange={(e) => setForm({ ...form, startTime: e.target.value })}
+                />
+                <Input
+                  type="time"
+                  label="End Time"
+                  value={form.endTime}
+                  onChange={(e) => setForm({ ...form, endTime: e.target.value })}
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input
+              label="Location / Venue"
+              placeholder="e.g. Main Auditorium, Sports Ground"
+              value={form.location}
+              onChange={(e) => setForm({ ...form, location: e.target.value })}
+            />
+
+            <Select
+              label="Audience Target"
+              value={form.audience}
+              onChange={(e) => setForm({ ...form, audience: e.target.value })}
+              options={AUDIENCE_OPTIONS}
+            />
+          </div>
+
+          {/* Specific Class Target selection */}
+          {form.audience === 'classes' && (
+            <div>
+              <label className="block text-xs font-semibold text-secondary mb-1.5">Select Target Classes</label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-36 overflow-y-auto p-2 bg-surface rounded-xl border border-border">
+                {classesList.map((cls) => {
+                  const isChecked = form.targetClasses.includes(cls._id);
+                  return (
+                    <label key={cls._id} className="flex items-center gap-2 text-xs text-deep cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={(e) => {
+                          const updated = e.target.checked
+                            ? [...form.targetClasses, cls._id]
+                            : form.targetClasses.filter((id) => id !== cls._id);
+                          setForm({ ...form, targetClasses: updated });
+                        }}
+                        className="w-3.5 h-3.5 rounded text-forest accent-forest"
+                      />
+                      {cls.name}
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <div>
+            <label className="block text-xs font-semibold text-secondary mb-1">Description / Agenda</label>
+            <textarea
+              rows={3}
+              placeholder="Detailed description, special instructions, or program agenda..."
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              className="w-full px-3 py-2 bg-white border border-border rounded-xl text-sm text-deep placeholder-muted focus:outline-none focus:ring-2 focus:ring-forest/30 transition-all resize-none"
+            />
+          </div>
+
+          <div className="flex justify-end gap-3 pt-3 border-t border-border">
+            <Button variant="ghost" type="button" onClick={() => setEventModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" loading={saving}>
+              {editingEvent ? 'Save Changes' : 'Create Event'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* ======================================================== */}
+      {/* EVENT DETAILS & PHOTO GALLERY MODAL / DRAWER             */}
+      {/* ======================================================== */}
+      {selectedEvent && (
+        <Modal
+          isOpen={galleryModalOpen}
+          onClose={() => setGalleryModalOpen(false)}
+          title={selectedEvent.title}
+          size="2xl"
+        >
+          <div className="space-y-6">
+            {/* Event Summary Banner */}
+            <div className="p-4 rounded-2xl bg-surface border border-border space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <span className={`px-2.5 py-1 text-xs font-bold rounded-lg border ${getTypeMeta(selectedEvent.type).bg}`}>
+                    {getTypeMeta(selectedEvent.type).label}
+                  </span>
+                  <Badge color={selectedEvent.status === 'upcoming' ? 'primary' : 'success'}>
+                    {selectedEvent.status}
+                  </Badge>
+                </div>
+
+                <div className="text-xs text-muted flex items-center gap-2">
+                  <span>Created by {selectedEvent.createdBy?.firstName || 'Admin'}</span>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-4 text-xs text-secondary">
+                <div className="flex items-center gap-1.5 font-medium text-deep">
+                  <Clock size={14} className="text-forest" />
+                  {formatDateRange(
+                    selectedEvent.startDate,
+                    selectedEvent.endDate,
+                    selectedEvent.isFullDay,
+                    selectedEvent.startTime,
+                    selectedEvent.endTime
+                  )}
+                </div>
+
+                {selectedEvent.location && (
+                  <div className="flex items-center gap-1.5">
+                    <MapPin size={14} className="text-muted" />
+                    {selectedEvent.location}
+                  </div>
+                )}
+
+                <div className="flex items-center gap-1.5">
+                  <Users size={14} className="text-muted" />
+                  Audience:{' '}
+                  <span className="capitalize font-medium text-deep">
+                    {selectedEvent.audience === 'all' ? 'All School' : selectedEvent.audience}
+                  </span>
+                </div>
+              </div>
+
+              {selectedEvent.description && (
+                <p className="text-xs text-secondary leading-relaxed pt-2 border-t border-border/60">
+                  {selectedEvent.description}
+                </p>
+              )}
+            </div>
+
+            {/* Gallery Section Header & Uploader */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-base font-bold text-deep flex items-center gap-2">
+                    <Camera size={18} className="text-forest" />
+                    Event Photo Gallery
+                  </h4>
+                  <p className="text-xs text-muted">
+                    {galleryPhotos.length} photo{galleryPhotos.length !== 1 ? 's' : ''} stored securely on Cloudinary
+                  </p>
+                </div>
+
+                {canManagePhotos && (
+                  <div>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      multiple
+                      accept="image/jpeg,image/png,image/webp,image/jpg"
+                      onChange={handleFileSelect}
+                      className="hidden"
+                    />
+                    <Button
+                      size="sm"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploading}
+                    >
+                      <UploadCloud size={15} className="mr-1.5" />
+                      Add Photos
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* Upload Pending Files Preview Strip */}
+              {selectedFiles.length > 0 && (
+                <div className="p-4 bg-emerald-50/60 border border-emerald-200 rounded-2xl space-y-3">
+                  <div className="flex items-center justify-between text-xs font-semibold text-emerald-800">
+                    <span>
+                      {selectedFiles.length} photo(s) selected for upload
+                    </span>
+                    <button
+                      onClick={() => {
+                        setSelectedFiles([]);
+                        setFilePreviews([]);
+                      }}
+                      className="text-emerald-700 hover:text-danger text-xs font-bold"
+                    >
+                      Clear all
+                    </button>
+                  </div>
+
+                  {/* Thumbnail Preview strip */}
+                  <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
+                    {filePreviews.map((preview, i) => (
+                      <div key={i} className="relative w-16 h-16 rounded-xl overflow-hidden border border-emerald-300 shrink-0 group">
+                        <img src={preview} alt="preview" className="w-full h-full object-cover" />
+                        <button
+                          onClick={() => removeSelectedFile(i)}
+                          className="absolute top-1 right-1 bg-black/70 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X size={10} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Upload Progress Bar */}
+                  {uploading && (
+                    <div className="space-y-1">
+                      <div className="w-full bg-emerald-200 rounded-full h-2 overflow-hidden">
+                        <div
+                          className="bg-forest h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${uploadProgress}%` }}
+                        />
+                      </div>
+                      <p className="text-[11px] text-emerald-800 font-medium text-right">
+                        Uploading to Cloudinary... {uploadProgress}%
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setSelectedFiles([]);
+                        setFilePreviews([]);
+                      }}
+                      disabled={uploading}
+                    >
+                      Cancel
+                    </Button>
+                    <Button size="sm" onClick={handleUploadPhotos} loading={uploading}>
+                      Upload Now
+                    </Button>
+                  </div>
                 </div>
               )}
 
-              {loading ? (
-                <div className="space-y-4 py-2">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="flex items-start gap-4 p-3 border-b border-border/50">
-                      <Skeleton className="w-12 h-12 rounded-xl shrink-0" />
-                      <div className="flex-1 space-y-2">
-                        <Skeleton className="h-4 w-1/3" />
-                        <Skeleton className="h-3 w-1/2" />
-                      </div>
-                    </div>
+              {/* Photos Grid */}
+              {galleryLoading ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 py-6">
+                  {[...Array(8)].map((_, i) => (
+                    <div key={i} className="aspect-square bg-surface animate-pulse rounded-2xl" />
                   ))}
                 </div>
-              ) : filteredEventsList.length === 0 ? (
-                <div className="py-16 text-center">
-                  <CalendarIcon size={36} className="mx-auto text-muted mb-2 opacity-50" />
-                  <p className="text-sm font-bold text-deep">No events found</p>
-                  <p className="text-xs text-muted mt-1 max-w-xs mx-auto">
-                    {activeFiltersCount > 0
-                      ? 'Try changing your search keywords or active filters.'
-                      : `There are no scheduled events in the ${activeTab} tab.`}
-                  </p>
-                  {activeFiltersCount > 0 ? (
-                    <Button variant="outline" size="sm" onClick={handleResetFilters} className="mt-4 text-xs">
-                      Reset Filters
-                    </Button>
-                  ) : isSchoolAdmin && (
-                    <Button size="sm" onClick={() => openFormModal(null)} className="mt-4 text-xs bg-forest text-white">
-                      <Plus size={14} className="mr-1" /> Create Event
+              ) : galleryPhotos.length === 0 ? (
+                <div className="py-12 border-2 border-dashed border-border rounded-2xl text-center space-y-3">
+                  <div className="w-12 h-12 rounded-2xl bg-surface text-muted flex items-center justify-center mx-auto">
+                    <ImageIcon size={24} />
+                  </div>
+                  <div>
+                    <h5 className="font-bold text-deep text-sm">No photos in this gallery yet</h5>
+                    <p className="text-xs text-muted mt-0.5">
+                      {canManagePhotos
+                        ? 'Upload high-resolution event photos to preserve and share memories.'
+                        : 'No photos have been uploaded for this event yet.'}
+                    </p>
+                  </div>
+                  {canManagePhotos && (
+                    <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()}>
+                      <UploadCloud size={14} className="mr-1.5" /> Upload Photos
                     </Button>
                   )}
                 </div>
               ) : (
-                <div className="divide-y divide-border/60">
-                  {filteredEventsList.map((ev) => {
-                    const typeInfo = getEventTypeInfo(ev.type);
-                    const TypeIcon = typeInfo.icon;
-                    const startDateObj = new Date(ev.startDate);
-                    const dayNum = startDateObj.getDate().toString().padStart(2, '0');
-                    const monthStr = startDateObj.toLocaleString('en-US', { month: 'short' }).toUpperCase();
-                    
-                    const audienceText = ev.audience && ev.audience.length > 0
-                      ? ev.audience.map((a) => a.charAt(0).toUpperCase() + a.slice(1)).join(', ')
-                      : 'All School';
-
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {galleryPhotos.map((photo, index) => {
+                    const isCover = selectedEvent.coverImage?.publicId === photo.publicId;
                     return (
-                      <div key={ev._id} className="py-3.5 px-2 hover:bg-surface/40 transition-colors rounded-xl flex items-start gap-4">
-                        {/* Date Badge (Left) */}
-                        <div className="w-12 text-center shrink-0 pt-1">
-                          <span className="text-lg font-black text-deep block leading-none">{dayNum}</span>
-                          <span className="text-[10px] font-bold text-muted uppercase block tracking-wider mt-0.5">{monthStr}</span>
-                        </div>
+                      <div
+                        key={photo._id}
+                        onClick={() => handleOpenLightbox(index)}
+                        className="group relative aspect-square bg-surface rounded-2xl overflow-hidden border border-border cursor-pointer shadow-2xs hover:shadow-card transition-all"
+                      >
+                        <img
+                          src={getMediaUrl(photo.url)}
+                          alt={photo.caption || 'Event photo'}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
 
-                        {/* Category Icon Box */}
-                        <div className={`w-10 h-10 rounded-xl ${typeInfo.lightBg} flex items-center justify-center shrink-0 shadow-2xs mt-0.5`}>
-                          <TypeIcon size={18} />
-                        </div>
-
-                        {/* Event Title & Info */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h3
-                              onClick={() => setViewEvent(ev)}
-                              className="text-sm font-bold text-deep hover:text-forest transition-colors cursor-pointer truncate"
-                            >
-                              {ev.title}
-                            </h3>
+                        {/* Top indicators */}
+                        {isCover && (
+                          <div className="absolute top-2 left-2 bg-forest text-white text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 shadow-sm">
+                            <Star size={10} fill="white" /> Cover
                           </div>
+                        )}
 
-                          <div className="flex items-center gap-2 mt-0.5 text-xs text-muted">
-                            <span className="font-medium text-secondary">{typeInfo.label}</span>
-                            <span>•</span>
-                            <span className="text-[11px] text-muted">{audienceText}</span>
-                          </div>
-
-                          <div className="flex items-center gap-4 mt-2 text-[11px] text-secondary flex-wrap">
-                            <div className="flex items-center gap-1">
-                              <Clock size={13} className="text-muted" />
-                              <span>{ev.isFullDay ? 'All Day' : `${ev.startTime || '09:00 AM'}${ev.endTime ? ` – ${ev.endTime}` : ''}`}</span>
-                            </div>
-                            {ev.location && (
-                              <div className="flex items-center gap-1">
-                                <MapPin size={13} className="text-muted" />
-                                <span className="truncate max-w-[180px]">{ev.location}</span>
-                              </div>
+                        {/* Hover Overlay Actions */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-2.5 text-white">
+                          <div className="flex justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+                            {isAdmin && (
+                              <>
+                                <button
+                                  onClick={(e) => handleSetCoverPhoto(photo, e)}
+                                  className="p-1.5 bg-black/50 hover:bg-forest rounded-lg backdrop-blur-xs transition-colors"
+                                  title="Set as Event Cover"
+                                >
+                                  <Star size={13} fill={isCover ? 'currentColor' : 'none'} />
+                                </button>
+                                <button
+                                  onClick={(e) => handleDeletePhoto(photo, e)}
+                                  className="p-1.5 bg-black/50 hover:bg-danger rounded-lg backdrop-blur-xs transition-colors"
+                                  title="Delete Photo"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              </>
                             )}
                           </div>
-                        </div>
 
-                        {/* Status Badge */}
-                        <div className="shrink-0 pt-1 hidden sm:block">
-                          {getStatusBadge(ev.status, ev.startDate)}
-                        </div>
-
-                        {/* Three-Dot Actions Menu */}
-                        <div className="relative shrink-0 pt-1">
-                          <button
-                            onClick={() => setActionMenuId(actionMenuId === ev._id ? null : ev._id)}
-                            className="p-1.5 rounded-lg text-muted hover:text-deep hover:bg-surface transition-colors"
-                          >
-                            <MoreVertical size={16} />
-                          </button>
-
-                          {actionMenuId === ev._id && (
-                            <div className="absolute right-0 top-8 w-40 bg-white border border-border rounded-xl shadow-lg z-20 py-1 text-xs">
-                              <button
-                                onClick={() => { setViewEvent(ev); setActionMenuId(null); }}
-                                className="w-full text-left px-3 py-2 hover:bg-surface flex items-center gap-2 text-deep font-medium"
-                              >
-                                <Eye size={14} className="text-muted" /> View Details
-                              </button>
-
-                              {isSchoolAdmin && (
-                                <>
-                                  <button
-                                    onClick={() => { openFormModal(ev); setActionMenuId(null); }}
-                                    className="w-full text-left px-3 py-2 hover:bg-surface flex items-center gap-2 text-deep font-medium"
-                                  >
-                                    <Edit3 size={14} className="text-muted" /> Edit Event
-                                  </button>
-
-                                  {ev.status === 'draft' && (
-                                    <button
-                                      onClick={() => { handlePublishEvent(ev._id); setActionMenuId(null); }}
-                                      className="w-full text-left px-3 py-2 hover:bg-surface flex items-center gap-2 text-forest font-medium"
-                                    >
-                                      <Send size={14} /> Publish Event
-                                    </button>
-                                  )}
-
-                                  {ev.status === 'published' && (
-                                    <button
-                                      onClick={() => { handleCancelEvent(ev._id); setActionMenuId(null); }}
-                                      className="w-full text-left px-3 py-2 hover:bg-surface flex items-center gap-2 text-amber-600 font-medium"
-                                    >
-                                      <XCircle size={14} /> Cancel Event
-                                    </button>
-                                  )}
-
-                                  <button
-                                    onClick={() => { handleDeleteEvent(ev); setActionMenuId(null); }}
-                                    className="w-full text-left px-3 py-2 hover:bg-surface flex items-center gap-2 text-danger font-medium border-t border-border mt-1 pt-1"
-                                  >
-                                    <Trash2 size={14} /> Delete Event
-                                  </button>
-                                </>
-                              )}
-                            </div>
+                          {photo.caption && (
+                            <p className="text-[11px] font-medium text-white line-clamp-1 truncate">
+                              {photo.caption}
+                            </p>
                           )}
                         </div>
                       </div>
@@ -732,342 +1621,168 @@ export default function Events() {
                   })}
                 </div>
               )}
-
-              {/* List Footer Counter */}
-              {filteredEventsList.length > 0 && (
-                <div className="mt-4 pt-3 border-t border-border flex items-center justify-between text-xs text-muted">
-                  <span>Showing {filteredEventsList.length} of {events.length} events</span>
-                  <button onClick={handleResetFilters} className="text-forest hover:underline font-semibold flex items-center gap-1">
-                    View all events <ArrowRight size={13} />
-                  </button>
-                </div>
-              )}
-            </div>
-          </Card>
-        </div>
-
-        {/* ── Right Column: Calendar & Categories (4 Cols) ── */}
-        <div className="lg:col-span-4 space-y-6">
-          
-          {/* Monthly Calendar Card */}
-          <Card padding={false} className="bg-white border border-border rounded-xl p-4">
-            <div className="flex items-center justify-between pb-3 border-b border-border">
-              <h2 className="text-xs font-bold text-deep uppercase tracking-wider">Calendar</h2>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-deep">{monthYearLabel}</span>
-                <div className="flex items-center gap-0.5">
-                  <button
-                    onClick={() => setCurrentCalendarDate(new Date(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth() - 1, 1))}
-                    className="p-1 rounded-md hover:bg-surface text-secondary"
-                  >
-                    <ChevronLeft size={15} />
-                  </button>
-                  <button
-                    onClick={() => setCurrentCalendarDate(new Date(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth() + 1, 1))}
-                    className="p-1 rounded-md hover:bg-surface text-secondary"
-                  >
-                    <ChevronRight size={15} />
-                  </button>
-                </div>
-              </div>
             </div>
 
-            {/* Weekdays */}
-            <div className="grid grid-cols-7 gap-1 text-center mt-3 text-[10px] font-bold text-muted uppercase tracking-wider">
-              <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
-            </div>
-
-            {/* Calendar Grid */}
-            <div className="grid grid-cols-7 gap-1 text-center mt-2">
-              {calendarMonthData.map((cd, index) => {
-                const isSelected = selectedCalendarDate && cd.date.toDateString() === new Date(selectedCalendarDate).toDateString();
-                const isToday = cd.date.toDateString() === new Date().toDateString();
-                const hasEvent = events.some((e) => new Date(e.startDate).toDateString() === cd.date.toDateString());
-
-                return (
-                  <button
-                    key={index}
-                    onClick={() => {
-                      if (isSelected) setSelectedCalendarDate(null);
-                      else setSelectedCalendarDate(cd.date);
-                    }}
-                    className={`h-8 rounded-full flex flex-col items-center justify-center text-xs relative transition-all cursor-pointer ${
-                      !cd.isCurrentMonth ? 'text-muted/40' : 'text-deep'
-                    } ${
-                      isToday ? 'bg-forest text-white font-bold' : ''
-                    } ${
-                      isSelected && !isToday ? 'ring-2 ring-forest font-bold bg-forest/10 text-forest' : ''
-                    } ${
-                      !isToday && !isSelected ? 'hover:bg-surface' : ''
-                    }`}
-                  >
-                    <span>{cd.day}</span>
-                    {hasEvent && (
-                      <span className={`w-1 h-1 rounded-full absolute bottom-1 ${isToday ? 'bg-white' : 'bg-forest'}`} />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </Card>
-
-          {/* Event Categories Card */}
-          <Card padding={false} className="bg-white border border-border rounded-xl p-4">
-            <div className="flex items-center justify-between pb-3 border-b border-border mb-3">
-              <h2 className="text-xs font-bold text-deep uppercase tracking-wider">Event Categories</h2>
-              <button onClick={handleResetFilters} className="text-xs font-semibold text-forest hover:underline">Manage</button>
-            </div>
-
-            <div className="space-y-2.5">
-              {[
-                { label: 'School Events', type: 'event', color: 'bg-forest' },
-                { label: 'Academic', type: 'academic', color: 'bg-amber-500' },
-                { label: 'Sports', type: 'sports', color: 'bg-orange-500' },
-                { label: 'Celebration', type: 'celebration', color: 'bg-pink-500' },
-                { label: 'Parent Meetings', type: 'ptm', color: 'bg-blue-500' },
-                { label: 'Others', type: 'other', color: 'bg-slate-500' },
-              ].map((cat) => {
-                const count = stats.categoryCounts?.[cat.type] || 0;
-                const isSelected = typeFilter === cat.type;
-
-                return (
-                  <button
-                    key={cat.type}
-                    onClick={() => setTypeFilter(isSelected ? 'all' : cat.type)}
-                    className={`w-full flex items-center justify-between p-2 rounded-lg text-xs transition-colors cursor-pointer ${
-                      isSelected ? 'bg-forest/10 font-bold text-forest' : 'hover:bg-surface text-deep'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <span className={`w-2.5 h-2.5 rounded-full ${cat.color}`} />
-                      <span>{cat.label}</span>
-                    </div>
-                    <span className="font-bold text-muted text-xs">{count}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </Card>
-
-        </div>
-      </div>
-      </>
-      )}
-
-      {/* ── 5. Create / Edit Event Modal ── */}
-      <Modal
-        isOpen={createModalOpen}
-        onClose={() => setCreateModalOpen(false)}
-        title={editEvent ? 'Edit Event' : 'Create School Event'}
-        size="lg"
-      >
-        <div className="space-y-4 text-xs">
-          <Input
-            label="Event Title *"
-            value={form.title}
-            onChange={(e) => setForm({ ...form, title: e.target.value })}
-            placeholder="Independence Day Celebration"
-          />
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Select
-              label="Event Type *"
-              value={form.type}
-              onChange={(e) => setForm({ ...form, type: e.target.value })}
-              options={EVENT_TYPES.filter((t) => t.value !== 'all')}
-            />
-
-            <Select
-              label="Status *"
-              value={form.status}
-              onChange={(e) => setForm({ ...form, status: e.target.value })}
-              options={[
-                { value: 'published', label: 'Published' },
-                { value: 'draft', label: 'Save Draft' },
-                { value: 'cancelled', label: 'Cancelled' },
-              ]}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Input
-              label="Start Date *"
-              type="date"
-              value={form.startDate}
-              onChange={(e) => setForm({ ...form, startDate: e.target.value })}
-            />
-            <Input
-              label="End Date"
-              type="date"
-              value={form.endDate}
-              onChange={(e) => setForm({ ...form, endDate: e.target.value })}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Input
-              label="Start Time"
-              value={form.startTime}
-              onChange={(e) => setForm({ ...form, startTime: e.target.value })}
-              placeholder="08:30 AM"
-            />
-            <Input
-              label="End Time"
-              value={form.endTime}
-              onChange={(e) => setForm({ ...form, endTime: e.target.value })}
-              placeholder="12:30 PM"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Input
-              label="Location"
-              value={form.location}
-              onChange={(e) => setForm({ ...form, location: e.target.value })}
-              placeholder="School Auditorium"
-            />
-            <Input
-              label="Organizer"
-              value={form.organizer}
-              onChange={(e) => setForm({ ...form, organizer: e.target.value })}
-              placeholder="Cultural Committee"
-            />
-          </div>
-
-          <div>
-            <label className="text-xs font-semibold text-deep block mb-1">Description</label>
-            <textarea
-              rows={3}
-              value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-              placeholder="Write a brief overview of the event..."
-              className="w-full text-xs bg-surface border border-border rounded-lg p-2 text-deep focus:outline-none focus:border-forest"
-            />
-          </div>
-
-          <div className="pt-2 border-t border-border">
-            <label className="text-xs font-bold text-deep block mb-2">Visible Audience</label>
-            <div className="flex items-center gap-4 flex-wrap">
-              {['students', 'parents', 'teachers', 'staff'].map((aud) => {
-                const checked = form.audience.includes(aud);
-                return (
-                  <label key={aud} className="flex items-center gap-1.5 cursor-pointer font-medium capitalize">
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setForm({ ...form, audience: [...form.audience, aud] });
-                        } else {
-                          setForm({ ...form, audience: form.audience.filter((a) => a !== aud) });
-                        }
-                      }}
-                      className="rounded border-border text-forest focus:ring-forest"
-                    />
-                    <span>{aud}</span>
-                  </label>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-2 pt-4 border-t border-border">
-            <Button variant="ghost" onClick={() => setCreateModalOpen(false)}>Cancel</Button>
-            <Button onClick={handleSaveEvent} loading={saving} className="bg-forest text-white">
-              {editEvent ? 'Update Event' : 'Create Event'}
-            </Button>
-          </div>
-        </div>
-      </Modal>
-
-      {/* ── 6. View Event Details Modal ── */}
-      {viewEvent && (
-        <Modal
-          isOpen={!!viewEvent}
-          onClose={() => setViewEvent(null)}
-          title="Event Details"
-          size="md"
-        >
-          <div className="space-y-4 text-xs">
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-deep">{viewEvent.title}</h2>
-              {getStatusBadge(viewEvent.status, viewEvent.startDate)}
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 bg-surface/50 border border-border rounded-xl p-3">
-              <div>
-                <span className="text-[11px] text-muted block">Event Type</span>
-                <span className="font-semibold text-deep capitalize">{viewEvent.type.replace('_', ' ')}</span>
-              </div>
-              <div>
-                <span className="text-[11px] text-muted block">Date</span>
-                <span className="font-semibold text-deep">
-                  {new Date(viewEvent.startDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                </span>
-              </div>
-              <div>
-                <span className="text-[11px] text-muted block">Time</span>
-                <span className="font-semibold text-deep">
-                  {viewEvent.isFullDay ? 'All Day' : `${viewEvent.startTime || '09:00 AM'} – ${viewEvent.endTime || '01:00 PM'}`}
-                </span>
-              </div>
-              <div>
-                <span className="text-[11px] text-muted block">Location</span>
-                <span className="font-semibold text-deep">{viewEvent.location || 'School Campus'}</span>
-              </div>
-            </div>
-
-            {viewEvent.description && (
-              <div>
-                <span className="text-[11px] font-bold text-deep block mb-1">Description</span>
-                <p className="text-secondary leading-relaxed p-3 bg-surface/30 border border-border rounded-lg">
-                  {viewEvent.description}
-                </p>
-              </div>
-            )}
-
-            <div className="flex items-center justify-between pt-3 border-t border-border">
-              <button
-                onClick={() => {
-                  setViewEvent(null);
-                  setMainModuleTab('gallery');
-                }}
-                className="text-xs font-semibold text-forest hover:underline flex items-center gap-1.5"
-              >
-                <Camera size={14} /> View Event Gallery
-              </button>
-
-              <div className="flex items-center gap-2">
-                {isSchoolAdmin && (
-                  <>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        const evToEdit = viewEvent;
-                        setViewEvent(null);
-                        openFormModal(evToEdit);
-                      }}
-                    >
-                      Edit Event
-                    </Button>
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      onClick={() => {
-                        const evToDelete = viewEvent;
-                        setViewEvent(null);
-                        handleDeleteEvent(evToDelete);
-                      }}
-                    >
-                      Delete
-                    </Button>
-                  </>
-                )}
-              </div>
+            <div className="flex justify-end pt-3 border-t border-border">
+              <Button variant="ghost" onClick={() => setGalleryModalOpen(false)}>
+                Close Gallery
+              </Button>
             </div>
           </div>
         </Modal>
+      )}
+
+      {/* ======================================================== */}
+      {/* FULLSCREEN INTERACTIVE LIGHTBOX                          */}
+      {/* ======================================================== */}
+      {lightboxOpen && galleryPhotos[activePhotoIndex] && (
+        <div
+          className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex flex-col justify-between p-4 sm:p-6 animate-fade-in"
+          onClick={() => setLightboxOpen(false)}
+        >
+          {/* Top Bar */}
+          <div className="flex items-center justify-between text-white z-10" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-semibold bg-white/10 px-3 py-1.5 rounded-xl backdrop-blur-xs">
+                Photo {activePhotoIndex + 1} of {galleryPhotos.length}
+              </span>
+              <span className="text-xs text-white/70 hidden sm:inline">
+                {selectedEvent?.title}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <a
+                href={getMediaUrl(galleryPhotos[activePhotoIndex].url)}
+                target="_blank"
+                rel="noreferrer"
+                download
+                className="p-2 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-xl transition-colors"
+                title="Open / Download Full Image"
+              >
+                <Download size={18} />
+              </a>
+
+              {isAdmin && (
+                <>
+                  <button
+                    onClick={(e) => handleSetCoverPhoto(galleryPhotos[activePhotoIndex], e)}
+                    className="p-2 text-white/80 hover:text-forest bg-white/10 hover:bg-white/20 rounded-xl transition-colors"
+                    title="Set as Cover Photo"
+                  >
+                    <Star size={18} />
+                  </button>
+                  <button
+                    onClick={(e) => handleDeletePhoto(galleryPhotos[activePhotoIndex], e)}
+                    className="p-2 text-white/80 hover:text-rose-400 bg-white/10 hover:bg-white/20 rounded-xl transition-colors"
+                    title="Delete Photo"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </>
+              )}
+
+              <button
+                onClick={() => setLightboxOpen(false)}
+                className="p-2 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-xl transition-colors ml-2"
+                title="Close Lightbox"
+              >
+                <X size={20} />
+              </button>
+            </div>
+          </div>
+
+          {/* Main Image Container with Navigation Arrows */}
+          <div
+            className="relative flex-1 flex items-center justify-center p-2 sm:p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Prev Arrow */}
+            {activePhotoIndex > 0 && (
+              <button
+                onClick={handlePrevPhoto}
+                className="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-md transition-all shadow-lg hover:scale-105 z-20"
+                title="Previous (Left Arrow)"
+              >
+                <ChevronLeft size={24} />
+              </button>
+            )}
+
+            {/* Next Arrow */}
+            {activePhotoIndex < galleryPhotos.length - 1 && (
+              <button
+                onClick={handleNextPhoto}
+                className="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-md transition-all shadow-lg hover:scale-105 z-20"
+                title="Next (Right Arrow)"
+              >
+                <ChevronRight size={24} />
+              </button>
+            )}
+
+            {/* High-res Image */}
+            <img
+              src={getMediaUrl(galleryPhotos[activePhotoIndex].url)}
+              alt="fullscreen preview"
+              className="max-h-[78vh] max-w-[92vw] object-contain rounded-xl shadow-2xl transition-all select-none"
+            />
+          </div>
+
+          {/* Bottom Caption & Info Bar */}
+          <div
+            className="max-w-2xl mx-auto w-full text-center text-white z-10 space-y-2 bg-black/50 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/10"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {editingCaption ? (
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={captionInput}
+                  onChange={(e) => setCaptionInput(e.target.value)}
+                  placeholder="Enter a caption for this photo..."
+                  className="flex-1 px-3 py-1.5 bg-white/10 border border-white/20 rounded-xl text-xs text-white placeholder-white/40 focus:outline-none focus:ring-1 focus:ring-forest"
+                  autoFocus
+                />
+                <Button size="sm" onClick={handleSaveCaption}>
+                  Save
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setEditingCaption(false)}>
+                  Cancel
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center gap-2">
+                <p className="text-xs font-medium text-white/90">
+                  {galleryPhotos[activePhotoIndex].caption || (
+                    <span className="text-white/40 italic">No caption attached</span>
+                  )}
+                </p>
+                {canManagePhotos && (
+                  <button
+                    onClick={() => {
+                      setCaptionInput(galleryPhotos[activePhotoIndex].caption || '');
+                      setEditingCaption(true);
+                    }}
+                    className="text-white/60 hover:text-white p-1 rounded transition-colors"
+                    title="Edit Caption"
+                  >
+                    <Edit2 size={12} />
+                  </button>
+                )}
+              </div>
+            )}
+
+            <div className="text-[11px] text-white/50 flex items-center justify-center gap-4">
+              <span>
+                Uploaded on {new Date(galleryPhotos[activePhotoIndex].createdAt).toLocaleDateString()}
+              </span>
+              {galleryPhotos[activePhotoIndex].width && galleryPhotos[activePhotoIndex].height && (
+                <span>
+                  {galleryPhotos[activePhotoIndex].width} × {galleryPhotos[activePhotoIndex].height} px
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

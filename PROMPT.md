@@ -1,376 +1,1578 @@
-# Instique — School ERP: Full-Stack Build Prompt
-
-You are building **Instique**, a complete, production-grade, multi-tenant School ERP web application, from scratch, end to end. You have full access to this codebase and complete context of this document. There are no reference images — every visual requirement below is described in words; interpret it faithfully and make expert design decisions where a specific value isn't given.
-
-Do not build a partial scaffold, a demo, or a "starter template." Build every module listed below as a fully working feature: real database models, real API endpoints, real validation, real UI screens wired to real data, seeded with realistic demo data so the app is usable immediately after setup.
-
----
-
-## 1. Tech Stack (fixed — do not substitute)
-
-| Layer                  | Choice                                                                                                      |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------- |
-| Frontend               | React (JavaScript, not TypeScript), Vite as the build tool                                                  |
-| Backend                | Node.js + Express                                                                                           |
-| Database               | MongoDB Atlas via Mongoose ODM                                                                              |
-| Package manager        | npm only (`package-lock.json`, no yarn/pnpm)                                                                |
-| Auth                   | JWT (access + refresh tokens)                                                                               |
-| State management       | Redux Toolkit (or Zustand if you judge it cleaner — pick one and use it consistently everywhere, don't mix) |
-| Routing                | React Router v6+                                                                                            |
-| Styling                | Tailwind CSS + a small custom design-token layer (see §11)                                                  |
-| Forms & validation     | react-hook-form + zod (frontend), express-validator or zod (backend)                                        |
-| Charts                 | Recharts                                                                                                    |
-| Icons                  | lucide-react                                                                                                |
-| Tables                 | Custom data-table component (sortable, filterable, paginated) — build it once, reuse everywhere             |
-| File uploads / Excel   | multer (uploads) + exceljs or xlsx (Excel import/export)                                                    |
-| Notifications delivery | Socket.io for real-time in-app notifications                                                                |
-| Offline support        | Service worker (Workbox or hand-rolled) + IndexedDB (idb library) for the offline-capable modules           |
-| Logging                | winston (server logs) + morgan (HTTP request logs)                                                          |
-| Security middleware    | helmet, cors, express-rate-limit, express-mongo-sanitize, bcrypt                                            |
-
----
-
-## 2. Architecture Principles
-
-- **Multi-tenant from day one.** Every school-scoped document (students, teachers, classes, fees, etc.) carries a `schoolId`. Every query on school-scoped data must be filtered by the authenticated user's `schoolId` at the service layer — never trust a `schoolId` passed in the request body/query for anything but Super Admin routes.
-- **Layered backend.** Controllers only orchestrate: parse request → call service → shape response. All business logic lives in services. No Mongoose queries directly inside controllers or routes.
-- **Consistent REST conventions** across all 29 modules (see §8) so the frontend API layer can be generated/reused rather than hand-written per module.
-- **Role-based everything.** Every route, every UI element, every dashboard widget respects the 5 roles: Super Admin (Instique), School Admin, Teacher, Student, Parent. If a role shouldn't see or do something, it must be impossible via both the API (middleware-enforced) and the UI (not just hidden with CSS — actually gated at the route level).
-- **No placeholder/mock data left in production code paths.** A `seed` script populates demo data for local development only; the running app always reads from MongoDB.
-
----
-
-## 3. Backend Folder Structure (mandatory — follow exactly)
-
-```
-server/
-├── config/
-│   ├── db.js                  # MongoDB Atlas connection
-│   ├── env.js                 # centralized, validated env access
-│   ├── socket.js               # socket.io setup
-│   └── logger.js              # winston config
-├── models/
-│   ├── User.js
-│   ├── School.js
-│   ├── Student.js
-│   ├── Teacher.js
-│   ├── Parent.js
-│   ├── Admission.js
-│   ├── AcademicYear.js
-│   ├── SchoolClass.js
-│   ├── Section.js
-│   ├── Subject.js
-│   ├── Timetable.js
-│   ├── Attendance.js
-│   ├── Homework.js
-│   ├── Exam.js
-│   ├── Mark.js
-│   ├── FeeStructure.js
-│   ├── FeeTransaction.js
-│   ├── Notice.js
-│   ├── Leave.js
-│   ├── CalendarEvent.js
-│   ├── ParentMeeting.js
-│   ├── Notification.js
-│   ├── Role.js
-│   ├── RecognitionPoint.js
-│   ├── Badge.js
-│   ├── Complaint.js
-│   ├── AuditLog.js
-│   ├── Setting.js
-│   └── Subscription.js
-├── controllers/                # one file per module, mirrors models
-├── routes/                     # one file per module, mounted under /api/v1
-├── services/                   # business logic, one file per module
-├── middlewares/
-│   ├── auth.middleware.js       # verifies JWT
-│   ├── rbac.middleware.js       # role + permission checks
-│   ├── tenant.middleware.js     # injects/enforces schoolId scoping
-│   ├── validate.middleware.js   # zod/express-validator error handling
-│   ├── error.middleware.js      # centralized error handler
-│   ├── upload.middleware.js     # multer config
-│   └── rateLimiter.middleware.js
-├── utils/
-│   ├── ApiError.js
-│   ├── ApiResponse.js
-│   ├── asyncHandler.js
-│   ├── generateTokens.js
-│   ├── excelParser.js
-│   ├── excelExporter.js
-│   ├── timetableEngine.js       # smart timetable generation algorithm
-│   ├── substituteEngine.js      # substitute recommendation logic
-│   └── pagination.js
-├── jobs/                       # scheduled/background jobs (fee reminders, leave-driven substitute suggestions, notification digesting)
-├── validators/                  # zod/express-validator schemas, one per module
-├── seed/
-│   └── seed.js                 # demo data generator
-├── app.js
-└── server.js
-```
-
-Every module (e.g. Attendance) follows this exact chain: `routes/attendance.routes.js` → `controllers/attendance.controller.js` → `services/attendance.service.js` → `models/Attendance.js`, with `validators/attendance.validator.js` used by `validate.middleware.js` before the controller runs.
-
----
-
-## 4. Frontend Folder Structure (mandatory — follow exactly)
-
-```
-client/
-├── src/
-│   ├── api/                    # one file per module, axios instances + endpoint calls
-│   ├── app/
-│   │   ├── store.js             # Redux store (or Zustand root)
-│   │   └── rootReducer.js
-│   ├── features/               # redux slices (or zustand stores), one folder per module
-│   ├── components/
-│   │   ├── ui/                  # Button, Input, Select, Modal, Drawer, Tabs, Badge, DataTable, Card, Toast, EmptyState, Skeleton…
-│   │   ├── layout/              # Sidebar, Topbar, DashboardShell, AuthLayout
-│   │   └── charts/
-│   ├── pages/
-│   │   ├── auth/
-│   │   ├── super-admin/
-│   │   ├── school-admin/
-│   │   ├── teacher/
-│   │   ├── student/
-│   │   └── parent/
-│   ├── routes/
-│   │   ├── AppRouter.jsx
-│   │   ├── ProtectedRoute.jsx
-│   │   └── roleRoutes.js
-│   ├── hooks/
-│   ├── context/                 # ThemeContext, SocketContext
-│   ├── utils/
-│   ├── constants/                # roles, permissions, module keys
-│   ├── styles/                   # tailwind.css, design tokens
-│   ├── offline/                  # service worker, IndexedDB sync logic
-│   ├── App.jsx
-│   └── main.jsx
-├── public/
-├── index.html
-├── vite.config.js
-├── tailwind.config.js
-└── package.json
-```
-
-Pages are organized by role because each of the 5 roles gets its own dashboard shell and navigation — but they should share the same underlying `components/ui` library so the whole app feels like one product, not five.
-
----
-
-## 5. Environment Variables
-
-Create a `server/.env.sample` and a `client/.env.sample` (do not commit real `.env` files). Include every variable the app actually uses — at minimum:
-
-**server/.env.sample**
-```
-NODE_ENV=development
-PORT=5000
-MONGODB_URI=your_mongodb_atlas_connection_string
-JWT_ACCESS_SECRET=
-JWT_REFRESH_SECRET=
-JWT_ACCESS_EXPIRY=15m
-JWT_REFRESH_EXPIRY=7d
-CLIENT_URL=http://localhost:5173
-BCRYPT_SALT_ROUNDS=10
-RATE_LIMIT_WINDOW_MS=900000
-RATE_LIMIT_MAX=100
-MAX_UPLOAD_SIZE_MB=10
-```
-
-**client/.env.sample**
-```
-VITE_API_BASE_URL=http://localhost:5000/api/v1
-VITE_SOCKET_URL=http://localhost:5000
-```
-
----
-
-## 6. Core Data Models (minimum required fields)
+# INSTIQUE — PRODUCTION-GRADE PARENT MEETING / PTM MODULE
+
+Implement a complete, production-grade Parent Meeting / Parent-Teacher Meeting (PTM) feature in the existing Instique School ERP.
+
+This must be a REAL working feature.
+
+Do NOT create a frontend-only mockup.
+Do NOT use static/mock parent, student, teacher, class, or meeting data.
+Do NOT create duplicate models or systems that already exist.
+Do NOT break existing functionality.
+
+The feature must use:
+
+- Existing authentication
+- Existing RBAC
+- Existing school/tenant architecture
+- Existing Student model
+- Existing Parent model
+- Existing Teacher model
+- Existing Class/Section model
+- Existing Events module
+- Existing Academic Calendar
+- Existing Notifications
+- Existing database architecture
+- Existing API architecture
+- Existing reusable UI components
+
+The final implementation must persist all data in the real database and work after refresh/logout/login.
+
+==================================================
+1. FIRST — INSPECT THE EXISTING CODEBASE
+==================================================
+
+Before writing code, inspect the application and identify:
+
+1. Existing Parent Meeting functionality, if any
+2. Existing Event model/schema
+3. Existing Student model
+4. Existing Parent/Guardian relationships
+5. Existing Teacher model
+6. Existing Class/Section model
+7. Existing authentication
+8. Existing RBAC
+9. Existing notification service
+10. Existing calendar/event system
+11. Existing audit logs
+12. Existing API/service/controller architecture
+13. Existing database/query architecture
+14. Existing reusable UI components
+15. Existing dashboard components
+
+Reuse existing infrastructure.
+
+If something already exists, extend it instead of creating a duplicate.
+
+==================================================
+2. CORE PTM WORKFLOW
+==================================================
+
+Implement:
+
+Admin
+  ↓
+Create Parent Meeting
+  ↓
+Select date/time
+  ↓
+Select classes/sections
+  ↓
+Auto-determine students and parents
+  ↓
+Assign teachers
+  ↓
+Save Draft
+  ↓
+Publish
+  ↓
+Notify relevant parents
+  ↓
+Parent views meeting
+  ↓
+Parent responds/RSVPs
+  ↓
+Meeting takes place
+  ↓
+Teacher/Admin records parent attendance
+  ↓
+Teacher adds meeting notes
+  ↓
+Meeting completed
+
+Do NOT implement complex appointment-slot booking in the first version.
+
+==================================================
+3. MEETING STATUS
+==================================================
+
+Use:
+
+DRAFT
+PUBLISHED
+COMPLETED
+CANCELLED
 
-Design full Mongoose schemas yourself with proper types, refs, indexes, and timestamps. At minimum, model these entities and relationships:
+Workflow:
 
-- **School** — profile, branding (logo/colors), academic session, contact info, subscription reference
-- **User** — email, password hash, role, schoolId (null for Super Admin), profile ref (Student/Teacher/Parent/SchoolAdmin), sessions[], lastLogin
-- **Student** — personal info, class/section refs, parent refs, documents[], status (active/promoted/transferred/archived), admission ref
-- **Teacher** — personal info, subject refs, class/section assignments, department, workload stats
-- **Parent** — personal info, linked student refs (supports multiple children)
-- **Admission** — applicant info, workflow status enum (submitted → document upload → verification → approved/rejected → fee paid → enrolled), documents[] each with status (uploaded/pending/verified/rejected)
-- **AcademicYear / SchoolClass / Section / Subject** — structural hierarchy, all schoolId-scoped
-- **Timetable** — periods per class/section/day, teacher+subject+room refs, generation metadata (auto-generated vs manually edited), constraint snapshot used to generate it
-- **Attendance** — date, class/section, per-student status, marked-by, subject (for subject-wise), source (manual/bulk/offline-sync)
-- **Homework** — class/section/subject, due date, attachments, template flag, submissions[] (optional)
-- **Exam / Mark** — exam definition (subjects, passing criteria), marks per student per subject, computed grade/percentage
-- **FeeStructure / FeeTransaction** — fee categories (admission/tuition/transport/custom), assignment rules, payment records (partial payments, discounts, scholarships, late fee calc), receipts
-- **Notice** — scope (school/class), schedule, category, template flag
-- **Leave** — requester, type (student/teacher), workflow status, linked substitute suggestion (for teacher leave)
-- **CalendarEvent** — type enum (holiday/exam/event/PTM/sports day/annual day/deadline)
-- **ParentMeeting** — schedule, assigned teacher, invited parents, notes, attendance
-- **Notification** — recipient, type, read/unread, in-app payload
-- **Role** — custom role name + module-level CRUD permission map
-- **RecognitionPoint / Badge** — point value, category, awarding teacher, note, running total per student, badge criteria
-- **Complaint** — type (student/parent), anonymous flag, status, resolution notes
-- **AuditLog** — actor, action, entity, before/after snapshot, timestamp, IP
-- **Setting** — per-school configurable values (grading scale, fee settings, notification toggles)
-- **Subscription** — plan, trial dates, billing history, usage limits, status
+DRAFT
+  ↓
+PUBLISHED
+  ↓
+COMPLETED
 
----
+Alternative:
 
-## 7. Authentication & RBAC
+PUBLISHED
+  ↓
+CANCELLED
 
-- JWT access token (short-lived) + refresh token (httpOnly cookie), with a `/auth/refresh` endpoint and silent renewal on the frontend.
-- 5 roles: `super_admin`, `school_admin`, `teacher`, `student`, `parent`. Super Admin has no `schoolId` and manages the platform (schools, subscriptions, platform analytics). All other roles are scoped to exactly one `schoolId`.
-- Build `rbac.middleware.js` as `requireRole(...roles)` and `requirePermission(module, action)` for the **Custom Roles & Permissions** module (module 20) — School Admins can create custom roles with granular per-module CRUD permission maps that then gate access the same way the 5 built-in roles do.
-- Password reset via signed, expiring token (email delivery can be stubbed/logged in dev, but the flow must be fully implemented).
-- Every login/logout/failed-attempt writes to Login Activity (module 1) and feeds Audit Logs (module 26).
+Do not allow arbitrary invalid status transitions.
 
----
+Status must be persisted in the database.
 
-## 8. API Conventions
+==================================================
+4. MEETING TYPES
+==================================================
 
-- Base path: `/api/v1`.
-- Standard response envelope: `{ success, data, message, meta }` (meta carries pagination info).
-- Errors go through a single `ApiError` class and `error.middleware.js` → consistent `{ success: false, message, errors[] }` shape with correct HTTP status codes.
-- List endpoints support `?page=&limit=&sort=&search=&filter[field]=` — implement this once in `utils/pagination.js` and reuse across every module.
-- Bulk-capable modules (Students, Attendance, Fees, Notifications, Class Allocation, User Creation — module 19) expose a `POST /bulk` endpoint accepting an array or an uploaded file.
-- Excel-capable modules (module 18) expose `POST /:module/import` (multipart upload → parsed → validated row-by-row → partial-success report returned) and `GET /:module/export` (streams a generated .xlsx).
+Support:
 
----
+- Parent Teacher Meeting
+- Academic Review
+- Progress Discussion
+- Behaviour Discussion
+- General Parent Meeting
+- Other
 
-## 9. Feature Modules — Build All 29
+If the application already has configurable categories, reuse them.
 
-Implement every module below as a complete vertical slice (model → service → controller → routes → validators → frontend API calls → Redux slice → UI pages/components), scoped correctly by role.
+==================================================
+5. ADMIN — PARENT MEETINGS PAGE
+==================================================
 
-**01 — Authentication & User Management**: multi-role login, JWT, password reset, RBAC, profile management, session management (list/revoke active sessions), login activity log.
+Create a professional Parent Meetings management page.
 
-**02 — School Management**: school profile, academic session config, branding upload, contact info, subscription status view. School creation itself is Super-Admin-only (schools don't self-register).
+Header:
 
-**03 — Student Information System**: full student CRUD, admission workflow linkage, parent/guardian + emergency contacts, document uploads (Aadhaar, birth certificate, transfer certificate, previous report cards, medical docs, custom docs — stored via multer with type validation), promotion/transfer/archive workflows with status history, bulk import/promotion/class-allocation.
+Parent Meetings
 
-**04 — Admission Management**: online admission form; support both a native form and a "Google Forms → Excel import" path (import mapped rows into Admission + auto-create Student/Parent records); full workflow (submission → document upload → verification with uploaded/pending/verified/rejected states per document → approval/rejection → fee generation → payment → account creation → parent linking → class allocation).
+Schedule and manage parent-teacher meetings.
 
-**05 — Teacher Management**: profiles, subject/class assignment, department management, leave linkage, workload analytics (classes/day, weekly hours, free periods, workload distribution chart).
+Primary action:
 
-**06 — Academic Structure**: academic years, classes, sections, subjects, class teacher assignment, student/subject allocation — this is the structural backbone every other module references.
++ Schedule Meeting
 
-**07 — Smart Timetable Management (flagship — build this to a genuinely high standard, see §10)**: automatic generation + manual editing, conflict detection (teacher overlap, room overlap, subject weekly limits, room constraints), lunch breaks, holiday awareness, teacher preferences, workload balancing, publishing, and a substitute-management engine (automatic substitute assignment with a "best teacher" recommendation score based on availability + subject match + current workload).
+Summary information:
 
-**08 — Attendance**: daily + subject-wise marking, "mark all present" shortcut, bulk correction, reports, analytics dashboard, automatic parent notification on absence.
+Upcoming Meetings
+Today
+Completed
+Parents Invited
 
-**09 — Homework Management**: creation with templates and "copy previous homework," attachments, due dates, optional student submission.
+These values MUST be calculated from real database data.
 
-**10 — Examination & Results**: exam creation with subject selection and passing criteria, marks entry (manual + Excel import), automatic grade/percentage calculation, result publishing, report card generation (PDF), performance analytics.
+Do not hardcode numbers.
 
-**11 — Fee Management**: configurable fee structures (admission/tuition/transport/custom), assignment (individual + bulk), partial payments, discounts, scholarships, late fee calculation, receipt generation (PDF), due tracking, collection reports.
+Example only:
 
-**12 — Notice Board**: school-wide + class-scoped notices, scheduling, templates, categories.
+Upcoming Meetings    3
+Today                 1
+Completed            12
+Parents Invited      84
 
-**13 — Leave Management**: student + teacher leave requests, approval workflow, history, automatic substitute recommendation triggered on approved teacher leave (feeds module 7's substitute engine).
+==================================================
+6. ADMIN MEETING LIST
+==================================================
 
-**14 — Events & Academic Calendar**: single centralized calendar rendering holidays, exams, school events, PTMs, sports day, annual day, and deadlines, each with distinct visual treatment.
+Use a professional enterprise-style table/list.
 
-**15 — Parent Meeting Management**: PTM scheduling, teacher assignment, parent invitations (in-app + notification), meeting notes, attendance tracking.
+Columns:
 
-**16 — Notifications**: in-app real-time notifications (Socket.io) covering attendance alerts, homework/fee reminders, leave updates, exam notifications, event reminders, plus admin-triggered bulk notifications.
+Date
+Meeting
+Type
+Classes
+Teachers
+Parents Invited
+Status
+Actions
 
-**17 — Reports & Analytics**: cross-module report generation (attendance/fee/academic/student/teacher) with PDF and Excel export.
+Example:
 
-**18 — Excel Import & Export**: generalized import for students/teachers/fees/marks/timetables and export for attendance/fee reports/marks/student & teacher lists/reports — build one reusable import/export pipeline (see §8) and wire every applicable module into it.
+24 Aug
+Parent Teacher Meeting
+Grade 5A, 5B
+4 Teachers
+68 Parents
+Upcoming
 
-**19 — Bulk Operations**: bulk promotion, class allocation, fee assignment, notifications, attendance corrections, and user creation — reuse the same bulk pipeline pattern across modules.
+Actions:
 
-**20 — Custom Roles & Permissions**: School Admins define custom roles with per-module CRUD permission maps; assign users to them; enforced via `rbac.middleware.js`.
+View
+Edit
+Publish
+Cancel
+Manage Attendance
 
-**21 — Student Recognition & Achievements**: teacher-awarded recognition points (configurable values, e.g. +1/+3/+5) with categories and notes, achievement badges (Star Student, Homework Hero, Perfect Attendance, Helpful Student, custom badges with configurable criteria), recognition history, leaderboards (attendance ranking, academic ranking), top performers, and class-to-class comparison analytics.
+Only show actions allowed by the current user's permissions and meeting state.
 
-**22 — Complaint & Feedback**: student/parent complaints, optional anonymous submission, status tracking, resolution workflow.
+==================================================
+7. SEARCH
+==================================================
 
-**23 — Parent Portal**: a dedicated parent-facing surface aggregating attendance, results, homework, timetable, fee status, notices, recognition, and leave requests — with full multi-child support (switch between linked children).
+Add:
 
-**24 — Curriculum / Syllabus Progress**: subject syllabus definition, chapter-level tracking, completion percentage, teacher progress reports.
+Search meetings...
 
-**25 — Offline Support**: attendance, timetable, and homework must remain usable without connectivity (service worker caching + IndexedDB queue) with automatic synchronization and conflict resolution when connectivity returns — surface sync status clearly in the UI.
+Search by:
 
-**26 — Audit Logs**: immutable log of admission changes, attendance edits, fee updates, user activity, permission changes, login history, and general system activity — Super Admin and School Admin viewable, filterable, exportable.
+- Meeting title
+- Meeting type
+- Class/section
+- Teacher
+- Date where appropriate
 
-**27 — Dashboards**: five distinct, role-specific dashboards —
-- *Super Admin*: total schools, active subscriptions, revenue, trial schools, platform analytics.
-- *School Admin*: student/teacher counts, today's attendance, pending fees, revenue summary, recent notices, admission applications, leave requests, upcoming events, timetable conflicts, teacher workload overview.
-- *Teacher*: today's timetable, attendance pending, homework pending, upcoming exams, free periods, syllabus progress, recognition activity.
-- *Student*: attendance, homework, timetable, fees, exam results, notices, recognition points, badges, leaderboard position.
-- *Parent*: child overview (with switcher), attendance, homework, results, fees, timetable, notices, recognition, leave status.
+Use the real database/query layer.
 
-**28 — Settings**: school profile, academic session, departments, subjects, grade settings, fee settings, notification settings, branding — centralized configuration screen for School Admins.
+Do not filter static frontend arrays if server-side querying already exists.
 
-**29 — SaaS Management** (Super Admin only): school onboarding (create school → assign admin → activate subscription), subscription plan management, free trial handling, billing, payment history, usage limits enforcement (block/warn when a school exceeds its plan's limits).
+==================================================
+8. FILTERS
+==================================================
 
----
+Add:
 
-## 10. Flagship Deep-Dive: Smart Timetable Engine
+Status
+- All
+- Draft
+- Published
+- Completed
+- Cancelled
 
-This is the feature the product is betting on — build it properly, not as a naive random assignment:
+Meeting Type
 
-- Implement `utils/timetableEngine.js` as a constraint-based generator (backtracking with heuristics, or a greedy + local-repair approach — your choice, but it must actually respect hard constraints, not just avoid the most obvious clashes):
-  - **Hard constraints (must never be violated):** no teacher double-booked at the same period, no room double-booked, subject weekly period limits respected, designated lunch break slots left free, holidays excluded entirely.
-  - **Soft constraints (optimize for, can trade off):** teacher preferences (preferred periods/days), even workload distribution across the week per teacher.
-- Provide a manual-editing UI (drag-and-drop grid) that re-runs conflict detection live and blocks/warns on any hard-constraint violation.
-- Substitute engine (`utils/substituteEngine.js`): given a teacher absence, score eligible substitute teachers by subject match, current free-period availability at that slot, and current workload, and return a ranked recommendation list.
-- Timetable must have a draft/published state — edits to a draft don't affect what students/parents/teachers currently see until published.
+Class / Section
 
----
+Teacher
 
-## 11. UI/UX Design System — "Premium ERP" Visual Direction
+Date Range
 
-The product must read as a serious, expensive, enterprise-grade system — the visual bar is Linear, Stripe Dashboard, Vercel, or a well-funded modern ERP like Rippling/Deel, **not** a free Bootstrap admin template. Concretely:
+Academic Year
 
-- **Layout**: persistent left sidebar (icon + label, collapsible), sticky top bar (global search, notification bell with live unread count, role/user menu, school switcher for Super Admin), content area with breadcrumbs. Every role gets this same shell with a role-appropriate nav.
-- **Density**: information-dense but never cluttered — generous internal padding inside cards/tables, tight padding at the page-grid level. This is a tool people use for hours a day; prioritize scanability over decoration.
-- **Color system**: a single restrained primary color (a deep, trustworthy blue or indigo) for actions/active states, a neutral gray scale (not pure black/white) for structure and text, and a small set of semantic colors (success green, warning amber, danger red, info blue) used *only* for status — never decoratively. Avoid gradients, avoid multiple competing accent colors, avoid saturated "SaaS landing page" colors. Support light and dark mode.
-- **Typography**: one clean sans-serif for UI text (e.g. Inter or Manrope) with a clear, restrained type scale (don't use more than 5–6 sizes across the whole app). Numbers in tables/dashboards use tabular figures.
-- **Data tables**: sticky header, sortable columns, column-level filters, row density toggle, pagination, bulk-select with a contextual action bar, empty and loading states designed as first-class (not an afterthought), skeleton loaders instead of spinners for table/card content.
-- **Dashboards**: KPI stat cards with a number, a label, and a small trend indicator; charts (Recharts) styled to match the palette — no default chart-library colors; every dashboard section should feel like it was designed for *this* data, not a generic template.
-- **Forms**: clear field grouping, inline validation, disabled-state clarity, multi-step forms (e.g. Admission workflow) shown as a visible stepper.
-- **Motion**: subtle, fast (150–200ms), used only for state transitions (drawer open, tab switch, toast in/out) — never decorative animation.
-- **Consistency**: build the component library in `components/ui` once and use it everywhere; there should be zero one-off styled buttons/inputs/cards anywhere in the app.
+Filters must actually affect the displayed data.
 
-The end result should feel like something a school would be proud to pay for — calm, precise, trustworthy — not flashy.
+Provide:
 
----
+Reset Filters
 
-## 12. Cross-Cutting Technical Requirements
+==================================================
+9. CREATE / SCHEDULE MEETING
+==================================================
 
-- Input validation and sanitization on every write endpoint (zod/express-validator + express-mongo-sanitize).
-- Centralized error handling on both frontend (error boundary + toast surface) and backend (`error.middleware.js`).
-- Rate limiting on auth endpoints specifically, plus a general API rate limit.
-- Passwords hashed with bcrypt, never logged, never returned in any API response.
-- Pagination, sorting, and search implemented once and reused, not duplicated per module.
-- All list/detail screens implement loading, empty, and error states — no blank screens.
-- Responsive down to tablet width at minimum (sidebar collapses to icon-only or drawer).
-- `README.md` at the repo root documenting setup, environment variables, seed script usage, and how to run frontend + backend together.
-- `seed/seed.js` creates: 1 sample school, all 5 role users with known demo credentials, a full academic structure, a generated timetable, several weeks of attendance/homework/marks history, fee records in various states, notices, recognition activity, and at least one open complaint — enough that every dashboard and every module has real data to show on first run.
+Clicking:
 
----
++ Schedule Meeting
 
-## 13. Deliverables Checklist
+should open a professional form/modal/drawer/page according to the existing application architecture.
 
-- [ ] `server/` fully implemented per the folder structure in §3, all 29 modules working end to end
-- [ ] `client/` fully implemented per the folder structure in §4, all 5 role dashboards and all 29 modules' UI wired to real API calls
-- [ ] `server/.env.sample` and `client/.env.sample`
-- [ ] `seed/seed.js` with realistic demo data, runnable via an npm script
-- [ ] Root or per-package `README.md` with setup instructions
-- [ ] `package.json` scripts: `npm run dev` (concurrently runs client + server in dev), `npm run seed`, `npm run build`, `npm start`
-- [ ] No TODOs, no stubbed-out modules, no "coming soon" screens — every one of the 29 modules is fully functional
+Fields:
 
----
+Meeting Title *
+Meeting Type *
+Description
 
-## 14. Suggested Build Order
+Date *
+Start Time *
+End Time *
 
-1. Backend foundation: config, db connection, error/response utils, auth (module 1), School (module 2), RBAC middleware.
-2. Academic Structure (module 6) — everything else references it.
-3. Student/Teacher/Parent/Admission (modules 3, 4, 5).
-4. Smart Timetable (module 7) — flagship, build early so downstream modules (attendance, homework, exams) can reference real timetable slots.
-5. Attendance, Homework, Examination (modules 8–10).
-6. Fee Management, Notice Board, Leave, Calendar, Parent Meetings, Notifications (modules 11–16).
-7. Reports, Excel Import/Export, Bulk Operations, Custom Roles (modules 17–20).
-8. Recognition, Complaints, Parent Portal, Curriculum (modules 21–24).
-9. Offline Support, Audit Logs, Dashboards, Settings, SaaS Management (modules 25–29).
-10. Frontend build proceeds in parallel per module once its API is stable; build `components/ui` and the dashboard shells first so every subsequent page reuses them.
-11. Final pass: seed data, README, environment samples, end-to-end smoke test of every role's full workflow.
+Location
+
+Instructions
+
+Example:
+
+Parent Teacher Meeting
+
+24 August 2026
+10:00 AM – 2:00 PM
+
+Location:
+School Auditorium
+
+Instructions:
+Parents should bring the student's previous report card.
+
+==================================================
+10. DATE/TIME VALIDATION
+==================================================
+
+Validate:
+
+- Date is valid
+- Start time is before end time
+- End time cannot be before start time
+- Required fields are present
+
+Backend validation is mandatory.
+
+Do not rely only on frontend validation.
+
+==================================================
+11. CLASS / SECTION SELECTION
+==================================================
+
+Admin selects the classes/sections participating in the PTM.
+
+Example:
+
+Classes:
+
+☑ Grade 5A
+☑ Grade 5B
+☐ Grade 6A
+☐ Grade 6B
+
+Provide:
+
+Search classes...
+
+Select All
+
+Clear All
+
+Classes MUST come from the actual database.
+
+Do not hardcode class names.
+
+==================================================
+12. AUTOMATIC STUDENT DETECTION
+==================================================
+
+This is important.
+
+When admin selects:
+
+Grade 5A
+Grade 5B
+
+the system should automatically determine:
+
+Selected Classes
+↓
+Students in those classes
+↓
+Parent/Guardian relationships
+↓
+Relevant parents
+
+Example:
+
+Selected Classes:
+Grade 5A
+Grade 5B
+
+Students:
+72
+
+Parents/Guardians:
+68
+
+Parents Invited:
+68
+
+Do NOT make the admin manually select every parent.
+
+Use the existing Student → Parent relationship.
+
+==================================================
+13. MULTIPLE CHILDREN
+==================================================
+
+A parent may have multiple children in the selected classes.
+
+Do NOT create duplicate parent invitations unnecessarily.
+
+Example:
+
+Parent:
+Rahul Sharma
+
+Children:
+Aarav Sharma — Grade 5A
+Ananya Sharma — Grade 8B
+
+If both children are part of the meeting:
+
+Parent should receive ONE meeting invitation.
+
+But the meeting should retain both child relationships.
+
+Conceptually:
+
+Meeting
+├── Parent Rahul
+│   ├── Aarav — Grade 5A
+│   └── Ananya — Grade 8B
+
+Do not create two duplicate parent meeting records.
+
+==================================================
+14. TEACHER ASSIGNMENT
+==================================================
+
+Allow admin to assign participating teachers.
+
+Teachers must come from the existing teacher/staff database.
+
+Example:
+
+Grade 5A
+- Class Teacher
+- Mathematics Teacher
+- Science Teacher
+
+Grade 5B
+- Class Teacher
+- English Teacher
+
+If the class already has a class teacher:
+
+Automatically suggest the class teacher.
+
+Admin can modify assignments if authorized.
+
+Do not allow assigning teachers from another school.
+
+==================================================
+15. TEACHER-CLASS RELATIONSHIP
+==================================================
+
+Where possible, automatically recommend teachers based on:
+
+Class
++
+Subject assignment
++
+Class teacher assignment
+
+Do not randomly assign teachers.
+
+Use existing academic relationships.
+
+==================================================
+16. PARENT INVITATION RECORDS
+==================================================
+
+Do not simply calculate parents every time and lose the historical invitation state.
+
+When a meeting is published, create appropriate meeting-participant/invitation records.
+
+Conceptually:
+
+ParentMeeting
+      ↓
+MeetingParticipant
+      ↓
+Parent
+      ↓
+Student/Child relationship
+
+Store:
+
+- meetingId
+- parentId
+- studentId
+- invitedAt
+- RSVP status
+- attendance status
+
+Follow the existing schema conventions.
+
+==================================================
+17. PARENT RSVP
+==================================================
+
+For MVP, support:
+
+GOING
+NOT_GOING
+MAYBE
+
+Default:
+
+PENDING
+
+Parent can respond from the Parent Dashboard.
+
+Example:
+
+Parent Teacher Meeting
+24 Aug 2026
+10:00 AM – 2:00 PM
+
+Child:
+Aarav Sharma — Grade 5A
+
+Your response:
+
+[ Going ] [ Maybe ] [ Not Going ]
+
+Persist the response in the database.
+
+After refresh, the response must remain.
+
+==================================================
+18. PARENT DASHBOARD
+==================================================
+
+Add an Upcoming Parent Meetings section.
+
+Example:
+
+Upcoming Parent Meeting
+
+Parent Teacher Meeting
+24 Aug 2026
+10:00 AM – 2:00 PM
+
+Aarav Sharma
+Grade 5A
+
+[View Details]
+
+If the parent has multiple children:
+
+Show the relevant child relationships.
+
+Do not show meetings belonging to unrelated students.
+
+==================================================
+19. PARENT MEETING DETAILS — PARENT
+
+Show:
+
+Meeting title
+Type
+Date
+Time
+Location
+Instructions
+Child/children
+Assigned teacher(s)
+RSVP status
+
+Example:
+
+Parent Teacher Meeting
+
+24 August 2026
+10:00 AM – 2:00 PM
+
+Location:
+School Auditorium
+
+Children:
+
+Aarav Sharma
+Grade 5A
+
+Teacher:
+Mrs. Sharma
+
+Response:
+Going
+
+==================================================
+20. TEACHER DASHBOARD
+==================================================
+
+Teachers should see:
+
+Upcoming Parent Meetings
+
+Example:
+
+Parent Teacher Meeting
+24 Aug
+10:00 AM – 2:00 PM
+
+Classes:
+Grade 5A
+Grade 5B
+
+[View Meeting]
+
+Teacher must only see meetings they are assigned to or otherwise authorized to see.
+
+==================================================
+21. TEACHER MEETING VIEW
+==================================================
+
+Teacher opens a meeting:
+
+Parent Teacher Meeting
+
+24 Aug 2026
+10:00 AM – 2:00 PM
+
+Assigned Classes:
+
+Grade 5A
+
+Students:
+
+Student
+Parent
+RSVP
+Attendance
+Notes
+
+Aarav Sharma
+Rahul Sharma
+Going
+Pending
+
+Ananya Patil
+Priya Patil
+Not Going
+-
+
+The teacher should only see students relevant to their assigned class/meeting scope.
+
+==================================================
+22. PARENT ATTENDANCE
+==================================================
+
+IMPORTANT:
+
+Do NOT confuse PTM attendance with student attendance.
+
+This is:
+
+Parent Meeting Attendance
+
+Statuses:
+
+PENDING
+ATTENDED
+ABSENT
+NOT_SCHEDULED
+
+Teacher/Admin can mark:
+
+ATTENDED
+ABSENT
+
+Store:
+
+meetingId
+parentId
+studentId
+status
+markedBy
+markedAt
+
+Use the actual authenticated user as markedBy.
+
+==================================================
+23. MULTIPLE CHILDREN ATTENDANCE
+==================================================
+
+If one parent has multiple children in the same PTM:
+
+Do not incorrectly count the parent twice.
+
+Example:
+
+Rahul Sharma
+├── Aarav — Grade 5A
+└── Ananya — Grade 8B
+
+Parent attendance should be represented correctly.
+
+The UI can show:
+
+Rahul Sharma
+2 children
+
+Attended
+
+Do not double-count the parent in overall attendance statistics.
+
+==================================================
+24. MEETING NOTES
+==================================================
+
+Teachers should be able to add notes for individual students.
+
+Example:
+
+Student:
+Aarav Sharma
+
+Academic Performance:
+Good progress in Mathematics.
+
+Behaviour:
+Participates actively.
+
+Areas to Improve:
+Reading comprehension.
+
+Action Items:
+Practice reading 20 minutes daily.
+
+[Save Notes]
+
+Persist notes in the database.
+
+Do not store notes only in frontend state.
+
+==================================================
+25. NOTE VISIBILITY
+==================================================
+
+Support note visibility if practical:
+
+INTERNAL
+PARENT_VISIBLE
+
+Internal:
+Visible only to authorized school staff.
+
+Parent Visible:
+Visible to the relevant parent.
+
+IMPORTANT:
+
+Never expose internal notes to parents.
+
+If this is too large for the current MVP architecture, implement staff-only notes first and leave parent-visible notes as a future extension.
+
+==================================================
+26. MEETING COMPLETION
+==================================================
+
+After the meeting date/time has passed, admin should be able to mark:
+
+COMPLETED
+
+Do not automatically mark it completed solely on frontend rendering.
+
+Persist the status.
+
+Admin can then view:
+
+Parents Invited
+Parents Attended
+Parents Absent
+RSVP breakdown
+Teacher notes
+Meeting summary
+
+==================================================
+27. MEETING SUMMARY
+==================================================
+
+For completed meetings:
+
+Show:
+
+Parents Invited
+68
+
+Going
+52
+
+Maybe
+8
+
+Not Going
+8
+
+Attended
+48
+
+Absent
+20
+
+Attendance Rate
+70.6%
+
+All values must be calculated from actual database records.
+
+Do not hardcode.
+
+==================================================
+28. ADMIN MEETING DETAILS
+==================================================
+
+Create a professional details page/drawer:
+
+Parent Teacher Meeting
+
+PUBLISHED
+
+24 August 2026
+10:00 AM – 2:00 PM
+
+School Auditorium
+
+Classes
+Grade 5A
+Grade 5B
+
+Teachers
+4
+
+Parents Invited
+68
+
+────────────────────────
+
+Attendance
+
+48 Attended
+20 Absent
+
+────────────────────────
+
+Teachers
+
+Mrs. Sharma
+Mr. Patel
+Ms. Joshi
+
+────────────────────────
+
+Actions
+
+Edit
+Cancel
+Manage Attendance
+Complete Meeting
+
+Use the existing Instique design system.
+
+==================================================
+29. ATTENDANCE MANAGEMENT
+==================================================
+
+Provide a dedicated attendance interface.
+
+Example:
+
+Parent Meeting Attendance
+
+Search parent/student...
+
+[All] [Attended] [Absent] [Pending]
+
+Parent             Student       Status
+
+Rahul Sharma       Aarav         ✓ Attended
+Priya Patil        Ananya        Pending
+Amit More          Rohan         ✕ Absent
+
+Provide:
+
+Mark Attended
+Mark Absent
+
+Use bulk actions if useful.
+
+Do not modify regular student attendance.
+
+==================================================
+30. EVENTS / CALENDAR INTEGRATION
+==================================================
+
+CRITICAL:
+
+Do NOT create a completely separate calendar system.
+
+A Parent Meeting should integrate with the existing Events/Academic Calendar architecture.
+
+Conceptually:
+
+Academic Calendar
+├── Holidays
+├── Exams
+├── Events
+└── Parent Meetings
+
+When a Parent Meeting is created/published:
+
+It should appear in the existing calendar.
+
+Type:
+
+PARENT_MEETING
+
+Use the existing calendar/event model if possible.
+
+Do not duplicate calendar functionality.
+
+==================================================
+31. EVENT RELATIONSHIP
+
+If the existing Events system supports event types:
+
+Create the PTM as a specialized event or associate the ParentMeeting with an Event.
+
+Preferred architecture if compatible with the existing code:
+
+Event
+  ↓
+Parent Meeting
+  ↓
+Meeting participants
+  ↓
+Attendance / Notes
+
+Do NOT create two unrelated calendar entries for the same meeting.
+
+There should be one source of truth for the meeting date/time.
+
+==================================================
+32. NOTIFICATIONS
+==================================================
+
+Use the existing notification system.
+
+When the meeting is published:
+
+Parent Meeting
+↓
+Determine relevant parents
+↓
+Existing Notification Service
+↓
+Notify parents
+
+Notification example:
+
+Parent Teacher Meeting
+
+24 August
+10:00 AM – 2:00 PM
+
+Your child's school has scheduled a Parent Teacher Meeting.
+
+Child:
+Aarav Sharma
+Grade 5A
+
+Location:
+School Auditorium
+
+Do not create a separate notification architecture.
+
+==================================================
+33. NOTIFICATION EVENTS
+
+Possible notification triggers:
+
+Meeting Published
+Meeting Updated
+Meeting Cancelled
+
+Do NOT send notifications for every small internal change.
+
+If the meeting date/time changes after publication:
+
+Notify affected parents.
+
+If the meeting is cancelled:
+
+Notify affected parents.
+
+==================================================
+34. ADMIN PAGE FILTERS
+
+Support:
+
+Search
+
+Status:
+All
+Draft
+Published
+Completed
+Cancelled
+
+Class/Section
+
+Teacher
+
+Meeting Type
+
+Date
+
+Academic Year
+
+Use real database queries.
+
+==================================================
+35. PAGINATION
+
+If there are many meetings:
+
+Use server-side pagination according to the existing architecture.
+
+Example:
+
+Showing 1–20 of 84 meetings
+
+Do not load thousands of records unnecessarily.
+
+==================================================
+36. DATABASE MODEL
+
+Inspect the current schema first.
+
+If no ParentMeeting model exists, use a structure similar to:
+
+ParentMeeting
+├── id
+├── schoolId
+├── eventId (optional/depending on architecture)
+├── title
+├── type
+├── description
+├── startDate
+├── endDate
+├── startTime
+├── endTime
+├── location
+├── instructions
+├── status
+├── createdById
+├── publishedAt
+├── completedAt
+├── createdAt
+└── updatedAt
+
+ParentMeetingClass
+├── id
+├── meetingId
+├── classId
+└── sectionId
+
+ParentMeetingTeacher
+├── id
+├── meetingId
+├── teacherId
+├── classId
+└── sectionId
+
+ParentMeetingParticipant
+├── id
+├── meetingId
+├── parentId
+├── studentId
+├── rsvpStatus
+├── attendanceStatus
+├── invitedAt
+├── respondedAt
+├── attendedAt
+└── updatedAt
+
+ParentMeetingNote
+├── id
+├── meetingId
+├── studentId
+├── teacherId
+├── note
+├── visibility
+├── createdAt
+└── updatedAt
+
+Use existing naming conventions.
+
+Do not create duplicate relationships if they already exist.
+
+==================================================
+37. SCHOOL / TENANT ISOLATION
+
+CRITICAL.
+
+Every query must be scoped to the authenticated school.
+
+Never trust schoolId from frontend input.
+
+Backend must derive school/institution from authenticated user/session.
+
+School A must NEVER be able to:
+
+- View School B meetings
+- Create meetings for School B
+- Assign School B teachers
+- See School B parents
+- See School B students
+- Modify School B attendance
+
+Test tenant isolation for every endpoint.
+
+==================================================
+38. RBAC
+
+Use existing RBAC.
+
+School Admin:
+- Create
+- Edit
+- Publish
+- Cancel
+- Assign teachers
+- View all relevant meeting data
+- Manage attendance
+- Complete meetings
+- View reports
+
+Teacher:
+- View assigned meetings
+- View assigned students
+- Manage parent meeting attendance for their scope
+- Add notes
+
+Parent:
+- View relevant meetings
+- RSVP
+- View parent-visible information
+
+Student:
+- Do not expose management features.
+- Only show meeting information if the existing product requirements explicitly require student visibility.
+
+==================================================
+39. PARENT-CHILD SECURITY
+
+A parent must only see meetings involving their own child/children.
+
+Do NOT trust a frontend childId.
+
+Backend must verify:
+
+authenticated parent
+↓
+parent-child relationship
+↓
+student belongs to parent
+↓
+meeting includes student's class/student
+
+If the parent manually changes childId in an API request, the backend must reject unauthorized access.
+
+==================================================
+40. TEACHER SECURITY
+
+A teacher should only see students/classes/meetings they are authorized to access.
+
+Do not allow:
+
+Teacher A
+↓
+modify attendance
+↓
+for students assigned only to Teacher B
+
+unless Teacher A has the required administrative permission.
+
+==================================================
+41. API
+
+Follow existing API conventions.
+
+Potential endpoints:
+
+GET /parent-meetings
+GET /parent-meetings/:id
+POST /parent-meetings
+PATCH /parent-meetings/:id
+DELETE /parent-meetings/:id
+
+Publish:
+PATCH /parent-meetings/:id/publish
+
+Cancel:
+PATCH /parent-meetings/:id/cancel
+
+Complete:
+PATCH /parent-meetings/:id/complete
+
+RSVP:
+POST /parent-meetings/:id/rsvp
+
+Attendance:
+PATCH /parent-meetings/:id/attendance
+
+Notes:
+POST /parent-meetings/:id/notes
+
+Use the project's existing endpoint conventions.
+
+Do not blindly create these endpoints if equivalent APIs already exist.
+
+==================================================
+42. VALIDATION
+
+Backend validation is mandatory.
+
+Validate:
+
+- Title
+- Type
+- Date
+- Start/end time
+- Classes
+- Teachers
+- Parent relationships
+- Student relationships
+- Status transitions
+- RSVP ownership
+- Attendance permissions
+- Note permissions
+
+End time must be after start time.
+
+Do not allow invalid class IDs or teacher IDs from another school.
+
+==================================================
+43. UI DESIGN
+
+Use the existing Instique design language.
+
+The Parent Meetings page should feel consistent with:
+
+- Events
+- Admissions
+- Exams
+- Attendance
+- Fees
+
+Use:
+
+- Light/neutral background
+- Instique green
+- Thin borders
+- Compact professional typography
+- Restrained cards
+- Professional tables
+- Status badges
+- Clear page hierarchy
+- Subtle hover states
+
+Avoid:
+
+- Excessive rounded cards
+- Glassmorphism
+- Neon colors
+- Giant icons
+- Gamification
+- Excessive animations
+- Generic AI dashboard patterns
+
+==================================================
+44. ADMIN PAGE UI
+
+Recommended:
+
+Parent Meetings                          + Schedule Meeting
+
+Schedule and manage parent-teacher meetings.
+
+[Upcoming 3] [Today 1] [Completed 12] [Parents Invited 84]
+
+[Search...] [Status] [Class] [Teacher] [Date]
+
+────────────────────────────────────────────────────────────
+
+Date       Meeting             Classes       Teachers    Status
+
+24 Aug     Parent Teacher Meet Grade 5A      4           Upcoming
+28 Aug     Academic Review     Grade 8       3           Upcoming
+10 Aug     Progress Meeting    Grade 10      5           Completed
+
+────────────────────────────────────────────────────────────
+
+Keep it information-dense and professional.
+
+Do not turn every value into a large card.
+
+==================================================
+45. PARENT UI
+
+Parent Dashboard:
+
+Upcoming Parent Meetings
+
+24 Aug
+
+Parent Teacher Meeting
+
+Aarav Sharma
+Grade 5A
+
+10:00 AM – 2:00 PM
+
+[View Details]
+
+[Going] [Maybe] [Not Going]
+
+Keep the parent interface simpler than the admin interface.
+
+==================================================
+46. TEACHER UI
+
+Teacher Dashboard:
+
+Upcoming Parent Meetings
+
+24 Aug
+
+Parent Teacher Meeting
+
+Grade 5A
+
+10:00 AM – 2:00 PM
+
+[View Meeting]
+
+Inside:
+
+Students
+Parent RSVP
+Attendance
+Notes
+
+Keep teacher workflows fast.
+
+==================================================
+47. EMPTY STATES
+
+Admin:
+
+No parent meetings found.
+
+[Schedule Meeting]
+
+Parent:
+
+No upcoming parent meetings.
+
+Teacher:
+
+No assigned parent meetings.
+
+Do not show empty cards with fake statistics.
+
+==================================================
+48. LOADING STATES
+
+Use skeleton loaders for:
+
+- Meeting statistics
+- Meeting list
+- Meeting details
+- Participants
+- Attendance
+
+Do not show blank screens.
+
+==================================================
+49. ERROR STATES
+
+Example:
+
+Unable to load parent meetings.
+
+Something went wrong while loading the meetings.
+
+[Try Again]
+
+Never expose:
+
+SQL errors
+MongoDB errors
+Stack traces
+Internal API details
+
+==================================================
+50. RESPONSIVE DESIGN
+
+Desktop:
+Professional table.
+
+Tablet:
+Compact table.
+
+Mobile:
+Meeting cards.
+
+Example:
+
+Parent Teacher Meeting
+
+24 Aug 2026
+10:00 AM – 2:00 PM
+
+Grade 5A
+4 Teachers
+
+Upcoming
+
+[View]
+
+Do not force the desktop table onto mobile.
+
+==================================================
+51. AUDIT LOGGING
+
+If the existing audit system exists, record:
+
+Meeting Created
+Meeting Updated
+Meeting Published
+Meeting Cancelled
+Teacher Assigned
+Parent RSVP
+Attendance Updated
+Note Added
+Meeting Completed
+
+Use the existing audit system.
+
+Do not create a separate audit architecture.
+
+==================================================
+52. DO NOT OVERBUILD MVP
+
+Do NOT implement:
+
+- Complex time-slot booking
+- Video meetings
+- Google Meet/Zoom integration
+- Payments
+- AI meeting summaries
+- AI teacher assignment
+- Parent-teacher chat
+- Voice notes
+- Complex recurring PTMs
+- External calendar synchronization
+- Advanced analytics
+
+MVP is:
+
+CREATE
+→ SELECT CLASSES
+→ AUTO-FETCH STUDENTS/PARENTS
+→ ASSIGN TEACHERS
+→ PUBLISH
+→ NOTIFY
+→ PARENT VIEW
+→ RSVP
+→ MEETING ATTENDANCE
+→ TEACHER NOTES
+→ COMPLETE
+
+==================================================
+53. TEST COMPLETE FLOW
+
+ADMIN:
+
+1. Login as School Admin.
+2. Open Parent Meetings.
+3. Create a meeting.
+4. Select classes.
+5. Verify students are automatically detected.
+6. Verify parents are automatically detected.
+7. Verify duplicate parents are handled correctly.
+8. Assign teachers.
+9. Save Draft.
+10. Refresh.
+11. Verify draft persists.
+12. Publish meeting.
+13. Verify status changes.
+14. Verify relevant parents receive notifications.
+15. Open meeting details.
+16. Verify participant counts.
+17. Manage attendance.
+18. Complete meeting.
+19. Verify summary.
+
+TEACHER:
+
+1. Login as Teacher.
+2. Verify only assigned meetings appear.
+3. Open meeting.
+4. Verify relevant students appear.
+5. Mark parent attendance.
+6. Add student-specific notes.
+7. Refresh.
+8. Verify notes and attendance persist.
+
+PARENT:
+
+1. Login as Parent.
+2. Verify relevant meeting appears.
+3. Verify correct child/children.
+4. Open details.
+5. RSVP.
+6. Refresh.
+7. Verify RSVP persists.
+8. Verify parent can only access their own children.
+9. Verify internal notes are not visible.
+
+SECURITY:
+
+1. Test RBAC.
+2. Test school isolation.
+3. Test parent-child relationship.
+4. Test teacher scope.
+5. Test unauthorized attendance update.
+6. Test unauthorized note access.
+7. Test invalid class/teacher IDs.
+8. Test invalid status transitions.
+
+==================================================
+54. FINAL QUALITY BAR
+
+The finished Parent Meeting feature should feel like a natural part of Instique.
+
+It should be:
+
+Professional
+Simple
+Fast
+Secure
+Real-data driven
+Permission-controlled
+Integrated with Events
+Integrated with Calendar
+Integrated with Notifications
+Integrated with Students/Parents/Teachers/Classes
+
+The core experience must be:
+
+ADMIN:
+Schedule and manage easily.
+
+TEACHER:
+See assigned parents and record meeting outcomes quickly.
+
+PARENT:
+Clearly understand when the meeting is, which child it concerns, and respond easily.
+
+Most importantly:
+
+REAL UI
++
+REAL API
++
+REAL DATABASE
++
+REAL AUTHENTICATION
++
+REAL RBAC
++
+REAL STUDENT/PARENT RELATIONSHIPS
++
+REAL TEACHER/CLASS RELATIONSHIPS
++
+REAL NOTIFICATIONS
++
+REAL CALENDAR INTEGRATION
++
+REAL PERSISTENCE
+
+Do not implement a frontend-only PTM mockup.

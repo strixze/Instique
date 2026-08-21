@@ -17,6 +17,7 @@ import Card from '../../components/ui/Card';
 import { admissionApi } from '../../api/admission.api';
 import { academicApi } from '../../api/academic.api';
 import { feeApi } from '../../api/fee.api';
+import UserAvatar from '../../components/ui/UserAvatar';
 
 /* ──────────────────────── Constants ──────────────────────── */
 
@@ -1019,9 +1020,15 @@ export default function Admissions() {
                       {/* Applicant */}
                       <td className="px-3.5 py-2.5">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-7 h-7 rounded-full bg-forest-soft text-forest text-[11px] font-bold flex items-center justify-center shrink-0">
-                            {getInitials(row.applicantName)}
-                          </div>
+                          <UserAvatar
+                            type="student"
+                            gender={row.gender}
+                            id={row._id}
+                            admissionNo={row.applicationNo}
+                            name={row.applicantName}
+                            size="sm"
+                            className="shrink-0 ring-1 ring-border/50"
+                          />
                           <div>
                             <p className="font-bold text-xs text-deep leading-tight">
                               {row.applicantName}

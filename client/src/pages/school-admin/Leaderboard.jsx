@@ -12,6 +12,7 @@ import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
 import Select from '../../components/ui/Select';
+import UserAvatar from '../../components/ui/UserAvatar';
 import { examApi } from '../../api/exam.api';
 import { useUserStore } from '../../store/userStore';
 import ReportCardModal from '../../components/exams/ReportCardModal';
@@ -717,13 +718,15 @@ export default function Leaderboard() {
                           {/* Student Name & Avatar */}
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-3">
-                              <div
-                                className={`w-8 h-8 rounded-full border flex items-center justify-center text-xs font-bold shrink-0 ${getAvatarBg(
-                                  `${row.student.firstName} ${row.student.lastName}`
-                                )}`}
-                              >
-                                {getInitials(row.student.firstName, row.student.lastName)}
-                              </div>
+                              <UserAvatar
+                                type="student"
+                                gender={row.student.gender}
+                                id={row.student._id}
+                                admissionNo={row.student.admissionNo}
+                                name={`${row.student.firstName} ${row.student.lastName}`}
+                                size="sm"
+                                className="shrink-0 ring-1 ring-border/50"
+                              />
                               <div>
                                 <div className="font-semibold text-deep flex items-center gap-1.5">
                                   <span>{row.student.firstName} {row.student.lastName}</span>
@@ -905,13 +908,15 @@ function PodiumCard({ position, data, maxTotal, accent, isFirst = false }) {
 
       {/* Student Details */}
       <div className="flex flex-col items-center my-2">
-        <div
-          className={`w-14 h-14 rounded-full border-2 ${currentTheme.ring} flex items-center justify-center text-base font-bold mb-2 ${getAvatarBg(
-            `${data.student.firstName} ${data.student.lastName}`
-          )} shadow-sm`}
-        >
-          {getInitials(data.student.firstName, data.student.lastName)}
-        </div>
+        <UserAvatar
+          type="student"
+          gender={data.student.gender}
+          id={data.student._id}
+          admissionNo={data.student.admissionNo}
+          name={`${data.student.firstName} ${data.student.lastName}`}
+          size="lg"
+          className={`mb-2 ring-2 ${currentTheme.ring} shadow-md`}
+        />
         <h4 className="text-base font-bold text-deep line-clamp-1">
           {data.student.firstName} {data.student.lastName}
         </h4>

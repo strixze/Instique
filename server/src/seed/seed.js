@@ -137,6 +137,11 @@ async function seed() {
   const subjects = await Subject.create(
     subjectData.map((s) => ({ ...s, schoolId: school._id }))
   );
+  for (const s of subjects) {
+    if (s.classes?.length) {
+      await SchoolClass.updateMany({ _id: { $in: s.classes } }, { $addToSet: { subjects: s._id } });
+    }
+  }
   console.log('Academic structure created');
 
   // Create Teachers

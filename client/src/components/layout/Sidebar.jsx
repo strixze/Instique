@@ -104,6 +104,8 @@ const navSections = {
     {
       title: 'ADMINISTRATION',
       items: [
+        { to: '/events', icon: Calendar, label: 'Events' },
+        { to: '/parent-meetings', icon: Users, label: 'Parent Meetings' },
         { to: '/leaves', icon: Calendar, label: 'Leaves' },
         { to: '/notices', icon: Bell, label: 'Notices' },
       ],
@@ -129,6 +131,7 @@ const navSections = {
     {
       title: 'SERVICES',
       items: [
+        { to: '/events', icon: Calendar, label: 'Events' },
         { to: '/fees', icon: DollarSign, label: 'Fees' },
         { to: '/notices', icon: Bell, label: 'Notices' },
         { to: '/complaints', icon: MessageSquare, label: 'Complaints' },
@@ -155,6 +158,8 @@ const navSections = {
     {
       title: 'SERVICES',
       items: [
+        { to: '/events', icon: Calendar, label: 'Events' },
+        { to: '/parent-meetings', icon: Users, label: 'Parent Meetings' },
         { to: '/fees', icon: DollarSign, label: 'Fees' },
         { to: '/notices', icon: Bell, label: 'Notices' },
         { to: '/complaints', icon: MessageSquare, label: 'Complaints' },

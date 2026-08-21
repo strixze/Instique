@@ -10,7 +10,11 @@ export const createTeacher = async (schoolId, data) => {
 };
 
 export const getTeachers = async (schoolId, options) => {
-  return paginate(Teacher, { schoolId }, { ...options, searchFields: ['firstName', 'lastName', 'employeeId', 'department'] });
+  const { status, gender, ...rest } = options;
+  const filter = {};
+  if (status) filter.status = status;
+  if (gender) filter.gender = gender;
+  return paginate(Teacher, { schoolId }, { ...rest, searchFields: ['firstName', 'lastName', 'employeeId', 'department'], filter });
 };
 
 export const getTeacherById = async (id, schoolId) => {

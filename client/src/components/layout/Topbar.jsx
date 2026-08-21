@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useUserStore } from '../../store/userStore';
 import { notificationApi } from '../../api/notification.api';
 import { useNavigate } from 'react-router-dom';
+import UserAvatar from '../ui/UserAvatar';
 
 export default function Topbar({ setMobileOpen }) {
   const user = useUserStore((s) => s.user);
@@ -93,9 +94,15 @@ export default function Topbar({ setMobileOpen }) {
           className="flex items-center gap-2.5 pl-1.5 pr-2 py-1 rounded-lg hover:bg-surface cursor-pointer transition-colors"
           title="User profile"
         >
-          <div className="w-8 h-8 rounded-full bg-forest-dark text-white flex items-center justify-center text-xs font-bold shadow-xs">
-            {getInitial(user?.name)}
-          </div>
+          <UserAvatar
+            src={user?.avatar || user?.avtar}
+            role={user?.role || 'admin'}
+            gender={user?.gender}
+            id={user?._id || user?.id}
+            name={user?.name || 'Admin'}
+            size="sm"
+            className="shadow-xs ring-1 ring-border/60"
+          />
           <div className="hidden md:block text-left">
             <p className="text-xs font-semibold text-deep leading-tight truncate max-w-[120px]">
               {user?.name || 'Admin'}
