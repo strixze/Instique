@@ -1,10 +1,30 @@
 import Exam from '../models/Exam.js';
 import Mark from '../models/Mark.js';
 import Student from '../models/Student.js';
+import SchoolClass from '../models/SchoolClass.js';
 import ApiError from '../utils/ApiError.js';
 import { paginate } from '../utils/pagination.js';
 
 export const createExam = async (schoolId, data) => {
+  const { schoolClass, subjects } = data;
+
+  // Validate that all selected subjects are assigned to the selected class
+  const schoolClassObj = await SchoolClass.findById(schoolClass);
+  if (!schoolClassObj) {
+    throw new ApiError(400, 'Selected class not found');
+  }
+
+  const classSubjectIds = new Set(schoolClassObj.subjects.map((s) => s.toString()));
+
+  for (const sub of subjects) {
+    if (!classSubjectIds.has(sub.subject.toString())) {
+      throw new ApiError(
+        400,
+        `Subject "${sub.subject}" is not assigned to class ${schoolClassObj.name}`
+      );
+    }
+  }
+
   const exam = await Exam.create({ ...data, schoolId });
   return exam;
 };

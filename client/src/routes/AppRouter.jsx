@@ -29,6 +29,9 @@ import Settings from '../pages/school-admin/Settings';
 import MarksEntry from '../pages/school-admin/MarksEntry';
 import Leaderboard from '../pages/school-admin/Leaderboard';
 import Events from '../pages/school-admin/Events';
+import AdminParentMeetings from '../pages/school-admin/ParentMeetings';
+import TeacherParentMeetings from '../pages/teacher/ParentMeetings';
+import ParentParentMeetings from '../pages/parent/ParentMeetings';
 
 function RoleDashboard() {
   const user = useUserStore((s) => s.user);
@@ -41,6 +44,13 @@ function RoleDashboard() {
   };
   const Dashboard = dashboards[user?.role] || SchoolAdminDashboard;
   return <DashboardShell><Dashboard /></DashboardShell>;
+}
+
+function UnifiedParentMeetings() {
+  const user = useUserStore((s) => s.user);
+  if (user?.role === 'teacher') return <TeacherParentMeetings />;
+  if (user?.role === 'parent') return <ParentParentMeetings />;
+  return <AdminParentMeetings />;
 }
 
 function UnifiedTimetable() {
@@ -87,6 +97,7 @@ export default function AppRouter() {
       <Route path="/fees" element={<ModulePage><Fees /></ModulePage>} />
       <Route path="/notices" element={<ModulePage><Notices /></ModulePage>} />
       <Route path="/events" element={<ModulePage><Events /></ModulePage>} />
+      <Route path="/parent-meetings" element={<ModulePage><UnifiedParentMeetings /></ModulePage>} />
       <Route path="/leaves" element={<ModulePage><Leaves /></ModulePage>} />
       <Route path="/complaints" element={<ModulePage><Complaints /></ModulePage>} />
       <Route path="/roles" element={<ModulePage><Roles /></ModulePage>} />
