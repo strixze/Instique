@@ -113,6 +113,7 @@ export const getSchoolAdminDashboard = async (schoolId, query = {}) => {
     feePeriod = 'This Month',
   } = query;
 
+  const sid = new mongoose.Types.ObjectId(schoolId);
   const now = new Date();
   const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
