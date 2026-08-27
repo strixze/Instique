@@ -96,6 +96,7 @@ export default function SchoolAdminDashboard() {
 
   const [attendancePeriod, setAttendancePeriod] = useState('This Week');
   const [classAttendancePeriod, setClassAttendancePeriod] = useState('This Week');
+  const [feePeriod, setFeePeriod] = useState('This Month');
 
   useEffect(() => {
     let active = true;
@@ -215,7 +216,8 @@ export default function SchoolAdminDashboard() {
       color: 'bg-indigo-50 text-indigo-700',
     },
   ];
-  const hasAnyFees = feeStats.totalBilled > 0;
+  const feeStats = data.feeStats || {};
+  const hasAnyFees = (feeStats.totalBilled || feeStats.collectedFees || 0) > 0;
 
   // ── Class attendance table based on selected period ──
   const currentClassAttendance =
@@ -624,8 +626,8 @@ export default function SchoolAdminDashboard() {
                     {row.change}
                   </span>
                 </div>
-              </>
-            )}
+              ))}
+            </div>
           </div>
         </Card>
 

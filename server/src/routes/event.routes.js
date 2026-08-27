@@ -11,6 +11,7 @@ import {
   deleteEventPhoto,
   updatePhotoCaption,
   setEventCoverPhoto,
+  getEventStats,
 } from '../controllers/event.controller.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
 import { requireRole } from '../middlewares/rbac.middleware.js';

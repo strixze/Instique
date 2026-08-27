@@ -106,7 +106,7 @@ export const updateEvent = async (id, schoolId, data) => {
 };
 
 export const publishEvent = async (id, schoolId) => {
-  const event = await CalendarEvent.findOneAndUpdate(
+  const event = await Event.findOneAndUpdate(
     { _id: id, schoolId },
     { status: 'published' },
     { new: true }
@@ -116,7 +116,7 @@ export const publishEvent = async (id, schoolId) => {
 };
 
 export const cancelEvent = async (id, schoolId) => {
-  const event = await CalendarEvent.findOneAndUpdate(
+  const event = await Event.findOneAndUpdate(
     { _id: id, schoolId },
     { status: 'cancelled' },
     { new: true }
@@ -320,4 +320,22 @@ export const setEventCoverPhoto = async (schoolId, eventId, photoId) => {
   );
 
   return event;
+};
+
+export const getEventStats = async (schoolId) => {
+  const [total, upcoming, completed, ongoing, photoStats] = await Promise.all([
+    Event.countDocuments({ schoolId }),
+    Event.countDocuments({ schoolId, status: 'upcoming' }),
+    Event.countDocuments({ schoolId, status: 'completed' }),
+    Event.countDocuments({ schoolId, status: 'ongoing' }),
+    EventGalleryPhoto.countDocuments({ schoolId }),
+  ]);
+
+  return {
+    total,
+    upcoming,
+    completed,
+    ongoing,
+    totalPhotos: photoStats,
+  };
 };

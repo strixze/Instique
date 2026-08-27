@@ -6117,3 +6117,183 @@ Stack Trace: ReferenceError: SchoolClass is not defined
     at processParams (D:\temp 1\Instique\server\node_modules\router\index.js:582:12)
 ================================================================================
 
+
+================================================================================
+Timestamp: 2026-08-27T09:41:16.054Z
+Method: GET
+URL: /api/v1/notifications/unread-count
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/chaitanya/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/chaitanya/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\chaitanya\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\chaitanya\Instique\server\node_modules\router\index.js:342:13)
+    at D:\chaitanya\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\chaitanya\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\chaitanya\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\chaitanya\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\chaitanya\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\chaitanya\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\chaitanya\Instique\server\node_modules\router\index.js:342:13)
+    at D:\chaitanya\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\chaitanya\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\chaitanya\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\chaitanya\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-27T09:41:16.189Z
+Method: GET
+URL: /api/v1/auth/profile
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/chaitanya/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/chaitanya/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\chaitanya\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\chaitanya\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\chaitanya\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\chaitanya\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\chaitanya\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\chaitanya\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\chaitanya\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\chaitanya\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\chaitanya\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\chaitanya\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\chaitanya\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\chaitanya\Instique\server\node_modules\router\index.js:342:13)
+    at D:\chaitanya\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\chaitanya\Instique\server\node_modules\router\index.js:582:12)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-27T09:41:16.191Z
+Method: GET
+URL: /api/v1/dashboards/school-admin?attendancePeriod=This+Week&classAttendancePeriod=This+Week&feePeriod=This+Month
+User ID: Unauthenticated
+Query: {"attendancePeriod":"This Week","classAttendancePeriod":"This Week","feePeriod":"This Month"}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/chaitanya/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/chaitanya/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\chaitanya\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\chaitanya\Instique\server\node_modules\router\index.js:342:13)
+    at D:\chaitanya\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\chaitanya\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\chaitanya\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\chaitanya\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\chaitanya\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\chaitanya\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\chaitanya\Instique\server\node_modules\router\index.js:342:13)
+    at D:\chaitanya\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\chaitanya\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\chaitanya\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\chaitanya\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-27T09:41:16.198Z
+Method: GET
+URL: /api/v1/notifications/unread-count
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/chaitanya/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/chaitanya/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\chaitanya\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\chaitanya\Instique\server\node_modules\router\index.js:342:13)
+    at D:\chaitanya\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\chaitanya\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\chaitanya\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\chaitanya\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\chaitanya\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\chaitanya\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\chaitanya\Instique\server\node_modules\router\index.js:342:13)
+    at D:\chaitanya\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\chaitanya\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\chaitanya\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\chaitanya\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-27T09:41:16.202Z
+Method: GET
+URL: /api/v1/dashboards/school-admin?attendancePeriod=This+Week&classAttendancePeriod=This+Week&feePeriod=This+Month
+User ID: Unauthenticated
+Query: {"attendancePeriod":"This Week","classAttendancePeriod":"This Week","feePeriod":"This Month"}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/chaitanya/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/chaitanya/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\chaitanya\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\chaitanya\Instique\server\node_modules\router\index.js:342:13)
+    at D:\chaitanya\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\chaitanya\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\chaitanya\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\chaitanya\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\chaitanya\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\chaitanya\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\chaitanya\Instique\server\node_modules\router\index.js:342:13)
+    at D:\chaitanya\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\chaitanya\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\chaitanya\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\chaitanya\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-27T09:41:16.205Z
+Method: GET
+URL: /api/v1/auth/profile
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/chaitanya/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/chaitanya/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\chaitanya\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\chaitanya\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\chaitanya\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\chaitanya\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\chaitanya\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\chaitanya\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\chaitanya\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\chaitanya\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\chaitanya\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\chaitanya\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\chaitanya\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\chaitanya\Instique\server\node_modules\router\index.js:342:13)
+    at D:\chaitanya\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\chaitanya\Instique\server\node_modules\router\index.js:582:12)
+Details: []
+================================================================================
+
