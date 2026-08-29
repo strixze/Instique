@@ -16,6 +16,10 @@ import FeeStructure from '../../models/FeeStructure.js';
 import FeeTransaction from '../../models/FeeTransaction.js';
 import AcademicYear from '../../models/AcademicYear.js';
 import InstallmentConfig from '../../models/InstallmentConfig.js';
+import User from '../../models/User.js';
+import AccountToken from '../../models/AccountToken.js';
+import School from '../../models/School.js';
+import AuditLog from '../../models/AuditLog.js';
 import mongoose from 'mongoose';
 
 describe('Admission Service MVP Flow Unit Tests', () => {
@@ -34,6 +38,13 @@ describe('Admission Service MVP Flow Unit Tests', () => {
   let originalFeeTransactionUpdateMany;
   let originalStartSession;
   let originalInstallmentConfigFindOne;
+  let originalUserFindOne;
+  let originalUserCreate;
+  let originalAccountTokenUpdateMany;
+  let originalAccountTokenCreate;
+  let originalAccountTokenFindByIdAndUpdate;
+  let originalSchoolFindById;
+  let originalAuditLogCreate;
 
   beforeAll(() => {
     originalAcademicYearFindById = AcademicYear.findById;
@@ -51,10 +62,24 @@ describe('Admission Service MVP Flow Unit Tests', () => {
     originalFeeTransactionUpdateMany = FeeTransaction.updateMany;
     originalStartSession = mongoose.startSession;
     originalInstallmentConfigFindOne = InstallmentConfig.findOne;
+    originalUserFindOne = User.findOne;
+    originalUserCreate = User.create;
+    originalAccountTokenUpdateMany = AccountToken.updateMany;
+    originalAccountTokenCreate = AccountToken.create;
+    originalAccountTokenFindByIdAndUpdate = AccountToken.findByIdAndUpdate;
+    originalSchoolFindById = School.findById;
+    originalAuditLogCreate = AuditLog.create;
   });
 
   beforeEach(() => {
     InstallmentConfig.findOne = async () => null;
+    User.findOne = () => ({ session: async () => null });
+    User.create = async (data) => data.map(d => ({ ...d, _id: 'mock-user-id', save: async () => {} }));
+    AccountToken.updateMany = async () => ({});
+    AccountToken.create = async (data) => data.map(d => ({ ...d, _id: 'mock-token-id' }));
+    AccountToken.findByIdAndUpdate = async () => ({});
+    School.findById = async () => ({ name: 'Test Public School' });
+    AuditLog.create = async () => ({});
   });
 
   afterAll(() => {
@@ -72,8 +97,16 @@ describe('Admission Service MVP Flow Unit Tests', () => {
     FeeTransaction.create = originalFeeTransactionCreate;
     FeeTransaction.updateMany = originalFeeTransactionUpdateMany;
     InstallmentConfig.findOne = originalInstallmentConfigFindOne;
+    User.findOne = originalUserFindOne;
+    User.create = originalUserCreate;
+    AccountToken.updateMany = originalAccountTokenUpdateMany;
+    AccountToken.create = originalAccountTokenCreate;
+    AccountToken.findByIdAndUpdate = originalAccountTokenFindByIdAndUpdate;
+    School.findById = originalSchoolFindById;
+    AuditLog.create = originalAuditLogCreate;
     mongoose.startSession = originalStartSession;
   });
+
 
   test('createAdmission should generate correct ADM-YYYY-XXXXX format', async () => {
     AcademicYear.findById = async () => ({ _id: 'year-123', name: '2026-2027' });

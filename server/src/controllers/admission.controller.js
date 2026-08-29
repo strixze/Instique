@@ -59,6 +59,14 @@ export const recordManualPayment = asyncHandler(async (req, res) => {
 });
 
 export const confirmAdmission = asyncHandler(async (req, res) => {
-  const { admission, student } = await admissionService.confirmAdmission(req.params.id, req.schoolId, req.user._id);
-  res.status(200).json(new ApiResponse(200, { admission, student }, 'Admission confirmed and student record created successfully'));
+  const result = await admissionService.confirmAdmission(req.params.id, req.schoolId, req.user._id);
+  res.status(200).json(new ApiResponse(200, result, 'Admission confirmed and student record created successfully'));
 });
+
+export const resendActivationEmail = asyncHandler(async (req, res) => {
+  const ip = req.ip;
+  const userAgent = req.headers['user-agent'] || '';
+  const result = await admissionService.resendAdmissionActivationEmail(req.params.id, req.schoolId, req.user._id, ip, userAgent);
+  res.status(200).json(new ApiResponse(200, result, result.message));
+});
+

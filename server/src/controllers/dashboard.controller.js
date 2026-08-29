@@ -23,6 +23,7 @@ export const getStudentDashboard = asyncHandler(async (req, res) => {
 });
 
 export const getParentDashboard = asyncHandler(async (req, res) => {
-  const data = await dashboardService.getParentDashboard(req.user._id, req.schoolId);
+  const data = await dashboardService.getParentDashboard(req.user, req.schoolId, req.query.studentId);
   res.status(200).json(new ApiResponse(200, data));
 });
+

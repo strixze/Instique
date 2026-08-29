@@ -14,7 +14,10 @@ const env = {
   RATE_LIMIT_WINDOW_MS: parseInt(process.env.RATE_LIMIT_WINDOW_MS, 10) || 900000,
   RATE_LIMIT_MAX: parseInt(process.env.RATE_LIMIT_MAX, 10) || 100,
   MAX_UPLOAD_SIZE_MB: parseInt(process.env.MAX_UPLOAD_SIZE_MB, 10) || 10,
-  GOOGLE_GENAI_API_KEY: process.env.GOOGLE_GENAI_API_KEY
+  GOOGLE_GENAI_API_KEY: process.env.GOOGLE_GENAI_API_KEY,
+  BREVO_API_KEY: process.env.BREVO_API_KEY,
+  BREVO_SENDER_NAME: process.env.BREVO_SENDER_NAME || 'Instique Admin',
+  BREVO_SENDER_EMAIL: process.env.BREVO_SENDER_EMAIL || 'bytecoder95@gmail.com',
 };
 
 const required = ['MONGODB_URI', 'JWT_ACCESS_SECRET', 'JWT_REFRESH_SECRET'];
@@ -25,3 +28,4 @@ for (const key of required) {
 }
 
 export default env;
+

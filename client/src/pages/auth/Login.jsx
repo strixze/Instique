@@ -40,7 +40,12 @@ export default function Login() {
  <h2 className="text-lg font-semibold text-deep">Sign in</h2>
 
  <Input label="Email"type="email"value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@instique.com"required />
- <Input label="Password"type="password"value={password} onChange={(e) => setPassword(e.target.value)} placeholder="password123"required />
+ <div>
+   <Input label="Password"type="password"value={password} onChange={(e) => setPassword(e.target.value)} placeholder="password123"required />
+   <div className="text-right mt-1">
+     <Link to="/forgot-password" className="text-xs text-forest hover:underline">Forgot password?</Link>
+   </div>
+ </div>
 
  <Button type="submit"loading={loading} className="w-full">Sign in</Button>
 

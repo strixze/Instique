@@ -4,6 +4,10 @@ import ProtectedRoute from '../components/guards/ProtectedRoute';
 import DashboardShell from '../components/layout/DashboardShell';
 import Login from '../pages/auth/Login';
 import Register from '../pages/auth/Register';
+import ActivateAccount from '../pages/auth/ActivateAccount';
+import ForgotPassword from '../pages/auth/ForgotPassword';
+import ResetPassword from '../pages/auth/ResetPassword';
+
 import SuperAdminDashboard from '../pages/super-admin/Dashboard';
 import SchoolAdminDashboard from '../pages/school-admin/Dashboard';
 import TeacherDashboard from '../pages/teacher/Dashboard';
@@ -75,7 +79,11 @@ export default function AppRouter() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/activate-account" element={<ActivateAccount />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route
+
         path="/dashboard"
         element={
           <ProtectedRoute>

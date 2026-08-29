@@ -10,13 +10,15 @@ import {
   allocateClassSection,
   assignFeeStructure,
   recordManualPayment,
-  confirmAdmission
+  confirmAdmission,
+  resendActivationEmail
 } from '../controllers/admission.controller.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
 import { requireRole } from '../middlewares/rbac.middleware.js';
 import tenantMiddleware from '../middlewares/tenant.middleware.js';
 import validate from '../middlewares/validate.middleware.js';
 import upload from '../middlewares/upload.middleware.js';
+import { authLimiter } from '../middlewares/rateLimiter.middleware.js';
 import { 
   createAdmissionSchema, 
   updateAdmissionStatusSchema,
@@ -43,5 +45,6 @@ router.put('/:id/allocate-class', requireRole('school_admin'), validate(allocate
 router.put('/:id/assign-fee', requireRole('school_admin'), validate(assignFeeStructureSchema), assignFeeStructure);
 router.put('/:id/record-payment', requireRole('school_admin'), validate(recordManualPaymentSchema), recordManualPayment);
 router.put('/:id/confirm', requireRole('school_admin'), confirmAdmission);
+router.post('/:id/resend-activation', requireRole('school_admin'), authLimiter, resendActivationEmail);
 
 export default router;

@@ -14,4 +14,6 @@ export const admissionApi = {
   assignFeeStructure: (id, data) => api.put(`/admissions/${id}/assign-fee`, data),
   recordManualPayment: (id, data) => api.put(`/admissions/${id}/record-payment`, data),
   confirmAdmission: (id) => api.put(`/admissions/${id}/confirm`),
+  resendActivationEmail: (id) => api.post(`/admissions/${id}/resend-activation`),
 };
+

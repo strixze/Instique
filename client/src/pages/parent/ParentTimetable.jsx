@@ -26,29 +26,25 @@ export default function ParentTimetable() {
  const [timetable, setTimetable] = useState(null);
  const [loading, setLoading] = useState(true);
 
- useEffect(() => {
- if (!user || !user.profileId) {
- setLoading(false);
- return;
- }
- loadParentProfile();
- }, [user]);
+  useEffect(() => {
+    loadParentProfile();
+  }, []);
 
- const loadParentProfile = async () => {
- setLoading(true);
- try {
- const res = await parentApi.getById(user.profileId);
- const kids = res.data?.students || [];
- setChildren(kids);
- if (kids.length > 0) {
- setSelectedChildId(kids[0]._id);
- }
- } catch (e) {
- toast.error(e?.message || 'Failed to load children profiles');
- } finally {
- setLoading(false);
- }
- };
+  const loadParentProfile = async () => {
+    setLoading(true);
+    try {
+      const res = await parentApi.getMyChildren();
+      const kids = res.data || [];
+      setChildren(kids);
+      if (kids.length > 0) {
+        setSelectedChildId(kids[0].id || kids[0]._id);
+      }
+    } catch (e) {
+      toast.error(e?.message || 'Failed to load children profiles');
+    } finally {
+      setLoading(false);
+    }
+  };
 
  useEffect(() => {
  if (!selectedChildId) {
@@ -102,7 +98,7 @@ export default function ParentTimetable() {
  {children.length > 1 && (
  <Select
  className="w-48 bg-white border-border"
- options={children.map((c) => ({ value: c._id, label: `${c.firstName} ${c.lastName}` }))}
+ options={children.map((c) => ({ value: c.id || c._id, label: `${c.firstName} ${c.lastName}` }))}
  value={selectedChildId}
  onChange={(e) => setSelectedChildId(e.target.value)}
  />

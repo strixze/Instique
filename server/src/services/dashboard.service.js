@@ -157,6 +157,16 @@ export const getStudentDashboard = async (studentId, schoolId) => {
   return { attendance, homework, fees, results, notices, recognition, timetable, events };
 };
 
-export const getParentDashboard = async (parentId, schoolId) => {
-  return { /* parent multi-child data aggregated */ };
+export const getParentDashboard = async (user, schoolId, studentId) => {
+  const { getMyChildren, getChildDashboard } = await import('./parent.service.js');
+  if (studentId) {
+    return getChildDashboard(studentId, user, schoolId);
+  }
+  const { children, parent } = await getMyChildren(user, schoolId);
+  if (children.length > 0) {
+    const childData = await getChildDashboard(children[0].id, user, schoolId);
+    return { ...childData, children, parent };
+  }
+  return { children: [], parent, student: null };
 };
+

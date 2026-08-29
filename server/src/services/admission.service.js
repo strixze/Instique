@@ -1,7 +1,13 @@
 import mongoose from 'mongoose';
+import crypto from 'crypto';
+import env from '../config/env.js';
 import Admission from '../models/Admission.js';
 import Student from '../models/Student.js';
 import Parent from '../models/Parent.js';
+import User from '../models/User.js';
+import AccountToken from '../models/AccountToken.js';
+import School from '../models/School.js';
+import AuditLog from '../models/AuditLog.js';
 import Section from '../models/Section.js';
 import SchoolClass from '../models/SchoolClass.js';
 import FeeStructure from '../models/FeeStructure.js';
@@ -10,6 +16,8 @@ import AcademicYear from '../models/AcademicYear.js';
 import InstallmentConfig from '../models/InstallmentConfig.js';
 import ApiError from '../utils/ApiError.js';
 import { paginate } from '../utils/pagination.js';
+import { sendEmail } from './brevoMail.service.js';
+import { getParentActivationEmailTemplate } from './emailTemplates/parentActivation.template.js';
 
 export const createAdmission = async (schoolId, data, userId) => {
   const academicSession = await AcademicYear.findById(data.academicSession);
@@ -486,7 +494,64 @@ export const confirmAdmission = async (id, schoolId, userId) => {
       { session }
     );
 
-    // 5. Update Admission Application
+    // 5. Create / Link Parent User Account and generate secure activation token
+    const parentEmail = parent.contact?.email || admission.parentEmail;
+    let parentUser = null;
+    let rawActivationToken = null;
+    let tokenRecord = null;
+
+    if (parentEmail) {
+      const normalizedEmail = parentEmail.toLowerCase().trim();
+      parentUser = await User.findOne({ email: normalizedEmail }).session(session);
+
+      if (!parentUser) {
+        const tempPassword = crypto.randomBytes(24).toString('hex');
+        const parentFullName = `${parent.firstName} ${parent.lastName}`.trim();
+        const createdUsers = await User.create([{
+          schoolId,
+          email: normalizedEmail,
+          password: tempPassword,
+          role: 'parent',
+          profileId: parent._id,
+          profileModel: 'Parent',
+          name: parentFullName,
+          phone: parent.contact?.phone || admission.parentPhone,
+          status: 'pending_activation',
+          isActive: false,
+          emailVerified: false,
+        }], { session });
+        parentUser = createdUsers[0];
+      } else if (!parentUser.profileId && parentUser.role === 'parent') {
+        parentUser.profileId = parent._id;
+        parentUser.profileModel = 'Parent';
+        await parentUser.save({ session });
+      }
+
+      // Generate activation token if account is pending activation or not verified
+      if (parentUser && (parentUser.status === 'pending_activation' || !parentUser.emailVerified)) {
+        // Invalidate any previous activation tokens
+        await AccountToken.updateMany(
+          { userId: parentUser._id, type: 'activation', usedAt: null },
+          { usedAt: new Date() },
+          { session }
+        );
+
+        rawActivationToken = crypto.randomBytes(32).toString('hex');
+        const tokenHash = crypto.createHash('sha256').update(rawActivationToken).digest('hex');
+        const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+        const createdTokens = await AccountToken.create([{
+          tokenHash,
+          userId: parentUser._id,
+          type: 'activation',
+          expiresAt,
+          emailDeliveryStatus: 'pending'
+        }], { session });
+        tokenRecord = createdTokens[0];
+      }
+    }
+
+    // 6. Update Admission Application
     admission.studentId = student._id;
     admission.workflowStatus = 'student_created';
     admission.history.push({
@@ -504,16 +569,198 @@ export const confirmAdmission = async (id, schoolId, userId) => {
 
     await admission.save({ session });
 
+    // CRITICAL: Commit transaction FIRST before attempting to send Brevo email
     await session.commitTransaction();
     session.endSession();
 
-    return { admission, student };
+    // 7. AFTER TRANSACTION COMMIT: Send Brevo Activation Email to Parent
+    let activationEmailSent = false;
+    if (parentUser && rawActivationToken && tokenRecord) {
+      try {
+        const [school, schoolClass, section] = await Promise.all([
+          School.findById(schoolId),
+          SchoolClass.findById(admission.assignedClass),
+          Section.findById(admission.assignedSection)
+        ]);
+
+        const schoolName = school?.name || 'Instique School';
+        const parentName = parentUser.name || `${parent.firstName} ${parent.lastName}`.trim();
+        const studentName = `${student.firstName} ${student.lastName}`.trim();
+        const className = `${schoolClass?.name || 'Class'} ${section?.name ? `- Section ${section.name}` : ''}`.trim();
+        const activationUrl = `${env.CLIENT_URL}/activate-account?token=${rawActivationToken}`;
+
+        const emailHtml = getParentActivationEmailTemplate({
+          parentName,
+          schoolName,
+          studentName,
+          className,
+          activationUrl,
+          expiryHours: 24
+        });
+
+        const emailResult = await sendEmail(
+          parentUser.email,
+          'Welcome to Instique — Set Up Your Parent Account',
+          emailHtml,
+          parentName
+        );
+
+        if (emailResult.success) {
+          activationEmailSent = true;
+          await AccountToken.findByIdAndUpdate(tokenRecord._id, { emailDeliveryStatus: 'sent' });
+          console.log(`✅ Parent account activation email sent to ${parentUser.email}`);
+        } else {
+          await AccountToken.findByIdAndUpdate(tokenRecord._id, {
+            emailDeliveryStatus: 'failed',
+            emailDeliveryError: emailResult.error
+          });
+          console.error(`⚠️ Brevo email sending failed for ${parentUser.email}:`, emailResult.error);
+        }
+
+        // Record Audit Activity
+        await AuditLog.create({
+          schoolId,
+          actor: userId,
+          action: 'parent_activation_email_dispatched',
+          entity: 'User',
+          entityId: parentUser._id,
+          after: { emailSent: emailResult.success, parentEmail: parentUser.email }
+        });
+      } catch (emailErr) {
+        // Never roll back DB or throw fatal error if Brevo fails
+        console.error('⚠️ Unexpected error while preparing/sending parent activation email:', emailErr.message);
+        if (tokenRecord) {
+          await AccountToken.findByIdAndUpdate(tokenRecord._id, {
+            emailDeliveryStatus: 'failed',
+            emailDeliveryError: emailErr.message
+          }).catch(() => {});
+        }
+      }
+    }
+
+    return { 
+      admission, 
+      student, 
+      parent, 
+      parentUser: parentUser ? { _id: parentUser._id, email: parentUser.email, status: parentUser.status } : null,
+      activationEmailSent 
+    };
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
     throw error;
   }
 };
+
+export const resendAdmissionActivationEmail = async (id, schoolId, userId, ip, userAgent) => {
+  const admission = await Admission.findOne({ _id: id, schoolId })
+    .populate('studentId')
+    .populate('assignedClass')
+    .populate('assignedSection');
+
+  if (!admission) throw new ApiError(404, 'Admission not found');
+  if (!admission.studentId) throw new ApiError(400, 'Student record has not been created yet for this application');
+
+  const student = await Student.findById(admission.studentId).populate('parents');
+  if (!student || !student.parents || student.parents.length === 0) {
+    throw new ApiError(404, 'Parent record not found for this student');
+  }
+
+  const parent = student.parents[0];
+  const parentEmail = parent.contact?.email || admission.parentEmail;
+  if (!parentEmail) {
+    throw new ApiError(400, 'Parent email address is missing. Please update parent contact details first.');
+  }
+
+  const normalizedEmail = parentEmail.toLowerCase().trim();
+  let user = await User.findOne({ email: normalizedEmail });
+
+  if (!user) {
+    const tempPassword = crypto.randomBytes(24).toString('hex');
+    user = await User.create({
+      schoolId,
+      email: normalizedEmail,
+      password: tempPassword,
+      role: 'parent',
+      profileId: parent._id,
+      profileModel: 'Parent',
+      name: `${parent.firstName} ${parent.lastName}`.trim(),
+      phone: parent.contact?.phone,
+      status: 'pending_activation',
+      isActive: false,
+      emailVerified: false,
+    });
+  }
+
+  if (user.status === 'active' && user.emailVerified) {
+    throw new ApiError(400, 'This parent account is already active and verified.');
+  }
+
+  // Invalidate previous activation tokens
+  await AccountToken.updateMany(
+    { userId: user._id, type: 'activation', usedAt: null },
+    { usedAt: new Date() }
+  );
+
+  // Generate fresh token
+  const rawToken = crypto.randomBytes(32).toString('hex');
+  const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+  const accountToken = await AccountToken.create({
+    tokenHash,
+    userId: user._id,
+    type: 'activation',
+    expiresAt,
+    emailDeliveryStatus: 'pending'
+  });
+
+  const school = await School.findById(schoolId);
+  const parentName = user.name || `${parent.firstName} ${parent.lastName}`.trim();
+  const studentName = `${student.firstName} ${student.lastName}`.trim();
+  const className = `${admission.assignedClass?.name || 'Class'} ${admission.assignedSection?.name ? `- Section ${admission.assignedSection.name}` : ''}`.trim();
+  const activationUrl = `${env.CLIENT_URL}/activate-account?token=${rawToken}`;
+
+  const emailHtml = getParentActivationEmailTemplate({
+    parentName,
+    schoolName: school?.name || 'Instique School',
+    studentName,
+    className,
+    activationUrl,
+    expiryHours: 24
+  });
+
+  const emailResult = await sendEmail(
+    user.email,
+    'Welcome to Instique — Set Up Your Parent Account',
+    emailHtml,
+    parentName
+  );
+
+  if (!emailResult.success) {
+    await AccountToken.findByIdAndUpdate(accountToken._id, {
+      emailDeliveryStatus: 'failed',
+      emailDeliveryError: emailResult.error
+    });
+    throw new ApiError(500, 'Unable to send the activation email. Please try again.');
+  }
+
+  await AccountToken.findByIdAndUpdate(accountToken._id, { emailDeliveryStatus: 'sent' });
+
+  await AuditLog.create({
+    schoolId,
+    actor: userId,
+    action: 'resend_parent_activation',
+    entity: 'User',
+    entityId: user._id,
+    ip,
+    userAgent,
+    after: { email: user.email }
+  });
+
+  return { success: true, message: `Activation email sent successfully to ${user.email}` };
+};
+
 
 export const updateDocuments = async (id, schoolId, documents) => {
   const admission = await Admission.findOne({ _id: id, schoolId });

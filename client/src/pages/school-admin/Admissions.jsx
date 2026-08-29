@@ -567,10 +567,12 @@ export default function Admissions() {
     }
   };
 
+  const [resendingEmail, setResendingEmail] = useState(false);
+
   const handleConfirmAdmission = async () => {
     const result = await Swal.fire({
       title: 'Confirm Admission',
-      text: 'This will create a Student record, generate a Student ID and Roll Number. This action cannot be undone.',
+      text: 'This will create a Student record, generate a Student ID and Roll Number, create the Parent Portal account, and send an activation email via Brevo.',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Confirm Admission',
@@ -580,13 +582,32 @@ export default function Admissions() {
     try {
       const res = await admissionApi.confirmAdmission(selectedAdmission._id);
       const student = res.data?.student;
-      toast.success(`Admission confirmed! Student ID: ${student?.admissionNo}, Roll No: ${student?.rollNo}`);
+      const emailSent = res.data?.activationEmailSent;
+      if (emailSent) {
+        toast.success(`Admission confirmed! Student ID: ${student?.admissionNo}. Activation email sent to parent.`);
+      } else {
+        toast.success(`Admission confirmed! Student ID: ${student?.admissionNo}. (Note: Activation email failed, you can resend it).`);
+      }
       await refreshDetail();
       triggerReload();
     } catch (e) {
       toast.error(e?.message || 'Failed to confirm admission');
     }
   };
+
+  const handleResendActivationEmail = async () => {
+    if (!selectedAdmission?._id) return;
+    setResendingEmail(true);
+    try {
+      const res = await admissionApi.resendActivationEmail(selectedAdmission._id);
+      toast.success(res?.message || 'Activation email sent successfully to parent');
+    } catch (e) {
+      toast.error(e?.message || 'Failed to resend activation email');
+    } finally {
+      setResendingEmail(false);
+    }
+  };
+
 
   const getPercentage = (count) => {
     if (!stats.total || stats.total === 0) return '0.00%';
@@ -1382,8 +1403,20 @@ export default function Admissions() {
                       Confirm Admission (Enroll) →
                     </Button>
                   )}
+                  {selectedAdmission.workflowStatus === 'student_created' && (
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      loading={resendingEmail}
+                      onClick={handleResendActivationEmail}
+                      className="border-emerald-500/50 text-emerald-700 hover:bg-emerald-50"
+                    >
+                      Resend Parent Activation Email
+                    </Button>
+                  )}
                 </div>
               </div>
+
             )}
           </div>
         )}

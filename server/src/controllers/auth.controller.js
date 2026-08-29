@@ -103,3 +103,40 @@ export const revokeSession = asyncHandler(async (req, res) => {
   await authService.revokeSession(req.user._id, token);
   res.status(200).json(new ApiResponse(200, null, 'Session revoked'));
 });
+
+export const verifyActivationToken = asyncHandler(async (req, res) => {
+  const { token } = req.query;
+  const result = await authService.verifyActivationToken(token);
+  res.status(200).json(new ApiResponse(200, result, 'Activation token is valid'));
+});
+
+export const activateAccount = asyncHandler(async (req, res) => {
+  const { token, password } = req.body;
+  const ip = req.ip;
+  const userAgent = req.headers['user-agent'] || '';
+  const result = await authService.activateAccount(token, password, ip, userAgent);
+  res.status(200).json(new ApiResponse(200, result, result.message));
+});
+
+export const forgotPassword = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  const ip = req.ip;
+  const userAgent = req.headers['user-agent'] || '';
+  const result = await authService.forgotPassword(email, ip, userAgent);
+  res.status(200).json(new ApiResponse(200, result, result.message));
+});
+
+export const verifyResetToken = asyncHandler(async (req, res) => {
+  const { token } = req.query;
+  const result = await authService.verifyResetToken(token);
+  res.status(200).json(new ApiResponse(200, result, 'Reset token is valid'));
+});
+
+export const resetPassword = asyncHandler(async (req, res) => {
+  const { token, password } = req.body;
+  const ip = req.ip;
+  const userAgent = req.headers['user-agent'] || '';
+  const result = await authService.resetPassword(token, password, ip, userAgent);
+  res.status(200).json(new ApiResponse(200, result, result.message));
+});
+
