@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError, ApiResponse } from "../utils/apiUtils.js";
-import { User } from "../models/user.model.js";
+import { User } from '../models/User.js';
 import dotenv from "dotenv";
 import { sendEmail } from "./brevoMail.service.js";
 

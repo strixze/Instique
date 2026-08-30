@@ -23,7 +23,7 @@ import Mark from '../models/Mark.js';
 import ParentMeetingTeacher from '../models/ParentMeetingTeacher.js';
 import Notification from '../models/Notification.js';
 import FeeStructure from '../models/FeeStructure.js';
-import { User } from '../models/user.model.js';
+import { User } from '../models/User.js';
 import AuditLog from '../models/AuditLog.js';
 import ApiError from '../utils/ApiError.js';
 

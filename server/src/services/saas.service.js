@@ -1,5 +1,5 @@
 import School from '../models/School.js';
-import { User } from '../models/user.model.js';
+import { User } from '../models/User.js';
 import Subscription from '../models/Subscription.js';
 import InstallmentConfig from '../models/InstallmentConfig.js';
 import ApiError from '../utils/ApiError.js';

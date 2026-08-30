@@ -1,6 +1,6 @@
 import { Chat } from "../models/chat.model.js"
 import { Message } from "../models/message.model.js"
-import { User } from "../models/user.model.js"
+import { User } from '../models/User.js';
 import { isChatExists } from "../utils/document existance check/chat.js"
 import { isMessageExists } from "../utils/document existance check/message.js"
 import { isUserExists } from "../utils/document existance check/user.js"

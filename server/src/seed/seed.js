@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 import School from '../models/School.js';
-import { User } from '../models/user.model.js';
+import { User } from '../models/User.js';
 import Student from '../models/Student.js';
 import Teacher from '../models/Teacher.js';
 import Parent from '../models/Parent.js';

@@ -1,5 +1,4 @@
 import Notification from '../models/Notification.js';
-import { getIO } from '../sockets/socketInstance.js';
 import { paginate } from '../utils/pagination.js';
 
 export const createNotification = async (schoolId, data) => {

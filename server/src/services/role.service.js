@@ -1,5 +1,5 @@
 import Role from '../models/Role.js';
-import { User } from '../models/user.model.js';
+import { User } from '../models/User.js';
 import ApiError from '../utils/ApiError.js';
 import { paginate } from '../utils/pagination.js';
 

@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { User } from '../models/user.model.js';
+import { User } from '../models/User.js';
 import AccountToken from '../models/AccountToken.js';
 import ApiError from '../utils/ApiError.js';
 import School from '../models/School.js';

@@ -13438,3 +13438,114 @@ Stack Trace: TypeError: Cannot read properties of undefined (reading 'push')
     at async file:///F:/Coding/Production%20grade%20Projects/Instique/server/src/controllers/auth.controller.js:36:18
 ================================================================================
 
+
+================================================================================
+Timestamp: 2026-08-30T10:23:29.351Z
+Method: POST
+URL: /api/v1/auth/login
+User ID: Unauthenticated
+Query: {}
+Body: {"email":"admin1@gmail.com","password":"12345678"}
+Error Name: ValidationError
+Error Message: User validation failed: username: Path `username` is required.
+Stack Trace: ValidationError: User validation failed: username: Path `username` is required.
+    at Document.invalidate (F:\Coding\Production grade Projects\Instique\server\node_modules\mongoose\lib\document.js:3379:32)
+    at validatePath (F:\Coding\Production grade Projects\Instique\server\node_modules\mongoose\lib\document.js:3154:13)
+    at async Promise.all (index 0)
+    at async model.$__validate (F:\Coding\Production grade Projects\Instique\server\node_modules\mongoose\lib\document.js:3095:3)
+    at async model.validate (F:\Coding\Production grade Projects\Instique\server\node_modules\mongoose\lib\document.js:2672:5)
+    at async model.validateBeforeSave (F:\Coding\Production grade Projects\Instique\server\node_modules\mongoose\lib\plugins\validateBeforeSave.js:34:7)
+    at async Kareem.execPre (F:\Coding\Production grade Projects\Instique\server\node_modules\kareem\index.js:65:24)
+    at async model.$__save (F:\Coding\Production grade Projects\Instique\server\node_modules\mongoose\lib\model.js:369:5)
+    at async model.save (F:\Coding\Production grade Projects\Instique\server\node_modules\mongoose\lib\model.js:609:5)
+    at async Module.loginUser (file:///F:/Coding/Production%20grade%20Projects/Instique/server/src/services/auth.service.js:83:3)
+    at async file:///F:/Coding/Production%20grade%20Projects/Instique/server/src/controllers/auth.controller.js:36:18
+Details: {
+  "username": {
+    "name": "ValidatorError",
+    "message": "Path `username` is required.",
+    "properties": {
+      "message": "Path `username` is required.",
+      "type": "required",
+      "path": "username"
+    },
+    "kind": "required",
+    "path": "username"
+  }
+}
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-30T10:23:30.743Z
+Method: POST
+URL: /api/v1/auth/login
+User ID: Unauthenticated
+Query: {}
+Body: {"email":"admin1@gmail.com","password":"12345678"}
+Error Name: ValidationError
+Error Message: User validation failed: username: Path `username` is required.
+Stack Trace: ValidationError: User validation failed: username: Path `username` is required.
+    at Document.invalidate (F:\Coding\Production grade Projects\Instique\server\node_modules\mongoose\lib\document.js:3379:32)
+    at validatePath (F:\Coding\Production grade Projects\Instique\server\node_modules\mongoose\lib\document.js:3154:13)
+    at async Promise.all (index 0)
+    at async model.$__validate (F:\Coding\Production grade Projects\Instique\server\node_modules\mongoose\lib\document.js:3095:3)
+    at async model.validate (F:\Coding\Production grade Projects\Instique\server\node_modules\mongoose\lib\document.js:2672:5)
+    at async model.validateBeforeSave (F:\Coding\Production grade Projects\Instique\server\node_modules\mongoose\lib\plugins\validateBeforeSave.js:34:7)
+    at async Kareem.execPre (F:\Coding\Production grade Projects\Instique\server\node_modules\kareem\index.js:65:24)
+    at async model.$__save (F:\Coding\Production grade Projects\Instique\server\node_modules\mongoose\lib\model.js:369:5)
+    at async model.save (F:\Coding\Production grade Projects\Instique\server\node_modules\mongoose\lib\model.js:609:5)
+    at async Module.loginUser (file:///F:/Coding/Production%20grade%20Projects/Instique/server/src/services/auth.service.js:83:3)
+    at async file:///F:/Coding/Production%20grade%20Projects/Instique/server/src/controllers/auth.controller.js:36:18
+Details: {
+  "username": {
+    "name": "ValidatorError",
+    "message": "Path `username` is required.",
+    "properties": {
+      "message": "Path `username` is required.",
+      "type": "required",
+      "path": "username"
+    },
+    "kind": "required",
+    "path": "username"
+  }
+}
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-08-30T10:23:36.676Z
+Method: POST
+URL: /api/v1/auth/login
+User ID: Unauthenticated
+Query: {}
+Body: {"email":"admin1@gmail.com","password":"12345678"}
+Error Name: ValidationError
+Error Message: User validation failed: username: Path `username` is required.
+Stack Trace: ValidationError: User validation failed: username: Path `username` is required.
+    at Document.invalidate (F:\Coding\Production grade Projects\Instique\server\node_modules\mongoose\lib\document.js:3379:32)
+    at validatePath (F:\Coding\Production grade Projects\Instique\server\node_modules\mongoose\lib\document.js:3154:13)
+    at async Promise.all (index 0)
+    at async model.$__validate (F:\Coding\Production grade Projects\Instique\server\node_modules\mongoose\lib\document.js:3095:3)
+    at async model.validate (F:\Coding\Production grade Projects\Instique\server\node_modules\mongoose\lib\document.js:2672:5)
+    at async model.validateBeforeSave (F:\Coding\Production grade Projects\Instique\server\node_modules\mongoose\lib\plugins\validateBeforeSave.js:34:7)
+    at async Kareem.execPre (F:\Coding\Production grade Projects\Instique\server\node_modules\kareem\index.js:65:24)
+    at async model.$__save (F:\Coding\Production grade Projects\Instique\server\node_modules\mongoose\lib\model.js:369:5)
+    at async model.save (F:\Coding\Production grade Projects\Instique\server\node_modules\mongoose\lib\model.js:609:5)
+    at async Module.loginUser (file:///F:/Coding/Production%20grade%20Projects/Instique/server/src/services/auth.service.js:83:3)
+    at async file:///F:/Coding/Production%20grade%20Projects/Instique/server/src/controllers/auth.controller.js:36:18
+Details: {
+  "username": {
+    "name": "ValidatorError",
+    "message": "Path `username` is required.",
+    "properties": {
+      "message": "Path `username` is required.",
+      "type": "required",
+      "path": "username"
+    },
+    "kind": "required",
+    "path": "username"
+  }
+}
+================================================================================
+

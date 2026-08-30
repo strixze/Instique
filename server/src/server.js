@@ -7,7 +7,6 @@ import morgan from 'morgan';
 import env from './config/env.js';
 import errorMiddleware from './middlewares/error.middleware.js';
 import { generalLimiter } from './middlewares/rateLimiter.middleware.js';
-import { initializeSocket } from './sockets/index.js';
 
 const app = express();
 const httpServer = createServer(app);

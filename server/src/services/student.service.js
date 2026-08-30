@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import Student from '../models/Student.js';
 import Parent from '../models/Parent.js';
-import { User } from '../models/user.model.js';
+import { User } from '../models/User.js';
 import School from '../models/School.js';
 import AccountToken from '../models/AccountToken.js';
 import AuditLog from '../models/AuditLog.js';

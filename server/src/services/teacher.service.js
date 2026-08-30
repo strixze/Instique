@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import Teacher from '../models/Teacher.js';
-import { User } from '../models/user.model.js';
+import { User } from '../models/User.js';
 import School from '../models/School.js';
 import AccountToken from '../models/AccountToken.js';
 import AuditLog from '../models/AuditLog.js';

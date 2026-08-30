@@ -6,7 +6,7 @@ import SchoolClass from '../models/SchoolClass.js';
 import Section from '../models/Section.js';
 import Subject from '../models/Subject.js';
 import AcademicYear from '../models/AcademicYear.js';
-import { User } from '../models/user.model.js';
+import { User } from '../models/User.js';
 import ApiError from '../utils/ApiError.js';
 import { paginate } from '../utils/pagination.js';
 import { uploadFileOnCloudinary, deleteFileFromCloudinary } from './cloudinary.service.js';
