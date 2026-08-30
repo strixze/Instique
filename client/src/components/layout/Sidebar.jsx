@@ -14,13 +14,13 @@ import toast from 'react-hot-toast';
 const navSections = {
   school_admin: [
     {
-      title: 'OVERVIEW',
+      title: 'Overview',
       items: [
         { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
       ],
     },
     {
-      title: 'ACADEMICS',
+      title: 'Academics',
       items: [
         { to: '/students', icon: Users, label: 'Students' },
         { to: '/teachers', icon: GraduationCap, label: 'Teachers' },
@@ -31,7 +31,7 @@ const navSections = {
       ],
     },
     {
-      title: 'EXAMINATIONS',
+      title: 'Examinations',
       items: [
         { to: '/exams', icon: Trophy, label: 'Exams' },
         { to: '/marks-entry', icon: ClipboardCheck, label: 'Marks Entry' },
@@ -39,7 +39,7 @@ const navSections = {
       ],
     },
     {
-      title: 'ADMINISTRATION',
+      title: 'Administration',
       items: [
         { to: '/admissions', icon: FileText, label: 'Admissions' },
         { to: '/fees', icon: DollarSign, label: 'Fees' },
@@ -48,7 +48,7 @@ const navSections = {
       ],
     },
     {
-      title: 'COMMUNICATION',
+      title: 'Communication',
       items: [
         { to: '/events', icon: Calendar, label: 'Events' },
         { to: '/complaints', icon: MessageSquare, label: 'Complaints' },
@@ -56,13 +56,13 @@ const navSections = {
       ],
     },
     {
-      title: 'REPORTS',
+      title: 'Reports',
       items: [
         { to: '/reports', icon: BarChart3, label: 'Reports & Analytics' },
       ],
     },
     {
-      title: 'SYSTEM',
+      title: 'System',
       items: [
         { to: '/roles', icon: Shield, label: 'Roles & Permissions' },
         { to: '/settings', icon: Settings, label: 'Settings' },
@@ -71,7 +71,7 @@ const navSections = {
   ],
   super_admin: [
     {
-      title: 'OVERVIEW',
+      title: 'Overview',
       items: [
         { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
         { to: '/schools', icon: BookOpen, label: 'Schools' },
@@ -83,13 +83,13 @@ const navSections = {
   ],
   teacher: [
     {
-      title: 'OVERVIEW',
+      title: 'Overview',
       items: [
         { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
       ],
     },
     {
-      title: 'ACADEMICS',
+      title: 'Academics',
       items: [
         { to: '/timetable', icon: Calendar, label: 'Timetable' },
         { to: '/attendance', icon: ClipboardList, label: 'Attendance' },
@@ -101,7 +101,7 @@ const navSections = {
       ],
     },
     {
-      title: 'ADMINISTRATION',
+      title: 'Administration',
       items: [
         { to: '/events', icon: Calendar, label: 'Events' },
         { to: '/parent-meetings', icon: Users, label: 'Parent Meetings' },
@@ -112,13 +112,13 @@ const navSections = {
   ],
   student: [
     {
-      title: 'OVERVIEW',
+      title: 'Overview',
       items: [
         { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
       ],
     },
     {
-      title: 'ACADEMICS',
+      title: 'Academics',
       items: [
         { to: '/timetable', icon: Calendar, label: 'Timetable' },
         { to: '/attendance', icon: ClipboardList, label: 'Attendance' },
@@ -128,7 +128,7 @@ const navSections = {
       ],
     },
     {
-      title: 'SERVICES',
+      title: 'Services',
       items: [
         { to: '/events', icon: Calendar, label: 'Events' },
         { to: '/fees', icon: DollarSign, label: 'Fees' },
@@ -139,13 +139,13 @@ const navSections = {
   ],
   parent: [
     {
-      title: 'OVERVIEW',
+      title: 'Overview',
       items: [
         { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
       ],
     },
     {
-      title: 'ACADEMICS',
+      title: 'Academics',
       items: [
         { to: '/attendance', icon: ClipboardList, label: 'Attendance' },
         { to: '/homework', icon: BookMarked, label: 'Homework' },
@@ -155,7 +155,7 @@ const navSections = {
       ],
     },
     {
-      title: 'SERVICES',
+      title: 'Services',
       items: [
         { to: '/events', icon: Calendar, label: 'Events' },
         { to: '/parent-meetings', icon: Users, label: 'Parent Meetings' },
@@ -185,15 +185,19 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
   const sidebarContent = (
     <div className="flex flex-col h-full bg-white">
       {/* Brand Header */}
-      <div className="flex items-center justify-between px-4 py-4 border-b border-border">
+      <div
+        className={`flex items-center border-b border-border h-14 shrink-0 ${
+          sidebarCollapsed ? 'justify-center px-3' : 'justify-between px-4'
+        }`}
+      >
         {!sidebarCollapsed && (
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-forest flex items-center justify-center text-white shadow-sm">
-              <BookOpen size={16} strokeWidth={2.2} />
+            <div className="w-7 h-7 rounded-lg bg-forest flex items-center justify-center text-white shrink-0">
+              <BookOpen size={14} strokeWidth={2.2} />
             </div>
-            <div>
-              <span className="text-sm font-bold text-deep tracking-tight block leading-tight">Instique</span>
-              <span className="text-[10px] text-muted font-normal block leading-tight">School Management</span>
+            <div className="leading-none">
+              <span className="text-sm font-bold text-deep tracking-tight block">Instique</span>
+              <span className="text-[10px] text-muted font-normal">School Management</span>
             </div>
           </div>
         )}
@@ -202,16 +206,16 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
           className="p-1.5 text-muted hover:text-deep rounded-lg hover:bg-surface transition-colors"
           title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
-          {sidebarCollapsed ? <Menu size={18} /> : <ChevronLeft size={18} />}
+          {sidebarCollapsed ? <Menu size={17} /> : <ChevronLeft size={17} />}
         </button>
       </div>
 
       {/* Navigation Groups */}
-      <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-4 scrollbar-thin">
+      <nav className="flex-1 overflow-y-auto py-3 space-y-4 scrollbar-thin">
         {sections.map((section) => (
-          <div key={section.title}>
+          <div key={section.title} className={sidebarCollapsed ? 'px-2' : 'px-3'}>
             {!sidebarCollapsed && (
-              <p className="px-3 mb-1 text-[10px] font-bold text-muted uppercase tracking-wider">
+              <p className="px-2 mb-1.5 text-[10px] font-bold text-muted/80 uppercase tracking-widest">
                 {section.title}
               </p>
             )}
@@ -221,15 +225,16 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                   key={item.to}
                   to={item.to}
                   onClick={() => setMobileOpen?.(false)}
+                  title={sidebarCollapsed ? item.label : undefined}
                   className={({ isActive }) =>
-                    `flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] transition-all duration-150 ${
+                    `flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-2.5'} px-2 py-2 rounded-lg text-[13px] transition-all duration-150 ${
                       isActive
-                        ? 'bg-sage text-forest font-semibold'
-                        : 'text-secondary hover:text-deep hover:bg-surface font-medium'
+                        ? 'bg-forest-soft text-forest font-semibold'
+                        : 'text-secondary hover:text-deep hover:bg-slate-50 font-medium'
                     }`
                   }
                 >
-                  <item.icon size={17} strokeWidth={1.8} className="shrink-0" />
+                  <item.icon size={16} strokeWidth={1.8} className="shrink-0" />
                   {!sidebarCollapsed && <span className="truncate">{item.label}</span>}
                 </NavLink>
               ))}
@@ -239,12 +244,13 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
       </nav>
 
       {/* Footer / Logout */}
-      <div className="px-3 py-3 border-t border-border bg-white">
+      <div className={`py-3 border-t border-border shrink-0 ${sidebarCollapsed ? 'px-2' : 'px-3'}`}>
         <button
           onClick={handleLogout}
-          className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-[13px] font-medium text-secondary hover:text-danger hover:bg-danger-light transition-colors"
+          title="Logout"
+          className={`flex items-center ${sidebarCollapsed ? 'justify-center px-2' : 'gap-2.5 px-2'} w-full py-2 rounded-lg text-[13px] font-medium text-secondary hover:text-danger hover:bg-red-50 transition-colors`}
         >
-          <LogOut size={17} strokeWidth={1.8} className="shrink-0" />
+          <LogOut size={16} strokeWidth={1.8} className="shrink-0" />
           {!sidebarCollapsed && <span>Logout</span>}
         </button>
       </div>
@@ -256,7 +262,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
       {/* Desktop Sidebar */}
       <aside
         className={`hidden lg:flex flex-col bg-white border-r border-border transition-all duration-200 ${
-          sidebarCollapsed ? 'w-16' : 'w-[220px]'
+          sidebarCollapsed ? 'w-14' : 'w-[216px]'
         }`}
       >
         {sidebarContent}
@@ -265,8 +271,11 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
       {/* Mobile Sidebar Overlay */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="fixed inset-0 bg-deep/40 backdrop-blur-xs" onClick={() => setMobileOpen(false)} />
-          <aside className="fixed left-0 top-0 bottom-0 w-[230px] bg-white border-r border-border z-50 animate-slide-right shadow-modal">
+          <div
+            className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs"
+            onClick={() => setMobileOpen(false)}
+          />
+          <aside className="fixed left-0 top-0 bottom-0 w-[220px] bg-white border-r border-border z-50 animate-slide-right shadow-modal">
             {sidebarContent}
           </aside>
         </div>

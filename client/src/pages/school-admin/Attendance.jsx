@@ -220,14 +220,14 @@ export default function Attendance() {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 pb-1">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-deep tracking-tight">Attendance</h1>
-          <p className="text-secondary text-xs sm:text-sm mt-0.5">
-            Mark, view, and track daily student attendance class-wise and section-wise
+          <h1 className="text-xl font-bold text-deep tracking-tight">Attendance</h1>
+          <p className="text-secondary text-xs mt-1 max-w-xl leading-relaxed">
+            Mark, view, and track daily student attendance class-wise and section-wise.
           </p>
         </div>
-        <Button variant="outline" onClick={() => setReportOpen(true)} className="gap-1.5 text-xs">
+        <Button variant="outline" size="sm" onClick={() => setReportOpen(true)} className="gap-1.5 text-xs shrink-0">
           <BarChart3 size={14} /> View Attendance Report
         </Button>
       </div>

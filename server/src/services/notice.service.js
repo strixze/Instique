@@ -7,9 +7,14 @@ export const createNotice = async (schoolId, data, userId) => {
   return notice;
 };
 
-export const getNotices = async (schoolId, options) => {
-  return paginate(Notice, { schoolId }, { ...options, searchFields: ['title'] });
+export const getNotices = async (schoolId, options, user) => {
+  const query = { schoolId };
+  if (user && (user.role === 'parent' || user.role === 'student')) {
+    query.status = 'published';
+  }
+  return paginate(Notice, query, { ...options, searchFields: ['title', 'content'] });
 };
+
 
 export const getNoticeById = async (id, schoolId) => {
   const notice = await Notice.findOne({ _id: id, schoolId });

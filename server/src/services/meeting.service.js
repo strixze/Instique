@@ -8,7 +8,7 @@ import Section from '../models/Section.js';
 import Student from '../models/Student.js';
 import Parent from '../models/Parent.js';
 import Teacher from '../models/Teacher.js';
-import User from '../models/User.js';
+import { User } from '../models/user.model.js';
 import Event from '../models/Event.js';
 import ApiError from '../utils/ApiError.js';
 import { paginate } from '../utils/pagination.js';

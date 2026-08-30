@@ -19,8 +19,9 @@ export const getAttendance = asyncHandler(async (req, res) => {
 
 export const getStudentAttendance = asyncHandler(async (req, res) => {
   const result = await attendanceService.getStudentAttendance(req.schoolId, req.params.studentId, req.query);
-  res.status(200).json(new ApiResponse(200, result.data, 'Attendance fetched', result.meta));
+  res.status(200).json(new ApiResponse(200, result, 'Attendance history and analytics fetched'));
 });
+
 
 export const getAttendanceReport = asyncHandler(async (req, res) => {
   const { classId, startDate, endDate } = req.query;

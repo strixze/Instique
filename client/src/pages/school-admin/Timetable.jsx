@@ -48,6 +48,11 @@ export default function Timetable() {
   const [sortField, setSortField] = useState('createdAt');
   const [sortOrder, setSortOrder] = useState('desc');
 
+  // Row Selection
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [generateDropdownOpen, setGenerateDropdownOpen] = useState(false);
+  const generateDropdownRef = useRef(null);
+
   // Action Menu
   const [activeMenuId, setActiveMenuId] = useState(null);
   const menuRef = useRef(null);
@@ -104,10 +109,64 @@ export default function Timetable() {
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) setActiveMenuId(null);
+      if (generateDropdownRef.current && !generateDropdownRef.current.contains(e.target)) {
+        setGenerateDropdownOpen(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const allSelected = timetables.length > 0 && selectedIds.length === timetables.length;
+
+  const toggleSelectAll = () => {
+    if (allSelected) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(timetables.map((t) => t._id));
+    }
+  };
+
+  const toggleSelectRow = (id) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleBulkPublishSelected = async (status = 'published') => {
+    if (selectedIds.length === 0) return;
+    try {
+      await Promise.all(selectedIds.map((id) => timetableApi.publish(id, status)));
+      toast.success(`${selectedIds.length} timetable(s) marked as ${status}`);
+      setSelectedIds([]);
+      triggerReload();
+    } catch (e) {
+      toast.error(e?.message || 'Failed to update selected timetables');
+    }
+  };
+
+  const handleBulkDeleteSelected = async () => {
+    if (selectedIds.length === 0) return;
+    const result = await Swal.fire({
+      title: `Delete ${selectedIds.length} timetable${selectedIds.length > 1 ? 's' : ''}?`,
+      text: 'This action cannot be undone.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Delete Timetables',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#dc2626',
+    });
+    if (!result.isConfirmed) return;
+
+    try {
+      await Promise.all(selectedIds.map((id) => timetableApi.delete(id)));
+      toast.success(`Deleted ${selectedIds.length} timetable(s)`);
+      setSelectedIds([]);
+      triggerReload();
+    } catch (e) {
+      toast.error(e?.message || 'Failed to delete selected timetables');
+    }
+  };
 
   useEffect(() => {
     academicApi.getClasses({ limit: 100 }).then((res) => setClasses(res.data)).catch(() => {});
@@ -548,28 +607,77 @@ export default function Timetable() {
   /* ──────────────────────── RENDER ──────────────────────── */
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="space-y-4 w-full">
+      {/* ── Page Header ── */}
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 pb-1">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-deep tracking-tight">Timetable Management</h1>
-          <p className="text-secondary text-xs sm:text-sm mt-0.5">
-            Auto-generate, inspect, and optimize school class schedules with conflict prevention
+          <h1 className="text-xl font-bold text-deep tracking-tight">Timetable Management</h1>
+          <p className="text-secondary text-xs mt-1 max-w-xl leading-relaxed">
+            Auto-generate, inspect, and optimize school class schedules with conflict prevention.
           </p>
         </div>
-        <div className="flex sm:flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <Button variant="outline" size="sm" onClick={handleLoadReports} className="gap-1.5 text-xs">
-            <BarChart3 size={14} /> Analytics & Reports
+
+        {/* Primary and Secondary Actions */}
+        <div className="flex items-center gap-2.5 relative">
+          {/* Secondary Action: Analytics */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleLoadReports}
+            className="gap-1.5 text-xs text-secondary hover:text-deep"
+          >
+            <BarChart3 size={14} /> Analytics
           </Button>
-          <Button variant="outline" size="sm" onClick={() => setOpenPublishModal(true)} className="gap-1.5 text-xs">
-            <Lock size={14} /> Bulk Publish
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => setOpenDeleteModal(true)} className="gap-1.5 text-xs text-red-600 border-red-200 hover:bg-red-50">
-            <Trash2 size={14} /> Bulk Delete
-          </Button>
-          <Button onClick={() => setOpenGen(true)} className="gap-1.5 text-xs">
-            <Plus size={16} /> Generate Timetable <ChevronDown size={14} className="opacity-70 ml-0.5" />
-          </Button>
+
+          {/* Primary Action: Generate Timetable Dropdown */}
+          <div className="relative" ref={generateDropdownRef}>
+            <Button
+              size="sm"
+              onClick={() => setGenerateDropdownOpen(!generateDropdownOpen)}
+              className="gap-1.5 text-xs bg-forest text-white shadow-2xs"
+            >
+              <Plus size={15} /> Generate Timetable{' '}
+              <ChevronDown
+                size={13}
+                className={`transition-transform duration-150 opacity-80 ${generateDropdownOpen ? 'rotate-180' : ''}`}
+              />
+            </Button>
+
+            {generateDropdownOpen && (
+              <div className="absolute right-0 top-full mt-1.5 w-56 bg-white border border-border rounded-xl shadow-dropdown z-50 py-1 text-left animate-scale-in">
+                <button
+                  onClick={() => { setGenerateDropdownOpen(false); setOpenGen(true); }}
+                  className="w-full px-3.5 py-2 text-xs text-deep hover:bg-surface flex items-center gap-2 font-medium"
+                >
+                  <Plus size={13} className="text-forest" /> Generate for Class
+                </button>
+                <button
+                  onClick={() => {
+                    setGenerateDropdownOpen(false);
+                    const defaultYear = years.find(y => y.isCurrent)?._id || years[0]?._id || '';
+                    setForm(f => ({ ...f, academicYear: defaultYear }));
+                    setOpenGen(true);
+                  }}
+                  className="w-full px-3.5 py-2 text-xs text-deep hover:bg-surface flex items-center gap-2 font-medium"
+                >
+                  <RefreshCw size={13} className="text-forest" /> Bulk Generation (All Classes)
+                </button>
+                <div className="border-t border-border/70 my-1"></div>
+                <button
+                  onClick={() => { setGenerateDropdownOpen(false); setOpenPublishModal(true); }}
+                  className="w-full px-3.5 py-2 text-xs text-secondary hover:bg-surface flex items-center gap-2"
+                >
+                  <Lock size={13} className="text-muted" /> Bulk Publish by Scope
+                </button>
+                <button
+                  onClick={() => { setGenerateDropdownOpen(false); setOpenDeleteModal(true); }}
+                  className="w-full px-3.5 py-2 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2"
+                >
+                  <Trash2 size={13} /> Bulk Delete by Scope
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -679,44 +787,40 @@ export default function Timetable() {
           )}
         </div>
       ) : (
-        /* List View (Admissions Pattern) */
+        /* List View */
         <div className="space-y-4 animate-scale-in">
           {/* KPI Summary Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-            <div className="bg-white border border-border rounded-xl p-3.5 shadow-2xs hover:shadow-card transition-shadow">
-              <div className="w-8 h-8 rounded-full bg-forest-soft text-forest flex items-center justify-center mb-2">
-                <Calendar size={16} />
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="bg-white border border-border rounded-xl p-3.5 shadow-2xs">
+              <div className="w-7 h-7 rounded-full bg-forest-soft text-forest flex items-center justify-center mb-1.5">
+                <Calendar size={15} />
               </div>
               <p className="text-[11px] font-semibold text-secondary">Total Timetables</p>
-              <p className="text-xl sm:text-2xl font-bold text-deep leading-tight mt-0.5">{totalCount}</p>
-              <p className="text-[10px] text-muted mt-1">Generated section schedules</p>
+              <p className="text-xl font-bold text-deep mt-0.5">{totalCount}</p>
             </div>
 
-            <div className="bg-white border border-border rounded-xl p-3.5 shadow-2xs hover:shadow-card transition-shadow">
-              <div className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-2">
-                <CheckCircle2 size={16} />
+            <div className="bg-white border border-border rounded-xl p-3.5 shadow-2xs">
+              <div className="w-7 h-7 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-1.5">
+                <CheckCircle2 size={15} />
               </div>
               <p className="text-[11px] font-semibold text-secondary">Published</p>
-              <p className="text-xl sm:text-2xl font-bold text-deep leading-tight mt-0.5">{publishedCount}</p>
-              <p className="text-[10px] text-muted mt-1">Live for students & staff</p>
+              <p className="text-xl font-bold text-deep mt-0.5">{publishedCount}</p>
             </div>
 
-            <div className="bg-white border border-border rounded-xl p-3.5 shadow-2xs hover:shadow-card transition-shadow">
-              <div className="w-8 h-8 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mb-2">
-                <Layers3 size={16} />
+            <div className="bg-white border border-border rounded-xl p-3.5 shadow-2xs">
+              <div className="w-7 h-7 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mb-1.5">
+                <Layers3 size={15} />
               </div>
               <p className="text-[11px] font-semibold text-secondary">Drafts</p>
-              <p className="text-xl sm:text-2xl font-bold text-deep leading-tight mt-0.5">{draftCount}</p>
-              <p className="text-[10px] text-muted mt-1">Under edit / review</p>
+              <p className="text-xl font-bold text-deep mt-0.5">{draftCount}</p>
             </div>
 
-            <div className="bg-white border border-border rounded-xl p-3.5 shadow-2xs hover:shadow-card transition-shadow">
-              <div className="w-8 h-8 rounded-full bg-forest text-white flex items-center justify-center mb-2">
-                <AlertTriangle size={16} />
+            <div className="bg-white border border-border rounded-xl p-3.5 shadow-2xs">
+              <div className="w-7 h-7 rounded-full bg-forest text-white flex items-center justify-center mb-1.5">
+                <AlertTriangle size={15} />
               </div>
               <p className="text-[11px] font-semibold text-secondary">Conflicts</p>
-              <p className="text-xl sm:text-2xl font-bold text-deep leading-tight mt-0.5">{conflicts.length}</p>
-              <p className="text-[10px] text-muted mt-1">Pending warnings</p>
+              <p className="text-xl font-bold text-deep mt-0.5">{conflicts.length}</p>
             </div>
           </div>
 
@@ -750,30 +854,23 @@ export default function Timetable() {
                 <Button variant="outline" size="sm" onClick={handleResetFilters} className="text-xs text-secondary">
                   <RotateCcw size={13} className="mr-1 text-muted" /> Reset
                 </Button>
-
-                <Button size="sm" variant="primary" className="text-xs gap-1.5">
-                  <Filter size={13} /> Filters
-                  {countActiveFilters() > 0 && (
-                    <span className="ml-0.5 px-1.5 bg-white/20 text-white rounded-full text-[10px] font-bold">{countActiveFilters()}</span>
-                  )}
-                </Button>
               </div>
             </div>
 
-            {/* Status Pills */}
+            {/* Status Filter Tabs */}
             <div className="pt-2 border-t border-border/70 flex flex-wrap items-center gap-2 text-xs">
-              <span className="font-medium text-secondary text-xs mr-1">Status:</span>
-              <div className="flex flex-wrap gap-1.5">
+              <span className="font-semibold text-secondary text-xs mr-1">Status:</span>
+              <div className="flex flex-wrap gap-1">
                 {STATUS_PILLS.map((pill) => {
                   const isActive = statusFilter === pill.value;
                   return (
                     <button
                       key={pill.value}
                       onClick={() => { setStatusFilter(pill.value); setPage(1); }}
-                      className={`px-3 py-1 rounded-lg text-xs transition-all whitespace-nowrap ${
+                      className={`px-3 py-1 rounded-lg text-xs transition-all whitespace-nowrap font-medium ${
                         isActive
                           ? 'bg-forest text-white font-semibold shadow-2xs'
-                          : 'bg-white border border-border text-secondary hover:bg-surface hover:text-deep font-medium'
+                          : 'text-secondary hover:bg-surface hover:text-deep'
                       }`}
                     >
                       {pill.label}
@@ -784,12 +881,66 @@ export default function Timetable() {
             </div>
           </div>
 
+          {/* ── Contextual Bulk Action Toolbar (Only visible when rows are selected) ── */}
+          {selectedIds.length > 0 && (
+            <div className="bg-forest-soft/60 border border-forest/30 rounded-xl p-3 flex flex-wrap items-center justify-between gap-3 text-xs animate-scale-in">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-forest">
+                  {selectedIds.length} timetable{selectedIds.length > 1 ? 's' : ''} selected
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleBulkPublishSelected('published')}
+                  className="text-xs bg-white text-forest border-forest/30 hover:bg-forest/10"
+                >
+                  <CheckCircle2 size={13} className="mr-1" /> Publish
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleBulkPublishSelected('draft')}
+                  className="text-xs bg-white text-secondary hover:bg-surface"
+                >
+                  Set to Draft
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleBulkDeleteSelected}
+                  className="text-xs bg-white text-red-600 border-red-200 hover:bg-red-50"
+                >
+                  <Trash2 size={13} className="mr-1 text-red-500" /> Delete
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setSelectedIds([])}
+                  className="text-xs text-muted hover:text-deep"
+                >
+                  Clear
+                </Button>
+              </div>
+            </div>
+          )}
+
           {/* High Density Table */}
           <div className="bg-white border border-border rounded-xl overflow-hidden shadow-2xs">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-border bg-surface/70">
+                    <th className="px-3 py-2.5 w-10 text-center">
+                      <input
+                        type="checkbox"
+                        checked={allSelected}
+                        onChange={toggleSelectAll}
+                        className="w-4 h-4 accent-forest rounded cursor-pointer"
+                        title="Select All"
+                      />
+                    </th>
                     <th onClick={() => handleSort('schoolClass')} className="px-3.5 py-2.5 text-xs font-semibold text-secondary uppercase tracking-wider cursor-pointer hover:text-deep select-none">
                       <div className="flex items-center gap-1"><span>CLASS</span><SortIcon field="schoolClass" /></div>
                     </th>
@@ -803,59 +954,75 @@ export default function Timetable() {
                 <tbody className="divide-y divide-border/60 bg-white">
                   {loading ? (
                     [1, 2, 3, 4, 5].map((i) => (
-                      <tr key={i}><td colSpan={6} className="px-3.5 py-3"><div className="h-5 bg-surface rounded animate-pulse w-full" /></td></tr>
+                      <tr key={i}><td colSpan={7} className="px-3.5 py-3"><div className="h-5 bg-surface rounded animate-pulse w-full" /></td></tr>
                     ))
                   ) : timetables.length === 0 ? (
-                    <tr><td colSpan={6} className="px-4 py-12 text-center text-xs text-muted">No timetables found matching the selected criteria.</td></tr>
+                    <tr><td colSpan={7} className="px-4 py-12 text-center text-xs text-muted">No timetables found matching the selected criteria.</td></tr>
                   ) : (
-                    timetables.map((row) => (
-                      <tr key={row._id} className="hover:bg-surface/50 transition-colors">
-                        <td className="px-3.5 py-2.5 font-bold text-xs text-deep">
-                          {row.schoolClass?.name || classMap[row.schoolClass] || '—'}
-                        </td>
-                        <td className="px-3.5 py-2.5 text-xs text-secondary font-medium">
-                          Section {row.section?.name || sectionMap[row.section] || '—'}
-                        </td>
-                        <td className="px-3.5 py-2.5 text-xs text-secondary">
-                          {row.academicYear?.name || yearMap[row.academicYear] || '—'}
-                        </td>
-                        <td className="px-3.5 py-2.5 text-xs font-semibold text-deep">
-                          {Array.isArray(row.periods) ? row.periods.length : 0} slots
-                        </td>
-                        <td className="px-3.5 py-2.5">
-                          {row.status === 'published' ? (
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">Published</span>
-                          ) : (
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">Draft</span>
-                          )}
-                        </td>
-                        <td className="px-3.5 py-2.5 text-right relative">
-                          <div className="inline-flex items-center gap-1">
-                            <button onClick={() => openEditor(row)} className="p-1.5 text-muted hover:text-deep hover:bg-surface border border-border rounded-lg transition-colors" title="Open Editor">
-                              <Eye size={14} />
-                            </button>
-                            <button onClick={() => setActiveMenuId(activeMenuId === row._id ? null : row._id)} className="p-1.5 text-muted hover:text-deep hover:bg-surface border border-border rounded-lg transition-colors">
-                              <MoreVertical size={14} />
-                            </button>
-                          </div>
-
-                          {activeMenuId === row._id && (
-                            <div ref={menuRef} className="absolute right-4 top-10 w-44 bg-white border border-border rounded-xl shadow-dropdown z-40 py-1 text-left animate-scale-in">
-                              <button onClick={() => { setActiveMenuId(null); openEditor(row); }} className="w-full px-3 py-1.5 text-xs text-deep hover:bg-surface flex items-center gap-2">
-                                <Eye size={13} className="text-muted" /> Inspect & Edit
+                    timetables.map((row) => {
+                      const isRowSelected = selectedIds.includes(row._id);
+                      return (
+                        <tr
+                          key={row._id}
+                          className={`transition-colors ${
+                            isRowSelected ? 'bg-forest-soft/30 hover:bg-forest-soft/40' : 'hover:bg-surface/50'
+                          }`}
+                        >
+                          <td className="px-3 py-2.5 text-center">
+                            <input
+                              type="checkbox"
+                              checked={isRowSelected}
+                              onChange={() => toggleSelectRow(row._id)}
+                              className="w-4 h-4 accent-forest rounded cursor-pointer"
+                            />
+                          </td>
+                          <td className="px-3.5 py-2.5 font-bold text-xs text-deep">
+                            {row.schoolClass?.name || classMap[row.schoolClass] || '—'}
+                          </td>
+                          <td className="px-3.5 py-2.5 text-xs text-secondary font-medium">
+                            Section {row.section?.name || sectionMap[row.section] || '—'}
+                          </td>
+                          <td className="px-3.5 py-2.5 text-xs text-secondary">
+                            {row.academicYear?.name || yearMap[row.academicYear] || '—'}
+                          </td>
+                          <td className="px-3.5 py-2.5 text-xs font-semibold text-deep">
+                            {Array.isArray(row.periods) ? row.periods.length : 0} slots
+                          </td>
+                          <td className="px-3.5 py-2.5">
+                            {row.status === 'published' ? (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">Published</span>
+                            ) : (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">Draft</span>
+                            )}
+                          </td>
+                          <td className="px-3.5 py-2.5 text-right relative">
+                            <div className="inline-flex items-center gap-1">
+                              <button onClick={() => openEditor(row)} className="p-1.5 text-muted hover:text-deep hover:bg-surface border border-border rounded-lg transition-colors" title="Open Editor">
+                                <Eye size={14} />
                               </button>
-                              <button onClick={() => { setActiveMenuId(null); handlePublish(row); }} className="w-full px-3 py-1.5 text-xs text-deep hover:bg-surface flex items-center gap-2">
-                                {row.status === 'published' ? <Lock size={13} className="text-muted" /> : <Unlock size={13} className="text-muted" />}
-                                {row.status === 'published' ? 'Unpublish' : 'Publish'}
-                              </button>
-                              <button onClick={() => { setActiveMenuId(null); handleDelete(row); }} className="w-full px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2">
-                                <Trash2 size={13} /> Delete Timetable
+                              <button onClick={() => setActiveMenuId(activeMenuId === row._id ? null : row._id)} className="p-1.5 text-muted hover:text-deep hover:bg-surface border border-border rounded-lg transition-colors">
+                                <MoreVertical size={14} />
                               </button>
                             </div>
-                          )}
-                        </td>
-                      </tr>
-                    ))
+
+                            {activeMenuId === row._id && (
+                              <div ref={menuRef} className="absolute right-4 top-10 w-44 bg-white border border-border rounded-xl shadow-dropdown z-40 py-1 text-left animate-scale-in">
+                                <button onClick={() => { setActiveMenuId(null); openEditor(row); }} className="w-full px-3 py-1.5 text-xs text-deep hover:bg-surface flex items-center gap-2">
+                                  <Eye size={13} className="text-muted" /> Inspect & Edit
+                                </button>
+                                <button onClick={() => { setActiveMenuId(null); handlePublish(row); }} className="w-full px-3 py-1.5 text-xs text-deep hover:bg-surface flex items-center gap-2">
+                                  {row.status === 'published' ? <Lock size={13} className="text-muted" /> : <Unlock size={13} className="text-muted" />}
+                                  {row.status === 'published' ? 'Unpublish' : 'Publish'}
+                                </button>
+                                <button onClick={() => { setActiveMenuId(null); handleDelete(row); }} className="w-full px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2">
+                                  <Trash2 size={13} /> Delete Timetable
+                                </button>
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })
                   )}
                 </tbody>
               </table>

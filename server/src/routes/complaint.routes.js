@@ -10,9 +10,10 @@ const router = Router();
 
 router.use(authMiddleware, tenantMiddleware);
 
-router.get('/', requireRole('school_admin'), getComplaints);
-router.get('/:id', requireRole('school_admin'), getComplaintById);
-router.post('/', requireRole('student', 'parent'), validate(createComplaintSchema), createComplaint);
+router.get('/', requireRole('school_admin', 'teacher', 'student', 'parent'), getComplaints);
+router.get('/:id', requireRole('school_admin', 'teacher', 'student', 'parent'), getComplaintById);
+router.post('/', requireRole('student', 'parent', 'teacher', 'school_admin'), validate(createComplaintSchema), createComplaint);
 router.put('/:id/process', requireRole('school_admin'), validate(processComplaintSchema), processComplaint);
 
 export default router;
+

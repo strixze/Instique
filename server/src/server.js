@@ -7,7 +7,7 @@ import morgan from 'morgan';
 import env from './config/env.js';
 import errorMiddleware from './middlewares/error.middleware.js';
 import { generalLimiter } from './middlewares/rateLimiter.middleware.js';
-import { initializeSocket } from './config/socket.js';
+import { initializeSocket } from './sockets/index.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -44,10 +44,11 @@ import complaintRoutes from './routes/complaint.routes.js';
 import syllabusRoutes from './routes/syllabus.routes.js';
 import roleRoutes from './routes/role.routes.js';
 import saasRoutes from './routes/saas.routes.js';
-import auditRoutes from './routes/audit.routes.js';
 import dashboardRoutes from './routes/dashboard.routes.js';
 import settingRoutes from './routes/setting.routes.js';
 import bulkImportRoutes from './routes/bulkImport.routes.js';
+import analyticsRoutes from './routes/analytics.routes.js';
+import auditRoutes from './routes/audit.routes.js';
 
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/schools', schoolRoutes);
@@ -76,6 +77,7 @@ app.use('/api/v1/audit-logs', auditRoutes);
 app.use('/api/v1/dashboards', dashboardRoutes);
 app.use('/api/v1/settings', settingRoutes);
 app.use('/api/v1/bulk-import', bulkImportRoutes);
+app.use('/api/v1/analytics', analyticsRoutes);
 
 app.get('/api/v1/health', (req, res) => {
   res.json({ success: true, message: 'Instique API is running', timestamp: new Date().toISOString() });
@@ -83,7 +85,7 @@ app.get('/api/v1/health', (req, res) => {
 
 app.use(errorMiddleware);
 
-initializeSocket(httpServer);
+// initializeSocket(httpServer);
 
 export { httpServer, app };
 // Trigger reload

@@ -1,12 +1,15 @@
 import mongoose from 'mongoose';
 import FeeStructure from '../models/FeeStructure.js';
 import FeeTransaction from '../models/FeeTransaction.js';
+import Parent from '../models/Parent.js';
+import Student from '../models/Student.js';
 import ApiError from '../utils/ApiError.js';
 import { paginate } from '../utils/pagination.js';
 import InstallmentConfig from '../models/InstallmentConfig.js';
 import ExcelJS from 'exceljs';
 import AcademicYear from '../models/AcademicYear.js';
 import SchoolClass from '../models/SchoolClass.js';
+
 
 export const createFeeStructure = async (schoolId, data) => {
   const total = data.categories.reduce((sum, c) => sum + c.amount, 0);
@@ -110,9 +113,26 @@ export const recordPayment = async (schoolId, data, userId) => {
   return feeTransaction;
 };
 
-export const getFeeTransactions = async (schoolId, options) => {
+export const getFeeTransactions = async (schoolId, options, user) => {
   const query = { schoolId };
   
+  if (user) {
+    if (user.role === 'parent') {
+      let parent = null;
+      if (user.profileId) {
+        parent = await Parent.findOne({ _id: user.profileId, schoolId });
+      }
+      if (!parent && user.email) {
+        parent = await Parent.findOne({ schoolId, 'contact.email': user.email.toLowerCase().trim() });
+      }
+      const studentIds = parent?.students || [];
+      query.student = { $in: studentIds };
+    } else if (user.role === 'student') {
+      const studentId = user.profileId || user._id;
+      query.student = studentId;
+    }
+  }
+
   if (options.status) {
     query.status = options.status;
   } else if (options.pendingOnly === 'true') {
@@ -136,16 +156,37 @@ export const getStudentFeeStatus = async (schoolId, studentId) => {
   return { transactions, totalDue, totalPaid, balance: totalDue - totalPaid };
 };
 
-export const getFeeReport = async (schoolId) => {
+export const getFeeReport = async (schoolId, user) => {
   const schoolIdObj = new mongoose.Types.ObjectId(schoolId.toString());
+  const matchCollected = { schoolId: schoolIdObj, status: { $in: ['paid', 'partial'] } };
+  const matchPending = { schoolId: schoolIdObj, status: { $in: ['pending', 'partial', 'overdue'] } };
+
+  if (user) {
+    if (user.role === 'parent') {
+      let parent = null;
+      if (user.profileId) {
+        parent = await Parent.findOne({ _id: user.profileId, schoolId });
+      }
+      if (!parent && user.email) {
+        parent = await Parent.findOne({ schoolId, 'contact.email': user.email.toLowerCase().trim() });
+      }
+      const studentIds = (parent?.students || []).map((id) => new mongoose.Types.ObjectId(id.toString()));
+      matchCollected.student = { $in: studentIds };
+      matchPending.student = { $in: studentIds };
+    } else if (user.role === 'student') {
+      const studentId = new mongoose.Types.ObjectId((user.profileId || user._id).toString());
+      matchCollected.student = studentId;
+      matchPending.student = studentId;
+    }
+  }
 
   const totalCollected = await FeeTransaction.aggregate([
-    { $match: { schoolId: schoolIdObj, status: { $in: ['paid', 'partial'] } } },
+    { $match: matchCollected },
     { $group: { _id: null, total: { $sum: '$paidAmount' } } },
   ]);
 
   const totalPending = await FeeTransaction.aggregate([
-    { $match: { schoolId: schoolIdObj, status: { $in: ['pending', 'partial', 'overdue'] } } },
+    { $match: matchPending },
     { $group: { _id: null, total: { $sum: '$balance' } } },
   ]);
 
@@ -154,6 +195,7 @@ export const getFeeReport = async (schoolId) => {
     totalPending: totalPending[0]?.total || 0,
   };
 };
+
 
 export const payPendingFee = async (schoolId, transactionId, data, userId) => {
   const transaction = await FeeTransaction.findOne({ _id: transactionId, schoolId });

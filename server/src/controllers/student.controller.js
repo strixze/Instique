@@ -37,3 +37,17 @@ export const promoteStudents = asyncHandler(async (req, res) => {
   const result = await studentService.promoteStudents(req.schoolId, studentIds, newClassId, newSectionId);
   res.status(200).json(new ApiResponse(200, result, 'Students promoted'));
 });
+
+export const sendParentPasswordReset = asyncHandler(async (req, res) => {
+  const { parentId } = req.body;
+  const result = await studentService.sendParentPasswordReset(
+    req.params.id,
+    req.schoolId,
+    parentId,
+    req.user,
+    req.ip,
+    req.headers['user-agent']
+  );
+  res.status(200).json(new ApiResponse(200, result, result.message));
+});
+

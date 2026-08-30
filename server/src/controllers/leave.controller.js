@@ -8,9 +8,10 @@ export const createLeave = asyncHandler(async (req, res) => {
 });
 
 export const getLeaves = asyncHandler(async (req, res) => {
-  const result = await leaveService.getLeaves(req.schoolId, req.query);
+  const result = await leaveService.getLeaves(req.schoolId, req.query, req.user);
   res.status(200).json(new ApiResponse(200, result.data, 'Leaves fetched', result.meta));
 });
+
 
 export const getLeaveById = asyncHandler(async (req, res) => {
   const leave = await leaveService.getLeaveById(req.params.id, req.schoolId);

@@ -100,9 +100,163 @@ export const getAttendance = async (schoolId, options) => {
   });
 };
 
-export const getStudentAttendance = async (schoolId, studentId, options) => {
-  return paginate(Attendance, { schoolId, 'students.student': studentId }, options);
+export const getStudentAttendance = async (schoolId, studentId, options = {}) => {
+  const query = {
+    schoolId,
+    'students.student': studentId,
+  };
+
+  if (options.startDate && options.endDate) {
+    query.date = { $gte: new Date(options.startDate), $lte: new Date(options.endDate) };
+  } else if (options.month && options.year) {
+    const start = new Date(Number(options.year), Number(options.month) - 1, 1);
+    const end = new Date(Number(options.year), Number(options.month), 0, 23, 59, 59, 999);
+    query.date = { $gte: start, $lte: end };
+  }
+
+  const student = await Student.findOne({ _id: studentId, schoolId })
+    .populate('currentClass', 'name')
+    .populate('currentSection', 'name');
+
+  const records = await Attendance.find(query)
+    .sort({ date: -1 })
+    .populate('schoolClass', 'name')
+    .populate('section', 'name')
+    .populate('subject', 'name code')
+    .populate('markedBy', 'name');
+
+  const logs = records.map((r) => {
+    const entry = r.students.find((s) => s.student?.toString() === studentId.toString());
+    return {
+      _id: r._id,
+      date: r.date,
+      status: entry ? entry.status : 'unknown',
+      class: r.schoolClass?.name,
+      section: r.section?.name,
+      subject: r.subject?.name,
+      markedBy: r.markedBy?.name,
+      source: r.source || 'manual',
+    };
+  });
+
+  const totalDays = logs.length;
+  const presentDays = logs.filter((l) => l.status === 'present').length;
+  const absentDays = logs.filter((l) => l.status === 'absent').length;
+  const lateDays = logs.filter((l) => l.status === 'late').length;
+  const leaveDays = logs.filter((l) => l.status === 'leave').length;
+  const holidayDays = logs.filter((l) => l.status === 'holiday').length;
+
+  const effectiveWorkingDays = totalDays - holidayDays;
+  const attendanceRate = effectiveWorkingDays > 0
+    ? Math.round(((presentDays + lateDays * 0.5) / effectiveWorkingDays) * 100)
+    : 0;
+
+  // Monthly breakdown
+  const monthlyTrends = {};
+  logs.forEach((l) => {
+    const d = new Date(l.date);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    const monthLabel = d.toLocaleString('default', { month: 'short', year: '2-digit' });
+    if (!monthlyTrends[key]) {
+      monthlyTrends[key] = {
+        key,
+        month: monthLabel,
+        total: 0,
+        present: 0,
+        absent: 0,
+        late: 0,
+        leave: 0,
+      };
+    }
+    if (l.status !== 'holiday') {
+      monthlyTrends[key].total++;
+      if (l.status === 'present') monthlyTrends[key].present++;
+      else if (l.status === 'absent') monthlyTrends[key].absent++;
+      else if (l.status === 'late') monthlyTrends[key].late++;
+      else if (l.status === 'leave') monthlyTrends[key].leave++;
+    }
+  });
+
+  const monthlyBreakdown = Object.values(monthlyTrends)
+    .sort((a, b) => a.key.localeCompare(b.key))
+    .slice(-6)
+    .map((m) => ({
+      ...m,
+      rate: m.total > 0 ? Math.round(((m.present + m.late * 0.5) / m.total) * 100) : 0,
+    }));
+
+  // Day of week consistency
+  const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const dayStats = {
+    Mon: { present: 0, total: 0 },
+    Tue: { present: 0, total: 0 },
+    Wed: { present: 0, total: 0 },
+    Thu: { present: 0, total: 0 },
+    Fri: { present: 0, total: 0 },
+    Sat: { present: 0, total: 0 },
+  };
+
+  logs.forEach((l) => {
+    const dayName = daysOfWeek[new Date(l.date).getDay()];
+    if (dayStats[dayName] && l.status !== 'holiday') {
+      dayStats[dayName].total++;
+      if (l.status === 'present' || l.status === 'late') dayStats[dayName].present++;
+    }
+  });
+
+  const dayOfWeekBreakdown = Object.entries(dayStats).map(([day, s]) => ({
+    day,
+    total: s.total,
+    present: s.present,
+    rate: s.total > 0 ? Math.round((s.present / s.total) * 100) : 0,
+  }));
+
+  // Consecutive streak
+  let currentStreak = 0;
+  for (const l of logs) {
+    if (l.status === 'present') {
+      currentStreak++;
+    } else if (l.status === 'holiday') {
+      continue;
+    } else {
+      break;
+    }
+  }
+
+  return {
+    student: {
+      _id: student?._id,
+      firstName: student?.firstName,
+      lastName: student?.lastName,
+      admissionNo: student?.admissionNo,
+      rollNo: student?.rollNo,
+      className: student?.currentClass?.name,
+      sectionName: student?.currentSection?.name,
+      avatar: student?.avatar,
+    },
+    analytics: {
+      attendanceRate,
+      totalWorkingDays: effectiveWorkingDays,
+      presentDays,
+      absentDays,
+      lateDays,
+      leaveDays,
+      holidayDays,
+      currentStreak,
+      monthlyBreakdown,
+      dayOfWeekBreakdown,
+      statusBreakdown: {
+        present: presentDays,
+        absent: absentDays,
+        late: lateDays,
+        leave: leaveDays,
+        holiday: holidayDays,
+      },
+    },
+    logs,
+  };
 };
+
 
 export const getStudentsByClassSection = async (schoolId, classId, sectionId) => {
   return Student.find({

@@ -10,10 +10,11 @@ const router = Router();
 
 router.use(authMiddleware, tenantMiddleware);
 
-router.get('/my', requireRole('teacher', 'student'), getMyLeaves);
-router.get('/', requireRole('school_admin'), getLeaves);
-router.get('/:id', requireRole('school_admin', 'teacher', 'student'), getLeaveById);
-router.post('/', requireRole('teacher', 'student'), validate(createLeaveSchema), createLeave);
+router.get('/my', requireRole('teacher', 'student', 'parent'), getMyLeaves);
+router.get('/', requireRole('school_admin', 'teacher', 'student', 'parent'), getLeaves);
+router.get('/:id', requireRole('school_admin', 'teacher', 'student', 'parent'), getLeaveById);
+router.post('/', requireRole('teacher', 'student', 'parent'), validate(createLeaveSchema), createLeave);
 router.put('/:id/process', requireRole('school_admin'), validate(processLeaveSchema), processLeave);
 
 export default router;
+

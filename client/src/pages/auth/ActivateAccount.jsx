@@ -81,6 +81,23 @@ export default function ActivateAccount() {
 
   const strength = getPasswordStrength(password);
 
+  const getRoleLabel = (role) => {
+    switch (role) {
+      case 'teacher':
+        return 'Teacher Portal';
+      case 'parent':
+        return 'Parent Portal';
+      case 'student':
+        return 'Student Portal';
+      case 'school_admin':
+        return 'Staff Portal';
+      default:
+        return 'Account Portal';
+    }
+  };
+
+  const roleLabel = getRoleLabel(tokenInfo?.role);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-900 px-4 py-12">
       <div className="w-full max-w-md space-y-6">
@@ -91,7 +108,7 @@ export default function ActivateAccount() {
             <ShieldCheck className="w-8 h-8" />
           </div>
           <h1 className="text-3xl font-extrabold text-white tracking-tight">
-            Instique <span className="text-blue-400 text-lg font-medium">| Parent Portal</span>
+            Instique <span className="text-blue-400 text-lg font-medium">| {roleLabel}</span>
           </h1>
           <p className="text-slate-400 text-sm">
             {tokenInfo?.schoolName ? tokenInfo.schoolName : 'School ERP Platform'}
@@ -137,7 +154,7 @@ export default function ActivateAccount() {
               <div className="space-y-1">
                 <h3 className="text-xl font-bold text-white">Account Activated!</h3>
                 <p className="text-sm text-slate-300">
-                  Your parent account has been successfully set up and verified.
+                  Your account has been successfully set up and verified.
                 </p>
               </div>
               <div className="pt-4">
@@ -145,7 +162,7 @@ export default function ActivateAccount() {
                   onClick={() => navigate('/login')}
                   className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30"
                 >
-                  Log In to Parent Portal <ArrowRight className="w-4 h-4" />
+                  Log In to {roleLabel} <ArrowRight className="w-4 h-4" />
                 </Button>
               </div>
             </div>
@@ -154,7 +171,7 @@ export default function ActivateAccount() {
               <div className="space-y-1">
                 <h2 className="text-xl font-bold text-white">Set Up Your Account</h2>
                 <p className="text-sm text-slate-400">
-                  Welcome <strong className="text-slate-200">{tokenInfo?.name || 'Parent'}</strong>! Choose a secure password for your portal access.
+                  Welcome <strong className="text-slate-200">{tokenInfo?.name || 'User'}</strong>! Choose a secure password for your portal access.
                 </p>
               </div>
 

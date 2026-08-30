@@ -576,7 +576,7 @@ export default function Admissions() {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Confirm Admission',
-      confirmButtonColor: '#2D6A4F',
+      confirmButtonColor: '#6C5CE7',
     });
     if (!result.isConfirmed) return;
     try {
@@ -748,16 +748,16 @@ export default function Admissions() {
   return (
     <div className="space-y-5 pb-6">
       {/* ── Page Header ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-1">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 pb-1">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-deep tracking-tight">Admissions</h1>
-          <p className="text-secondary text-xs sm:text-sm mt-0.5">
-            Manage admission applications through the enrollment workflow
+          <h1 className="text-xl font-bold text-deep tracking-tight">Admissions</h1>
+          <p className="text-secondary text-xs mt-1 max-w-xl leading-relaxed">
+            Manage admission applications through the enrollment workflow.
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button onClick={() => setCreateOpen(true)} className="gap-1.5">
-            <Plus size={16} /> New Application <ChevronDown size={14} className="opacity-70 ml-0.5" />
+        <div className="flex items-center gap-2 shrink-0">
+          <Button size="sm" onClick={() => setCreateOpen(true)} className="gap-1.5">
+            <Plus size={15} /> New Application
           </Button>
         </div>
       </div>

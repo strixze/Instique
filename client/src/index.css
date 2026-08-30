@@ -1,7 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --primary: #6C5CE7;
+  --primary-hover: #5B4BC4;
+  --primary-light: #F5F3FF;
+  --primary-border: #EDE9FE;
+  --primary-foreground: #FFFFFF;
+}
 
 html, body, #root {
   height: 100%;
@@ -13,12 +21,14 @@ body {
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: #0F172A;
   background-color: #F8FAFC;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 @layer utilities {
   .scrollbar-thin::-webkit-scrollbar {
-    width: 5px;
-    height: 5px;
+    width: 4px;
+    height: 4px;
   }
   .scrollbar-thin::-webkit-scrollbar-track {
     background: transparent;
@@ -32,19 +42,20 @@ body {
   }
 }
 
-/* Selection */
+/* Text Selection */
 ::selection {
-  background: #D8F3DC;
-  color: #1B4332;
+  background: #EDE9FE;
+  color: #4C3DA8;
 }
 
 /* Focus ring utility */
 .focus-ring {
-  @apply focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest;
+  @apply focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary;
 }
 
+/* Animations */
 @keyframes scale-in {
-  from { opacity: 0; transform: scale(0.95); }
+  from { opacity: 0; transform: scale(0.97); }
   to { opacity: 1; transform: scale(1); }
 }
 
@@ -54,7 +65,7 @@ body {
 }
 
 @keyframes fade-in {
-  from { opacity: 0; transform: translateY(4px); }
+  from { opacity: 0; transform: translateY(2px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -63,11 +74,11 @@ body {
   100% { background-position: 200% 0; }
 }
 
-.animate-scale-in { animation: scale-in 0.15s ease-out; }
-.animate-slide-right { animation: slide-right 0.2s ease-out; }
-.animate-fade-in { animation: fade-in 0.2s ease-out; }
+.animate-scale-in { animation: scale-in 0.12s ease-out; }
+.animate-slide-right { animation: slide-right 0.18s ease-out; }
+.animate-fade-in { animation: fade-in 0.15s ease-out; }
 .animate-shimmer {
-  background: linear-gradient(90deg, #EEF3EF 25%, #DCE8DF 50%, #EEF3EF 75%);
+  background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
 }

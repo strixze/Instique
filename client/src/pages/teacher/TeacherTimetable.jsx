@@ -50,7 +50,7 @@ export default function TeacherTimetable() {
  const maxPeriods = schedule.length > 0 ? Math.max(...schedule.map((s) => s.periodNo)) : 8;
 
  return (
- <div className="space-y-6 max-w-6xl mx-auto pb-12 print:p-0">
+ <div className="space-y-5 w-full pb-12 print:p-0">
  <div className="print:hidden">
  <PageHeader
  title="My Timetable Schedule"

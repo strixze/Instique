@@ -2,7 +2,18 @@ import { ChevronUp, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight, Sear
 import { useState, useEffect } from 'react';
 import Button from './Button';
 
-export default function DataTable({ columns, data, loading, meta, onPageChange, onSort, onSearch, searchPlaceholder = 'Search records...' }) {
+export default function DataTable({
+  columns,
+  data = [],
+  loading = false,
+  meta,
+  onPageChange,
+  onSort,
+  onSearch,
+  searchPlaceholder = 'Search records...',
+  emptyMessage = 'No records found',
+  className = '',
+}) {
   const [sortField, setSortField] = useState('');
   const [sortOrder, setSortOrder] = useState('asc');
   const [searchValue, setSearchValue] = useState('');
@@ -27,15 +38,19 @@ export default function DataTable({ columns, data, loading, meta, onPageChange, 
   };
 
   const SortIcon = ({ field }) => {
-    if (sortField !== field) return <ChevronsUpDown size={13} className="text-muted/60" />;
-    return sortOrder === 'asc' ? <ChevronUp size={13} className="text-forest" /> : <ChevronDown size={13} className="text-forest" />;
+    if (sortField !== field) return <ChevronsUpDown size={13} className="text-muted/50 ml-1" />;
+    return sortOrder === 'asc' ? (
+      <ChevronUp size={13} className="text-forest ml-1 font-bold" />
+    ) : (
+      <ChevronDown size={13} className="text-forest ml-1 font-bold" />
+    );
   };
 
   return (
-    <div className="bg-white border border-border rounded-xl overflow-hidden shadow-2xs">
+    <div className={`bg-white border border-border rounded-xl overflow-hidden shadow-2xs ${className}`}>
       {onSearch && (
-        <div className="p-3.5 border-b border-border bg-white">
-          <div className="relative max-w-sm">
+        <div className="p-3.5 border-b border-border bg-white flex items-center justify-between gap-3">
+          <div className="relative max-w-sm w-full">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
             <input
               className="w-full pl-9 pr-3 py-1.5 bg-white border border-border rounded-lg text-deep placeholder-muted focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest text-xs transition-all"
@@ -48,16 +63,22 @@ export default function DataTable({ columns, data, loading, meta, onPageChange, 
       )}
 
       <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
+        <table className="w-full text-left border-collapse text-xs">
           <thead>
-            <tr className="border-b border-border bg-surface/70">
+            <tr className="border-b border-border bg-slate-50/80">
               {columns.map((col) => (
                 <th
                   key={col.key}
-                  className={`px-3.5 py-2.5 text-xs font-semibold text-secondary uppercase tracking-wider ${col.sortable && !loading ? 'cursor-pointer hover:text-deep select-none' : ''}`}
+                  className={`px-3.5 py-2.5 text-xs font-semibold text-secondary uppercase tracking-wider ${
+                    col.sortable && !loading ? 'cursor-pointer hover:text-deep select-none' : ''
+                  } ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}`}
                   onClick={() => col.sortable && !loading && handleSort(col.key)}
                 >
-                  <div className="flex items-center gap-1.5">
+                  <div
+                    className={`inline-flex items-center gap-1 ${
+                      col.align === 'right' ? 'justify-end w-full' : col.align === 'center' ? 'justify-center w-full' : ''
+                    }`}
+                  >
                     <span>{col.label}</span>
                     {col.sortable && <SortIcon field={col.key} />}
                   </div>
@@ -70,22 +91,27 @@ export default function DataTable({ columns, data, loading, meta, onPageChange, 
               [1, 2, 3, 4, 5].map((i) => (
                 <tr key={i}>
                   <td colSpan={columns.length} className="px-3.5 py-3">
-                    <div className="h-4 bg-surface rounded-md animate-pulse w-full" />
+                    <div className="h-4 bg-slate-100 rounded animate-pulse w-full" />
                   </td>
                 </tr>
               ))
             ) : data?.length === 0 ? (
               <tr>
-                <td colSpan={columns.length} className="px-4 py-10 text-center text-xs text-muted">
-                  No records found
+                <td colSpan={columns.length} className="px-4 py-12 text-center text-xs text-muted">
+                  {emptyMessage}
                 </td>
               </tr>
             ) : (
               data?.map((row, i) => (
-                <tr key={row._id || i} className="hover:bg-surface/50 transition-colors">
+                <tr key={row._id || i} className="hover:bg-slate-50/50 transition-colors">
                   {columns.map((col) => (
-                    <td key={col.key} className="px-3.5 py-2.5 text-xs text-deep whitespace-nowrap">
-                      {col.render ? col.render(row) : row[col.key]}
+                    <td
+                      key={col.key}
+                      className={`px-3.5 py-2.5 text-xs text-deep ${
+                        col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'
+                      }`}
+                    >
+                      {col.render ? col.render(row) : row[col.key] ?? '—'}
                     </td>
                   ))}
                 </tr>
@@ -95,10 +121,11 @@ export default function DataTable({ columns, data, loading, meta, onPageChange, 
         </table>
       </div>
 
-      {meta && (
-        <div className="flex items-center justify-between px-3.5 py-2.5 border-t border-border bg-surface/30">
-          <span className="text-xs text-muted">
-            Showing {((meta.page - 1) * meta.limit) + (meta.total > 0 ? 1 : 0)} to {Math.min(meta.page * meta.limit, meta.total)} of {meta.total}
+      {meta && meta.totalPages > 1 && (
+        <div className="flex items-center justify-between px-4 py-3 border-t border-border bg-slate-50/40 text-xs">
+          <span className="text-muted">
+            Showing {((meta.page - 1) * meta.limit) + (meta.total > 0 ? 1 : 0)} to{' '}
+            {Math.min(meta.page * meta.limit, meta.total)} of {meta.total} entries
           </span>
           <div className="flex items-center gap-1.5">
             <Button
@@ -110,8 +137,8 @@ export default function DataTable({ columns, data, loading, meta, onPageChange, 
             >
               <ChevronLeft size={14} />
             </Button>
-            <span className="text-xs font-medium text-secondary px-1">
-              Page {meta.page} of {meta.totalPages || 1}
+            <span className="font-medium text-secondary px-1">
+              Page {meta.page} of {meta.totalPages}
             </span>
             <Button
               variant="outline"

@@ -62,7 +62,7 @@ export default function StudentTimetable() {
  const workingDays = timetable?.configSnapshot?.workingDays || [1, 2, 3, 4, 5];
 
  return (
- <div className="space-y-6 max-w-6xl mx-auto pb-12 print:p-0">
+ <div className="space-y-5 w-full pb-12 print:p-0">
  <div className="print:hidden">
  <PageHeader
  title="Class Timetable"

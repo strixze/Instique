@@ -36,6 +36,11 @@ import Events from '../pages/school-admin/Events';
 import AdminParentMeetings from '../pages/school-admin/ParentMeetings';
 import TeacherParentMeetings from '../pages/teacher/ParentMeetings';
 import ParentParentMeetings from '../pages/parent/ParentMeetings';
+import ParentAttendance from '../pages/parent/ParentAttendance';
+import Homework from '../pages/school-admin/Homework';
+import Reports from '../pages/school-admin/Reports';
+
+
 
 function RoleDashboard() {
   const user = useUserStore((s) => s.user);
@@ -64,6 +69,12 @@ function UnifiedTimetable() {
   if (user?.role === 'student') return <StudentTimetable />;
   if (user?.role === 'parent') return <ParentTimetable />;
   return <Timetable />;
+}
+
+function UnifiedAttendance() {
+  const user = useUserStore((s) => s.user);
+  if (user?.role === 'parent') return <ParentAttendance />;
+  return <Attendance />;
 }
 
 function ModulePage({ children }) {
@@ -98,7 +109,10 @@ export default function AppRouter() {
       <Route path="/academic" element={<ModulePage><Academic /></ModulePage>} />
       <Route path="/timetable" element={<ModulePage><UnifiedTimetable /></ModulePage>} />
       <Route path="/timetable-config" element={<ModulePage><TimetableConfig /></ModulePage>} />
-      <Route path="/attendance" element={<ModulePage><Attendance /></ModulePage>} />
+      <Route path="/attendance" element={<ModulePage><UnifiedAttendance /></ModulePage>} />
+      <Route path="/homework" element={<ModulePage><Homework /></ModulePage>} />
+
+
       <Route path="/exams" element={<ModulePage><Exams /></ModulePage>} />
       <Route path="/marks-entry" element={<ModulePage><MarksEntry /></ModulePage>} />
       <Route path="/leaderboard" element={<ModulePage><Leaderboard /></ModulePage>} />
@@ -110,6 +124,7 @@ export default function AppRouter() {
       <Route path="/complaints" element={<ModulePage><Complaints /></ModulePage>} />
       <Route path="/roles" element={<ModulePage><Roles /></ModulePage>} />
       <Route path="/settings" element={<ModulePage><Settings /></ModulePage>} />
+      <Route path="/reports" element={<ModulePage><Reports /></ModulePage>} />
 
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

@@ -989,32 +989,39 @@ export default function Academic() {
   const [activeTab, setActiveTab] = useState('years');
 
   return (
-    <div className="space-y-4">
-      {/* Headline & Subtitle */}
-      <div className="flex flex-col sm:flex-row sm:flex-items-center sm:justify-between gap-3 pb-1">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-deep tracking-tight">Academic Structure</h1>
-          <p className="text-secondary text-xs sm:text-sm mt-0.5">Manage academic sessions, classes, sections, and subjects offered</p>
-        </div>
+    <div className="space-y-4 w-full">
+      {/* Page Header */}
+      <div className="pb-1">
+        <h1 className="text-xl font-bold text-deep tracking-tight">Academic Structure</h1>
+        <p className="text-secondary text-xs mt-1 max-w-xl leading-relaxed">
+          Manage academic sessions, classes, sections, and subjects offered.
+        </p>
+      </div>
+
+      {/* Segmented Section Navigation */}
+      <div className="flex items-center gap-1 border-b border-border/80 pb-3 overflow-x-auto">
         {TABS.map((t) => (
           <button
             key={t.key}
             onClick={() => setActiveTab(t.key)}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${activeTab === t.key
-              ? 'bg-forest text-white shadow-2xs'
-              : 'text-secondary hover:bg-surface hover:text-deep font-medium'
-              }`}
+            className={`px-3.5 py-1.5 rounded-lg text-xs transition-all whitespace-nowrap ${
+              activeTab === t.key
+                ? 'bg-forest text-white font-semibold shadow-2xs'
+                : 'text-secondary hover:bg-surface hover:text-deep font-medium'
+            }`}
           >
             {t.label}
           </button>
         ))}
       </div>
 
-      {/* Active Tab Component */}
-      {activeTab === 'years' && <AcademicYears />}
-      {activeTab === 'classes' && <Classes />}
-      {activeTab === 'sections' && <Sections />}
-      {activeTab === 'subjects' && <Subjects />}
+      {/* Active Tab Content */}
+      <div className="pt-1">
+        {activeTab === 'years' && <AcademicYears />}
+        {activeTab === 'classes' && <Classes />}
+        {activeTab === 'sections' && <Sections />}
+        {activeTab === 'subjects' && <Subjects />}
+      </div>
     </div>
   );
 }

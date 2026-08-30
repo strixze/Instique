@@ -1,4 +1,4 @@
-import { httpServer } from "../server.js";
+// httpServer will be passed in initializeSocket(httpServer)
 import { parseCookies } from "./utils/cookieParser.js";
 import jwt from "jsonwebtoken";
 import { User } from "../models/user.model.js";
@@ -11,7 +11,7 @@ import {Server} from "socket.io"
 import { registerSocketHandlers } from "./handler/index.js";
 import { setIO } from "./socketInstance.js";
 
-export const initializeSocket = () =>{
+export const initializeSocket = (httpServer) => {
     const io = new Server(httpServer, {
     cors:{
         origin:process.env.CLIENT_URL || "http://localhost:5173",

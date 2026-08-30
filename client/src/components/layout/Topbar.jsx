@@ -1,4 +1,4 @@
-import { Bell, Calendar, Menu, Search, User } from 'lucide-react';
+import { Bell, Calendar, Menu, Search } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useUserStore } from '../../store/userStore';
 import { notificationApi } from '../../api/notification.api';
@@ -27,7 +27,6 @@ export default function Topbar({ setMobileOpen }) {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
-    year: 'numeric',
   });
 
   const handleGlobalSearchKeyDown = (e) => {
@@ -36,12 +35,8 @@ export default function Topbar({ setMobileOpen }) {
     }
   };
 
-  const getInitial = (name = 'Admin') => {
-    return name.trim().charAt(0).toUpperCase() || 'A';
-  };
-
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between h-14 px-4 lg:px-6 bg-white border-b border-border">
+    <header className="sticky top-0 z-30 flex items-center justify-between h-14 px-4 lg:px-5 bg-white border-b border-border">
       {/* Mobile Toggle */}
       <div className="flex items-center gap-3">
         <button
@@ -49,50 +44,53 @@ export default function Topbar({ setMobileOpen }) {
           onClick={() => setMobileOpen?.(true)}
           title="Open menu"
         >
-          <Menu size={19} />
+          <Menu size={18} />
         </button>
       </div>
 
-      {/* Right Actions */}
-      <div className="flex items-center gap-2.5 sm:gap-3 ml-auto">
-        {/* Global Search Input */}
+      {/* Right Side Actions */}
+      <div className="flex items-center gap-2 sm:gap-3 ml-auto">
+        {/* Global Search */}
         <div className="relative hidden md:block">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
           <input
             type="text"
-            placeholder="Search students, classes, fees..."
+            placeholder="Search students, classes..."
             value={globalSearch}
             onChange={(e) => setGlobalSearch(e.target.value)}
             onKeyDown={handleGlobalSearchKeyDown}
-            className="w-60 lg:w-72 pl-9 pr-3 py-1.5 bg-white border border-border rounded-lg text-xs text-deep placeholder-muted focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest transition-all"
+            className="w-56 lg:w-64 pl-8.5 pr-3 py-1.5 bg-slate-50 border border-border rounded-lg text-xs text-deep placeholder-muted focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest focus:bg-white transition-all"
           />
         </div>
 
-        {/* Date Badge */}
-        <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-white border border-border rounded-lg text-xs font-medium text-secondary shadow-2xs">
-          <Calendar size={13} className="text-muted" />
+        {/* Date Pill */}
+        <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-50 border border-border rounded-lg text-xs font-medium text-secondary">
+          <Calendar size={12} className="text-muted" />
           <span>{todayFormatted}</span>
         </div>
 
-        {/* Notifications */}
+        {/* Notification Bell */}
         <button
-          className="relative p-2 text-secondary hover:text-deep rounded-lg hover:bg-surface transition-colors"
+          className="relative p-1.5 text-secondary hover:text-deep rounded-lg hover:bg-surface transition-colors"
           onClick={() => navigate('/notices')}
           title="Notifications"
         >
-          <Bell size={18} />
+          <Bell size={17} strokeWidth={1.8} />
           {unreadCount > 0 && (
-            <span className="absolute 1.5 top-1 right-1 flex items-center justify-center min-w-4 h-4 px-1 text-[9px] font-bold text-white bg-danger rounded-full ring-2 ring-white">
+            <span className="absolute top-0.5 right-0.5 flex items-center justify-center min-w-[16px] h-4 px-1 text-[9px] font-bold text-white bg-danger rounded-full ring-1.5 ring-white">
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
         </button>
 
+        {/* Divider */}
+        <div className="w-px h-5 bg-border hidden sm:block" />
+
         {/* User Profile Chip */}
-        <div
+        <button
           onClick={() => navigate('/settings')}
-          className="flex items-center gap-2.5 pl-1.5 pr-2 py-1 rounded-lg hover:bg-surface cursor-pointer transition-colors"
-          title="User profile"
+          className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-lg hover:bg-surface cursor-pointer transition-colors"
+          title="Profile & settings"
         >
           <UserAvatar
             src={user?.avatar || user?.avtar}
@@ -101,17 +99,17 @@ export default function Topbar({ setMobileOpen }) {
             id={user?._id || user?.id}
             name={user?.name || 'Admin'}
             size="sm"
-            className="shadow-xs ring-1 ring-border/60"
+            className="ring-1 ring-border/60"
           />
           <div className="hidden md:block text-left">
             <p className="text-xs font-semibold text-deep leading-tight truncate max-w-[120px]">
               {user?.name || 'Admin'}
             </p>
             <p className="text-[10px] text-muted capitalize leading-tight">
-              {user?.role?.replace('_', ' ') || 'School Admin'}
+              {user?.role?.replace(/_/g, ' ') || 'School Admin'}
             </p>
           </div>
-        </div>
+        </button>
       </div>
     </header>
   );

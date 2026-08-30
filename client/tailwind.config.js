@@ -7,13 +7,43 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Institutional Brand Green (Exact match to reference)
+        // Primary Brand Violet / Periwinkle Identity (#6C5CE7)
+        primary: {
+          50: '#F5F3FF',
+          100: '#EDE9FE',
+          200: '#DDD6FE',
+          300: '#C4B5FD',
+          400: '#A78BFA',
+          500: '#7C6CF2',
+          600: '#6C5CE7',
+          700: '#5B4BC4',
+          800: '#4C3DA8',
+          900: '#3D318A',
+          DEFAULT: '#6C5CE7',
+          hover: '#5B4BC4',
+          dark: '#4C3DA8',
+          light: '#A78BFA',
+          soft: '#F5F3FF',
+          muted: '#EDE9FE',
+        },
+        // Forest alias (harmonized with the new violet palette for complete backward-compatibility)
         forest: {
-          DEFAULT: '#2D6A4F',
-          dark: '#1B4332',
-          hover: '#22543D',
-          light: '#40916C',
-          soft: '#E8F3EB',
+          50: '#F5F3FF',
+          100: '#EDE9FE',
+          200: '#DDD6FE',
+          300: '#C4B5FD',
+          400: '#A78BFA',
+          500: '#7C6CF2',
+          600: '#6C5CE7',
+          700: '#5B4BC4',
+          800: '#4C3DA8',
+          900: '#3D318A',
+          DEFAULT: '#6C5CE7',
+          hover: '#5B4BC4',
+          dark: '#4C3DA8',
+          light: '#A78BFA',
+          soft: '#F5F3FF',
+          muted: '#EDE9FE',
         },
         // Professional Typography Hierarchy (Slate-based neutrals)
         deep: '#0F172A',
@@ -26,15 +56,16 @@ export default {
         card: '#FFFFFF',
         surface: '#F1F5F9',
         sage: {
-          DEFAULT: '#E8F3EB',
-          soft: '#F4F9F5',
-          border: '#D1E7D7',
-          text: '#2D6A4F',
+          DEFAULT: '#F5F3FF',
+          soft: '#FAF8FF',
+          border: '#EDE9FE',
+          text: '#6C5CE7',
         },
         // Clean System Borders
         border: '#E2E8F0',
         'border-subtle': '#EEF2F6',
-        // Semantic Operational Colors
+        'border-light': '#F1F5F9',
+        // Semantic Operational Colors (Preserved)
         success: {
           DEFAULT: '#16A34A',
           light: '#E8F5EC',
@@ -70,8 +101,10 @@ export default {
         'pill': '9999px',
       },
       boxShadow: {
-        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.02)',
-        'card-hover': '0 4px 12px 0 rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.03)',
+        '2xs': '0 1px 2px 0 rgba(15, 23, 42, 0.04)',
+        'xs': '0 1px 2px 0 rgba(15, 23, 42, 0.05)',
+        'card': '0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.02)',
+        'card-hover': '0 4px 12px 0 rgba(15, 23, 42, 0.05), 0 2px 4px -2px rgba(15, 23, 42, 0.03)',
         'dropdown': '0 4px 16px -2px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.04)',
         'modal': '0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.05)',
       },

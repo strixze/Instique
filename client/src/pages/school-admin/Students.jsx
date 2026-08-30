@@ -3,9 +3,11 @@ import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import {
   Plus, Trash2, Upload, Users, UserCheck, UserX,
-  Search, RotateCcw, Filter, MoreVertical, ChevronLeft, ChevronRight,
+  Search, RotateCcw, MoreVertical, ChevronLeft, ChevronRight,
   ChevronUp, ChevronDown, ChevronsUpDown, GraduationCap,
+  Key, Mail, AlertTriangle, UserX as UserXIcon,
 } from 'lucide-react';
+
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import Input from '../../components/ui/Input';
@@ -15,12 +17,6 @@ import { academicApi } from '../../api/academic.api';
 import { feeApi } from '../../api/fee.api';
 import BulkImportModal from '../../components/ui/BulkImportModal';
 import UserAvatar from '../../components/ui/UserAvatar';
-
-/* ──────────────────────── Helpers ──────────────────────── */
-
-function getInitials(firstName = '', lastName = '') {
-  return ((firstName[0] || '') + (lastName[0] || '')).toUpperCase() || 'ST';
-}
 
 /* ──────────────────────── Constants ──────────────────────── */
 
@@ -70,6 +66,12 @@ export default function Students() {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [bulkOpen, setBulkOpen] = useState(false);
+
+  // Parent Reset Password Modal
+  const [resetModalOpen, setResetModalOpen] = useState(false);
+  const [selectedStudentForReset, setSelectedStudentForReset] = useState(null);
+  const [selectedParentId, setSelectedParentId] = useState('');
+  const [sendingReset, setSendingReset] = useState(false);
 
   // Action menu
   const [activeMenuId, setActiveMenuId] = useState(null);
@@ -225,24 +227,58 @@ export default function Students() {
     });
   };
 
+  /* ──────────────────────── Parent Password Reset ──────────────────────── */
+
+  const handleOpenParentReset = (student) => {
+    setActiveMenuId(null);
+    const parents = student.parents || [];
+    if (parents.length === 0) {
+      toast.error('No parent account linked to this student');
+      return;
+    }
+
+    const primaryParent = parents.find((p) => p.isPrimary) || parents[0];
+    setSelectedStudentForReset(student);
+    setSelectedParentId(primaryParent._id);
+    setResetModalOpen(true);
+  };
+
+  const handleConfirmSendReset = async () => {
+    if (!selectedStudentForReset) return;
+    setSendingReset(true);
+    try {
+      const res = await studentApi.sendParentPasswordReset(
+        selectedStudentForReset._id,
+        selectedParentId || undefined
+      );
+      toast.success(res.message || 'Password reset link sent successfully via Brevo');
+      setResetModalOpen(false);
+      setSelectedStudentForReset(null);
+    } catch (err) {
+      toast.error(err?.message || 'Failed to send password reset email');
+    } finally {
+      setSendingReset(false);
+    }
+  };
+
   /* ──────────────────────── Render Helpers ──────────────────────── */
 
   const renderGender = (gender) => {
     if (gender === 'female') {
       return (
         <span className="inline-flex items-center gap-1 text-xs font-medium text-pink-600">
-          <span className="text-sm"></span> Female
+          Female
         </span>
       );
     }
     if (gender === 'male') {
       return (
         <span className="inline-flex items-center gap-1 text-xs font-medium text-blue-600">
-          <span className="text-sm"></span> Male
+          Male
         </span>
       );
     }
-    return <span className="text-xs text-muted capitalize">{gender || '\u2014'}</span>;
+    return <span className="text-xs text-muted capitalize">{gender || '—'}</span>;
   };
 
   const renderStatusBadge = (status) => {
@@ -260,6 +296,52 @@ export default function Students() {
     );
   };
 
+  const renderParentAccountCell = (parents = []) => {
+    if (!parents || parents.length === 0) {
+      return (
+        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-muted bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
+          Not Linked
+        </span>
+      );
+    }
+
+    const primary = parents.find((p) => p.isPrimary) || parents[0];
+    const status = primary.accountStatus || 'NOT_LINKED';
+
+    let badgeColor = 'bg-slate-50 text-slate-600 border-slate-200';
+    let label = 'Not Linked';
+
+    if (status === 'ACTIVE') {
+      badgeColor = 'bg-emerald-50 text-emerald-700 border-emerald-200 font-semibold';
+      label = '● Active';
+    } else if (status === 'PENDING_ACTIVATION') {
+      badgeColor = 'bg-amber-50 text-amber-700 border-amber-200 font-semibold';
+      label = '● Pending Activation';
+    } else if (status === 'SUSPENDED') {
+      badgeColor = 'bg-rose-50 text-rose-700 border-rose-200 font-semibold';
+      label = '● Suspended';
+    }
+
+    return (
+      <div>
+        <p className="text-xs font-bold text-deep leading-tight truncate max-w-44">
+          {primary.firstName} {primary.lastName}
+          {primary.relation ? <span className="text-[10px] text-muted font-normal ml-1">({primary.relation})</span> : ''}
+        </p>
+        <div className="flex items-center gap-1.5 mt-0.5">
+          <span className={`inline-flex items-center px-1.5 py-0.2 text-[10px] rounded border ${badgeColor}`}>
+            {label}
+          </span>
+          {primary.contact?.email && (
+            <span className="text-[10px] text-muted truncate max-w-28" title={primary.contact.email}>
+              {primary.contact.email}
+            </span>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   const classOptions = classes.map((c) => ({ value: c._id, label: c.name }));
   const sectionOptions = sections
     .filter((s) => !form.currentClass || s.schoolClass === form.currentClass)
@@ -268,61 +350,57 @@ export default function Students() {
   /* ──────────────────────── RENDER ──────────────────────── */
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 w-full">
       {/* Header Row */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 pb-1">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-deep tracking-tight">Students</h1>
-          <p className="text-secondary text-xs sm:text-sm mt-0.5">
-            Manage student records, enrollment, and academic information
+          <h1 className="text-xl font-bold text-deep tracking-tight">Students</h1>
+          <p className="text-secondary text-xs mt-1 max-w-xl leading-relaxed">
+            Manage student records, enrollment, parent accounts, and academic information.
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => setBulkOpen(true)} className="gap-1.5">
+        <div className="flex items-center gap-2 shrink-0">
+          <Button variant="outline" size="sm" onClick={() => setBulkOpen(true)} className="gap-1.5">
             <Upload size={14} /> Bulk Import
           </Button>
-          <Button onClick={() => setOpen(true)} className="gap-1.5">
-            <Plus size={16} /> Add Student <ChevronDown size={14} className="opacity-70 ml-0.5" />
+          <Button size="sm" onClick={() => setOpen(true)} className="gap-1.5">
+            <Plus size={15} /> Add Student
           </Button>
         </div>
       </div>
 
       {/* KPI Summary Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-        <div className="bg-white border border-border rounded-xl p-3.5 shadow-2xs hover:shadow-card transition-shadow">
-          <div className="w-8 h-8 rounded-full bg-forest-soft text-forest flex items-center justify-center mb-2">
-            <Users size={16} />
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="bg-white border border-border rounded-xl p-4 shadow-2xs">
+          <div className="w-7 h-7 rounded-lg bg-forest-soft text-forest flex items-center justify-center mb-2">
+            <Users size={15} strokeWidth={1.8} />
           </div>
-          <p className="text-[11px] font-semibold text-secondary">Total Students</p>
-          <p className="text-xl sm:text-2xl font-bold text-deep leading-tight mt-0.5">{totalCount}</p>
-          <p className="text-[10px] text-muted mt-1">All enrolled students</p>
+          <p className="text-[11px] font-semibold text-muted uppercase tracking-wide">Total Students</p>
+          <p className="text-2xl font-bold text-deep leading-none mt-1">{totalCount}</p>
         </div>
 
-        <div className="bg-white border border-border rounded-xl p-3.5 shadow-2xs hover:shadow-card transition-shadow">
-          <div className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-2">
-            <UserCheck size={16} />
+        <div className="bg-white border border-border rounded-xl p-4 shadow-2xs">
+          <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center mb-2">
+            <UserCheck size={15} strokeWidth={1.8} />
           </div>
-          <p className="text-[11px] font-semibold text-secondary">Active</p>
-          <p className="text-xl sm:text-2xl font-bold text-deep leading-tight mt-0.5">{activeCount}</p>
-          <p className="text-[10px] text-muted mt-1">Currently enrolled</p>
+          <p className="text-[11px] font-semibold text-muted uppercase tracking-wide">Active</p>
+          <p className="text-2xl font-bold text-deep leading-none mt-1">{activeCount}</p>
         </div>
 
-        <div className="bg-white border border-border rounded-xl p-3.5 shadow-2xs hover:shadow-card transition-shadow">
-          <div className="w-8 h-8 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mb-2">
-            <UserX size={16} />
+        <div className="bg-white border border-border rounded-xl p-4 shadow-2xs">
+          <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center mb-2">
+            <UserX size={15} strokeWidth={1.8} />
           </div>
-          <p className="text-[11px] font-semibold text-secondary">Inactive</p>
-          <p className="text-xl sm:text-2xl font-bold text-deep leading-tight mt-0.5">{inactiveCount}</p>
-          <p className="text-[10px] text-muted mt-1">Not currently active</p>
+          <p className="text-[11px] font-semibold text-muted uppercase tracking-wide">Inactive</p>
+          <p className="text-2xl font-bold text-deep leading-none mt-1">{inactiveCount}</p>
         </div>
 
-        <div className="bg-white border border-border rounded-xl p-3.5 shadow-2xs hover:shadow-card transition-shadow">
-          <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-2">
-            <GraduationCap size={16} />
+        <div className="bg-white border border-border rounded-xl p-4 shadow-2xs">
+          <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mb-2">
+            <GraduationCap size={15} strokeWidth={1.8} />
           </div>
-          <p className="text-[11px] font-semibold text-secondary">Gender Split</p>
-          <p className="text-xl sm:text-2xl font-bold text-deep leading-tight mt-0.5">{maleCount}M / {femaleCount}F</p>
-          <p className="text-[10px] text-muted mt-1">Male / Female ratio</p>
+          <p className="text-[11px] font-semibold text-muted uppercase tracking-wide">Gender Split</p>
+          <p className="text-2xl font-bold text-deep leading-none mt-1">{maleCount}M / {femaleCount}F</p>
         </div>
       </div>
 
@@ -369,33 +447,24 @@ export default function Students() {
               </select>
             </div>
 
-            <Button variant="outline" size="sm" onClick={handleResetFilters} className="text-xs text-secondary">
-              <RotateCcw size={13} className="mr-1 text-muted" /> Reset
-            </Button>
-
-            <Button size="sm" variant="primary" className="text-xs gap-1.5">
-              <Filter size={13} /> Filters
-              {countActiveFilters() > 0 && (
-                <span className="ml-0.5 px-1.5 py-0.2 bg-white/20 text-white rounded-full text-[10px] font-bold">
-                  {countActiveFilters()}
-                </span>
-              )}
+            <Button variant="outline" size="sm" onClick={handleResetFilters} className="text-xs text-secondary gap-1">
+              <RotateCcw size={12} /> Reset
             </Button>
           </div>
         </div>
 
-        <div className="pt-2 border-t border-border/70 flex flex-wrap items-center gap-2 text-xs">
-          <span className="font-medium text-secondary text-xs mr-1">Status:</span>
-          <div className="flex flex-wrap gap-1.5">
+        <div className="pt-2 border-t border-border/70 flex flex-wrap items-center gap-1.5 text-xs">
+          <span className="font-semibold text-muted text-[11px] uppercase tracking-wide mr-1">Status:</span>
+          <div className="flex flex-wrap gap-1">
             {STATUS_PILLS.map((pill) => {
               const isActive = statusFilter === pill.value;
               return (
                 <button
                   key={pill.value}
                   onClick={() => { setStatusFilter(pill.value); setPage(1); }}
-                  className={`px-3 py-1 rounded-lg text-xs transition-all whitespace-nowrap ${isActive
-                    ? 'bg-forest text-white font-semibold shadow-2xs'
-                    : 'bg-white border border-border text-secondary hover:bg-surface hover:text-deep font-medium'
+                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${isActive
+                    ? 'bg-forest text-white shadow-2xs'
+                    : 'text-secondary hover:bg-surface hover:text-deep'
                     }`}
                 >
                   {pill.label}
@@ -411,75 +480,105 @@ export default function Students() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-border bg-surface/70">
-                <th onClick={() => handleSort('admissionNo')} className="px-3.5 py-2.5 text-xs font-semibold text-secondary uppercase tracking-wider cursor-pointer hover:text-deep select-none">
-                  <div className="flex items-center gap-1"><span>ADMISSION NO.</span><SortIcon field="admissionNo" /></div>
+              <tr className="border-b border-border bg-slate-50/80">
+                <th onClick={() => handleSort('admissionNo')} className="px-3.5 py-2.5 text-[11px] font-semibold text-secondary uppercase tracking-wider cursor-pointer hover:text-deep select-none">
+                  <div className="flex items-center gap-1"><span>Adm No.</span><SortIcon field="admissionNo" /></div>
                 </th>
-                <th onClick={() => handleSort('firstName')} className="px-3.5 py-2.5 text-xs font-semibold text-secondary uppercase tracking-wider cursor-pointer hover:text-deep select-none">
-                  <div className="flex items-center gap-1"><span>STUDENT</span><SortIcon field="firstName" /></div>
+                <th onClick={() => handleSort('firstName')} className="px-3.5 py-2.5 text-[11px] font-semibold text-secondary uppercase tracking-wider cursor-pointer hover:text-deep select-none">
+                  <div className="flex items-center gap-1"><span>Student</span><SortIcon field="firstName" /></div>
                 </th>
-                <th className="px-3.5 py-2.5 text-xs font-semibold text-secondary uppercase tracking-wider">GENDER</th>
-                <th className="px-3.5 py-2.5 text-xs font-semibold text-secondary uppercase tracking-wider">CLASS</th>
-                <th className="px-3.5 py-2.5 text-xs font-semibold text-secondary uppercase tracking-wider">SECTION</th>
-                <th className="px-3.5 py-2.5 text-xs font-semibold text-secondary uppercase tracking-wider">STATUS</th>
-                <th className="px-3.5 py-2.5 text-xs font-semibold text-secondary uppercase tracking-wider text-right">ACTIONS</th>
+                <th className="px-3.5 py-2.5 text-[11px] font-semibold text-secondary uppercase tracking-wider">Class & Section</th>
+                <th className="px-3.5 py-2.5 text-[11px] font-semibold text-secondary uppercase tracking-wider">Parent Account</th>
+                <th className="px-3.5 py-2.5 text-[11px] font-semibold text-secondary uppercase tracking-wider">Status</th>
+                <th className="px-3.5 py-2.5 text-[11px] font-semibold text-secondary uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/60 bg-white">
               {loading ? (
                 [1, 2, 3, 4, 5].map((i) => (
-                  <tr key={i}><td colSpan={7} className="px-3.5 py-3"><div className="h-5 bg-surface rounded animate-pulse w-full" /></td></tr>
+                  <tr key={i}><td colSpan={6} className="px-3.5 py-3"><div className="h-5 bg-surface rounded animate-pulse w-full" /></td></tr>
                 ))
               ) : data.length === 0 ? (
-                <tr><td colSpan={7} className="px-4 py-12 text-center text-xs text-muted">No students found matching the selected criteria.</td></tr>
+                <tr><td colSpan={6} className="px-4 py-12 text-center text-xs text-muted">No students found matching the selected criteria.</td></tr>
               ) : (
-                data.map((row) => (
-                  <tr key={row._id} className="hover:bg-surface/50 transition-colors">
-                    <td className="px-3.5 py-2.5 font-bold text-xs text-deep font-mono">{row.admissionNo || '\u2014'}</td>
-                    <td className="px-3.5 py-2.5">
-                      <div className="flex items-center gap-2.5">
-                        <UserAvatar
-                          type="student"
-                          gender={row.gender}
-                          id={row._id}
-                          admissionNo={row.admissionNo}
-                          name={`${row.firstName} ${row.lastName}`}
-                          size="sm"
-                          className="shrink-0 ring-1 ring-border/50"
-                        />
-                        <div>
-                          <p className="font-bold text-xs text-deep leading-tight">{row.firstName} {row.lastName}</p>
-                          {row.contact?.email && <p className="text-[11px] text-muted leading-tight mt-0.5">{row.contact.email}</p>}
+                data.map((row) => {
+                  const parents = row.parents || [];
+                  const primaryParent = parents.find((p) => p.isPrimary) || parents[0];
+                  const hasParent = parents.length > 0;
+                  const isParentActive = primaryParent?.accountStatus === 'ACTIVE';
+
+                  return (
+                    <tr key={row._id} className="hover:bg-surface/50 transition-colors">
+                      <td className="px-3.5 py-2.5 font-bold text-xs text-deep font-mono">{row.admissionNo || '—'}</td>
+                      <td className="px-3.5 py-2.5">
+                        <div className="flex items-center gap-2.5">
+                          <UserAvatar
+                            type="student"
+                            gender={row.gender}
+                            id={row._id}
+                            admissionNo={row.admissionNo}
+                            name={`${row.firstName} ${row.lastName}`}
+                            size="sm"
+                            className="shrink-0 ring-1 ring-border/50"
+                          />
+                          <div>
+                            <p className="font-bold text-xs text-deep leading-tight">{row.firstName} {row.lastName}</p>
+                            {row.contact?.phone && <p className="text-[11px] text-muted leading-tight mt-0.5">{row.contact.phone}</p>}
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-3.5 py-2.5">{renderGender(row.gender)}</td>
-                    <td className="px-3.5 py-2.5 text-xs text-secondary font-medium">{classMap[row.currentClass] || '\u2014'}</td>
-                    <td className="px-3.5 py-2.5 text-xs text-secondary font-medium">{sectionMap[row.currentSection] || '\u2014'}</td>
-                    <td className="px-3.5 py-2.5">{renderStatusBadge(row.status)}</td>
-                    <td className="px-3.5 py-2.5 text-right relative">
-                      <div className="inline-flex items-center gap-1">
-                        <button
-                          onClick={() => setActiveMenuId(activeMenuId === row._id ? null : row._id)}
-                          className="p-1.5 text-muted hover:text-deep hover:bg-surface border border-border rounded-lg transition-colors"
-                          title="More actions"
-                        >
-                          <MoreVertical size={14} />
-                        </button>
-                      </div>
-                      {activeMenuId === row._id && (
-                        <div ref={menuRef} className="absolute right-4 top-10 w-40 bg-white border border-border rounded-xl shadow-dropdown z-40 py-1 text-left animate-scale-in">
+                      </td>
+                      <td className="px-3.5 py-2.5 text-xs text-secondary font-medium">
+                        {classMap[row.currentClass?._id || row.currentClass] || '—'} {sectionMap[row.currentSection?._id || row.currentSection] ? `(${sectionMap[row.currentSection?._id || row.currentSection]})` : ''}
+                      </td>
+                      <td className="px-3.5 py-2.5">
+                        {renderParentAccountCell(row.parents)}
+                      </td>
+                      <td className="px-3.5 py-2.5">{renderStatusBadge(row.status)}</td>
+                      <td className="px-3.5 py-2.5 text-right relative">
+                        <div className="inline-flex items-center gap-1">
                           <button
-                            onClick={() => { setActiveMenuId(null); handleDelete(row); }}
-                            className="w-full px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2"
+                            onClick={() => setActiveMenuId(activeMenuId === row._id ? null : row._id)}
+                            className="p-1.5 text-muted hover:text-deep hover:bg-surface border border-border rounded-lg transition-colors cursor-pointer"
+                            title="More actions"
                           >
-                            <Trash2 size={13} /> Delete Student
+                            <MoreVertical size={14} />
                           </button>
                         </div>
-                      )}
-                    </td>
-                  </tr>
-                ))
+                        {activeMenuId === row._id && (
+                          <div ref={menuRef} className="absolute right-4 top-10 w-52 bg-white border border-border rounded-xl shadow-dropdown z-40 py-1 text-left animate-scale-in">
+                            {/* Send Parent Password Reset Action */}
+                            {hasParent && isParentActive ? (
+                              <button
+                                onClick={() => handleOpenParentReset(row)}
+                                className="w-full px-3 py-2 text-xs text-forest hover:bg-forest/5 flex items-center gap-2 font-medium cursor-pointer border-b border-border/50"
+                              >
+                                <Key size={13} className="text-forest shrink-0" />
+                                <span>Send Parent Password Reset</span>
+                              </button>
+                            ) : hasParent && primaryParent?.accountStatus === 'PENDING_ACTIVATION' ? (
+                              <div className="px-3 py-2 text-xs text-amber-700 bg-amber-50/50 flex items-center gap-2 border-b border-border/50">
+                                <AlertTriangle size={13} className="text-amber-600 shrink-0" />
+                                <span>Parent Pending Activation</span>
+                              </div>
+                            ) : (
+                              <div className="px-3 py-2 text-xs text-muted flex items-center gap-2 border-b border-border/50">
+                                <UserX size={13} className="shrink-0" />
+                                <span>Parent not linked</span>
+                              </div>
+                            )}
+
+                            <button
+                              onClick={() => { setActiveMenuId(null); handleDelete(row); }}
+                              className="w-full px-3 py-2 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2 cursor-pointer"
+                            >
+                              <Trash2 size={13} /> Delete Student
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -524,13 +623,130 @@ export default function Students() {
           <Select label="Section" options={sectionOptions} value={form.currentSection} onChange={(e) => setField('currentSection', e.target.value)} />
           <Input label="Phone" value={form.phone} onChange={(e) => setField('phone', e.target.value)} placeholder="+91 90000 00000" />
           <Input label="Email" type="email" value={form.email} onChange={(e) => setField('email', e.target.value)} placeholder="student@school.edu" />
-          <Select label="Fee Structure" options={[{ value: '', label: 'None' }, ...feeStructures.map(f => ({ value: f._id, label: `${f.name} — \u20B9${f.totalAmount?.toLocaleString('en-IN') || 0}` }))]} value={form.feeStructure} onChange={(e) => setField('feeStructure', e.target.value)} />
+          <Select label="Fee Structure" options={[{ value: '', label: 'None' }, ...feeStructures.map(f => ({ value: f._id, label: `${f.name} — ₹${f.totalAmount?.toLocaleString('en-IN') || 0}` }))]} value={form.feeStructure} onChange={(e) => setField('feeStructure', e.target.value)} />
         </div>
         <div className="flex justify-end gap-3 mt-6">
           <Button variant="ghost" onClick={resetAndClose}>Cancel</Button>
           <Button onClick={handleCreate} loading={saving}>Create Student</Button>
         </div>
       </Modal>
+
+      {/* ── PARENT PASSWORD RESET CONFIRMATION MODAL ── */}
+      {selectedStudentForReset && (
+        <Modal
+          isOpen={resetModalOpen}
+          onClose={() => {
+            if (!sendingReset) {
+              setResetModalOpen(false);
+              setSelectedStudentForReset(null);
+            }
+          }}
+          title="Send Parent Password Reset Link"
+          size="md"
+        >
+          <div className="space-y-4">
+            <div className="p-3.5 bg-forest-soft border border-forest/20 rounded-xl text-xs text-forest">
+              <div className="flex items-start gap-2.5">
+                <Key size={18} className="shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-bold text-deep">Reset Parent Portal Password</p>
+                  <p className="text-secondary text-[11px] mt-0.5">
+                    A secure, single-use password reset link will be sent to the parent's registered email address via Brevo.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Student Context */}
+            <div className="p-3 bg-slate-50 border border-border rounded-xl text-xs space-y-1">
+              <div className="flex justify-between">
+                <span className="text-muted">Student:</span>
+                <span className="font-bold text-deep">
+                  {selectedStudentForReset.firstName} {selectedStudentForReset.lastName}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted">Admission No:</span>
+                <span className="font-mono text-deep">{selectedStudentForReset.admissionNo || '—'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted">Class:</span>
+                <span className="text-deep">{classMap[selectedStudentForReset.currentClass?._id || selectedStudentForReset.currentClass] || '—'}</span>
+              </div>
+            </div>
+
+            {/* Parent Selection (if multiple parents exist) */}
+            <div>
+              <label className="block text-xs font-semibold text-secondary mb-1.5">
+                Select Recipient Parent:
+              </label>
+
+              <div className="space-y-2">
+                {(selectedStudentForReset.parents || []).map((parent) => {
+                  const isSelected = selectedParentId === parent._id;
+                  const email = parent.contact?.email;
+
+                  return (
+                    <label
+                      key={parent._id}
+                      className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${
+                        isSelected
+                          ? 'bg-forest/5 border-forest ring-1 ring-forest/20'
+                          : 'bg-white border-border hover:bg-slate-50'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="parentRecipient"
+                        value={parent._id}
+                        checked={isSelected}
+                        onChange={() => setSelectedParentId(parent._id)}
+                        className="mt-1 text-forest focus:ring-forest"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-deep">
+                            {parent.firstName} {parent.lastName}
+                          </span>
+                          {parent.relation && (
+                            <span className="text-[10px] font-semibold text-muted bg-slate-100 px-1.5 py-0.2 rounded capitalize">
+                              {parent.relation}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1 text-[11px] text-secondary mt-0.5">
+                          <Mail size={12} className="text-muted shrink-0" />
+                          <span className="truncate">{email || 'No email registered'}</span>
+                        </div>
+                      </div>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-4 border-t border-border mt-4">
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setResetModalOpen(false);
+                  setSelectedStudentForReset(null);
+                }}
+                disabled={sendingReset}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleConfirmSendReset}
+                loading={sendingReset}
+                className="gap-1.5"
+              >
+                <Key size={14} /> Send Reset Link
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
 
       <BulkImportModal isOpen={bulkOpen} onClose={() => setBulkOpen(false)} entityType="students" onSuccess={() => triggerReload()} />
     </div>

@@ -8,4 +8,6 @@ export const studentApi = {
   delete: (id) => api.delete(`/students/${id}`),
   bulkCreate: (students) => api.post('/students/bulk', { students }),
   promote: (data) => api.post('/students/promote', data),
+  sendParentPasswordReset: (studentId, parentId) =>
+    api.post(`/students/${studentId}/parent/reset-password`, { parentId }),
 };

@@ -8,9 +8,10 @@ export const createNotice = asyncHandler(async (req, res) => {
 });
 
 export const getNotices = asyncHandler(async (req, res) => {
-  const result = await noticeService.getNotices(req.schoolId, req.query);
+  const result = await noticeService.getNotices(req.schoolId, req.query, req.user);
   res.status(200).json(new ApiResponse(200, result.data, 'Notices fetched', result.meta));
 });
+
 
 export const getNoticeById = asyncHandler(async (req, res) => {
   const notice = await noticeService.getNoticeById(req.params.id, req.schoolId);

@@ -1,9 +1,12 @@
 import { Server } from 'socket.io';
 import env from './env.js';
+import { createAdapter } from '@socket.io/redis-adapter';
+import IORedis from 'ioredis';
+import { socketAuth } from '../realtime/socket.auth.js';
 
 let io;
 
-export const initializeSocket = (httpServer) => {
+export const initializeSocket = async (httpServer) => {
   io = new Server(httpServer, {
     cors: {
       origin: env.CLIENT_URL,
@@ -11,17 +14,23 @@ export const initializeSocket = (httpServer) => {
     },
   });
 
+  // Attach authentication middleware
+  io.use(socketAuth);
+
+  // Setup Redis adapter if REDIS_URL provided
+  if (env.REDIS_URL) {
+    const pubClient = new IORedis(env.REDIS_URL);
+    const subClient = pubClient.duplicate();
+    await Promise.all([pubClient.connect(), subClient.connect()]);
+    io.adapter(createAdapter(pubClient, subClient));
+    console.log('Socket.io Redis adapter initialized');
+  } else {
+    console.warn('REDIS_URL not set; using in‑memory adapter for Socket.io');
+  }
+
   io.on('connection', (socket) => {
     console.log('Socket connected:', socket.id);
-
-    socket.on('join-school', (schoolId) => {
-      socket.join(`school:${schoolId}`);
-    });
-
-    socket.on('join-user', (userId) => {
-      socket.join(`user:${userId}`);
-    });
-
+    // rooms will be joined in auth middleware after verification
     socket.on('disconnect', () => {
       console.log('Socket disconnected:', socket.id);
     });

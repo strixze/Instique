@@ -4,7 +4,7 @@ import env from '../config/env.js';
 import Admission from '../models/Admission.js';
 import Student from '../models/Student.js';
 import Parent from '../models/Parent.js';
-import User from '../models/User.js';
+import { User } from '../models/user.model.js';
 import AccountToken from '../models/AccountToken.js';
 import School from '../models/School.js';
 import AuditLog from '../models/AuditLog.js';

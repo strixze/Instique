@@ -49,9 +49,20 @@ const userSchema = new mongoose.Schema({
     lastNotificationRead: {
         type: Date
     },
+    isActive: { type: Boolean, default: true },
     isVerified: {
         type: Boolean,
         default: false
+    },
+    // Store active JWT sessions
+    sessions: {
+        type: [{
+            token: { type: String },
+            ip: { type: String },
+            device: { type: String },
+            lastActivity: { type: Date }
+        }],
+        default: []
     }
 },
     { timestamps: true })
@@ -65,8 +76,11 @@ userSchema.pre("save", async function () {
 })
 
 userSchema.methods.isCorrectPassword = async function (password) {
-    return await bcrypt.compare(password, this.password);
-}
+        return await bcrypt.compare(password, this.password);
+    };
+
+    // Alias for backward compatibility
+    userSchema.methods.comparePassword = userSchema.methods.isCorrectPassword;
 
 userSchema.methods.generateAccessToken = function () {
     return jwt.sign(

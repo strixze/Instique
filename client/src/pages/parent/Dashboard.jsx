@@ -138,7 +138,8 @@ export default function ParentDashboard() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12">
+    <div className="space-y-6 w-full pb-12">
+
       
       {/* ────────────────── Header & Child Selector ────────────────── */}
       <div className="bg-white border border-border rounded-2xl p-5 shadow-sm">

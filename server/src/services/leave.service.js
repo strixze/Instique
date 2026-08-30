@@ -25,8 +25,12 @@ export const createLeave = async (schoolId, data, userId) => {
   return leave;
 };
 
-export const getLeaves = async (schoolId, options) => {
-  return paginate(Leave, { schoolId }, {
+export const getLeaves = async (schoolId, options, user) => {
+  const query = { schoolId };
+  if (user && (user.role === 'parent' || user.role === 'student')) {
+    query.requester = user._id;
+  }
+  return paginate(Leave, query, {
     ...options,
     populate: [
       { path: 'requester', select: 'name email role' },
@@ -34,6 +38,7 @@ export const getLeaves = async (schoolId, options) => {
     ],
   });
 };
+
 
 export const getLeaveById = async (id, schoolId) => {
   const leave = await Leave.findOne({ _id: id, schoolId })

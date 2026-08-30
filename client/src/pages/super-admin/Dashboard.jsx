@@ -22,7 +22,7 @@ import { saasApi } from '../../api/saas.api';
 const PLAN_COLORS = {
   free_trial: '#64748B',
   basic: '#2563EB',
-  professional: '#2D6A4F',
+  professional: '#6C5CE7',
   enterprise: '#7C3AED',
 };
 
@@ -364,7 +364,7 @@ export default function SuperAdminDashboard() {
                       formatter={(val) => [`₹${val.toLocaleString('en-IN')}`, 'Revenue']}
                       contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#E2E8F0', borderRadius: '8px', fontSize: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.06)' }}
                     />
-                    <Bar dataKey="revenue" fill="#2D6A4F" radius={[4, 4, 0, 0]} maxBarSize={32} />
+                    <Bar dataKey="revenue" fill="#6C5CE7" radius={[4, 4, 0, 0]} maxBarSize={32} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>

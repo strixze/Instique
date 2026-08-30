@@ -412,7 +412,7 @@ export default function ParentMeetings() {
       showCancelButton: true,
       confirmButtonText: 'Publish & Notify',
       cancelButtonText: 'Cancel',
-      confirmButtonColor: '#2D6A4F',
+      confirmButtonColor: '#6C5CE7',
     });
     if (!isConfirmed) return;
     try {
@@ -455,7 +455,7 @@ export default function ParentMeetings() {
       showCancelButton: true,
       confirmButtonText: 'Complete',
       cancelButtonText: 'Cancel',
-      confirmButtonColor: '#2D6A4F',
+      confirmButtonColor: '#6C5CE7',
     });
     if (!isConfirmed) return;
     try {
@@ -553,7 +553,7 @@ export default function ParentMeetings() {
       showCancelButton: true,
       confirmButtonText: 'Yes',
       cancelButtonText: 'Cancel',
-      confirmButtonColor: '#2D6A4F',
+      confirmButtonColor: '#6C5CE7',
     });
     if (!isConfirmed) return;
     try {

@@ -206,7 +206,7 @@ export default function TimetableConfig() {
  };
 
  return (
- <div className="space-y-6 max-w-6xl mx-auto pb-12">
+ <div className="space-y-5 w-full pb-12">
  <PageHeader
  title="Timetable Configuration"
  description="Set school timings, periods, working days, lunch breaks, and scheduling constraints."

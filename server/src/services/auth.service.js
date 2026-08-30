@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import User from '../models/User.js';
+import { User } from '../models/user.model.js';
 import AccountToken from '../models/AccountToken.js';
 import ApiError from '../utils/ApiError.js';
 import School from '../models/School.js';
@@ -75,6 +75,10 @@ export const loginUser = async (email, password, ip, userAgent) => {
 
   user.refreshToken = tokens.refreshToken;
   user.lastLogin = new Date();
+  // Ensure sessions array exists
+  if (!Array.isArray(user.sessions)) {
+    user.sessions = [];
+  }
   user.sessions.push({ token: tokens.refreshToken, ip, device: userAgent, lastActivity: new Date() });
   await user.save();
 
@@ -270,9 +274,10 @@ export const activateAccount = async (rawToken, password, ip, userAgent) => {
   await AuditLog.create({
     schoolId: user.schoolId,
     actor: user._id,
-    action: 'parent_account_activated',
+    action: 'account_activated',
     entity: 'User',
     entityId: user._id,
+    after: { role: user.role },
     ip,
     userAgent
   });

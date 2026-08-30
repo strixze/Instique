@@ -8,13 +8,13 @@ export const getSuperAdminDashboard = asyncHandler(async (req, res) => {
 });
 
 export const getSchoolAdminDashboard = asyncHandler(async (req, res) => {
-  const data = await dashboardService.getSchoolAdminDashboard(req.schoolId);
+  const data = await dashboardService.getSchoolAdminDashboard(req.schoolId, req.query);
   res.status(200).json(new ApiResponse(200, data));
 });
 
 export const getTeacherDashboard = asyncHandler(async (req, res) => {
-  const data = await dashboardService.getTeacherDashboard(req.user._id, req.schoolId);
-  res.status(200).json(new ApiResponse(200, data));
+  const data = await dashboardService.getTeacherDashboard(req.user, req.schoolId, req.query);
+  res.status(200).json(new ApiResponse(200, data, 'Teacher dashboard fetched successfully'));
 });
 
 export const getStudentDashboard = asyncHandler(async (req, res) => {

@@ -34,7 +34,7 @@ export const recordPayment = asyncHandler(async (req, res) => {
 });
 
 export const getFeeTransactions = asyncHandler(async (req, res) => {
-  const result = await feeService.getFeeTransactions(req.schoolId, req.query);
+  const result = await feeService.getFeeTransactions(req.schoolId, req.query, req.user);
   res.status(200).json(new ApiResponse(200, result.data, 'Transactions fetched', result.meta));
 });
 
@@ -44,9 +44,10 @@ export const getStudentFeeStatus = asyncHandler(async (req, res) => {
 });
 
 export const getFeeReport = asyncHandler(async (req, res) => {
-  const report = await feeService.getFeeReport(req.schoolId);
+  const report = await feeService.getFeeReport(req.schoolId, req.user);
   res.status(200).json(new ApiResponse(200, report));
 });
+
 
 export const importFeeStructures = asyncHandler(async (req, res) => {
   if (!req.file) {
