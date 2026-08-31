@@ -27,6 +27,7 @@ import Exams from '../pages/school-admin/Exams';
 import Fees from '../pages/school-admin/Fees';
 import Notices from '../pages/school-admin/Notices';
 import Leaves from '../pages/school-admin/Leaves';
+import TeacherLeaves from '../pages/teacher/TeacherLeaves';
 import Complaints from '../pages/school-admin/Complaints';
 import Roles from '../pages/school-admin/Roles';
 import Settings from '../pages/school-admin/Settings';
@@ -77,6 +78,12 @@ function UnifiedAttendance() {
   return <Attendance />;
 }
 
+function UnifiedLeaves() {
+  const user = useUserStore((s) => s.user);
+  if (user?.role === 'teacher') return <TeacherLeaves />;
+  return <Leaves />;
+}
+
 function ModulePage({ children }) {
   return (
     <ProtectedRoute>
@@ -120,7 +127,7 @@ export default function AppRouter() {
       <Route path="/notices" element={<ModulePage><Notices /></ModulePage>} />
       <Route path="/events" element={<ModulePage><Events /></ModulePage>} />
       <Route path="/parent-meetings" element={<ModulePage><UnifiedParentMeetings /></ModulePage>} />
-      <Route path="/leaves" element={<ModulePage><Leaves /></ModulePage>} />
+      <Route path="/leaves" element={<ModulePage><UnifiedLeaves /></ModulePage>} />
       <Route path="/complaints" element={<ModulePage><Complaints /></ModulePage>} />
       <Route path="/roles" element={<ModulePage><Roles /></ModulePage>} />
       <Route path="/settings" element={<ModulePage><Settings /></ModulePage>} />

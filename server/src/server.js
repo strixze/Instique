@@ -48,6 +48,7 @@ import settingRoutes from './routes/setting.routes.js';
 import bulkImportRoutes from './routes/bulkImport.routes.js';
 import analyticsRoutes from './routes/analytics.routes.js';
 import auditRoutes from './routes/audit.routes.js';
+import substitutionRoutes from './routes/substitution.routes.js';
 
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/schools', schoolRoutes);
@@ -64,6 +65,7 @@ app.use('/api/v1/exams', examRoutes);
 app.use('/api/v1/fees', feeRoutes);
 app.use('/api/v1/notices', noticeRoutes);
 app.use('/api/v1/leaves', leaveRoutes);
+app.use('/api/v1/substitutions', substitutionRoutes);
 app.use('/api/v1/events', eventRoutes);
 app.use('/api/v1/meetings', meetingRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
