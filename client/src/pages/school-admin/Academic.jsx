@@ -737,6 +737,7 @@ function Subjects() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
+  const [sort, setSort] = useState('-createdAt');
   const [reload, setReload] = useState(0);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -761,7 +762,7 @@ function Subjects() {
     let active = true;
     const load = async () => {
       try {
-        const res = await academicApi.getSubjects({ page, limit: 10, search: search || undefined });
+        const res = await academicApi.getSubjects({ page, limit: 10, search: search || undefined, sort });
         if (!active) return;
         setData(res.data || []);
         setMeta(res.meta);
@@ -773,7 +774,7 @@ function Subjects() {
     };
     load();
     return () => { active = false; };
-  }, [page, search, reload]);
+  }, [page, search, reload, sort]);
 
   const setField = (key, value) => setForm((f) => ({ ...f, [key]: value }));
   const triggerReload = () => { setLoading(true); setReload((r) => r + 1); };

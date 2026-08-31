@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
-import { Plus, Trash2, Send, Trophy, ClipboardCheck, Award } from 'lucide-react';
+import { Plus, Trash2, Send, Trophy, ClipboardCheck, Award, FileText } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 import DataTable from '../../components/ui/DataTable';
 import Button from '../../components/ui/Button';
@@ -12,6 +12,7 @@ import Select from '../../components/ui/Select';
 import Badge from '../../components/ui/Badge';
 import { examApi } from '../../api/exam.api';
 import { academicApi } from '../../api/academic.api';
+import ReportCardModal from '../../components/exams/ReportCardModal';
 
 const statusColors = {
   upcoming: 'info',
@@ -205,7 +206,49 @@ export default function Exams() {
     },
   ];
 
-  const subjectOptions = subjects.map((s) => ({ value: s._id, label: `${s.name} (${s.code})` }));
+  const handleClassChange = (selectedClassId) => {
+    const selectedClassObj = classes.find((c) => c._id === selectedClassId);
+    const classSubIds = new Set(
+      Array.isArray(selectedClassObj?.subjects)
+        ? selectedClassObj.subjects.map((s) => (typeof s === 'string' ? s : s._id))
+        : []
+    );
+
+    const assignedSubjectIds = new Set(
+      subjects
+        .filter((s) => {
+          const inSubjectClasses = Array.isArray(s.classes) && s.classes.some((c) => (typeof c === 'string' ? c : c._id) === selectedClassId);
+          const inClassSubjects = classSubIds.has(s._id);
+          return inSubjectClasses || inClassSubjects;
+        })
+        .map((s) => s._id)
+    );
+
+    setForm((f) => {
+      const updatedRows = f.subjectRows.map((row) => ({
+        ...row,
+        subject: assignedSubjectIds.has(row.subject) ? row.subject : '',
+      }));
+      return { ...f, schoolClass: selectedClassId, subjectRows: updatedRows };
+    });
+  };
+
+  const selectedClassObj = classes.find((c) => c._id === form.schoolClass);
+  const classSubIds = new Set(
+    Array.isArray(selectedClassObj?.subjects)
+      ? selectedClassObj.subjects.map((s) => (typeof s === 'string' ? s : s._id))
+      : []
+  );
+
+  const availableSubjects = form.schoolClass
+    ? subjects.filter((s) => {
+      const inSubjectClasses = Array.isArray(s.classes) && s.classes.some((c) => (typeof c === 'string' ? c : c._id) === form.schoolClass);
+      const inClassSubjects = classSubIds.has(s._id);
+      return inSubjectClasses || inClassSubjects;
+    })
+    : [];
+
+  const subjectOptions = availableSubjects.map((s) => ({ value: s._id, label: `${s.name} (${s.code})` }));
 
   return (
     <div className="space-y-6">
@@ -257,7 +300,7 @@ export default function Exams() {
             placeholder="Select Class"
             options={classes.map((c) => ({ value: c._id, label: c.name }))}
             value={form.schoolClass}
-            onChange={(e) => setField('schoolClass', e.target.value)}
+            onChange={(e) => handleClassChange(e.target.value)}
           />
           <Input label="Start date *" type="date" value={form.startDate} onChange={(e) => setField('startDate', e.target.value)} />
           <Input label="End date *" type="date" value={form.endDate} onChange={(e) => setField('endDate', e.target.value)} />
@@ -265,8 +308,17 @@ export default function Exams() {
 
         <div className="mt-6">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-medium text-secondary">Subjects *</h3>
-            <Button variant="outline" size="sm" onClick={addRow}><Plus size={14} className="mr-1" />Add Subject</Button>
+            <div>
+              <h3 className="text-sm font-medium text-secondary">Subjects *</h3>
+              {!form.schoolClass ? (
+                <p className="text-xs text-muted">Please select a class first to view assigned subjects.</p>
+              ) : availableSubjects.length === 0 ? (
+                <p className="text-xs text-amber-600">No subjects assigned to this class yet.</p>
+              ) : null}
+            </div>
+            <Button variant="outline" size="sm" onClick={addRow} disabled={!form.schoolClass || availableSubjects.length === 0}>
+              <Plus size={14} className="mr-1" />Add Subject
+            </Button>
           </div>
           <div className="space-y-3">
             {form.subjectRows.map((row, index) => (
@@ -274,8 +326,9 @@ export default function Exams() {
                 <div className="flex-1">
                   <Select
                     label={index === 0 ? 'Subject' : undefined}
-                    placeholder="Select Subject"
+                    placeholder={!form.schoolClass ? 'Select a class first' : availableSubjects.length === 0 ? 'No assigned subjects' : 'Select Subject'}
                     options={subjectOptions}
+                    disabled={!form.schoolClass || availableSubjects.length === 0}
                     value={row.subject}
                     onChange={(e) => updateRow(index, 'subject', e.target.value)}
                   />

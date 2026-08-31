@@ -285,12 +285,24 @@ export const getAttendanceReport = async (schoolId, classId, startDate, endDate)
     date: { $gte: new Date(startDate), $lte: new Date(endDate) },
   });
 
-  const report = { totalDays: records.length, present: 0, absent: 0, late: 0, leave: 0 };
+  const report = { totalDays: records.length, present: 0, absent: 0, late: 0, leave: 0, studentStats: {} };
   for (const r of records) {
     report.present += r.summary?.present || 0;
     report.absent += r.summary?.absent || 0;
     report.late += r.summary?.late || 0;
     report.leave += r.summary?.leave || 0;
+
+    if (r.students && Array.isArray(r.students)) {
+      for (const s of r.students) {
+        const sid = s.student.toString();
+        if (!report.studentStats[sid]) {
+          report.studentStats[sid] = { present: 0, absent: 0, late: 0, leave: 0 };
+        }
+        if (s.status) {
+          report.studentStats[sid][s.status] = (report.studentStats[sid][s.status] || 0) + 1;
+        }
+      }
+    }
   }
 
   return report;

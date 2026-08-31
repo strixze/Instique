@@ -105,6 +105,26 @@ export const updateEvent = async (id, schoolId, data) => {
   return event;
 };
 
+export const publishEvent = async (id, schoolId) => {
+  const event = await CalendarEvent.findOneAndUpdate(
+    { _id: id, schoolId },
+    { status: 'published' },
+    { new: true }
+  );
+  if (!event) throw new ApiError(404, 'Event not found');
+  return event;
+};
+
+export const cancelEvent = async (id, schoolId) => {
+  const event = await CalendarEvent.findOneAndUpdate(
+    { _id: id, schoolId },
+    { status: 'cancelled' },
+    { new: true }
+  );
+  if (!event) throw new ApiError(404, 'Event not found');
+  return event;
+};
+
 export const deleteEvent = async (id, schoolId) => {
   const event = await Event.findOne({ _id: id, schoolId });
   if (!event) {

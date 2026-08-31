@@ -3,7 +3,7 @@ import {
   LayoutDashboard, GraduationCap, Users, BookOpen, Calendar, DollarSign,
   Bell, Settings, ChevronLeft, FileText, ClipboardList, Trophy,
   MessageSquare, LogOut, Menu, ClipboardCheck, Award, BarChart3, Shield,
-  BookMarked,
+  BookMarked, Activity,
 } from 'lucide-react';
 import { useUserStore } from '../../store/userStore';
 import { useAppStore } from '../../store/appStore';
@@ -64,6 +64,7 @@ const navSections = {
     {
       title: 'System',
       items: [
+        { to: '/recent-activity', icon: Activity, label: 'Recent Activity' },
         { to: '/roles', icon: Shield, label: 'Roles & Permissions' },
         { to: '/settings', icon: Settings, label: 'Settings' },
       ],

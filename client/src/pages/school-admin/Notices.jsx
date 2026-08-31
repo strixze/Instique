@@ -21,7 +21,7 @@ const categoryColors = {
   circular: 'gray',
 };
 
-const emptyForm = { title: '', content: '', category: 'general', scope: 'school', isPinned: false };
+const emptyForm = { title: '', content: '', category: 'general', scope: 'school', isPinned: false, publishAt: '', expireAt: '' };
 
 export default function Notices() {
   const user = useUserStore((s) => s.user);

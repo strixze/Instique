@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import School from '../models/School.js';
 import Student from '../models/Student.js';
 import Teacher from '../models/Teacher.js';
@@ -1148,19 +1149,130 @@ export const getTeacherDashboard = async (user, schoolId, query = {}) => {
   };
 };
 
-export const getStudentDashboard = async (studentId, schoolId) => {
-  const [attendance, homework, fees, results, notices, recognition, timetable, events] = await Promise.all([
-    Attendance.find({ schoolId, 'students.student': studentId }).sort('-date').limit(30),
-    Homework.find({ schoolId, schoolClass: (await Student.findById(studentId))?.currentClass }).sort('-createdAt').limit(5),
-    FeeTransaction.find({ schoolId, student: studentId }),
-    Exam.find({ schoolId, status: 'published' }),
-    Notice.find({ schoolId, status: 'published' }).sort('-createdAt').limit(5),
-    RecognitionPoint.find({ schoolId, student: studentId }).sort('-createdAt'),
-    Timetable.findOne({ schoolId, status: 'published' }),
-    CalendarEvent.find({ schoolId, startDate: { $gte: new Date() } }).sort('startDate').limit(5),
+// ── Student Dashboard ─────────────────────────────────────────────────────────
+
+export const getStudentDashboard = async (userId, schoolId) => {
+  const sid = new mongoose.Types.ObjectId(schoolId);
+
+  // Find student doc via User.profileId (User.profileModel = 'Student')
+  const userDoc = await User.findById(userId).select('profileId profileModel').lean();
+  const studentId = userDoc?.profileModel === 'Student' ? userDoc?.profileId : null;
+
+  if (!studentId) {
+    return { attendance: null, homework: [], fees: [], results: [], notices: [], recognition: 0, timetable: null, events: [] };
+  }
+
+  const studentDoc = await Student.findById(studentId).select('currentClass').lean();
+  const classId = studentDoc?.currentClass;
+
+  // Last 30 days attendance
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const [
+    attendanceDocs,
+    homework,
+    fees,
+    results,
+    notices,
+    recognitionCount,
+    timetable,
+    events,
+  ] = await Promise.all([
+    Attendance.find({ schoolId: sid, 'students.student': studentId, date: { $gte: thirtyDaysAgo } })
+      .sort('-date')
+      .select('date students'),
+
+    classId
+      ? Homework.find({ schoolId: sid, schoolClass: classId }).sort('-createdAt').limit(5).select('title subject dueDate submissions')
+      : Promise.resolve([]),
+
+    FeeTransaction.find({ schoolId: sid, student: studentId })
+      .select('amount paidAmount balance status dueDate paymentDate receiptNo'),
+
+    Exam.find({ schoolId: sid, status: { $in: ['upcoming', 'published'] } })
+      .sort('startDate')
+      .limit(5)
+      .select('name startDate endDate status type'),
+
+    Notice.find({ schoolId: sid, status: 'published' })
+      .sort('-createdAt')
+      .limit(5)
+      .select('title content createdAt'),
+
+    RecognitionPoint.countDocuments({ schoolId: sid, student: studentId }),
+
+    classId
+      ? Timetable.findOne({ schoolId: sid, schoolClass: classId })
+          .populate('periods.subject', 'name')
+          .populate('periods.teacher', 'firstName lastName')
+          .select('periods')
+      : Promise.resolve(null),
+
+    CalendarEvent.find({ schoolId: sid, startDate: { $gte: new Date() } })
+      .sort('startDate')
+      .limit(5)
+      .select('title startDate endDate type'),
   ]);
 
-  return { attendance, homework, fees, results, notices, recognition, timetable, events };
+  // Summarize attendance
+  let presentCount = 0;
+  let totalCount = 0;
+  attendanceDocs.forEach((doc) => {
+    const studentEntry = doc.students?.find(
+      (s) => s.student?.toString() === studentId.toString()
+    );
+    if (studentEntry) {
+      totalCount++;
+      if (studentEntry.status === 'present' || studentEntry.status === 'late') {
+        presentCount++;
+      }
+    }
+  });
+  const attendancePercentage =
+    totalCount > 0 ? Math.round((presentCount / totalCount) * 1000) / 10 : null;
+
+  // Fee summary
+  const totalFees = fees.reduce((s, f) => s + (f.amount || 0), 0);
+  const paidFees = fees.reduce((s, f) => s + (f.paidAmount || 0), 0);
+  const pendingFees = fees.reduce((s, f) => s + (f.balance || 0), 0);
+  const overdueFees = fees.filter((f) => f.status === 'overdue').length;
+
+  return {
+    attendance: {
+      present: presentCount,
+      total: totalCount,
+      percentage: attendancePercentage,
+      recentDays: attendanceDocs.slice(0, 10).map((doc) => {
+        const entry = doc.students?.find((s) => s.student?.toString() === studentId.toString());
+        return { date: doc.date, status: entry?.status || 'unknown' };
+      }),
+    },
+    homework: homework.map((h) => {
+      const submission = h.submissions?.find(
+        (s) => s.student?.toString() === studentId.toString()
+      );
+      return {
+        id: h._id,
+        title: h.title,
+        dueDate: h.dueDate,
+        submittedAt: submission?.submittedAt || null,
+        submissionStatus: submission?.status || null,
+      };
+    }),
+    fees: {
+      total: totalFees,
+      paid: paidFees,
+      pending: pendingFees,
+      overdue: overdueFees,
+      transactions: fees.length,
+    },
+    results,
+    notices,
+    recognition: recognitionCount,
+    timetable,
+    events,
+  };
 };
 
 export const getParentDashboard = async (user, schoolId, studentId) => {

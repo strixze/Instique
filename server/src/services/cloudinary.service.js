@@ -40,8 +40,11 @@ const uploadFileOnCloudinary = async function (localFilePath, options = {}) {
       const uploadOptions = {
         resource_type: options.resource_type || "auto",
         folder: options.folder || "instique",
-        ...options,
       };
+      if (options.public_id) uploadOptions.public_id = options.public_id;
+      if (options.tags) uploadOptions.tags = options.tags;
+      if (options.context) uploadOptions.context = options.context;
+      if (options.transformation) uploadOptions.transformation = options.transformation;
 
       const uploadInfo = await cloudinary.uploader.upload(localFilePath, uploadOptions);
 

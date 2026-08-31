@@ -16,7 +16,15 @@ import { dashboardApi } from '../../api/dashboard.api';
 import { useUserStore } from '../../store/userStore';
 import { useThemeStore } from '../../store/useThemeStore';
 
-// ── Helpers ──
+const iconMap = {
+  UserCheck,
+  DollarSign,
+  CheckCircle2,
+  FileCheck,
+  BookOpen,
+  Users,
+  GraduationCap,
+};
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -77,7 +85,6 @@ export default function SchoolAdminDashboard() {
   // Period Filter States
   const [attendancePeriod, setAttendancePeriod] = useState('This Week');
   const [classAttendancePeriod, setClassAttendancePeriod] = useState('This Week');
-  const [feePeriod, setFeePeriod] = useState('This Month');
 
   // Dropdown Open States
   const [attendanceDropdownOpen, setAttendanceDropdownOpen] = useState(false);

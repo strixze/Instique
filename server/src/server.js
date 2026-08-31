@@ -67,6 +67,7 @@ app.use('/api/v1/notices', noticeRoutes);
 app.use('/api/v1/leaves', leaveRoutes);
 app.use('/api/v1/substitutions', substitutionRoutes);
 app.use('/api/v1/events', eventRoutes);
+app.use('/api/v1/gallery', galleryRoutes);
 app.use('/api/v1/meetings', meetingRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1/recognition', recognitionRoutes);

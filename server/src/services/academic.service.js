@@ -44,6 +44,9 @@ export const createClass = async (schoolId, data) => {
   if (existing) throw new ApiError(409, 'Class already exists for this academic year');
 
   const schoolClass = await SchoolClass.create({ ...classData, schoolId });
+  if (data.subjects?.length) {
+    await Subject.updateMany({ schoolId, _id: { $in: data.subjects } }, { $addToSet: { classes: schoolClass._id } });
+  }
   return schoolClass;
 };
 
@@ -68,6 +71,10 @@ export const updateClass = async (id, schoolId, data) => {
   }
   const schoolClass = await SchoolClass.findOneAndUpdate({ _id: id, schoolId }, updateData, { new: true });
   if (!schoolClass) throw new ApiError(404, 'Class not found');
+  if (data.subjects) {
+    await Subject.updateMany({ schoolId, classes: id }, { $pull: { classes: id } });
+    await Subject.updateMany({ schoolId, _id: { $in: data.subjects } }, { $addToSet: { classes: id } });
+  }
   return schoolClass;
 };
 
@@ -119,13 +126,27 @@ export const createSubject = async (schoolId, data) => {
   return subject;
 };
 
-export const getSubjects = async (schoolId, options) => {
-  return paginate(Subject, { schoolId }, { ...options, searchFields: ['name', 'code'] });
+export const getSubjects = async (schoolId, options = {}) => {
+  const query = { schoolId };
+  const targetClassId = options.schoolClass || options.classId;
+  if (targetClassId) {
+    const schoolClassObj = await SchoolClass.findById(targetClassId).select('subjects');
+    const classSubjectIds = schoolClassObj?.subjects || [];
+    query.$or = [
+      { classes: targetClassId },
+      { _id: { $in: classSubjectIds } },
+    ];
+  }
+  return paginate(Subject, query, { ...options, searchFields: ['name', 'code'] });
 };
 
 export const updateSubject = async (id, schoolId, data) => {
   const subject = await Subject.findOneAndUpdate({ _id: id, schoolId }, data, { new: true });
   if (!subject) throw new ApiError(404, 'Subject not found');
+  if (data.classes) {
+    await SchoolClass.updateMany({ schoolId, subjects: id }, { $pull: { subjects: id } });
+    await SchoolClass.updateMany({ schoolId, _id: { $in: data.classes } }, { $addToSet: { subjects: id } });
+  }
   return subject;
 };
 

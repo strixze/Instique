@@ -3,7 +3,11 @@ import ApiError from '../utils/ApiError.js';
 import { paginate } from '../utils/pagination.js';
 
 export const createNotice = async (schoolId, data, userId) => {
-  const notice = await Notice.create({ ...data, schoolId, createdBy: userId });
+  const notice = await Notice.create({ 
+    ...data, 
+    schoolId, 
+    createdBy: userId,
+  });
   return notice;
 };
 

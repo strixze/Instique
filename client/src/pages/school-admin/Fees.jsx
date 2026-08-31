@@ -563,6 +563,7 @@ function PendingFees() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
+  const [sort, setSort] = useState('-createdAt');
   const [reload, setReload] = useState(0);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -573,7 +574,7 @@ function PendingFees() {
     let active = true;
     const load = async () => {
       try {
-        const res = await feeApi.getTransactions({ page, limit: 10, search: search || undefined, pendingOnly: 'true' });
+        const res = await feeApi.getTransactions({ page, limit: 10, search: search || undefined, pendingOnly: 'true', sort });
         if (!active) return;
         setData(res.data || []);
         setMeta(res.meta);
@@ -585,7 +586,7 @@ function PendingFees() {
     };
     load();
     return () => { active = false; };
-  }, [page, search, reload]);
+  }, [page, search, reload, sort]);
 
   const handlePayClick = (tx) => {
     setSelectedTx(tx);
@@ -652,7 +653,7 @@ function PendingFees() {
         title="Pending Fees"
         description={isAdmin ? "Track and pay outstanding fee balances for students" : "View outstanding fee balances"}
       />
-      <DataTable columns={columns} data={data} loading={loading} meta={meta} onPageChange={(p) => { setLoading(true); setPage(p); }} onSearch={(s) => { setLoading(true); setSearch(s); setPage(1); }} searchPlaceholder="Search pending fees..."/>
+      <DataTable columns={columns} data={data} loading={loading} meta={meta} onPageChange={(p) => { setLoading(true); setPage(p); }} onSearch={(s) => { setLoading(true); setSearch(s); setPage(1); }} onSort={(field, order) => { setSort(`${order === 'desc' ? '-' : ''}${field}`); setPage(1); setLoading(true); }} searchPlaceholder="Search pending fees..."/>
       
       {isAdmin && (
         <Modal isOpen={open} onClose={resetAndClose} title={selectedTx ? `Record Payment: ${selectedTx.student?.firstName} ${selectedTx.student?.lastName}` : 'Record Payment'} size="lg">

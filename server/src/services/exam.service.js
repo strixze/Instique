@@ -2,6 +2,7 @@ import Exam from '../models/Exam.js';
 import Mark from '../models/Mark.js';
 import Student from '../models/Student.js';
 import SchoolClass from '../models/SchoolClass.js';
+import Subject from '../models/Subject.js';
 import ApiError from '../utils/ApiError.js';
 import { paginate } from '../utils/pagination.js';
 
@@ -14,13 +15,22 @@ export const createExam = async (schoolId, data) => {
     throw new ApiError(400, 'Selected class not found');
   }
 
-  const classSubjectIds = new Set(schoolClassObj.subjects.map((s) => s.toString()));
+  const classSubjectIds = (schoolClassObj.subjects || []).map((s) => s.toString());
+  const assignedSubjects = await Subject.find({
+    schoolId,
+    $or: [
+      { _id: { $in: classSubjectIds } },
+      { classes: schoolClass },
+    ],
+  }).select('_id name');
+
+  const validSubjectIds = new Set(assignedSubjects.map((s) => s._id.toString()));
 
   for (const sub of subjects) {
-    if (!classSubjectIds.has(sub.subject.toString())) {
+    if (!validSubjectIds.has(sub.subject.toString())) {
       throw new ApiError(
         400,
-        `Subject "${sub.subject}" is not assigned to class ${schoolClassObj.name}`
+        `Selected subject is not assigned to class ${schoolClassObj.name}`
       );
     }
   }

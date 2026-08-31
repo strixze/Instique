@@ -1,5 +1,37 @@
-import { ClipboardList, BookOpen, DollarSign, Trophy } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  ClipboardList, BookOpen, DollarSign, Trophy,
+  Calendar, Bell, CheckCircle, XCircle, Clock,
+} from 'lucide-react';
 import Card from '../../components/ui/Card';
+import Skeleton from '../../components/ui/Skeleton';
+import Badge from '../../components/ui/Badge';
+import { dashboardApi } from '../../api/dashboard.api';
+import { useUserStore } from '../../store/userStore';
+
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h < 12) return 'Good morning';
+  if (h < 17) return 'Good afternoon';
+  return 'Good evening';
+}
+
+function formatINR(amount) {
+  if (!amount || amount === 0) return '₹0';
+  if (amount >= 100000) return `₹${(amount / 100000).toFixed(1)}L`;
+  if (amount >= 1000) return `₹${(amount / 1000).toFixed(1)}K`;
+  return `₹${amount}`;
+}
+
+const STATUS_COLORS = {
+  present: 'bg-success',
+  absent: 'bg-danger',
+  late: 'bg-warning',
+  leave: 'bg-info',
+  holiday: 'bg-surface border border-border',
+  unknown: 'bg-surface border border-border',
+};
 
 export default function StudentDashboard() {
   return (
