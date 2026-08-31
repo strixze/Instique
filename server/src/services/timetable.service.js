@@ -1,0 +1,801 @@
+import Timetable from '../models/Timetable.js';
+import Subject from '../models/Subject.js';
+import Teacher from '../models/Teacher.js';
+import SchoolClass from '../models/SchoolClass.js';
+import Section from '../models/Section.js';
+import TimetableConfig from '../models/TimetableConfig.js';
+import AcademicYear from '../models/AcademicYear.js';
+import ApiError from '../utils/ApiError.js';
+import { getConfig } from './timetableConfig.service.js';
+import { TimetableEngine } from '../engine/TimetableEngine.js';
+import { preValidateBulk } from '../engine/PreValidator.js';
+import { postValidateTimetable } from '../engine/ConflictReporter.js';
+import { generateDeterministicTimetables } from './timetable/generator.service.js';
+import { paginate } from '../utils/pagination.js';
+import ExcelJS from 'exceljs';
+import puppeteer from 'puppeteer';
+
+// Helper to compile global schedules from existing timetables (excluding the current one if specified)
+const buildGlobalSchedules = async (schoolId, academicYear, excludeTimetableId = null) => {
+  const query = { schoolId, academicYear };
+  if (excludeTimetableId) {
+    query._id = { $ne: excludeTimetableId };
+  }
+
+  const timetables = await Timetable.find(query);
+  const globalTeacherSchedule = new Map();
+  const globalRoomSchedule = new Map();
+
+  for (const t of timetables) {
+    const classId = t.schoolClass.toString();
+    const sectionId = t.section.toString();
+    for (const p of t.periods) {
+      if (p.isLunch || p.isBreak || p.isAssembly || p.isFixed) continue;
+      if (p.teacher) {
+        const key = `${p.teacher.toString()}-${p.day}-${p.periodNo}`;
+        globalTeacherSchedule.set(key, { classId, sectionId });
+      }
+      if (p.room) {
+        const key = `${p.room}-${p.day}-${p.periodNo}`;
+        globalRoomSchedule.set(key, { classId, sectionId });
+      }
+    }
+  }
+
+  return { globalTeacherSchedule, globalRoomSchedule };
+};
+
+export const generateTimetable = async (schoolId, data) => {
+  // Check for published timetables in this class
+  const publishedCheck = await Timetable.findOne({
+    schoolId,
+    schoolClass: data.schoolClass,
+    academicYear: data.academicYear,
+    status: 'published',
+  });
+
+  if (publishedCheck) {
+    throw new ApiError(409, 'A published timetable exists for a section in this class. Unpublish or delete it first.');
+  }
+
+  const result = await generateDeterministicTimetables(schoolId, {
+    schoolClass: data.schoolClass,
+    academicYear: data.academicYear,
+  });
+
+  if (!result.success) {
+    throw new ApiError(400, result.message || 'Generation failed', result.errors);
+  }
+
+  // Fetch all generated timetables for this class
+  const timetables = await Timetable.find({
+    schoolId,
+    schoolClass: data.schoolClass,
+    academicYear: data.academicYear,
+  })
+    .populate('schoolClass', 'name')
+    .populate('section', 'name')
+    .populate('academicYear', 'name')
+    .populate('periods.subject', 'name code category')
+    .populate('periods.teacher', 'firstName lastName');
+
+  return { timetables, conflicts: [], success: true };
+};
+
+export const generateBulkTimetables = async (schoolId, { academicYear }) => {
+  const result = await generateDeterministicTimetables(schoolId, { academicYear });
+  
+  if (!result.success) {
+    const errList = (result.errors || []).map(err => ({
+      message: err.message
+    }));
+
+    return {
+      success: false,
+      phase: 'pre-validation',
+      summary: {
+        total: 0,
+        generated: 0,
+        skipped: 0,
+        failed: errList.length,
+      },
+      preValidationErrors: errList,
+      preValidationWarnings: [],
+      results: [],
+    };
+  }
+
+  const drafts = await Timetable.find({ schoolId, academicYear, status: 'draft' })
+    .populate('schoolClass', 'name')
+    .populate('section', 'name');
+
+  const published = await Timetable.find({ schoolId, academicYear, status: 'published' })
+    .populate('schoolClass', 'name')
+    .populate('section', 'name');
+
+  const results = [];
+  drafts.forEach(d => {
+    const logs = d.generationLog || [];
+    const hasError = logs.some(l => l.severity === 'error');
+    results.push({
+      classId: d.schoolClass._id,
+      className: d.schoolClass.name,
+      sectionId: d.section._id,
+      sectionName: d.section.name,
+      success: !hasError,
+      status: hasError ? 'failed' : 'generated',
+      conflicts: logs,
+    });
+  });
+
+  published.forEach(p => {
+    results.push({
+      classId: p.schoolClass._id,
+      className: p.schoolClass.name,
+      sectionId: p.section._id,
+      sectionName: p.section.name,
+      success: true,
+      status: 'skipped',
+      statusReason: 'Published timetable preserved',
+      conflicts: [],
+    });
+  });
+
+  const generatedCount = results.filter(r => r.status === 'generated').length;
+  const failedCount = results.filter(r => r.status === 'failed').length;
+
+  return {
+    success: true,
+    phase: 'generation',
+    summary: {
+      total: results.length,
+      generated: generatedCount,
+      skipped: published.length,
+      failed: failedCount,
+    },
+    preValidationWarnings: [],
+    results,
+  };
+};
+
+export const getTimetables = async (schoolId, options) => {
+  return paginate(Timetable, { schoolId }, {
+    ...options,
+    populate: ['schoolClass', 'section', 'academicYear'],
+  });
+};
+
+export const getTimetableById = async (id, schoolId) => {
+  const timetable = await Timetable.findOne({ _id: id, schoolId })
+    .populate('schoolClass', 'name subjects')
+    .populate('section', 'name roomNo')
+    .populate('academicYear', 'name')
+    .populate('periods.subject', 'name code category isPractical')
+    .populate('periods.teacher', 'firstName lastName');
+  if (!timetable) throw new ApiError(404, 'Timetable not found');
+  return timetable;
+};
+
+export const getTimetableByClassSection = async (schoolId, classId, sectionId) => {
+  // Try to find published first, fall back to draft if requested or if no published exists
+  let timetable = await Timetable.findOne({ schoolId, schoolClass: classId, section: sectionId, status: 'published' })
+    .populate('schoolClass', 'name')
+    .populate('section', 'name')
+    .populate('academicYear', 'name')
+    .populate('periods.subject', 'name code category isPractical')
+    .populate('periods.teacher', 'firstName lastName');
+
+  if (!timetable) {
+    timetable = await Timetable.findOne({ schoolId, schoolClass: classId, section: sectionId })
+      .populate('schoolClass', 'name')
+      .populate('section', 'name')
+      .populate('academicYear', 'name')
+      .populate('periods.subject', 'name code category isPractical')
+      .populate('periods.teacher', 'firstName lastName');
+  }
+
+  return timetable;
+};
+
+const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+const checkCrossClassConflicts = async (schoolId, academicYear, timetableId, updatedPeriods, teachers, subjects) => {
+  const otherTimetables = await Timetable.find({
+    schoolId,
+    academicYear,
+    _id: { $ne: timetableId },
+  }).populate('schoolClass', 'name').populate('section', 'name');
+
+  const allPeriods = [...updatedPeriods];
+  for (const ot of otherTimetables) {
+    const otPeriods = ot.periods.map(p => ({
+      ...p.toObject ? p.toObject() : p,
+      isOtherClass: true,
+      className: ot.schoolClass?.name || 'Unknown Class',
+      sectionName: ot.section?.name || 'Unknown Section'
+    }));
+    allPeriods.push(...otPeriods);
+  }
+
+  const rawConflicts = postValidateTimetable(allPeriods, teachers, subjects, {});
+  
+  const currentClassPeriodsKeys = new Set(updatedPeriods.map(p => `${p.day}-${p.periodNo}`));
+  
+  const refinedConflicts = rawConflicts.map(c => {
+    if (c.type === 'teacher_double_booked') {
+      const matchingPeriods = allPeriods.filter(
+        p => p.teacher?.toString() === c.context.teacherId && p.day === c.context.day && p.periodNo === c.context.periodNo
+      );
+      
+      const currentClassLec = matchingPeriods.find(p => !p.isOtherClass);
+      const otherClassLec = matchingPeriods.find(p => p.isOtherClass);
+      
+      if (currentClassLec && otherClassLec) {
+        const teacher = teachers.find(t => t._id.toString() === c.context.teacherId);
+        const teacherName = teacher ? `${teacher.firstName} ${teacher.lastName}` : 'Teacher';
+        return {
+          ...c,
+          message: `Teacher "${teacherName}" is already scheduled in ${otherClassLec.className} ${otherClassLec.sectionName} at ${DAY_NAMES[c.context.day]} period ${c.context.periodNo}`
+        };
+      }
+    }
+
+    if (c.type === 'room_double_booked') {
+      const matchingPeriods = allPeriods.filter(
+        p => p.room === c.context.room && p.day === c.context.day && p.periodNo === c.context.periodNo
+      );
+      
+      const currentClassLec = matchingPeriods.find(p => !p.isOtherClass);
+      const otherClassLec = matchingPeriods.find(p => p.isOtherClass);
+      
+      if (currentClassLec && otherClassLec) {
+        return {
+          ...c,
+          message: `Room "${c.context.room}" is already occupied by ${otherClassLec.className} ${otherClassLec.sectionName} at ${DAY_NAMES[c.context.day]} period ${c.context.periodNo}`
+        };
+      }
+    }
+    return c;
+  });
+
+  return refinedConflicts.filter(c => {
+    if (c.context?.day !== undefined && c.context?.periodNo !== undefined) {
+      return currentClassPeriodsKeys.has(`${c.context.day}-${c.context.periodNo}`);
+    }
+    if (c.context?.teacherId) {
+      const activeTeachers = new Set(updatedPeriods.filter(p => p.teacher).map(p => p.teacher.toString()));
+      return activeTeachers.has(c.context.teacherId);
+    }
+    return true;
+  });
+};
+
+export const updateTimetablePeriods = async (id, schoolId, periods) => {
+  const timetable = await Timetable.findOne({ _id: id, schoolId });
+  if (!timetable) throw new ApiError(404, 'Timetable not found');
+
+  const teachers = await Teacher.find({ schoolId, status: 'active' });
+  const subjects = await Subject.find({ schoolId });
+
+  // Validate
+  const conflicts = await checkCrossClassConflicts(schoolId, timetable.academicYear, timetable._id, periods, teachers, subjects);
+  const errors = conflicts.filter((c) => c.severity === 'error');
+  if (errors.length > 0) {
+    throw new ApiError(409, errors[0].message, conflicts);
+  }
+
+  timetable.periods = periods;
+  timetable.generationLog = conflicts;
+  await timetable.save();
+
+  return { timetable, conflicts };
+};
+
+export const manualEdit = async (id, schoolId, { day, periodNo, subject, teacher, room }) => {
+  const timetable = await Timetable.findOne({ _id: id, schoolId });
+  if (!timetable) throw new ApiError(404, 'Timetable not found');
+
+  const teachers = await Teacher.find({ schoolId, status: 'active' });
+  const subjects = await Subject.find({ schoolId });
+
+  const updatedPeriods = timetable.periods.map((p) => {
+    if (p.day === day && p.periodNo === periodNo) {
+      return {
+        ...p.toObject ? p.toObject() : p,
+        subject: subject || null,
+        teacher: teacher || null,
+        room: room !== undefined ? room : p.room,
+      };
+    }
+    return p;
+  });
+
+  const conflicts = await checkCrossClassConflicts(schoolId, timetable.academicYear, timetable._id, updatedPeriods, teachers, subjects);
+  const errors = conflicts.filter((c) => c.severity === 'error');
+  if (errors.length > 0) {
+    throw new ApiError(409, errors[0].message, conflicts);
+  }
+
+  timetable.periods = updatedPeriods;
+  timetable.generationLog = conflicts;
+  await timetable.save();
+
+  return { timetable, conflicts };
+};
+
+export const swapPeriods = async (id, schoolId, { sourceDay, sourcePeriodNo, targetDay, targetPeriodNo }) => {
+  const timetable = await Timetable.findOne({ _id: id, schoolId });
+  if (!timetable) throw new ApiError(404, 'Timetable not found');
+
+  const sourceIdx = timetable.periods.findIndex((p) => p.day === sourceDay && p.periodNo === sourcePeriodNo);
+  const targetIdx = timetable.periods.findIndex((p) => p.day === targetDay && p.periodNo === targetPeriodNo);
+
+  if (sourceIdx === -1 || targetIdx === -1) {
+    throw new ApiError(400, 'Invalid period coordinates provided');
+  }
+
+  const p1 = timetable.periods[sourceIdx].toObject ? timetable.periods[sourceIdx].toObject() : timetable.periods[sourceIdx];
+  const p2 = timetable.periods[targetIdx].toObject ? timetable.periods[targetIdx].toObject() : timetable.periods[targetIdx];
+
+  // Swap subject, teacher, room, and consecutive flags
+  const temp = {
+    subject: p1.subject,
+    teacher: p1.teacher,
+    room: p1.room,
+    isConsecutiveStart: p1.isConsecutiveStart,
+    consecutiveGroupId: p1.consecutiveGroupId,
+  };
+
+  timetable.periods[sourceIdx].subject = p2.subject;
+  timetable.periods[sourceIdx].teacher = p2.teacher;
+  timetable.periods[sourceIdx].room = p2.room;
+  timetable.periods[sourceIdx].isConsecutiveStart = p2.isConsecutiveStart;
+  timetable.periods[sourceIdx].consecutiveGroupId = p2.consecutiveGroupId;
+
+  timetable.periods[targetIdx].subject = temp.subject;
+  timetable.periods[targetIdx].teacher = temp.teacher;
+  timetable.periods[targetIdx].room = temp.room;
+  timetable.periods[targetIdx].isConsecutiveStart = temp.isConsecutiveStart;
+  timetable.periods[targetIdx].consecutiveGroupId = temp.consecutiveGroupId;
+
+  const teachers = await Teacher.find({ schoolId, status: 'active' });
+  const subjects = await Subject.find({ schoolId });
+
+  const conflicts = await checkCrossClassConflicts(schoolId, timetable.academicYear, timetable._id, timetable.periods, teachers, subjects);
+  const errors = conflicts.filter((c) => c.severity === 'error');
+  if (errors.length > 0) {
+    throw new ApiError(409, errors[0].message, conflicts);
+  }
+
+  timetable.generationLog = conflicts;
+  await timetable.save();
+
+  return { timetable, conflicts };
+};
+
+export const lockPeriods = async (id, schoolId, { lockedPeriods }) => {
+  const timetable = await Timetable.findOne({ _id: id, schoolId });
+  if (!timetable) throw new ApiError(404, 'Timetable not found');
+
+  timetable.lockedPeriods = lockedPeriods;
+
+  // Update periods isLocked status
+  const lockedKeys = new Set(lockedPeriods.map((lp) => `${lp.day}-${lp.periodNo}`));
+  for (const p of timetable.periods) {
+    p.isLocked = lockedKeys.has(`${p.day}-${p.periodNo}`);
+  }
+
+  await timetable.save();
+  return timetable;
+};
+
+export const regeneratePartial = async (id, schoolId) => {
+  const timetable = await Timetable.findOne({ _id: id, schoolId });
+  if (!timetable) throw new ApiError(404, 'Timetable not found');
+
+  // Load configuration (auto-creates default if not found)
+  const config = await getConfig(schoolId, timetable.academicYear);
+
+  const classObj = await SchoolClass.findById(timetable.schoolClass);
+  const subjects = await Subject.find({ schoolId, _id: { $in: classObj.subjects } });
+  const teachers = await Teacher.find({ schoolId, status: 'active' });
+  const sectionObj = await Section.findById(timetable.section);
+
+  const { globalTeacherSchedule, globalRoomSchedule } = await buildGlobalSchedules(
+    schoolId,
+    timetable.academicYear,
+    timetable._id
+  );
+
+  const engine = new TimetableEngine({
+    schoolClass: classObj,
+    section: sectionObj,
+    subjects,
+    teachers,
+    config,
+    existingTimetable: timetable, // Pass it so it can use the locked periods
+    globalTeacherSchedule,
+    globalRoomSchedule,
+  });
+
+  const result = engine.generate();
+
+  timetable.periods = result.periods;
+  timetable.generationLog = result.conflicts;
+  timetable.version = (timetable.version || 1) + 1;
+  await timetable.save();
+
+  return { timetable, conflicts: result.conflicts, success: result.success };
+};
+
+export const publishTimetable = async (id, schoolId, status) => {
+  const timetable = await Timetable.findOneAndUpdate({ _id: id, schoolId }, { status }, { new: true });
+  if (!timetable) throw new ApiError(404, 'Timetable not found');
+  return timetable;
+};
+
+export const publishClassTimetables = async (schoolId, classId, academicYearId, status) => {
+  if (!academicYearId) throw new ApiError(400, 'Academic year is required');
+  if (!status) throw new ApiError(400, 'Status is required');
+  const result = await Timetable.updateMany(
+    {
+      schoolId,
+      schoolClass: classId,
+      academicYear: academicYearId,
+    },
+    { status }
+  );
+  return { updatedCount: result.modifiedCount };
+};
+
+export const publishSchoolTimetables = async (schoolId, academicYearId, status) => {
+  if (!academicYearId) throw new ApiError(400, 'Academic year is required');
+  if (!status) throw new ApiError(400, 'Status is required');
+  const result = await Timetable.updateMany(
+    {
+      schoolId,
+      academicYear: academicYearId,
+    },
+    { status }
+  );
+  return { updatedCount: result.modifiedCount };
+};
+
+
+export const deleteTimetable = async (id, schoolId) => {
+  const timetable = await Timetable.findOneAndDelete({ _id: id, schoolId });
+  if (!timetable) throw new ApiError(404, 'Timetable not found');
+  return true;
+};
+
+export const deleteClassTimetables = async (schoolId, classId, academicYearId) => {
+  if (!academicYearId) throw new ApiError(400, 'Academic year is required');
+  const result = await Timetable.deleteMany({
+    schoolId,
+    schoolClass: classId,
+    academicYear: academicYearId
+  });
+  return { deletedCount: result.deletedCount };
+};
+
+export const deleteSchoolTimetables = async (schoolId, academicYearId) => {
+  if (!academicYearId) throw new ApiError(400, 'Academic year is required');
+  const result = await Timetable.deleteMany({
+    schoolId,
+    academicYear: academicYearId
+  });
+  return { deletedCount: result.deletedCount };
+};
+
+export const getTeacherTimetable = async (schoolId, teacherId) => {
+  const timetables = await Timetable.find({ schoolId })
+    .populate('schoolClass', 'name')
+    .populate('section', 'name')
+    .populate('periods.subject', 'name code category');
+
+  // Filter periods where teacher matches
+  const schedule = [];
+  for (const t of timetables) {
+    const tPeriods = t.periods.filter((p) => p.teacher && p.teacher.toString() === teacherId.toString());
+    for (const p of tPeriods) {
+      schedule.push({
+        day: p.day,
+        periodNo: p.periodNo,
+        schoolClass: t.schoolClass,
+        section: t.section,
+        subject: p.subject,
+        startTime: p.startTime,
+        endTime: p.endTime,
+        room: p.room || t.section?.roomNo || '',
+      });
+    }
+  }
+
+  return schedule;
+};
+
+export const getSubjectTimetable = async (schoolId, subjectId) => {
+  const timetables = await Timetable.find({ schoolId })
+    .populate('schoolClass', 'name')
+    .populate('section', 'name')
+    .populate('periods.teacher', 'firstName lastName');
+
+  const schedule = [];
+  for (const t of timetables) {
+    const sPeriods = t.periods.filter((p) => p.subject && p.subject.toString() === subjectId.toString());
+    for (const p of sPeriods) {
+      schedule.push({
+        day: p.day,
+        periodNo: p.periodNo,
+        schoolClass: t.schoolClass,
+        section: t.section,
+        teacher: p.teacher,
+        startTime: p.startTime,
+        endTime: p.endTime,
+        room: p.room || '',
+      });
+    }
+  }
+  return schedule;
+};
+
+export const getDailyView = async (schoolId, day) => {
+  const timetables = await Timetable.find({ schoolId })
+    .populate('schoolClass', 'name')
+    .populate('section', 'name')
+    .populate('periods.subject', 'name code')
+    .populate('periods.teacher', 'firstName lastName');
+
+  const dailySchedule = [];
+  for (const t of timetables) {
+    const periodsForDay = t.periods.filter((p) => p.day === parseInt(day));
+    dailySchedule.push({
+      timetableId: t._id,
+      schoolClass: t.schoolClass,
+      section: t.section,
+      periods: periodsForDay,
+    });
+  }
+  return dailySchedule;
+};
+
+export const getConflictReport = async (id, schoolId) => {
+  const timetable = await getTimetableById(id, schoolId);
+  return timetable.generationLog;
+};
+
+export const getTeacherWorkloadReport = async (schoolId, academicYear) => {
+  const timetables = await Timetable.find({ schoolId, academicYear });
+  const teachers = await Teacher.find({ schoolId, status: 'active' });
+
+  const workload = new Map();
+  for (const t of teachers) {
+    workload.set(t._id.toString(), {
+      teacher: { _id: t._id, firstName: t.firstName, lastName: t.lastName, employeeId: t.employeeId },
+      weeklyLimit: t.weeklyTeachingLimit || 30,
+      dailyLimit: t.dailyTeachingLimit || 6,
+      assignedPeriods: 0,
+      dayCounts: Array.from({ length: 7 }).map(() => 0),
+    });
+  }
+
+  for (const t of timetables) {
+    for (const p of t.periods) {
+      if (p.isLunch || p.isBreak || p.isAssembly || p.isFixed) continue;
+      if (p.teacher) {
+        const tid = p.teacher.toString();
+        const data = workload.get(tid);
+        if (data) {
+          data.assignedPeriods++;
+          data.dayCounts[p.day]++;
+        }
+      }
+    }
+  }
+
+  return Array.from(workload.values());
+};
+
+export const getSubjectDistributionReport = async (schoolId, academicYear) => {
+  const timetables = await Timetable.find({ schoolId, academicYear })
+    .populate('schoolClass', 'name')
+    .populate('section', 'name');
+  
+  const subjects = await Subject.find({ schoolId });
+
+  const report = [];
+  for (const sub of subjects) {
+    const classesAssigned = [];
+    let totalPeriods = 0;
+
+    for (const t of timetables) {
+      const count = t.periods.filter((p) => p.subject && p.subject.toString() === sub._id.toString()).length;
+      if (count > 0) {
+        totalPeriods += count;
+        classesAssigned.push({
+          classId: t.schoolClass._id,
+          className: t.schoolClass.name,
+          sectionName: t.section.name,
+          periods: count,
+        });
+      }
+    }
+
+    report.push({
+      subjectId: sub._id,
+      name: sub.name,
+      code: sub.code,
+      category: sub.category,
+      totalWeeklyPeriodsAssigned: totalPeriods,
+      classesAssigned,
+    });
+  }
+
+  return report;
+};
+
+export const exportToPdf = async (id, schoolId) => {
+  const timetable = await getTimetableById(id, schoolId);
+  
+  const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const workingDays = timetable.configSnapshot?.workingDays || [1, 2, 3, 4, 5, 6];
+  const maxPeriods = timetable.totalPeriodsPerDay || 8;
+
+  // Build HTML table for pdf rendering
+  let headerHtml = `<th>Period</th>`;
+  for (const day of workingDays) {
+    headerHtml += `<th>${DAYS[day]}</th>`;
+  }
+
+  let rowsHtml = '';
+  for (let p = 1; p <= maxPeriods; p++) {
+    rowsHtml += `<tr><td><strong>P${p}</strong></td>`;
+    for (const day of workingDays) {
+      const cell = timetable.periods.find((pt) => pt.day === day && pt.periodNo === p);
+      if (cell?.isLunch || cell?.isBreak || cell?.isAssembly || cell?.isFixed) {
+        rowsHtml += `<td class="bg-gray-100 font-semibold text-center text-gray-500">${cell.label || 'Break'}</td>`;
+      } else if (cell?.subject) {
+        rowsHtml += `<td>
+          <div class="subject">${cell.subject.name}</div>
+          <div class="teacher">${cell.teacher ? `${cell.teacher.firstName} ${cell.teacher.lastName}` : ''}</div>
+          <div class="room">${cell.room ? `Room: ${cell.room}` : ''}</div>
+        </td>`;
+      } else {
+        rowsHtml += `<td class="empty">-</td>`;
+      }
+    }
+    rowsHtml += `</tr>`;
+  }
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Timetable - ${timetable.schoolClass.name} ${timetable.section.name}</title>
+      <style>
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 20px; color: #333; }
+        h1 { text-align: center; margin-bottom: 5px; color: #1e3a8a; }
+        h3 { text-align: center; margin-top: 0; color: #4b5563; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #d1d5db; padding: 12px 10px; text-align: center; font-size: 13px; }
+        th { background-color: #f3f4f6; color: #1f2937; font-weight: bold; }
+        .subject { font-weight: bold; color: #111827; }
+        .teacher { font-size: 11px; color: #4b5563; margin-top: 4px; }
+        .room { font-size: 10px; color: #6b7280; font-style: italic; margin-top: 2px; }
+        .bg-gray-100 { background-color: #f3f4f6; }
+        .empty { color: #d1d5db; }
+      </style>
+    </head>
+    <body>
+      <h1>${timetable.schoolClass.name} - Section ${timetable.section.name}</h1>
+      <h3>Academic Year: ${timetable.academicYear.name}</h3>
+      <table>
+        <thead>
+          <tr>${headerHtml}</tr>
+        </thead>
+        <tbody>
+          ${rowsHtml}
+        </tbody>
+      </table>
+    </body>
+    </html>
+  `;
+
+  const browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox'] });
+  const page = await browser.newPage();
+  await page.setContent(htmlContent, { waitUntil: 'domcontentloaded' });
+  const pdfBuffer = await page.pdf({ format: 'A4', landscape: true, printBackground: true });
+  await browser.close();
+
+  return pdfBuffer;
+};
+
+export const exportToExcel = async (id, schoolId) => {
+  const timetable = await getTimetableById(id, schoolId);
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet(`${timetable.schoolClass.name} - ${timetable.section.name}`);
+
+  const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const workingDays = timetable.configSnapshot?.workingDays || [1, 2, 3, 4, 5, 6];
+  const maxPeriods = timetable.totalPeriodsPerDay || 8;
+
+  // Add headers
+  const columns = [
+    { header: 'Period', key: 'period', width: 12 },
+    ...workingDays.map((d) => ({ header: DAYS[d], key: `day_${d}`, width: 25 })),
+  ];
+  worksheet.columns = columns;
+
+  // Format header row
+  worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFF' } };
+  worksheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '1E3A8A' } };
+  worksheet.getRow(1).alignment = { horizontal: 'center', vertical: 'middle' };
+
+  for (let p = 1; p <= maxPeriods; p++) {
+    const rowData = { period: `Period ${p}` };
+    for (const day of workingDays) {
+      const cell = timetable.periods.find((pt) => pt.day === day && pt.periodNo === p);
+      if (cell?.isLunch || cell?.isBreak || cell?.isAssembly || cell?.isFixed) {
+        rowData[`day_${day}`] = cell.label || 'Break';
+      } else if (cell?.subject) {
+        const teacherName = cell.teacher ? `${cell.teacher.firstName} ${cell.teacher.lastName}` : '';
+        rowData[`day_${day}`] = `${cell.subject.name}\n${teacherName}\n${cell.room ? `Room: ${cell.room}` : ''}`;
+      } else {
+        rowData[`day_${day}`] = '-';
+      }
+    }
+    
+    const row = worksheet.addRow(rowData);
+    row.alignment = { wrapText: true, horizontal: 'center', vertical: 'middle' };
+    row.height = 45;
+
+    // Apply formatting to cells in row
+    row.eachCell((cell, colNumber) => {
+      // Add borders
+      cell.border = {
+        top: { style: 'thin' },
+        left: { style: 'thin' },
+        bottom: { style: 'thin' },
+        right: { style: 'thin' },
+      };
+
+      // Gray color for break slots
+      const rawVal = cell.value?.toString() || '';
+      if (rawVal.includes('Break') || rawVal.includes('Lunch') || rawVal.includes('Assembly')) {
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'F3F4F6' },
+        };
+        cell.font = { italic: true, color: { argb: '6B7280' } };
+      }
+    });
+  }
+
+  // Generate Excel workbook buffer
+  const buffer = await workbook.xlsx.writeBuffer();
+  return buffer;
+};
+
+export const findSubstitutes = async (schoolId, absentTeacherId, targetPeriodId) => {
+  const timetable = await Timetable.findOne({ 'periods._id': targetPeriodId, schoolId });
+  if (!timetable) throw new ApiError(404, 'Timetable period not found');
+
+  const period = timetable.periods.id(targetPeriodId);
+  if (!period) throw new ApiError(404, 'Period not found');
+
+  const allTeachers = await Teacher.find({ schoolId, status: 'active' });
+  const allSubjects = await Subject.find({ schoolId });
+
+  const { SubstituteEngine } = await import('../utils/substituteEngine.js');
+  const candidates = SubstituteEngine.findSubstitutes(
+    absentTeacherId,
+    period.subject,
+    period.day,
+    period.periodNo,
+    allTeachers,
+    allSubjects
+  );
+
+  return candidates;
+};
