@@ -14,6 +14,7 @@ import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
 import { dashboardApi } from '../../api/dashboard.api';
 import { useUserStore } from '../../store/userStore';
+import { useThemeStore } from '../../store/useThemeStore';
 
 // ── Helpers ──
 
@@ -66,6 +67,8 @@ const activityIconMap = {
 
 export default function SchoolAdminDashboard() {
   const user = useUserStore((s) => s.user);
+  const { theme } = useThemeStore();
+  const isDark = theme === 'dark';
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
@@ -114,10 +117,18 @@ export default function SchoolAdminDashboard() {
     ? attendanceOverview.data
     : [];
 
-  const feeDonutData = feeCollection.donutData || [
-    { name: 'Collected', value: feeCollection.collected || 0, color: '#6C5CE7' },
-    { name: 'Pending', value: feeCollection.pending || 0, color: '#D97706' },
-  ];
+  const primaryChartColor = isDark ? '#34D399' : '#6C5CE7';
+  const pendingChartColor = isDark ? '#F59E0B' : '#D97706';
+
+  const feeDonutData = (feeCollection.donutData && feeCollection.donutData.length > 0)
+    ? feeCollection.donutData.map(d => ({
+        ...d,
+        color: d.name === 'Collected' ? primaryChartColor : pendingChartColor
+      }))
+    : [
+        { name: 'Collected', value: feeCollection.collected || 0, color: primaryChartColor },
+        { name: 'Pending', value: feeCollection.pending || 0, color: pendingChartColor },
+      ];
 
   const totalNeedsAttentionCount = 
     (needsAttention.lowAttendanceCount > 0 ? 1 : 0) +
@@ -126,134 +137,123 @@ export default function SchoolAdminDashboard() {
     (needsAttention.pendingLeaves > 0 ? 1 : 0) +
     (needsAttention.timetableConflicts > 0 ? 1 : 0);
 
-  const currentDateString = new Date().toLocaleDateString('en-US', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
-  });
-
   return (
     <div className="space-y-5 w-full pb-10">
-      {/* ── Page Greeting & Live Date ── */}
+      {/* ── Page Greeting ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-deep tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-bold text-deep dark:text-dark-text tracking-tight">
             {getGreeting()}, {user?.name?.split(' ')[0] || 'Admin'} 👋
           </h1>
-          <p className="text-xs sm:text-sm text-secondary mt-0.5">
+          <p className="text-xs sm:text-sm text-secondary dark:text-dark-text-secondary mt-0.5">
             Here's your school overview for today.
           </p>
-        </div>
-        <div className="flex items-center gap-2 text-xs font-semibold text-secondary bg-white border border-border px-3 py-1.5 rounded-xl shadow-2xs w-fit">
-          <Calendar size={13} className="text-forest" />
-          <span>{currentDateString}</span>
         </div>
       </div>
 
       {/* ── Row 1: 4 Contextual Operational KPI Cards ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 w-full">
         {/* Total Students */}
-        <div className="bg-white border border-border rounded-2xl p-5 shadow-2xs hover:shadow-card transition-all flex flex-col justify-between">
+        <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-2xl p-5 shadow-2xs hover:shadow-card dark:hover:border-dark-border-strong transition-all flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <div className="w-10 h-10 rounded-xl bg-forest-soft text-forest flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-forest-soft dark:bg-dark-accent-soft text-forest dark:text-emerald-400 flex items-center justify-center shrink-0">
               <Users size={20} strokeWidth={1.8} />
             </div>
-            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider text-muted bg-slate-100/80 border border-slate-200/50 uppercase">
+            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider text-muted dark:text-dark-text-muted bg-slate-100/80 dark:bg-dark-elevated border border-slate-200/50 dark:border-dark-border uppercase">
               Total Students
             </span>
           </div>
           <div className="my-3">
-            <p className="text-3xl font-extrabold text-deep leading-none tracking-tight">
+            <p className="text-3xl font-extrabold text-deep dark:text-dark-text leading-none tracking-tight">
               {loading ? '...' : (summary.studentCount ?? 0).toLocaleString('en-IN')}
             </p>
           </div>
-          <div className="pt-3 border-t border-border/70 flex items-center justify-between text-xs">
-            <span className="inline-flex items-center gap-1 font-semibold text-emerald-600 text-[11px] bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/50">
+          <div className="pt-3 border-t border-border/70 dark:border-dark-border flex items-center justify-between text-xs">
+            <span className="inline-flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400 text-[11px] bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-200/50 dark:border-emerald-500/20">
               <TrendingUp size={12} /> {summary.studentGrowthPercent ?? 100}%
             </span>
-            <span className="text-muted text-[11px] font-medium">
+            <span className="text-muted dark:text-dark-text-muted text-[11px] font-medium">
               {summary.newAdmissionsMonth ?? 0} New Admissions
             </span>
           </div>
         </div>
 
         {/* Total Teachers */}
-        <div className="bg-white border border-border rounded-2xl p-5 shadow-2xs hover:shadow-card transition-all flex flex-col justify-between">
+        <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-2xl p-5 shadow-2xs hover:shadow-card dark:hover:border-dark-border-strong transition-all flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <div className="w-10 h-10 rounded-xl bg-forest-soft text-forest flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-forest-soft dark:bg-dark-accent-soft text-forest dark:text-emerald-400 flex items-center justify-center shrink-0">
               <GraduationCap size={20} strokeWidth={1.8} />
             </div>
-            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider text-muted bg-slate-100/80 border border-slate-200/50 uppercase">
+            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider text-muted dark:text-dark-text-muted bg-slate-100/80 dark:bg-dark-elevated border border-slate-200/50 dark:border-dark-border uppercase">
               Total Teachers
             </span>
           </div>
           <div className="my-3">
-            <p className="text-3xl font-extrabold text-deep leading-none tracking-tight">
+            <p className="text-3xl font-extrabold text-deep dark:text-dark-text leading-none tracking-tight">
               {loading ? '...' : (summary.teacherCount ?? 0)}
             </p>
           </div>
-          <div className="pt-3 border-t border-border/70 flex items-center justify-between text-xs">
-            <span className="inline-flex items-center gap-1 font-semibold text-emerald-600 text-[11px] bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/50">
+          <div className="pt-3 border-t border-border/70 dark:border-dark-border flex items-center justify-between text-xs">
+            <span className="inline-flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400 text-[11px] bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-200/50 dark:border-emerald-500/20">
               <TrendingUp size={12} /> {summary.teacherGrowthPercent ?? 100}%
             </span>
-            <span className="text-muted text-[11px] font-medium">
+            <span className="text-muted dark:text-dark-text-muted text-[11px] font-medium">
               {summary.teachersOnLeaveToday ?? 0} On Leave Today
             </span>
           </div>
         </div>
 
         {/* Today's Attendance */}
-        <div className="bg-white border border-border rounded-2xl p-5 shadow-2xs hover:shadow-card transition-all flex flex-col justify-between">
+        <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-2xl p-5 shadow-2xs hover:shadow-card dark:hover:border-dark-border-strong transition-all flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <div className="w-10 h-10 rounded-xl bg-forest-soft text-forest flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-forest-soft dark:bg-dark-accent-soft text-forest dark:text-emerald-400 flex items-center justify-center shrink-0">
               <ClipboardCheck size={20} strokeWidth={1.8} />
             </div>
-            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider text-muted bg-slate-100/80 border border-slate-200/50 uppercase">
+            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider text-muted dark:text-dark-text-muted bg-slate-100/80 dark:bg-dark-elevated border border-slate-200/50 dark:border-dark-border uppercase">
               Today's Attendance
             </span>
           </div>
           <div className="my-3">
-            <p className="text-3xl font-extrabold text-deep leading-none tracking-tight">
+            <p className="text-3xl font-extrabold text-deep dark:text-dark-text leading-none tracking-tight">
               {loading ? '...' : summary.todayAttendance?.percentage !== null && summary.todayAttendance?.percentage !== undefined ? `${summary.todayAttendance.percentage}%` : '—'}
             </p>
           </div>
-          <div className="pt-3 border-t border-border/70 flex items-center justify-between text-xs">
+          <div className="pt-3 border-t border-border/70 dark:border-dark-border flex items-center justify-between text-xs">
             {summary.todayAttendance?.vsYesterday !== null && summary.todayAttendance?.vsYesterday !== undefined ? (
-              <span className={`inline-flex items-center gap-1 font-semibold text-[11px] px-2 py-0.5 rounded-full border ${summary.todayAttendance.vsYesterday >= 0 ? 'bg-emerald-50 text-emerald-600 border-emerald-200/50' : 'bg-rose-50 text-rose-600 border-rose-200/50'}`}>
+              <span className={`inline-flex items-center gap-1 font-semibold text-[11px] px-2 py-0.5 rounded-full border ${summary.todayAttendance.vsYesterday >= 0 ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200/50 dark:border-emerald-500/20' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-200/50 dark:border-rose-500/20'}`}>
                 {summary.todayAttendance.vsYesterday >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                 {summary.todayAttendance.vsYesterday >= 0 ? `+${summary.todayAttendance.vsYesterday}%` : `${summary.todayAttendance.vsYesterday}%`}
               </span>
             ) : (
-              <span className="text-[11px] text-muted font-medium">No comparison data</span>
+              <span className="text-[11px] text-muted dark:text-dark-text-muted font-medium">No comparison data</span>
             )}
-            <span className="text-muted text-[11px] font-medium">
+            <span className="text-muted dark:text-dark-text-muted text-[11px] font-medium">
               {summary.todayAttendance?.absentCount ?? 0} Absent Today
             </span>
           </div>
         </div>
 
         {/* Fees Collected */}
-        <div className="bg-white border border-border rounded-2xl p-5 shadow-2xs hover:shadow-card transition-all flex flex-col justify-between">
+        <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-2xl p-5 shadow-2xs hover:shadow-card dark:hover:border-dark-border-strong transition-all flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <div className="w-10 h-10 rounded-xl bg-forest text-white flex items-center justify-center font-bold text-base shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-forest dark:bg-emerald-500 text-white dark:text-gray-900 flex items-center justify-center font-bold text-base shrink-0">
               ₹
             </div>
-            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider text-muted bg-slate-100/80 border border-slate-200/50 uppercase">
+            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider text-muted dark:text-dark-text-muted bg-slate-100/80 dark:bg-dark-elevated border border-slate-200/50 dark:border-dark-border uppercase">
               Fees Collected
             </span>
           </div>
           <div className="my-3">
-            <p className="text-3xl font-extrabold text-deep leading-none tracking-tight">
+            <p className="text-3xl font-extrabold text-deep dark:text-dark-text leading-none tracking-tight">
               {loading ? '...' : formatINR(summary.feesCollected?.collectedSession)}
             </p>
           </div>
-          <div className="pt-3 border-t border-border/70 flex items-center justify-between text-xs">
-            <span className="text-muted text-[11px] font-medium">
+          <div className="pt-3 border-t border-border/70 dark:border-dark-border flex items-center justify-between text-xs">
+            <span className="text-muted dark:text-dark-text-muted text-[11px] font-medium">
               {summary.feesCollected?.feeCollectionRate ?? 0}% of {formatINR(summary.feesCollected?.targetSession)} target
             </span>
-            <span className="text-deep font-bold text-xs">
-              {formatINR(summary.feesCollected?.pendingSession)} <span className="text-muted font-normal text-[11px]">Pending</span>
+            <span className="text-deep dark:text-dark-text font-bold text-xs">
+              {formatINR(summary.feesCollected?.pendingSession)} <span className="text-muted dark:text-dark-text-muted font-normal text-[11px]">Pending</span>
             </span>
           </div>
         </div>
@@ -262,10 +262,10 @@ export default function SchoolAdminDashboard() {
       {/* ── Row 2: Middle Operational Command Grid (3 Columns) ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 w-full">
         {/* Needs Attention */}
-        <div className="bg-white border border-border rounded-2xl shadow-2xs flex flex-col justify-between overflow-hidden">
-          <div className="px-5 py-3.5 flex items-center justify-between border-b border-border">
+        <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-2xl shadow-2xs flex flex-col justify-between overflow-hidden">
+          <div className="px-5 py-3.5 flex items-center justify-between border-b border-border dark:border-dark-border">
             <div className="flex items-center gap-2">
-              <h3 className="text-xs font-bold text-deep uppercase tracking-wider">Needs Attention</h3>
+              <h3 className="text-xs font-bold text-deep dark:text-dark-text uppercase tracking-wider">Needs Attention</h3>
               <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-rose-500 text-white text-[10px] font-bold">
                 {totalNeedsAttentionCount}
               </span>
@@ -276,121 +276,121 @@ export default function SchoolAdminDashboard() {
             {/* Low Attendance */}
             <div
               onClick={() => navigate('/attendance')}
-              className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group"
+              className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-dark-hover transition-colors cursor-pointer group"
             >
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
                   <Users size={16} strokeWidth={1.8} />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-deep group-hover:text-forest transition-colors">
+                  <p className="text-xs font-bold text-deep dark:text-dark-text group-hover:text-forest dark:group-hover:text-emerald-400 transition-colors">
                     {needsAttention.lowAttendanceCount ?? 0} Students
                   </p>
-                  <p className="text-[11px] text-muted">Attendance below 75%</p>
+                  <p className="text-[11px] text-muted dark:text-dark-text-muted">Attendance below 75%</p>
                 </div>
               </div>
-              <ChevronRight size={15} className="text-muted group-hover:text-deep transition-colors" />
+              <ChevronRight size={15} className="text-muted dark:text-dark-text-muted group-hover:text-deep dark:group-hover:text-dark-text transition-colors" />
             </div>
 
             {/* Pending Admissions */}
             <div
               onClick={() => navigate('/admissions')}
-              className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group"
+              className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-dark-hover transition-colors cursor-pointer group"
             >
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
                   <BookOpen size={16} strokeWidth={1.8} />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-deep group-hover:text-forest transition-colors">
+                  <p className="text-xs font-bold text-deep dark:text-dark-text group-hover:text-forest dark:group-hover:text-emerald-400 transition-colors">
                     {needsAttention.pendingApplications ?? 0} Applications
                   </p>
-                  <p className="text-[11px] text-muted">Awaiting admission review</p>
+                  <p className="text-[11px] text-muted dark:text-dark-text-muted">Awaiting admission review</p>
                 </div>
               </div>
-              <ChevronRight size={15} className="text-muted group-hover:text-deep transition-colors" />
+              <ChevronRight size={15} className="text-muted dark:text-dark-text-muted group-hover:text-deep dark:group-hover:text-dark-text transition-colors" />
             </div>
 
             {/* Pending Fees */}
             <div
               onClick={() => navigate('/fees')}
-              className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group"
+              className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-dark-hover transition-colors cursor-pointer group"
             >
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-sm shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 flex items-center justify-center font-bold text-sm shrink-0">
                   ₹
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-deep group-hover:text-forest transition-colors">
+                  <p className="text-xs font-bold text-deep dark:text-dark-text group-hover:text-forest dark:group-hover:text-emerald-400 transition-colors">
                     {formatINR(needsAttention.pendingFeesAmount)}
                   </p>
-                  <p className="text-[11px] text-muted">
+                  <p className="text-[11px] text-muted dark:text-dark-text-muted">
                     Fees pending from {needsAttention.pendingFeesStudentCount ?? 0} {needsAttention.pendingFeesStudentCount === 1 ? 'student' : 'students'}
                   </p>
                 </div>
               </div>
-              <ChevronRight size={15} className="text-muted group-hover:text-deep transition-colors" />
+              <ChevronRight size={15} className="text-muted dark:text-dark-text-muted group-hover:text-deep dark:group-hover:text-dark-text transition-colors" />
             </div>
 
             {/* Leave Requests */}
             <div
               onClick={() => navigate('/leaves')}
-              className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group"
+              className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-dark-hover transition-colors cursor-pointer group"
             >
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
                   <GraduationCap size={16} strokeWidth={1.8} />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-deep group-hover:text-forest transition-colors">
+                  <p className="text-xs font-bold text-deep dark:text-dark-text group-hover:text-forest dark:group-hover:text-emerald-400 transition-colors">
                     {needsAttention.pendingLeaves ?? 0} Requests
                   </p>
-                  <p className="text-[11px] text-muted">Teacher leave requests pending</p>
+                  <p className="text-[11px] text-muted dark:text-dark-text-muted">Teacher leave requests pending</p>
                 </div>
               </div>
-              <ChevronRight size={15} className="text-muted group-hover:text-deep transition-colors" />
+              <ChevronRight size={15} className="text-muted dark:text-dark-text-muted group-hover:text-deep dark:group-hover:text-dark-text transition-colors" />
             </div>
 
             {/* Timetable Conflicts */}
             <div
               onClick={() => navigate('/timetable')}
-              className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group"
+              className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-dark-hover transition-colors cursor-pointer group"
             >
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
                   <ShieldAlert size={16} strokeWidth={1.8} />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-deep group-hover:text-forest transition-colors">
+                  <p className="text-xs font-bold text-deep dark:text-dark-text group-hover:text-forest dark:group-hover:text-emerald-400 transition-colors">
                     {needsAttention.timetableConflicts ?? 0} Conflicts
                   </p>
-                  <p className="text-[11px] text-muted">Timetable conflicts detected</p>
+                  <p className="text-[11px] text-muted dark:text-dark-text-muted">Timetable conflicts detected</p>
                 </div>
               </div>
-              <ChevronRight size={15} className="text-muted group-hover:text-deep transition-colors" />
+              <ChevronRight size={15} className="text-muted dark:text-dark-text-muted group-hover:text-deep dark:group-hover:text-dark-text transition-colors" />
             </div>
           </div>
         </div>
 
         {/* Attendance Overview (Spline Area Chart) */}
-        <div className="bg-white border border-border rounded-2xl shadow-2xs flex flex-col justify-between relative overflow-hidden">
-          <div className="px-5 py-3.5 flex items-center justify-between border-b border-border">
-            <h3 className="text-xs font-bold text-deep uppercase tracking-wider">Attendance Overview</h3>
+        <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-2xl shadow-2xs flex flex-col justify-between relative overflow-hidden">
+          <div className="px-5 py-3.5 flex items-center justify-between border-b border-border dark:border-dark-border">
+            <h3 className="text-xs font-bold text-deep dark:text-dark-text uppercase tracking-wider">Attendance Overview</h3>
             <div className="relative">
               <button
                 type="button"
                 onClick={() => setAttendanceDropdownOpen((prev) => !prev)}
-                className="flex items-center gap-1 text-xs text-secondary bg-slate-50 px-2.5 py-1 rounded-lg cursor-pointer border border-border hover:bg-slate-100 transition-colors"
+                className="flex items-center gap-1 text-xs text-secondary dark:text-dark-text-secondary bg-slate-50 dark:bg-dark-elevated px-2.5 py-1 rounded-lg cursor-pointer border border-border dark:border-dark-border hover:bg-slate-100 dark:hover:bg-dark-hover transition-colors"
               >
                 <span>{attendancePeriod}</span>
-                <ChevronDown size={12} className="text-muted" />
+                <ChevronDown size={12} className="text-muted dark:text-dark-text-muted" />
               </button>
               {attendanceDropdownOpen && (
-                <div className="absolute right-0 mt-1 w-32 bg-white border border-border rounded-xl shadow-lg z-30 py-1 text-xs">
+                <div className="absolute right-0 mt-1 w-32 bg-white dark:bg-dark-elevated border border-border dark:border-dark-border rounded-xl shadow-lg z-30 py-1 text-xs">
                   {['Today', 'This Week', 'This Month'].map((p) => (
                     <button
                       key={p}
-                      className={`w-full text-left px-3 py-1.5 hover:bg-slate-50 transition-colors ${attendancePeriod === p ? 'font-bold text-forest bg-forest/5' : 'text-deep'}`}
+                      className={`w-full text-left px-3 py-1.5 hover:bg-slate-50 dark:hover:bg-dark-hover transition-colors ${attendancePeriod === p ? 'font-bold text-forest dark:text-emerald-400 bg-forest/5 dark:bg-dark-accent-soft' : 'text-deep dark:text-dark-text'}`}
                       onClick={() => {
                         setAttendancePeriod(p);
                         setAttendanceDropdownOpen(false);
@@ -407,28 +407,28 @@ export default function SchoolAdminDashboard() {
           <div className="p-5 pt-4">
             <div className="flex items-baseline justify-between mb-3">
               <div>
-                <span className="text-3xl font-extrabold text-deep tracking-tight">
+                <span className="text-3xl font-extrabold text-deep dark:text-dark-text tracking-tight">
                   {attendanceOverview.averagePercentage !== null && attendanceOverview.averagePercentage !== undefined
                     ? `${attendanceOverview.averagePercentage}%`
                     : '—'}
                 </span>
-                <p className="text-xs text-muted font-medium mt-0.5">Average Attendance</p>
+                <p className="text-xs text-muted dark:text-dark-text-muted font-medium mt-0.5">Average Attendance</p>
               </div>
               {attendanceOverview.vsPreviousPeriod !== null && attendanceOverview.vsPreviousPeriod !== undefined ? (
-                <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full border ${attendanceOverview.vsPreviousPeriod >= 0 ? 'bg-emerald-50 text-emerald-600 border-emerald-200/50' : 'bg-rose-50 text-rose-600 border-rose-200/50'}`}>
+                <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full border ${attendanceOverview.vsPreviousPeriod >= 0 ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200/50 dark:border-emerald-500/20' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-200/50 dark:border-rose-500/20'}`}>
                   {attendanceOverview.vsPreviousPeriod >= 0 ? <TrendingUp size={13} /> : <TrendingDown size={13} />}
                   {attendanceOverview.vsPreviousPeriod >= 0 ? `+${attendanceOverview.vsPreviousPeriod}%` : `${attendanceOverview.vsPreviousPeriod}%`}{' '}
-                  <span className="font-normal text-muted">vs last period</span>
+                  <span className="font-normal text-muted dark:text-dark-text-muted">vs last period</span>
                 </span>
               ) : (
-                <span className="text-xs text-muted">No comparison data</span>
+                <span className="text-xs text-muted dark:text-dark-text-muted">No comparison data</span>
               )}
             </div>
 
             <div className="h-44 w-full">
               {attendanceChartData.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-xs text-muted italic">
-                  <ClipboardCheck size={24} className="opacity-30 mb-1 text-forest" />
+                <div className="h-full flex flex-col items-center justify-center text-xs text-muted dark:text-dark-text-muted italic">
+                  <ClipboardCheck size={24} className="opacity-30 mb-1 text-forest dark:text-emerald-400" />
                   No attendance data for this period
                 </div>
               ) : (
@@ -436,28 +436,35 @@ export default function SchoolAdminDashboard() {
                   <AreaChart data={attendanceChartData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
                     <defs>
                       <linearGradient id="attendanceGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#6C5CE7" stopOpacity={0.16} />
-                        <stop offset="95%" stopColor="#6C5CE7" stopOpacity={0.0} />
+                        <stop offset="5%" stopColor={primaryChartColor} stopOpacity={isDark ? 0.25 : 0.16} />
+                        <stop offset="95%" stopColor={primaryChartColor} stopOpacity={0.0} />
                       </linearGradient>
                     </defs>
-                    <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 11 }} />
-                    <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 11 }} ticks={[0, 25, 50, 75, 100]} />
+                    <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: isDark ? '#707980' : '#64748B', fontSize: 11 }} />
+                    <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fill: isDark ? '#707980' : '#64748B', fontSize: 11 }} ticks={[0, 25, 50, 75, 100]} />
                     <Tooltip
                       formatter={(val, name, item) => [
                         `${val}% (${item.payload.present ?? 0} present, ${item.payload.absent ?? 0} absent)`,
                         'Attendance'
                       ]}
-                      contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#E2E8F0', borderRadius: '12px', fontSize: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.06)' }}
+                      contentStyle={{
+                        backgroundColor: isDark ? '#15191C' : '#FFFFFF',
+                        borderColor: isDark ? 'rgba(255,255,255,0.06)' : '#E2E8F0',
+                        color: isDark ? '#F5F7F8' : '#0F172A',
+                        borderRadius: '12px',
+                        fontSize: '12px',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                      }}
                     />
                     <Area
                       type="monotone"
                       dataKey="attendance"
-                      stroke="#6C5CE7"
+                      stroke={primaryChartColor}
                       strokeWidth={2.5}
                       fillOpacity={1}
                       fill="url(#attendanceGradient)"
-                      dot={{ fill: '#6C5CE7', stroke: '#FFFFFF', strokeWidth: 2, r: 3.5 }}
-                      activeDot={{ r: 5, fill: '#6C5CE7', stroke: '#FFFFFF', strokeWidth: 2 }}
+                      dot={{ fill: primaryChartColor, stroke: isDark ? '#101315' : '#FFFFFF', strokeWidth: 2, r: 3.5 }}
+                      activeDot={{ r: 5, fill: primaryChartColor, stroke: isDark ? '#101315' : '#FFFFFF', strokeWidth: 2 }}
                       connectNulls={true}
                     />
                   </AreaChart>
@@ -468,12 +475,12 @@ export default function SchoolAdminDashboard() {
         </div>
 
         {/* Today's Schedule Timeline */}
-        <div className="bg-white border border-border rounded-2xl shadow-2xs flex flex-col justify-between overflow-hidden">
-          <div className="px-5 py-3.5 flex items-center justify-between border-b border-border">
-            <h3 className="text-xs font-bold text-deep uppercase tracking-wider">Today's Schedule</h3>
+        <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-2xl shadow-2xs flex flex-col justify-between overflow-hidden">
+          <div className="px-5 py-3.5 flex items-center justify-between border-b border-border dark:border-dark-border">
+            <h3 className="text-xs font-bold text-deep dark:text-dark-text uppercase tracking-wider">Today's Schedule</h3>
             <button
               onClick={() => navigate('/timetable')}
-              className="text-xs font-semibold text-forest hover:underline cursor-pointer"
+              className="text-xs font-semibold text-forest dark:text-emerald-400 hover:underline cursor-pointer"
             >
               View Full Timetable
             </button>
@@ -482,27 +489,27 @@ export default function SchoolAdminDashboard() {
           <div className="p-5 flex-1 flex flex-col justify-center overflow-y-auto max-h-72">
             {todaysSchedule.length === 0 ? (
               <div className="py-8 text-center flex flex-col items-center justify-center">
-                <div className="w-12 h-12 rounded-full bg-forest-soft text-forest flex items-center justify-center mb-3">
+                <div className="w-12 h-12 rounded-full bg-forest-soft dark:bg-dark-accent-soft text-forest dark:text-emerald-400 flex items-center justify-center mb-3">
                   <Clock size={22} strokeWidth={1.8} />
                 </div>
-                <h4 className="text-sm font-bold text-deep mb-1">No classes scheduled today.</h4>
-                <p className="text-xs text-muted max-w-xs leading-relaxed">
+                <h4 className="text-sm font-bold text-deep dark:text-dark-text mb-1">No classes scheduled today.</h4>
+                <p className="text-xs text-muted dark:text-dark-text-muted max-w-xs leading-relaxed">
                   Enjoy your Sunday or review tomorrow's academic timetable in advance.
                 </p>
               </div>
             ) : (
               <div className="space-y-3">
                 {todaysSchedule.map((item, index) => (
-                  <div key={index} className={`flex items-start justify-between border-l-2 ${item.color || 'border-l-forest'} pl-3 py-0.5`}>
+                  <div key={index} className={`flex items-start justify-between border-l-2 ${item.color || 'border-l-forest dark:border-l-emerald-400'} pl-3 py-0.5`}>
                     <div>
-                      <span className="text-[11px] font-semibold text-muted block">{item.time}</span>
-                      <p className="text-xs font-bold text-deep leading-snug mt-0.5">{item.subject}</p>
-                      <p className="text-[11px] text-muted">{item.classRoom}</p>
+                      <span className="text-[11px] font-semibold text-muted dark:text-dark-text-muted block">{item.time}</span>
+                      <p className="text-xs font-bold text-deep dark:text-dark-text leading-snug mt-0.5">{item.subject}</p>
+                      <p className="text-[11px] text-muted dark:text-dark-text-muted">{item.classRoom}</p>
                     </div>
                     {item.isBreak ? (
-                      <Coffee size={15} className="text-muted shrink-0 mt-1" />
+                      <Coffee size={15} className="text-muted dark:text-dark-text-muted shrink-0 mt-1" />
                     ) : (
-                      <span className="text-[11px] font-medium text-secondary text-right shrink-0">
+                      <span className="text-[11px] font-medium text-secondary dark:text-dark-text-secondary text-right shrink-0">
                         {item.teacher}
                       </span>
                     )}
@@ -517,24 +524,24 @@ export default function SchoolAdminDashboard() {
       {/* ── Row 3: Bottom Operations Row (3 Columns) ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 w-full">
         {/* Attendance by Class */}
-        <div className="bg-white border border-border rounded-2xl shadow-2xs flex flex-col justify-between relative overflow-hidden">
-          <div className="px-5 py-3.5 flex items-center justify-between border-b border-border">
-            <h3 className="text-xs font-bold text-deep uppercase tracking-wider">Attendance by Class</h3>
+        <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-2xl shadow-2xs flex flex-col justify-between relative overflow-hidden">
+          <div className="px-5 py-3.5 flex items-center justify-between border-b border-border dark:border-dark-border">
+            <h3 className="text-xs font-bold text-deep dark:text-dark-text uppercase tracking-wider">Attendance by Class</h3>
             <div className="relative">
               <button
                 type="button"
                 onClick={() => setClassDropdownOpen((prev) => !prev)}
-                className="flex items-center gap-1 text-xs text-secondary bg-slate-50 px-2.5 py-1 rounded-lg cursor-pointer border border-border hover:bg-slate-100 transition-colors"
+                className="flex items-center gap-1 text-xs text-secondary dark:text-dark-text-secondary bg-slate-50 dark:bg-dark-elevated px-2.5 py-1 rounded-lg cursor-pointer border border-border dark:border-dark-border hover:bg-slate-100 dark:hover:bg-dark-hover transition-colors"
               >
                 <span>{classAttendancePeriod}</span>
-                <ChevronDown size={12} className="text-muted" />
+                <ChevronDown size={12} className="text-muted dark:text-dark-text-muted" />
               </button>
               {classDropdownOpen && (
-                <div className="absolute right-0 mt-1 w-32 bg-white border border-border rounded-xl shadow-lg z-30 py-1 text-xs">
+                <div className="absolute right-0 mt-1 w-32 bg-white dark:bg-dark-elevated border border-border dark:border-dark-border rounded-xl shadow-lg z-30 py-1 text-xs">
                   {['Today', 'This Week', 'This Month'].map((p) => (
                     <button
                       key={p}
-                      className={`w-full text-left px-3 py-1.5 hover:bg-slate-50 transition-colors ${classAttendancePeriod === p ? 'font-bold text-forest bg-forest/5' : 'text-deep'}`}
+                      className={`w-full text-left px-3 py-1.5 hover:bg-slate-50 dark:hover:bg-dark-hover transition-colors ${classAttendancePeriod === p ? 'font-bold text-forest dark:text-emerald-400 bg-forest/5 dark:bg-dark-accent-soft' : 'text-deep dark:text-dark-text'}`}
                       onClick={() => {
                         setClassAttendancePeriod(p);
                         setClassDropdownOpen(false);
@@ -551,30 +558,30 @@ export default function SchoolAdminDashboard() {
           <div className="p-5">
             <div className="space-y-3.5">
               {attendanceByClass.length === 0 ? (
-                <div className="py-6 text-center text-xs text-muted italic">
+                <div className="py-6 text-center text-xs text-muted dark:text-dark-text-muted italic">
                   No class attendance records available
                 </div>
               ) : (
                 attendanceByClass.map((row, i) => (
                   <div key={i} className="space-y-1">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-semibold text-deep">{row.class}</span>
+                      <span className="font-semibold text-deep dark:text-dark-text">{row.class}</span>
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-deep text-xs">
+                        <span className="font-bold text-deep dark:text-dark-text text-xs">
                           {row.percentage}%
                         </span>
                         <span
                           className={`inline-flex items-center text-[10px] font-bold ${
-                            row.up ? 'text-emerald-600' : 'text-rose-600'
+                            row.up ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
                           }`}
                         >
                           {row.change !== '—' && (row.up ? `+${row.change}` : row.change)}
                         </span>
                       </div>
                     </div>
-                    <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                    <div className="w-full bg-slate-100 dark:bg-dark-elevated rounded-full h-2 overflow-hidden">
                       <div
-                        className="bg-forest h-full rounded-full transition-all duration-500"
+                        className="bg-forest dark:bg-emerald-400 h-full rounded-full transition-all duration-500"
                         style={{ width: `${Math.min(100, row.percentage)}%` }}
                       />
                     </div>
@@ -586,24 +593,24 @@ export default function SchoolAdminDashboard() {
         </div>
 
         {/* Fee Collection Overview (Donut Chart) */}
-        <div className="bg-white border border-border rounded-2xl shadow-2xs flex flex-col justify-between relative overflow-hidden">
-          <div className="px-5 py-3.5 flex items-center justify-between border-b border-border">
-            <h3 className="text-xs font-bold text-deep uppercase tracking-wider">Fee Collection Overview</h3>
+        <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-2xl shadow-2xs flex flex-col justify-between relative overflow-hidden">
+          <div className="px-5 py-3.5 flex items-center justify-between border-b border-border dark:border-dark-border">
+            <h3 className="text-xs font-bold text-deep dark:text-dark-text uppercase tracking-wider">Fee Collection Overview</h3>
             <div className="relative">
               <button
                 type="button"
                 onClick={() => setFeeDropdownOpen((prev) => !prev)}
-                className="flex items-center gap-1 text-xs text-secondary bg-slate-50 px-2.5 py-1 rounded-lg cursor-pointer border border-border hover:bg-slate-100 transition-colors"
+                className="flex items-center gap-1 text-xs text-secondary dark:text-dark-text-secondary bg-slate-50 dark:bg-dark-elevated px-2.5 py-1 rounded-lg cursor-pointer border border-border dark:border-dark-border hover:bg-slate-100 dark:hover:bg-dark-hover transition-colors"
               >
                 <span>{feePeriod}</span>
-                <ChevronDown size={12} className="text-muted" />
+                <ChevronDown size={12} className="text-muted dark:text-dark-text-muted" />
               </button>
               {feeDropdownOpen && (
-                <div className="absolute right-0 mt-1 w-32 bg-white border border-border rounded-xl shadow-lg z-30 py-1 text-xs">
+                <div className="absolute right-0 mt-1 w-32 bg-white dark:bg-dark-elevated border border-border dark:border-dark-border rounded-xl shadow-lg z-30 py-1 text-xs">
                   {['Today', 'This Week', 'This Month', 'This Session'].map((p) => (
                     <button
                       key={p}
-                      className={`w-full text-left px-3 py-1.5 hover:bg-slate-50 transition-colors ${feePeriod === p ? 'font-bold text-forest bg-forest/5' : 'text-deep'}`}
+                      className={`w-full text-left px-3 py-1.5 hover:bg-slate-50 dark:hover:bg-dark-hover transition-colors ${feePeriod === p ? 'font-bold text-forest dark:text-emerald-400 bg-forest/5 dark:bg-dark-accent-soft' : 'text-deep dark:text-dark-text'}`}
                       onClick={() => {
                         setFeePeriod(p);
                         setFeeDropdownOpen(false);
@@ -639,19 +646,19 @@ export default function SchoolAdminDashboard() {
                 </PieChart>
               </ResponsiveContainer>
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="text-[10px] text-muted font-bold tracking-widest uppercase">TOTAL</span>
-                <span className="text-base font-extrabold text-deep leading-tight mt-0.5">{formatINR(feeCollection.target || (feeCollection.collected + feeCollection.pending))}</span>
+                <span className="text-[10px] text-muted dark:text-dark-text-muted font-bold tracking-widest uppercase">TOTAL</span>
+                <span className="text-base font-extrabold text-deep dark:text-dark-text leading-tight mt-0.5">{formatINR(feeCollection.target || (feeCollection.collected + feeCollection.pending))}</span>
               </div>
             </div>
 
             {/* Legend & Stats */}
-            <div className="grid grid-cols-2 gap-4 w-full pt-3 mt-1 border-t border-border/70 text-xs">
+            <div className="grid grid-cols-2 gap-4 w-full pt-3 mt-1 border-t border-border/70 dark:border-dark-border text-xs">
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-forest shrink-0" />
+                <span className="w-2.5 h-2.5 rounded-full bg-forest dark:bg-emerald-400 shrink-0" />
                 <div>
-                  <span className="text-[11px] text-muted block">Collected</span>
-                  <p className="font-bold text-deep text-xs">
-                    {formatINR(feeCollection.collected)} <span className="font-normal text-muted text-[10px]">({feeCollection.collectedPercentage ?? 0}%)</span>
+                  <span className="text-[11px] text-muted dark:text-dark-text-muted block">Collected</span>
+                  <p className="font-bold text-deep dark:text-dark-text text-xs">
+                    {formatINR(feeCollection.collected)} <span className="font-normal text-muted dark:text-dark-text-muted text-[10px]">({feeCollection.collectedPercentage ?? 0}%)</span>
                   </p>
                 </div>
               </div>
@@ -659,9 +666,9 @@ export default function SchoolAdminDashboard() {
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0" />
                 <div>
-                  <span className="text-[11px] text-muted block">Pending</span>
-                  <p className="font-bold text-deep text-xs">
-                    {formatINR(feeCollection.pending)} <span className="font-normal text-muted text-[10px]">({feeCollection.pendingPercentage ?? 0}%)</span>
+                  <span className="text-[11px] text-muted dark:text-dark-text-muted block">Pending</span>
+                  <p className="font-bold text-deep dark:text-dark-text text-xs">
+                    {formatINR(feeCollection.pending)} <span className="font-normal text-muted dark:text-dark-text-muted text-[10px]">({feeCollection.pendingPercentage ?? 0}%)</span>
                   </p>
                 </div>
               </div>
@@ -670,12 +677,12 @@ export default function SchoolAdminDashboard() {
         </div>
 
         {/* Recent Activity */}
-        <div className="bg-white border border-border rounded-2xl shadow-2xs flex flex-col justify-between overflow-hidden">
-          <div className="px-5 py-3.5 flex items-center justify-between border-b border-border">
-            <h3 className="text-xs font-bold text-deep uppercase tracking-wider">Recent Activity</h3>
+        <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-2xl shadow-2xs flex flex-col justify-between overflow-hidden">
+          <div className="px-5 py-3.5 flex items-center justify-between border-b border-border dark:border-dark-border">
+            <h3 className="text-xs font-bold text-deep dark:text-dark-text uppercase tracking-wider">Recent Activity</h3>
             <button
               onClick={() => navigate('/notices')}
-              className="text-xs font-semibold text-forest hover:underline cursor-pointer"
+              className="text-xs font-semibold text-forest dark:text-emerald-400 hover:underline cursor-pointer"
             >
               View All
             </button>
@@ -683,8 +690,8 @@ export default function SchoolAdminDashboard() {
 
           <div className="p-5 space-y-3.5 max-h-72 overflow-y-auto">
             {recentActivities.length === 0 ? (
-              <div className="py-8 text-center text-xs text-muted italic">
-                <FileCheck size={24} className="mx-auto mb-2 opacity-30 text-forest" />
+              <div className="py-8 text-center text-xs text-muted dark:text-dark-text-muted italic">
+                <FileCheck size={24} className="mx-auto mb-2 opacity-30 text-forest dark:text-emerald-400" />
                 No recent activity recorded yet.
               </div>
             ) : (
@@ -692,19 +699,19 @@ export default function SchoolAdminDashboard() {
                 const IconComponent = activityIconMap[act.icon] || FileCheck;
                 return (
                   <div key={index} className="flex items-start gap-3">
-                    <div className={`w-8 h-8 rounded-xl ${act.color || 'bg-slate-100 text-slate-700'} flex items-center justify-center shrink-0`}>
+                    <div className={`w-8 h-8 rounded-xl ${act.color || 'bg-slate-100 dark:bg-dark-elevated text-slate-700 dark:text-dark-text'} flex items-center justify-center shrink-0`}>
                       <IconComponent size={14} strokeWidth={1.8} />
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
-                        <p className="text-xs font-bold text-deep truncate leading-tight">
+                        <p className="text-xs font-bold text-deep dark:text-dark-text truncate leading-tight">
                           {act.title}
                         </p>
-                        <span className="text-[10px] font-medium text-muted shrink-0">
+                        <span className="text-[10px] font-medium text-muted dark:text-dark-text-muted shrink-0">
                           {formatActivityTime(act.time)}
                         </span>
                       </div>
-                      <p className="text-[11px] text-muted truncate mt-0.5">
+                      <p className="text-[11px] text-muted dark:text-dark-text-muted truncate mt-0.5">
                         {act.desc}
                       </p>
                     </div>
@@ -717,7 +724,7 @@ export default function SchoolAdminDashboard() {
       </div>
 
       {/* ── Footer ── */}
-      <footer className="pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted">
+      <footer className="pt-6 border-t border-border dark:border-dark-border flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted dark:text-dark-text-muted">
         <p>© 2026 Instique School Management System. All rights reserved.</p>
         <p className="font-medium">Version 1.0.0</p>
       </footer>

@@ -750,8 +750,8 @@ export default function Admissions() {
       {/* ── Page Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 pb-1">
         <div>
-          <h1 className="text-xl font-bold text-deep tracking-tight">Admissions</h1>
-          <p className="text-secondary text-xs mt-1 max-w-xl leading-relaxed">
+          <h1 className="text-xl font-bold text-deep dark:text-dark-text tracking-tight">Admissions</h1>
+          <p className="text-secondary dark:text-dark-text-secondary text-xs mt-1 max-w-xl leading-relaxed">
             Manage admission applications through the enrollment workflow.
           </p>
         </div>
@@ -762,105 +762,105 @@ export default function Admissions() {
         </div>
       </div>
 
-      {/* ── Row 1: Top 6 Summary KPI Cards (Exact match to reference) ── */}
+      {/* ── Row 1: Top 6 Summary KPI Cards ── */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
         {/* Total Applications */}
-        <div className="bg-white border border-border rounded-xl p-3.5 shadow-2xs hover:shadow-card transition-shadow">
-          <div className="w-8 h-8 rounded-full bg-forest-soft text-forest flex items-center justify-center mb-2">
+        <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3.5 shadow-2xs hover:shadow-card dark:hover:border-dark-border-strong transition-shadow">
+          <div className="w-8 h-8 rounded-full bg-forest-soft dark:bg-dark-accent-soft text-forest dark:text-emerald-400 flex items-center justify-center mb-2">
             <Users size={16} />
           </div>
-          <p className="text-[11px] font-semibold text-secondary">Total Applications</p>
-          <p className="text-xl sm:text-2xl font-bold text-deep leading-tight mt-0.5">
+          <p className="text-[11px] font-semibold text-secondary dark:text-dark-text-secondary">Total Applications</p>
+          <p className="text-xl sm:text-2xl font-bold text-deep dark:text-dark-text leading-tight mt-0.5">
             {stats.total}
           </p>
-          <p className="text-[10px] text-muted mt-1">This Academic Year</p>
+          <p className="text-[10px] text-muted dark:text-dark-text-muted mt-1">This Academic Year</p>
         </div>
 
         {/* Submitted */}
-        <div className="bg-white border border-border rounded-xl p-3.5 shadow-2xs hover:shadow-card transition-shadow">
-          <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-2">
+        <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3.5 shadow-2xs hover:shadow-card dark:hover:border-dark-border-strong transition-shadow">
+          <div className="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-2">
             <FileText size={16} />
           </div>
-          <p className="text-[11px] font-semibold text-secondary">Submitted</p>
-          <p className="text-xl sm:text-2xl font-bold text-deep leading-tight mt-0.5">
+          <p className="text-[11px] font-semibold text-secondary dark:text-dark-text-secondary">Submitted</p>
+          <p className="text-xl sm:text-2xl font-bold text-deep dark:text-dark-text leading-tight mt-0.5">
             {stats.submitted}
           </p>
-          <p className="text-[10px] text-muted mt-1">{getPercentage(stats.submitted)}</p>
+          <p className="text-[10px] text-muted dark:text-dark-text-muted mt-1">{getPercentage(stats.submitted)}</p>
         </div>
 
         {/* Under Review */}
-        <div className="bg-white border border-border rounded-xl p-3.5 shadow-2xs hover:shadow-card transition-shadow">
-          <div className="w-8 h-8 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mb-2">
+        <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3.5 shadow-2xs hover:shadow-card dark:hover:border-dark-border-strong transition-shadow">
+          <div className="w-8 h-8 rounded-full bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-2">
             <Sparkles size={16} />
           </div>
-          <p className="text-[11px] font-semibold text-secondary">Under Review</p>
-          <p className="text-xl sm:text-2xl font-bold text-deep leading-tight mt-0.5">
+          <p className="text-[11px] font-semibold text-secondary dark:text-dark-text-secondary">Under Review</p>
+          <p className="text-xl sm:text-2xl font-bold text-deep dark:text-dark-text leading-tight mt-0.5">
             {stats.underReview}
           </p>
-          <p className="text-[10px] text-muted mt-1">{getPercentage(stats.underReview)}</p>
+          <p className="text-[10px] text-muted dark:text-dark-text-muted mt-1">{getPercentage(stats.underReview)}</p>
         </div>
 
         {/* Approved */}
-        <div className="bg-white border border-border rounded-xl p-3.5 shadow-2xs hover:shadow-card transition-shadow">
-          <div className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-2">
+        <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3.5 shadow-2xs hover:shadow-card dark:hover:border-dark-border-strong transition-shadow">
+          <div className="w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-2">
             <CheckCheck size={16} />
           </div>
-          <p className="text-[11px] font-semibold text-secondary">Approved</p>
-          <p className="text-xl sm:text-2xl font-bold text-deep leading-tight mt-0.5">
+          <p className="text-[11px] font-semibold text-secondary dark:text-dark-text-secondary">Approved</p>
+          <p className="text-xl sm:text-2xl font-bold text-deep dark:text-dark-text leading-tight mt-0.5">
             {stats.approved}
           </p>
-          <p className="text-[10px] text-muted mt-1">{getPercentage(stats.approved)}</p>
+          <p className="text-[10px] text-muted dark:text-dark-text-muted mt-1">{getPercentage(stats.approved)}</p>
         </div>
 
         {/* Enrolled */}
-        <div className="bg-white border border-border rounded-xl p-3.5 shadow-2xs hover:shadow-card transition-shadow">
-          <div className="w-8 h-8 rounded-full bg-teal-50 text-teal-600 flex items-center justify-center mb-2">
+        <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3.5 shadow-2xs hover:shadow-card dark:hover:border-dark-border-strong transition-shadow">
+          <div className="w-8 h-8 rounded-full bg-teal-50 dark:bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center mb-2">
             <UserPlus size={16} />
           </div>
-          <p className="text-[11px] font-semibold text-secondary">Enrolled</p>
-          <p className="text-xl sm:text-2xl font-bold text-deep leading-tight mt-0.5">
+          <p className="text-[11px] font-semibold text-secondary dark:text-dark-text-secondary">Enrolled</p>
+          <p className="text-xl sm:text-2xl font-bold text-deep dark:text-dark-text leading-tight mt-0.5">
             {stats.enrolled}
           </p>
-          <p className="text-[10px] text-muted mt-1">{getPercentage(stats.enrolled)}</p>
+          <p className="text-[10px] text-muted dark:text-dark-text-muted mt-1">{getPercentage(stats.enrolled)}</p>
         </div>
 
         {/* Rejected */}
-        <div className="bg-white border border-border rounded-xl p-3.5 shadow-2xs hover:shadow-card transition-shadow">
-          <div className="w-8 h-8 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mb-2">
+        <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3.5 shadow-2xs hover:shadow-card dark:hover:border-dark-border-strong transition-shadow">
+          <div className="w-8 h-8 rounded-full bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-2">
             <XCircle size={16} />
           </div>
-          <p className="text-[11px] font-semibold text-secondary">Rejected</p>
-          <p className="text-xl sm:text-2xl font-bold text-deep leading-tight mt-0.5">
+          <p className="text-[11px] font-semibold text-secondary dark:text-dark-text-secondary">Rejected</p>
+          <p className="text-xl sm:text-2xl font-bold text-deep dark:text-dark-text leading-tight mt-0.5">
             {stats.rejected}
           </p>
-          <p className="text-[10px] text-muted mt-1">{getPercentage(stats.rejected)}</p>
+          <p className="text-[10px] text-muted dark:text-dark-text-muted mt-1">{getPercentage(stats.rejected)}</p>
         </div>
       </div>
 
       {/* ── Row 2: Comprehensive Filter Toolbar ── */}
-      <div className="bg-white border border-border rounded-xl p-3.5 shadow-2xs space-y-3">
+      <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3.5 shadow-2xs space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           {/* Search Input */}
           <div className="relative flex-1 min-w-[240px] max-w-md">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted dark:text-dark-text-muted" />
             <input
               type="text"
               placeholder="Search by applicant name or application no..."
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              className="w-full pl-9 pr-3 py-1.5 bg-white border border-border rounded-lg text-xs text-deep placeholder-muted focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest transition-all"
+              className="w-full pl-9 pr-3 py-1.5 bg-white dark:bg-dark-elevated border border-border dark:border-dark-border rounded-lg text-xs text-deep dark:text-dark-text placeholder-muted dark:placeholder-dark-text-muted focus:outline-none focus:ring-2 focus:ring-forest/20 dark:focus:ring-emerald-500/20 focus:border-forest dark:focus:border-emerald-500 transition-all"
             />
           </div>
 
           {/* Quick Filter Selects */}
           <div className="flex flex-wrap items-center gap-2.5">
             {/* Class Dropdown */}
-            <div className="flex items-center gap-1.5 text-xs text-secondary">
-              <span className="font-semibold text-muted text-[11px]">Class</span>
+            <div className="flex items-center gap-1.5 text-xs text-secondary dark:text-dark-text-secondary">
+              <span className="font-semibold text-muted dark:text-dark-text-muted text-[11px]">Class</span>
               <select
                 value={classFilter}
                 onChange={(e) => { setClassFilter(e.target.value); setPage(1); }}
-                className="px-2.5 py-1.5 bg-white border border-border rounded-lg text-xs text-deep focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest"
+                className="px-2.5 py-1.5 bg-white dark:bg-dark-elevated border border-border dark:border-dark-border rounded-lg text-xs text-deep dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-forest/20 dark:focus:ring-emerald-500/20 focus:border-forest dark:focus:border-emerald-500"
               >
                 <option value="">All Classes</option>
                 {classes.map((c) => (
@@ -870,12 +870,12 @@ export default function Admissions() {
             </div>
 
             {/* Gender Dropdown */}
-            <div className="flex items-center gap-1.5 text-xs text-secondary">
-              <span className="font-semibold text-muted text-[11px]">Gender</span>
+            <div className="flex items-center gap-1.5 text-xs text-secondary dark:text-dark-text-secondary">
+              <span className="font-semibold text-muted dark:text-dark-text-muted text-[11px]">Gender</span>
               <select
                 value={genderFilter}
                 onChange={(e) => { setGenderFilter(e.target.value); setPage(1); }}
-                className="px-2.5 py-1.5 bg-white border border-border rounded-lg text-xs text-deep focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest"
+                className="px-2.5 py-1.5 bg-white dark:bg-dark-elevated border border-border dark:border-dark-border rounded-lg text-xs text-deep dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-forest/20 dark:focus:ring-emerald-500/20 focus:border-forest dark:focus:border-emerald-500"
               >
                 <option value="all">All Gender</option>
                 <option value="male">Male</option>
@@ -885,20 +885,20 @@ export default function Admissions() {
             </div>
 
             {/* Date Range Dropdown */}
-            <div className="flex items-center gap-1.5 text-xs text-secondary">
-              <span className="font-semibold text-muted text-[11px]">Date Range</span>
+            <div className="flex items-center gap-1.5 text-xs text-secondary dark:text-dark-text-secondary">
+              <span className="font-semibold text-muted dark:text-dark-text-muted text-[11px]">Date Range</span>
               <div className="relative">
                 <select
                   value={dateRangeFilter}
                   onChange={(e) => { setDateRangeFilter(e.target.value); setPage(1); }}
-                  className="pl-7 pr-3 py-1.5 bg-white border border-border rounded-lg text-xs text-deep focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest"
+                  className="pl-7 pr-3 py-1.5 bg-white dark:bg-dark-elevated border border-border dark:border-dark-border rounded-lg text-xs text-deep dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-forest/20 dark:focus:ring-emerald-500/20 focus:border-forest dark:focus:border-emerald-500"
                 >
                   <option value="">Select Range</option>
                   <option value="today">Today</option>
                   <option value="this_week">This Week</option>
                   <option value="this_month">This Month</option>
                 </select>
-                <CalendarIcon size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
+                <CalendarIcon size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted dark:text-dark-text-muted pointer-events-none" />
               </div>
             </div>
 
@@ -907,9 +907,9 @@ export default function Admissions() {
               variant="outline"
               size="sm"
               onClick={handleResetFilters}
-              className="text-xs text-secondary"
+              className="text-xs text-secondary dark:text-dark-text-secondary"
             >
-              <RotateCcw size={13} className="mr-1 text-muted" /> Reset
+              <RotateCcw size={13} className="mr-1 text-muted dark:text-dark-text-muted" /> Reset
             </Button>
 
             {/* Filters Count Button */}
@@ -920,7 +920,7 @@ export default function Admissions() {
             >
               <Filter size={13} /> Filters
               {countActiveFilters() > 0 && (
-                <span className="ml-0.5 px-1.5 py-0.2 bg-white/20 text-white rounded-full text-[10px] font-bold">
+                <span className="ml-0.5 px-1.5 py-0.2 bg-white/20 dark:bg-black/20 text-white dark:text-gray-900 rounded-full text-[10px] font-bold">
                   {countActiveFilters()}
                 </span>
               )}
@@ -928,9 +928,9 @@ export default function Admissions() {
           </div>
         </div>
 
-        {/* Status Horizontal Filter Pills (Exact Match) */}
-        <div className="pt-2 border-t border-border/70 flex flex-wrap items-center gap-2 text-xs">
-          <span className="font-medium text-secondary text-xs mr-1">Filter by status:</span>
+        {/* Status Horizontal Filter Pills */}
+        <div className="pt-2 border-t border-border/70 dark:border-dark-border flex flex-wrap items-center gap-2 text-xs">
+          <span className="font-medium text-secondary dark:text-dark-text-secondary text-xs mr-1">Filter by status:</span>
           <div className="flex flex-wrap gap-1.5 overflow-x-auto pb-0.5 scrollbar-thin">
             {WORKFLOW_STATUS_PILLS.map((pill) => {
               const isActive = statusFilter === pill.value;
@@ -940,8 +940,8 @@ export default function Admissions() {
                   onClick={() => { setStatusFilter(pill.value); setPage(1); }}
                   className={`px-3 py-1 rounded-lg text-xs transition-all whitespace-nowrap ${
                     isActive
-                      ? 'bg-forest text-white font-semibold shadow-2xs'
-                      : 'bg-white border border-border text-secondary hover:bg-surface hover:text-deep font-medium'
+                      ? 'bg-forest dark:bg-emerald-500 text-white dark:text-gray-900 font-semibold shadow-2xs'
+                      : 'bg-white dark:bg-dark-card border border-border dark:border-dark-border text-secondary dark:text-dark-text-secondary hover:bg-surface dark:hover:bg-dark-hover hover:text-deep dark:hover:text-dark-text font-medium'
                   }`}
                 >
                   {pill.label}

@@ -284,13 +284,13 @@ export default function Students() {
   const renderStatusBadge = (status) => {
     if (status === 'active') {
       return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
           Active
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-slate-50 text-slate-600 border border-slate-200">
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-slate-50 dark:bg-dark-hover text-slate-600 dark:text-dark-text-secondary border border-slate-200 dark:border-dark-border">
         {status || 'Inactive'}
       </span>
     );
@@ -299,7 +299,7 @@ export default function Students() {
   const renderParentAccountCell = (parents = []) => {
     if (!parents || parents.length === 0) {
       return (
-        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-muted bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
+        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-muted dark:text-dark-text-muted bg-slate-50 dark:bg-dark-elevated px-2 py-0.5 rounded border border-slate-200 dark:border-dark-border">
           Not Linked
         </span>
       );
@@ -308,32 +308,32 @@ export default function Students() {
     const primary = parents.find((p) => p.isPrimary) || parents[0];
     const status = primary.accountStatus || 'NOT_LINKED';
 
-    let badgeColor = 'bg-slate-50 text-slate-600 border-slate-200';
+    let badgeColor = 'bg-slate-50 dark:bg-dark-elevated text-slate-600 dark:text-dark-text-secondary border-slate-200 dark:border-dark-border';
     let label = 'Not Linked';
 
     if (status === 'ACTIVE') {
-      badgeColor = 'bg-emerald-50 text-emerald-700 border-emerald-200 font-semibold';
+      badgeColor = 'bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20 font-semibold';
       label = '● Active';
     } else if (status === 'PENDING_ACTIVATION') {
-      badgeColor = 'bg-amber-50 text-amber-700 border-amber-200 font-semibold';
+      badgeColor = 'bg-amber-50 dark:bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20 font-semibold';
       label = '● Pending Activation';
     } else if (status === 'SUSPENDED') {
-      badgeColor = 'bg-rose-50 text-rose-700 border-rose-200 font-semibold';
+      badgeColor = 'bg-rose-50 dark:bg-rose-500/15 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-500/20 font-semibold';
       label = '● Suspended';
     }
 
     return (
       <div>
-        <p className="text-xs font-bold text-deep leading-tight truncate max-w-44">
+        <p className="text-xs font-bold text-deep dark:text-dark-text leading-tight truncate max-w-44">
           {primary.firstName} {primary.lastName}
-          {primary.relation ? <span className="text-[10px] text-muted font-normal ml-1">({primary.relation})</span> : ''}
+          {primary.relation ? <span className="text-[10px] text-muted dark:text-dark-text-muted font-normal ml-1">({primary.relation})</span> : ''}
         </p>
         <div className="flex items-center gap-1.5 mt-0.5">
           <span className={`inline-flex items-center px-1.5 py-0.2 text-[10px] rounded border ${badgeColor}`}>
             {label}
           </span>
           {primary.contact?.email && (
-            <span className="text-[10px] text-muted truncate max-w-28" title={primary.contact.email}>
+            <span className="text-[10px] text-muted dark:text-dark-text-muted truncate max-w-28" title={primary.contact.email}>
               {primary.contact.email}
             </span>
           )}
@@ -354,8 +354,8 @@ export default function Students() {
       {/* Header Row */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 pb-1">
         <div>
-          <h1 className="text-xl font-bold text-deep tracking-tight">Students</h1>
-          <p className="text-secondary text-xs mt-1 max-w-xl leading-relaxed">
+          <h1 className="text-xl font-bold text-deep dark:text-dark-text tracking-tight">Students</h1>
+          <p className="text-secondary dark:text-dark-text-secondary text-xs mt-1 max-w-xl leading-relaxed">
             Manage student records, enrollment, parent accounts, and academic information.
           </p>
         </div>
@@ -371,60 +371,60 @@ export default function Students() {
 
       {/* KPI Summary Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="bg-white border border-border rounded-xl p-4 shadow-2xs">
-          <div className="w-7 h-7 rounded-lg bg-forest-soft text-forest flex items-center justify-center mb-2">
+        <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-2xs">
+          <div className="w-7 h-7 rounded-lg bg-forest-soft dark:bg-dark-accent-soft text-forest dark:text-emerald-400 flex items-center justify-center mb-2">
             <Users size={15} strokeWidth={1.8} />
           </div>
-          <p className="text-[11px] font-semibold text-muted uppercase tracking-wide">Total Students</p>
-          <p className="text-2xl font-bold text-deep leading-none mt-1">{totalCount}</p>
+          <p className="text-[11px] font-semibold text-muted dark:text-dark-text-muted uppercase tracking-wide">Total Students</p>
+          <p className="text-2xl font-bold text-deep dark:text-dark-text leading-none mt-1">{totalCount}</p>
         </div>
 
-        <div className="bg-white border border-border rounded-xl p-4 shadow-2xs">
-          <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center mb-2">
+        <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-2xs">
+          <div className="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-2">
             <UserCheck size={15} strokeWidth={1.8} />
           </div>
-          <p className="text-[11px] font-semibold text-muted uppercase tracking-wide">Active</p>
-          <p className="text-2xl font-bold text-deep leading-none mt-1">{activeCount}</p>
+          <p className="text-[11px] font-semibold text-muted dark:text-dark-text-muted uppercase tracking-wide">Active</p>
+          <p className="text-2xl font-bold text-deep dark:text-dark-text leading-none mt-1">{activeCount}</p>
         </div>
 
-        <div className="bg-white border border-border rounded-xl p-4 shadow-2xs">
-          <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center mb-2">
+        <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-2xs">
+          <div className="w-7 h-7 rounded-lg bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-2">
             <UserX size={15} strokeWidth={1.8} />
           </div>
-          <p className="text-[11px] font-semibold text-muted uppercase tracking-wide">Inactive</p>
-          <p className="text-2xl font-bold text-deep leading-none mt-1">{inactiveCount}</p>
+          <p className="text-[11px] font-semibold text-muted dark:text-dark-text-muted uppercase tracking-wide">Inactive</p>
+          <p className="text-2xl font-bold text-deep dark:text-dark-text leading-none mt-1">{inactiveCount}</p>
         </div>
 
-        <div className="bg-white border border-border rounded-xl p-4 shadow-2xs">
-          <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mb-2">
+        <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-2xs">
+          <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-2">
             <GraduationCap size={15} strokeWidth={1.8} />
           </div>
-          <p className="text-[11px] font-semibold text-muted uppercase tracking-wide">Gender Split</p>
-          <p className="text-2xl font-bold text-deep leading-none mt-1">{maleCount}M / {femaleCount}F</p>
+          <p className="text-[11px] font-semibold text-muted dark:text-dark-text-muted uppercase tracking-wide">Gender Split</p>
+          <p className="text-2xl font-bold text-deep dark:text-dark-text leading-none mt-1">{maleCount}M / {femaleCount}F</p>
         </div>
       </div>
 
       {/* Filter Toolbar */}
-      <div className="bg-white border border-border rounded-xl p-3.5 shadow-2xs space-y-3">
+      <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3.5 shadow-2xs space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="relative flex-1 min-w-[240px] max-w-md">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted dark:text-dark-text-muted" />
             <input
               type="text"
               placeholder="Search by name or admission no..."
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              className="w-full pl-9 pr-3 py-1.5 bg-white border border-border rounded-lg text-xs text-deep placeholder-muted focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest transition-all"
+              className="w-full pl-9 pr-3 py-1.5 bg-white dark:bg-dark-elevated border border-border dark:border-dark-border rounded-lg text-xs text-deep dark:text-dark-text placeholder-muted dark:placeholder-dark-text-muted focus:outline-none focus:ring-2 focus:ring-forest/20 dark:focus:ring-emerald-500/20 focus:border-forest dark:focus:border-emerald-500 transition-all"
             />
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
-            <div className="flex items-center gap-1.5 text-xs text-secondary">
-              <span className="font-semibold text-muted text-[11px]">Class</span>
+            <div className="flex items-center gap-1.5 text-xs text-secondary dark:text-dark-text-secondary">
+              <span className="font-semibold text-muted dark:text-dark-text-muted text-[11px]">Class</span>
               <select
                 value={classFilter}
                 onChange={(e) => { setClassFilter(e.target.value); setPage(1); }}
-                className="px-2.5 py-1.5 bg-white border border-border rounded-lg text-xs text-deep focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest"
+                className="px-2.5 py-1.5 bg-white dark:bg-dark-elevated border border-border dark:border-dark-border rounded-lg text-xs text-deep dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-forest/20 dark:focus:ring-emerald-500/20 focus:border-forest dark:focus:border-emerald-500"
               >
                 <option value="">All Classes</option>
                 {classes.map((c) => (
@@ -433,12 +433,12 @@ export default function Students() {
               </select>
             </div>
 
-            <div className="flex items-center gap-1.5 text-xs text-secondary">
-              <span className="font-semibold text-muted text-[11px]">Gender</span>
+            <div className="flex items-center gap-1.5 text-xs text-secondary dark:text-dark-text-secondary">
+              <span className="font-semibold text-muted dark:text-dark-text-muted text-[11px]">Gender</span>
               <select
                 value={genderFilter}
                 onChange={(e) => { setGenderFilter(e.target.value); setPage(1); }}
-                className="px-2.5 py-1.5 bg-white border border-border rounded-lg text-xs text-deep focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest"
+                className="px-2.5 py-1.5 bg-white dark:bg-dark-elevated border border-border dark:border-dark-border rounded-lg text-xs text-deep dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-forest/20 dark:focus:ring-emerald-500/20 focus:border-forest dark:focus:border-emerald-500"
               >
                 <option value="all">All Gender</option>
                 <option value="male">Male</option>
@@ -447,14 +447,14 @@ export default function Students() {
               </select>
             </div>
 
-            <Button variant="outline" size="sm" onClick={handleResetFilters} className="text-xs text-secondary gap-1">
+            <Button variant="outline" size="sm" onClick={handleResetFilters} className="text-xs text-secondary dark:text-dark-text-secondary gap-1">
               <RotateCcw size={12} /> Reset
             </Button>
           </div>
         </div>
 
-        <div className="pt-2 border-t border-border/70 flex flex-wrap items-center gap-1.5 text-xs">
-          <span className="font-semibold text-muted text-[11px] uppercase tracking-wide mr-1">Status:</span>
+        <div className="pt-2 border-t border-border/70 dark:border-dark-border flex flex-wrap items-center gap-1.5 text-xs">
+          <span className="font-semibold text-muted dark:text-dark-text-muted text-[11px] uppercase tracking-wide mr-1">Status:</span>
           <div className="flex flex-wrap gap-1">
             {STATUS_PILLS.map((pill) => {
               const isActive = statusFilter === pill.value;
@@ -463,8 +463,8 @@ export default function Students() {
                   key={pill.value}
                   onClick={() => { setStatusFilter(pill.value); setPage(1); }}
                   className={`px-3 py-1 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${isActive
-                    ? 'bg-forest text-white shadow-2xs'
-                    : 'text-secondary hover:bg-surface hover:text-deep'
+                    ? 'bg-forest dark:bg-emerald-500 text-white dark:text-gray-900 shadow-2xs'
+                    : 'text-secondary dark:text-dark-text-secondary hover:bg-surface dark:hover:bg-dark-hover hover:text-deep dark:hover:text-dark-text'
                     }`}
                 >
                   {pill.label}
@@ -476,30 +476,30 @@ export default function Students() {
       </div>
 
       {/* Data Table */}
-      <div className="bg-white border border-border rounded-xl overflow-hidden shadow-2xs">
+      <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl overflow-hidden shadow-2xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-border bg-slate-50/80">
-                <th onClick={() => handleSort('admissionNo')} className="px-3.5 py-2.5 text-[11px] font-semibold text-secondary uppercase tracking-wider cursor-pointer hover:text-deep select-none">
+              <tr className="border-b border-border dark:border-dark-border bg-slate-50/80 dark:bg-dark-elevated">
+                <th onClick={() => handleSort('admissionNo')} className="px-3.5 py-2.5 text-[11px] font-semibold text-secondary dark:text-dark-text-secondary uppercase tracking-wider cursor-pointer hover:text-deep dark:hover:text-dark-text select-none">
                   <div className="flex items-center gap-1"><span>Adm No.</span><SortIcon field="admissionNo" /></div>
                 </th>
-                <th onClick={() => handleSort('firstName')} className="px-3.5 py-2.5 text-[11px] font-semibold text-secondary uppercase tracking-wider cursor-pointer hover:text-deep select-none">
+                <th onClick={() => handleSort('firstName')} className="px-3.5 py-2.5 text-[11px] font-semibold text-secondary dark:text-dark-text-secondary uppercase tracking-wider cursor-pointer hover:text-deep dark:hover:text-dark-text select-none">
                   <div className="flex items-center gap-1"><span>Student</span><SortIcon field="firstName" /></div>
                 </th>
-                <th className="px-3.5 py-2.5 text-[11px] font-semibold text-secondary uppercase tracking-wider">Class & Section</th>
-                <th className="px-3.5 py-2.5 text-[11px] font-semibold text-secondary uppercase tracking-wider">Parent Account</th>
-                <th className="px-3.5 py-2.5 text-[11px] font-semibold text-secondary uppercase tracking-wider">Status</th>
-                <th className="px-3.5 py-2.5 text-[11px] font-semibold text-secondary uppercase tracking-wider text-right">Actions</th>
+                <th className="px-3.5 py-2.5 text-[11px] font-semibold text-secondary dark:text-dark-text-secondary uppercase tracking-wider">Class & Section</th>
+                <th className="px-3.5 py-2.5 text-[11px] font-semibold text-secondary dark:text-dark-text-secondary uppercase tracking-wider">Parent Account</th>
+                <th className="px-3.5 py-2.5 text-[11px] font-semibold text-secondary dark:text-dark-text-secondary uppercase tracking-wider">Status</th>
+                <th className="px-3.5 py-2.5 text-[11px] font-semibold text-secondary dark:text-dark-text-secondary uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/60 bg-white">
+            <tbody className="divide-y divide-border/60 dark:divide-dark-border bg-white dark:bg-dark-card">
               {loading ? (
                 [1, 2, 3, 4, 5].map((i) => (
-                  <tr key={i}><td colSpan={6} className="px-3.5 py-3"><div className="h-5 bg-surface rounded animate-pulse w-full" /></td></tr>
+                  <tr key={i}><td colSpan={6} className="px-3.5 py-3"><div className="h-5 bg-surface dark:bg-dark-hover rounded animate-pulse w-full" /></td></tr>
                 ))
               ) : data.length === 0 ? (
-                <tr><td colSpan={6} className="px-4 py-12 text-center text-xs text-muted">No students found matching the selected criteria.</td></tr>
+                <tr><td colSpan={6} className="px-4 py-12 text-center text-xs text-muted dark:text-dark-text-muted">No students found matching the selected criteria.</td></tr>
               ) : (
                 data.map((row) => {
                   const parents = row.parents || [];
@@ -508,8 +508,8 @@ export default function Students() {
                   const isParentActive = primaryParent?.accountStatus === 'ACTIVE';
 
                   return (
-                    <tr key={row._id} className="hover:bg-surface/50 transition-colors">
-                      <td className="px-3.5 py-2.5 font-bold text-xs text-deep font-mono">{row.admissionNo || '—'}</td>
+                    <tr key={row._id} className="hover:bg-surface/50 dark:hover:bg-dark-hover transition-colors">
+                      <td className="px-3.5 py-2.5 font-bold text-xs text-deep dark:text-dark-text font-mono">{row.admissionNo || '—'}</td>
                       <td className="px-3.5 py-2.5">
                         <div className="flex items-center gap-2.5">
                           <UserAvatar
@@ -519,15 +519,15 @@ export default function Students() {
                             admissionNo={row.admissionNo}
                             name={`${row.firstName} ${row.lastName}`}
                             size="sm"
-                            className="shrink-0 ring-1 ring-border/50"
+                            className="shrink-0 ring-1 ring-border/50 dark:ring-dark-border"
                           />
                           <div>
-                            <p className="font-bold text-xs text-deep leading-tight">{row.firstName} {row.lastName}</p>
-                            {row.contact?.phone && <p className="text-[11px] text-muted leading-tight mt-0.5">{row.contact.phone}</p>}
+                            <p className="font-bold text-xs text-deep dark:text-dark-text leading-tight">{row.firstName} {row.lastName}</p>
+                            {row.contact?.phone && <p className="text-[11px] text-muted dark:text-dark-text-muted leading-tight mt-0.5">{row.contact.phone}</p>}
                           </div>
                         </div>
                       </td>
-                      <td className="px-3.5 py-2.5 text-xs text-secondary font-medium">
+                      <td className="px-3.5 py-2.5 text-xs text-secondary dark:text-dark-text-secondary font-medium">
                         {classMap[row.currentClass?._id || row.currentClass] || '—'} {sectionMap[row.currentSection?._id || row.currentSection] ? `(${sectionMap[row.currentSection?._id || row.currentSection]})` : ''}
                       </td>
                       <td className="px-3.5 py-2.5">
@@ -538,14 +538,14 @@ export default function Students() {
                         <div className="inline-flex items-center gap-1">
                           <button
                             onClick={() => setActiveMenuId(activeMenuId === row._id ? null : row._id)}
-                            className="p-1.5 text-muted hover:text-deep hover:bg-surface border border-border rounded-lg transition-colors cursor-pointer"
+                            className="p-1.5 text-muted dark:text-dark-text-muted hover:text-deep dark:hover:text-dark-text hover:bg-surface dark:hover:bg-dark-hover border border-border dark:border-dark-border rounded-lg transition-colors cursor-pointer"
                             title="More actions"
                           >
                             <MoreVertical size={14} />
                           </button>
                         </div>
                         {activeMenuId === row._id && (
-                          <div ref={menuRef} className="absolute right-4 top-10 w-52 bg-white border border-border rounded-xl shadow-dropdown z-40 py-1 text-left animate-scale-in">
+                          <div ref={menuRef} className="absolute right-4 top-10 w-52 bg-white dark:bg-dark-elevated border border-border dark:border-dark-border rounded-xl shadow-dropdown z-40 py-1 text-left animate-scale-in">
                             {/* Send Parent Password Reset Action */}
                             {hasParent && isParentActive ? (
                               <button

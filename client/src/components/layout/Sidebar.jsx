@@ -183,27 +183,27 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
   };
 
   const sidebarContent = (
-    <div className="flex flex-col h-full bg-white">
+    <div className="flex flex-col h-full bg-white dark:bg-dark-surface">
       {/* Brand Header */}
       <div
-        className={`flex items-center border-b border-border h-14 shrink-0 ${
+        className={`flex items-center border-b border-border dark:border-dark-border h-14 shrink-0 ${
           sidebarCollapsed ? 'justify-center px-3' : 'justify-between px-4'
         }`}
       >
         {!sidebarCollapsed && (
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-forest flex items-center justify-center text-white shrink-0">
+            <div className="w-7 h-7 rounded-lg bg-forest dark:bg-emerald-500 flex items-center justify-center text-white shrink-0">
               <BookOpen size={14} strokeWidth={2.2} />
             </div>
             <div className="leading-none">
-              <span className="text-sm font-bold text-deep tracking-tight block">Instique</span>
-              <span className="text-[10px] text-muted font-normal">School Management</span>
+              <span className="text-sm font-bold text-deep dark:text-dark-text tracking-tight block">Instique</span>
+              <span className="text-[10px] text-muted dark:text-dark-text-muted font-normal">School Management</span>
             </div>
           </div>
         )}
         <button
           onClick={() => { toggleSidebar(); setMobileOpen?.(false); }}
-          className="p-1.5 text-muted hover:text-deep rounded-lg hover:bg-surface transition-colors"
+          className="p-1.5 text-muted dark:text-dark-text-muted hover:text-deep dark:hover:text-dark-text rounded-lg hover:bg-surface dark:hover:bg-dark-hover transition-colors"
           title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {sidebarCollapsed ? <Menu size={17} /> : <ChevronLeft size={17} />}
@@ -215,7 +215,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
         {sections.map((section) => (
           <div key={section.title} className={sidebarCollapsed ? 'px-2' : 'px-3'}>
             {!sidebarCollapsed && (
-              <p className="px-2 mb-1.5 text-[10px] font-bold text-muted/80 uppercase tracking-widest">
+              <p className="px-2 mb-1.5 text-[10px] font-bold text-muted/80 dark:text-dark-text-muted/80 uppercase tracking-widest">
                 {section.title}
               </p>
             )}
@@ -229,8 +229,8 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                   className={({ isActive }) =>
                     `flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-2.5'} px-2 py-2 rounded-lg text-[13px] transition-all duration-150 ${
                       isActive
-                        ? 'bg-forest-soft text-forest font-semibold'
-                        : 'text-secondary hover:text-deep hover:bg-slate-50 font-medium'
+                        ? 'bg-forest-soft dark:bg-dark-accent-soft text-forest dark:text-dark-accent font-semibold'
+                        : 'text-secondary dark:text-dark-text-secondary hover:text-deep dark:hover:text-dark-text hover:bg-slate-50 dark:hover:bg-dark-hover font-medium'
                     }`
                   }
                 >
@@ -244,11 +244,11 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
       </nav>
 
       {/* Footer / Logout */}
-      <div className={`py-3 border-t border-border shrink-0 ${sidebarCollapsed ? 'px-2' : 'px-3'}`}>
+      <div className={`py-3 border-t border-border dark:border-dark-border shrink-0 ${sidebarCollapsed ? 'px-2' : 'px-3'}`}>
         <button
           onClick={handleLogout}
           title="Logout"
-          className={`flex items-center ${sidebarCollapsed ? 'justify-center px-2' : 'gap-2.5 px-2'} w-full py-2 rounded-lg text-[13px] font-medium text-secondary hover:text-danger hover:bg-red-50 transition-colors`}
+          className={`flex items-center ${sidebarCollapsed ? 'justify-center px-2' : 'gap-2.5 px-2'} w-full py-2 rounded-lg text-[13px] font-medium text-secondary dark:text-dark-text-secondary hover:text-danger dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors`}
         >
           <LogOut size={16} strokeWidth={1.8} className="shrink-0" />
           {!sidebarCollapsed && <span>Logout</span>}
@@ -261,7 +261,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
     <>
       {/* Desktop Sidebar */}
       <aside
-        className={`hidden lg:flex flex-col bg-white border-r border-border transition-all duration-200 ${
+        className={`hidden lg:flex flex-col bg-white dark:bg-dark-surface border-r border-border dark:border-dark-border transition-all duration-200 ${
           sidebarCollapsed ? 'w-14' : 'w-[216px]'
         }`}
       >
@@ -272,10 +272,10 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div
-            className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs"
+            className="fixed inset-0 bg-slate-950/40 dark:bg-black/60 backdrop-blur-xs"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="fixed left-0 top-0 bottom-0 w-[220px] bg-white border-r border-border z-50 animate-slide-right shadow-modal">
+          <aside className="fixed left-0 top-0 bottom-0 w-[220px] bg-white dark:bg-dark-surface border-r border-border dark:border-dark-border z-50 animate-slide-right shadow-modal">
             {sidebarContent}
           </aside>
         </div>

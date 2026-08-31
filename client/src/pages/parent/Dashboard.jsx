@@ -49,6 +49,7 @@ export default function ParentDashboard() {
   const [dashboardError, setDashboardError] = useState(null);
   const [rsvpSavingId, setRsvpSavingId] = useState(null);
 
+
   // 1. Fetch authenticated parent's linked children
   const fetchChildren = useCallback(async () => {
     setChildrenLoading(true);
@@ -147,20 +148,20 @@ export default function ParentDashboard() {
           
           {/* Greeting */}
           <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-forest bg-forest/10 px-2.5 py-0.5 rounded-full">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs font-bold uppercase tracking-wider text-forest dark:text-emerald-400 bg-forest/10 dark:bg-dark-accent-soft px-2.5 py-0.5 rounded-full">
                 Parent Portal
               </span>
               {selectedChild && (
-                <span className="text-xs text-muted">
+                <span className="text-xs text-muted dark:text-dark-text-muted">
                   {selectedChild.academicYear}
                 </span>
               )}
             </div>
-            <h1 className="text-2xl font-extrabold text-deep mt-1">
+            <h1 className="text-2xl font-extrabold text-deep dark:text-dark-text mt-1">
               {getGreeting()}, {user?.name?.split(' ')[0] || 'Parent'}
             </h1>
-            <p className="text-muted text-xs md:text-sm mt-0.5">
+            <p className="text-muted dark:text-dark-text-muted text-xs md:text-sm mt-0.5">
               {selectedChild
                 ? `Overview for ${selectedChild.name} • Class ${selectedChild.class} - ${selectedChild.section}`
                 : "Manage and track your child's academic progress"}
@@ -170,18 +171,18 @@ export default function ParentDashboard() {
           {/* Child Switcher Dropdown */}
           <div className="flex items-center gap-3 self-start md:self-auto">
             {childrenLoading ? (
-              <div className="h-10 w-48 bg-slate-100 animate-pulse rounded-xl" />
+              <div className="h-10 w-48 bg-slate-100 dark:bg-dark-hover animate-pulse rounded-xl" />
             ) : children.length > 0 ? (
               <div className="relative">
-                <div className="flex items-center gap-2 bg-slate-50 border border-border rounded-xl px-3 py-1.5 shadow-sm">
-                  <div className="w-8 h-8 rounded-full bg-forest text-white flex items-center justify-center font-bold text-xs shrink-0">
+                <div className="flex items-center gap-2 bg-slate-50 dark:bg-dark-card border border-border dark:border-dark-border rounded-xl px-3 py-1.5 shadow-sm">
+                  <div className="w-8 h-8 rounded-full bg-forest dark:bg-emerald-500 text-white dark:text-gray-900 flex items-center justify-center font-bold text-xs shrink-0">
                     {selectedChild?.name?.charAt(0) || 'C'}
                   </div>
                   <div className="pr-2">
-                    <p className="text-xs font-bold text-deep leading-tight truncate max-w-[140px]">
+                    <p className="text-xs font-bold text-deep dark:text-dark-text leading-tight truncate max-w-[140px]">
                       {selectedChild?.name || 'Select Child'}
                     </p>
-                    <p className="text-[11px] text-muted leading-tight">
+                    <p className="text-[11px] text-muted dark:text-dark-text-muted leading-tight">
                       {selectedChild ? `${selectedChild.class} - ${selectedChild.section}` : ''}
                     </p>
                   </div>
@@ -199,7 +200,7 @@ export default function ParentDashboard() {
                       ))}
                     </select>
                   )}
-                  {children.length > 1 && <ChevronDown size={14} className="text-muted shrink-0" />}
+                  {children.length > 1 && <ChevronDown size={14} className="text-muted dark:text-dark-text-muted shrink-0" />}
                 </div>
               </div>
             ) : null}

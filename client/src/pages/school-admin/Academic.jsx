@@ -149,47 +149,47 @@ function AcademicYears() {
       </div>
 
       {/* Table */}
-      <div className="bg-white border border-border rounded-xl overflow-hidden shadow-2xs">
+      <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl overflow-hidden shadow-2xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-border bg-surface/70">
-                <th onClick={() => handleSort('name')} className="px-3.5 py-2.5 text-xs font-semibold text-secondary uppercase tracking-wider cursor-pointer hover:text-deep select-none">
+              <tr className="border-b border-border dark:border-dark-border bg-surface/70 dark:bg-dark-elevated">
+                <th onClick={() => handleSort('name')} className="px-3.5 py-2.5 text-xs font-semibold text-secondary dark:text-dark-text-secondary uppercase tracking-wider cursor-pointer hover:text-deep dark:hover:text-dark-text select-none">
                   <div className="flex items-center gap-1"><span>NAME</span><SortIcon field="name" /></div>
                 </th>
-                <th className="px-3.5 py-2.5 text-xs font-semibold text-secondary uppercase tracking-wider">START DATE</th>
-                <th className="px-3.5 py-2.5 text-xs font-semibold text-secondary uppercase tracking-wider">END DATE</th>
-                <th className="px-3.5 py-2.5 text-xs font-semibold text-secondary uppercase tracking-wider">STATUS</th>
-                <th className="px-3.5 py-2.5 text-xs font-semibold text-secondary uppercase tracking-wider text-right">ACTIONS</th>
+                <th className="px-3.5 py-2.5 text-xs font-semibold text-secondary dark:text-dark-text-secondary uppercase tracking-wider">START DATE</th>
+                <th className="px-3.5 py-2.5 text-xs font-semibold text-secondary dark:text-dark-text-secondary uppercase tracking-wider">END DATE</th>
+                <th className="px-3.5 py-2.5 text-xs font-semibold text-secondary dark:text-dark-text-secondary uppercase tracking-wider">STATUS</th>
+                <th className="px-3.5 py-2.5 text-xs font-semibold text-secondary dark:text-dark-text-secondary uppercase tracking-wider text-right">ACTIONS</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/60 bg-white">
+            <tbody className="divide-y divide-border/60 dark:divide-dark-border bg-white dark:bg-dark-card">
               {loading ? (
                 [1, 2, 3].map((i) => (
-                  <tr key={i}><td colSpan={5} className="px-3.5 py-3"><div className="h-5 bg-surface rounded animate-pulse w-full" /></td></tr>
+                  <tr key={i}><td colSpan={5} className="px-3.5 py-3"><div className="h-5 bg-surface dark:bg-dark-hover rounded animate-pulse w-full" /></td></tr>
                 ))
               ) : data.length === 0 ? (
-                <tr><td colSpan={5} className="px-4 py-8 text-center text-xs text-muted">No academic years found.</td></tr>
+                <tr><td colSpan={5} className="px-4 py-8 text-center text-xs text-muted dark:text-dark-text-muted">No academic years found.</td></tr>
               ) : (
                 data.map((row) => (
-                  <tr key={row._id} className="hover:bg-surface/50 transition-colors">
-                    <td className="px-3.5 py-2.5 font-bold text-xs text-deep">{row.name}</td>
-                    <td className="px-3.5 py-2.5 text-xs text-secondary">{new Date(row.startDate).toLocaleDateString()}</td>
-                    <td className="px-3.5 py-2.5 text-xs text-secondary">{new Date(row.endDate).toLocaleDateString()}</td>
+                  <tr key={row._id} className="hover:bg-surface/50 dark:hover:bg-dark-hover transition-colors">
+                    <td className="px-3.5 py-2.5 font-bold text-xs text-deep dark:text-dark-text">{row.name}</td>
+                    <td className="px-3.5 py-2.5 text-xs text-secondary dark:text-dark-text-secondary">{new Date(row.startDate).toLocaleDateString()}</td>
+                    <td className="px-3.5 py-2.5 text-xs text-secondary dark:text-dark-text-secondary">{new Date(row.endDate).toLocaleDateString()}</td>
                     <td className="px-3.5 py-2.5">
                       {row.isCurrent ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">Current</span>
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">Current</span>
                       ) : (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-slate-50 text-slate-600 border border-slate-200">Previous</span>
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-slate-50 dark:bg-dark-hover text-slate-600 dark:text-dark-text-secondary border border-slate-200 dark:border-dark-border">Previous</span>
                       )}
                     </td>
                     <td className="px-3.5 py-2.5 text-right relative">
-                      <button onClick={() => setActiveMenuId(activeMenuId === row._id ? null : row._id)} className="p-1.5 text-muted hover:text-deep hover:bg-surface border border-border rounded-lg transition-colors">
+                      <button onClick={() => setActiveMenuId(activeMenuId === row._id ? null : row._id)} className="p-1.5 text-muted dark:text-dark-text-muted hover:text-deep dark:hover:text-dark-text hover:bg-surface dark:hover:bg-dark-hover border border-border dark:border-dark-border rounded-lg transition-colors cursor-pointer">
                         <MoreVertical size={14} />
                       </button>
                       {activeMenuId === row._id && (
-                        <div ref={menuRef} className="absolute right-4 top-10 w-36 bg-white border border-border rounded-xl shadow-dropdown z-40 py-1 text-left animate-scale-in">
-                          <button onClick={() => { setActiveMenuId(null); handleDelete(row); }} className="w-full px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2">
+                        <div ref={menuRef} className="absolute right-4 top-10 w-36 bg-white dark:bg-dark-elevated border border-border dark:border-dark-border rounded-xl shadow-dropdown z-40 py-1 text-left animate-scale-in">
+                          <button onClick={() => { setActiveMenuId(null); handleDelete(row); }} className="w-full px-3 py-1.5 text-xs text-red-600 dark:text-rose-400 hover:bg-red-50 dark:hover:bg-rose-500/10 flex items-center gap-2">
                             <Trash2 size={13} /> Delete
                           </button>
                         </div>
@@ -202,8 +202,8 @@ function AcademicYears() {
           </table>
         </div>
         {meta && (
-          <div className="flex items-center justify-between px-3.5 py-2.5 border-t border-border bg-surface/30">
-            <span className="text-xs text-muted">Showing {((meta.page - 1) * meta.limit) + (meta.total > 0 ? 1 : 0)} to {Math.min(meta.page * meta.limit, meta.total)} of {meta.total} entries</span>
+          <div className="flex items-center justify-between px-3.5 py-2.5 border-t border-border dark:border-dark-border bg-surface/30 dark:bg-dark-elevated">
+            <span className="text-xs text-muted dark:text-dark-text-muted">Showing {((meta.page - 1) * meta.limit) + (meta.total > 0 ? 1 : 0)} to {Math.min(meta.page * meta.limit, meta.total)} of {meta.total} entries</span>
             <div className="flex items-center gap-1.5">
               <Button variant="outline" size="sm" disabled={loading || !meta.hasPrevPage} onClick={() => setPage(meta.page - 1)} className="p-1 px-2 text-xs"><ChevronLeft size={14} /></Button>
               <Button variant="outline" size="sm" disabled={loading || !meta.hasNextPage} onClick={() => setPage(meta.page + 1)} className="p-1 px-2 text-xs"><ChevronRight size={14} /></Button>
@@ -885,46 +885,46 @@ function Subjects() {
       </div>
 
       {/* Table */}
-      <div className="bg-white border border-border rounded-xl overflow-hidden shadow-2xs">
+      <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl overflow-hidden shadow-2xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-border bg-surface/70">
-                <th className="px-3.5 py-2.5 text-xs font-semibold text-secondary uppercase tracking-wider">CODE</th>
-                <th className="px-3.5 py-2.5 text-xs font-semibold text-secondary uppercase tracking-wider">NAME</th>
-                <th className="px-3.5 py-2.5 text-xs font-semibold text-secondary uppercase tracking-wider">TYPE</th>
-                <th className="px-3.5 py-2.5 text-xs font-semibold text-secondary uppercase tracking-wider">MAX MARKS</th>
-                <th className="px-3.5 py-2.5 text-xs font-semibold text-secondary uppercase tracking-wider text-right">ACTIONS</th>
+              <tr className="border-b border-border dark:border-dark-border bg-surface/70 dark:bg-dark-elevated">
+                <th className="px-3.5 py-2.5 text-xs font-semibold text-secondary dark:text-dark-text-secondary uppercase tracking-wider">CODE</th>
+                <th className="px-3.5 py-2.5 text-xs font-semibold text-secondary dark:text-dark-text-secondary uppercase tracking-wider">NAME</th>
+                <th className="px-3.5 py-2.5 text-xs font-semibold text-secondary dark:text-dark-text-secondary uppercase tracking-wider">TYPE</th>
+                <th className="px-3.5 py-2.5 text-xs font-semibold text-secondary dark:text-dark-text-secondary uppercase tracking-wider">MAX MARKS</th>
+                <th className="px-3.5 py-2.5 text-xs font-semibold text-secondary dark:text-dark-text-secondary uppercase tracking-wider text-right">ACTIONS</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/60 bg-white">
+            <tbody className="divide-y divide-border/60 dark:divide-dark-border bg-white dark:bg-dark-card">
               {loading ? (
                 [1, 2, 3].map((i) => (
-                  <tr key={i}><td colSpan={5} className="px-3.5 py-3"><div className="h-5 bg-surface rounded animate-pulse w-full" /></td></tr>
+                  <tr key={i}><td colSpan={5} className="px-3.5 py-3"><div className="h-5 bg-surface dark:bg-dark-hover rounded animate-pulse w-full" /></td></tr>
                 ))
               ) : data.length === 0 ? (
-                <tr><td colSpan={5} className="px-4 py-8 text-center text-xs text-muted">No subjects found.</td></tr>
+                <tr><td colSpan={5} className="px-4 py-8 text-center text-xs text-muted dark:text-dark-text-muted">No subjects found.</td></tr>
               ) : (
                 data.map((row) => (
-                  <tr key={row._id} className="hover:bg-surface/50 transition-colors">
-                    <td className="px-3.5 py-2.5 font-bold text-xs text-deep font-mono">{row.code}</td>
-                    <td className="px-3.5 py-2.5 text-xs font-semibold text-deep">{row.name}</td>
+                  <tr key={row._id} className="hover:bg-surface/50 dark:hover:bg-dark-hover transition-colors">
+                    <td className="px-3.5 py-2.5 font-bold text-xs text-deep dark:text-dark-text font-mono">{row.code}</td>
+                    <td className="px-3.5 py-2.5 text-xs font-semibold text-deep dark:text-dark-text">{row.name}</td>
                     <td className="px-3.5 py-2.5">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium border ${row.type === 'core' ? 'bg-forest-soft text-forest border-forest/20' : 'bg-slate-50 text-slate-600 border-slate-200'}`}>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium border ${row.type === 'core' ? 'bg-forest-soft dark:bg-dark-accent-soft text-forest dark:text-emerald-400 border-forest/20 dark:border-emerald-500/20' : 'bg-slate-50 dark:bg-dark-hover text-slate-600 dark:text-dark-text-secondary border-slate-200 dark:border-dark-border'}`}>
                         {row.type}
                       </span>
                     </td>
-                    <td className="px-3.5 py-2.5 text-xs text-secondary">{row.maxMarks ?? '—'}</td>
+                    <td className="px-3.5 py-2.5 text-xs text-secondary dark:text-dark-text-secondary">{row.maxMarks ?? '—'}</td>
                     <td className="px-3.5 py-2.5 text-right relative">
-                      <button onClick={() => setActiveMenuId(activeMenuId === row._id ? null : row._id)} className="p-1.5 text-muted hover:text-deep hover:bg-surface border border-border rounded-lg transition-colors">
+                      <button onClick={() => setActiveMenuId(activeMenuId === row._id ? null : row._id)} className="p-1.5 text-muted dark:text-dark-text-muted hover:text-deep dark:hover:text-dark-text hover:bg-surface dark:hover:bg-dark-hover border border-border dark:border-dark-border rounded-lg transition-colors cursor-pointer">
                         <MoreVertical size={14} />
                       </button>
                       {activeMenuId === row._id && (
-                        <div ref={menuRef} className="absolute right-4 top-10 w-36 bg-white border border-border rounded-xl shadow-dropdown z-40 py-1 text-left animate-scale-in">
-                          <button onClick={() => { setActiveMenuId(null); handleEdit(row); }} className="w-full px-3 py-1.5 text-xs text-deep hover:bg-surface flex items-center gap-2">
-                            <Edit2 size={13} className="text-muted" /> Edit Subject
+                        <div ref={menuRef} className="absolute right-4 top-10 w-36 bg-white dark:bg-dark-elevated border border-border dark:border-dark-border rounded-xl shadow-dropdown z-40 py-1 text-left animate-scale-in">
+                          <button onClick={() => { setActiveMenuId(null); handleEdit(row); }} className="w-full px-3 py-1.5 text-xs text-deep dark:text-dark-text hover:bg-surface dark:hover:bg-dark-hover flex items-center gap-2">
+                            <Edit2 size={13} className="text-muted dark:text-dark-text-muted" /> Edit Subject
                           </button>
-                          <button onClick={() => { setActiveMenuId(null); handleDelete(row); }} className="w-full px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2">
+                          <button onClick={() => { setActiveMenuId(null); handleDelete(row); }} className="w-full px-3 py-1.5 text-xs text-red-600 dark:text-rose-400 hover:bg-red-50 dark:hover:bg-rose-500/10 flex items-center gap-2">
                             <Trash2 size={13} /> Delete Subject
                           </button>
                         </div>
@@ -937,8 +937,8 @@ function Subjects() {
           </table>
         </div>
         {meta && (
-          <div className="flex items-center justify-between px-3.5 py-2.5 border-t border-border bg-surface/30">
-            <span className="text-xs text-muted">Showing {((meta.page - 1) * meta.limit) + (meta.total > 0 ? 1 : 0)} to {Math.min(meta.page * meta.limit, meta.total)} of {meta.total} entries</span>
+          <div className="flex items-center justify-between px-3.5 py-2.5 border-t border-border dark:border-dark-border bg-surface/30 dark:bg-dark-elevated">
+            <span className="text-xs text-muted dark:text-dark-text-muted">Showing {((meta.page - 1) * meta.limit) + (meta.total > 0 ? 1 : 0)} to {Math.min(meta.page * meta.limit, meta.total)} of {meta.total} entries</span>
             <div className="flex items-center gap-1.5">
               <Button variant="outline" size="sm" disabled={loading || !meta.hasPrevPage} onClick={() => setPage(meta.page - 1)} className="p-1 px-2 text-xs"><ChevronLeft size={14} /></Button>
               <Button variant="outline" size="sm" disabled={loading || !meta.hasNextPage} onClick={() => setPage(meta.page + 1)} className="p-1 px-2 text-xs"><ChevronRight size={14} /></Button>
@@ -992,22 +992,22 @@ export default function Academic() {
     <div className="space-y-4 w-full">
       {/* Page Header */}
       <div className="pb-1">
-        <h1 className="text-xl font-bold text-deep tracking-tight">Academic Structure</h1>
-        <p className="text-secondary text-xs mt-1 max-w-xl leading-relaxed">
+        <h1 className="text-xl font-bold text-deep dark:text-dark-text tracking-tight">Academic Structure</h1>
+        <p className="text-secondary dark:text-dark-text-secondary text-xs mt-1 max-w-xl leading-relaxed">
           Manage academic sessions, classes, sections, and subjects offered.
         </p>
       </div>
 
       {/* Segmented Section Navigation */}
-      <div className="flex items-center gap-1 border-b border-border/80 pb-3 overflow-x-auto">
+      <div className="flex items-center gap-1 border-b border-border/80 dark:border-dark-border pb-3 overflow-x-auto">
         {TABS.map((t) => (
           <button
             key={t.key}
             onClick={() => setActiveTab(t.key)}
             className={`px-3.5 py-1.5 rounded-lg text-xs transition-all whitespace-nowrap ${
               activeTab === t.key
-                ? 'bg-forest text-white font-semibold shadow-2xs'
-                : 'text-secondary hover:bg-surface hover:text-deep font-medium'
+                ? 'bg-forest dark:bg-emerald-500 text-white dark:text-gray-900 font-semibold shadow-2xs'
+                : 'text-secondary dark:text-dark-text-secondary hover:bg-surface dark:hover:bg-dark-hover hover:text-deep dark:hover:text-dark-text font-medium'
             }`}
           >
             {t.label}

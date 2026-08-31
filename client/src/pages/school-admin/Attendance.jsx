@@ -222,8 +222,8 @@ export default function Attendance() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 pb-1">
         <div>
-          <h1 className="text-xl font-bold text-deep tracking-tight">Attendance</h1>
-          <p className="text-secondary text-xs mt-1 max-w-xl leading-relaxed">
+          <h1 className="text-xl font-bold text-deep dark:text-dark-text tracking-tight">Attendance</h1>
+          <p className="text-secondary dark:text-dark-text-secondary text-xs mt-1 max-w-xl leading-relaxed">
             Mark, view, and track daily student attendance class-wise and section-wise.
           </p>
         </div>
@@ -233,13 +233,13 @@ export default function Attendance() {
       </div>
 
       {/* Tab Switcher Pills */}
-      <div className="flex items-center gap-1.5 p-1 bg-white border border-border rounded-xl w-fit shadow-2xs">
+      <div className="flex items-center gap-1.5 p-1 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl w-fit shadow-2xs">
         <button
           onClick={() => setActiveTab('mark')}
           className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
             activeTab === 'mark'
-              ? 'bg-forest text-white shadow-2xs'
-              : 'text-secondary hover:bg-surface hover:text-deep font-medium'
+              ? 'bg-forest dark:bg-emerald-500 text-white dark:text-gray-900 shadow-2xs'
+              : 'text-secondary dark:text-dark-text-secondary hover:bg-surface dark:hover:bg-dark-hover hover:text-deep dark:hover:text-dark-text font-medium'
           }`}
         >
           <Users size={13} className="inline mr-1.5 -mt-0.5" /> Mark Attendance
@@ -248,8 +248,8 @@ export default function Attendance() {
           onClick={() => { setActiveTab('history'); setLoading(true); }}
           className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
             activeTab === 'history'
-              ? 'bg-forest text-white shadow-2xs'
-              : 'text-secondary hover:bg-surface hover:text-deep font-medium'
+              ? 'bg-forest dark:bg-emerald-500 text-white dark:text-gray-900 shadow-2xs'
+              : 'text-secondary dark:text-dark-text-secondary hover:bg-surface dark:hover:bg-dark-hover hover:text-deep dark:hover:text-dark-text font-medium'
           }`}
         >
           Attendance History

@@ -473,25 +473,29 @@ export default function MarksEntry() {
 
           {/* Controls */}
           <Card padding={false}>
-            <div className="p-4 border-b border-border">
+            <div className="p-4 border-b border-border dark:border-dark-border">
               <div className="flex flex-col lg:flex-row lg:items-center gap-3">
                 {/* View Toggle */}
-                <div className="flex rounded-lg bg-surface p-0.5 shrink-0">
+                <div className="flex rounded-lg bg-surface dark:bg-dark-elevated p-0.5 shrink-0">
                   <button
                     onClick={() => setViewMode('entry')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${viewMode === 'entry' ? 'bg-white text-forest shadow-card' : 'text-muted hover:text-deep'}`}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                      viewMode === 'entry' ? 'bg-white dark:bg-dark-card text-forest dark:text-emerald-400 shadow-card' : 'text-muted dark:text-dark-text-muted hover:text-deep dark:hover:text-dark-text'
+                    }`}
                   >
                     <Edit3 size={13} /> Marks Entry
                   </button>
                   <button
                     onClick={() => setViewMode('results')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${viewMode === 'results' ? 'bg-white text-forest shadow-card' : 'text-muted hover:text-deep'}`}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                      viewMode === 'results' ? 'bg-white dark:bg-dark-card text-forest dark:text-emerald-400 shadow-card' : 'text-muted dark:text-dark-text-muted hover:text-deep dark:hover:text-dark-text'
+                    }`}
                   >
                     <Eye size={13} /> Results
                   </button>
                   <button
                     onClick={() => navigate('/leaderboard' + (selectedExamId ? `?examId=${selectedExamId}` : ''))}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-muted hover:text-deep transition-all"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-muted dark:text-dark-text-muted hover:text-deep dark:hover:text-dark-text transition-all"
                   >
                     <Award size={13} /> Leaderboard
                   </button>
@@ -499,30 +503,30 @@ export default function MarksEntry() {
 
                 {/* Search */}
                 <div className="relative flex-1 max-w-xs">
-                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted dark:text-dark-text-muted" />
                   <input
                     type="text"
                     placeholder="Search student..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-8 pr-3 py-1.5 bg-white border border-border rounded-lg text-sm text-deep placeholder-muted focus:outline-none focus:ring-2 focus:ring-forest/30 focus:border-forest transition-all"
+                    className="w-full pl-8 pr-3 py-1.5 bg-white dark:bg-dark-elevated border border-border dark:border-dark-border rounded-lg text-sm text-deep dark:text-dark-text placeholder-muted dark:placeholder-dark-text-muted focus:outline-none focus:ring-2 focus:ring-forest/30 dark:focus:ring-emerald-500/30 focus:border-forest dark:focus:border-emerald-500 transition-all"
                   />
                 </div>
 
                 {/* Filter */}
                 <div className="flex items-center gap-1.5">
-                  <Filter size={13} className="text-muted" />
+                  <Filter size={13} className="text-muted dark:text-dark-text-muted" />
                   {['all', 'pass', 'fail', 'incomplete'].map((f) => (
                     <button
                       key={f}
                       onClick={() => setFilterStatus(f)}
                       className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
                         filterStatus === f
-                          ? f === 'pass' ? 'bg-success-light text-success-text'
-                          : f === 'fail' ? 'bg-danger-light text-danger-text'
-                          : f === 'incomplete' ? 'bg-warning-light text-warning-text'
-                          : 'bg-sage text-forest'
-                          : 'text-muted hover:bg-surface'
+                          ? f === 'pass' ? 'bg-success-light dark:bg-emerald-500/20 text-success-text dark:text-emerald-400'
+                          : f === 'fail' ? 'bg-danger-light dark:bg-rose-500/20 text-danger-text dark:text-rose-400'
+                          : f === 'incomplete' ? 'bg-warning-light dark:bg-amber-500/20 text-warning-text dark:text-amber-400'
+                          : 'bg-sage dark:bg-emerald-500 text-forest dark:text-gray-900 font-bold'
+                          : 'text-muted dark:text-dark-text-muted hover:bg-surface dark:hover:bg-dark-hover'
                       }`}
                     >
                       {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
@@ -546,33 +550,33 @@ export default function MarksEntry() {
 
             {/* Marks Grid */}
             <div className="overflow-x-auto" ref={gridRef}>
-              <table className="w-full text-sm">
+              <table className="w-full text-sm border-collapse">
                 <thead className="sticky top-0 z-10">
-                  <tr className="bg-sage-soft">
-                    <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted uppercase tracking-wider w-12 cursor-pointer select-none" onClick={() => toggleSort('rank')}>
+                  <tr className="bg-sage-soft dark:bg-dark-elevated border-b border-border dark:border-dark-border">
+                    <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted dark:text-dark-text-secondary uppercase tracking-wider w-12 cursor-pointer select-none" onClick={() => toggleSort('rank')}>
                       <span className="flex items-center gap-1">Rank <SortIcon field="rank" /></span>
                     </th>
-                    <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted uppercase tracking-wider w-12 cursor-pointer select-none" onClick={() => toggleSort('roll')}>
+                    <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted dark:text-dark-text-secondary uppercase tracking-wider w-12 cursor-pointer select-none" onClick={() => toggleSort('roll')}>
                       <span className="flex items-center gap-1">Roll <SortIcon field="roll" /></span>
                     </th>
-                    <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted uppercase tracking-wider min-w-[140px] cursor-pointer select-none" onClick={() => toggleSort('name')}>
+                    <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted dark:text-dark-text-secondary uppercase tracking-wider min-w-[140px] cursor-pointer select-none" onClick={() => toggleSort('name')}>
                       <span className="flex items-center gap-1">Student <SortIcon field="name" /></span>
                     </th>
                     {subjects.map((subj) => (
-                      <th key={subj._id} className="px-2 py-2.5 text-center text-xs font-semibold text-muted uppercase tracking-wider min-w-[90px]">
-                        <div>{subj.name}</div>
-                        <div className="text-[10px] font-normal text-muted/70 mt-0.5">Max: {subj.maxMarks}</div>
+                      <th key={subj._id} className="px-2 py-2.5 text-center text-xs font-semibold text-muted dark:text-dark-text-secondary uppercase tracking-wider min-w-[90px]">
+                        <div className="text-deep dark:text-dark-text">{subj.name}</div>
+                        <div className="text-[10px] font-normal text-muted/70 dark:text-dark-text-muted mt-0.5">Max: {subj.maxMarks}</div>
                       </th>
                     ))}
-                    <th className="px-3 py-2.5 text-center text-xs font-semibold text-muted uppercase tracking-wider w-24">Total</th>
-                    <th className="px-3 py-2.5 text-center text-xs font-semibold text-muted uppercase tracking-wider w-20">%</th>
-                    <th className="px-3 py-2.5 text-center text-xs font-semibold text-muted uppercase tracking-wider w-20">Result</th>
+                    <th className="px-3 py-2.5 text-center text-xs font-semibold text-muted dark:text-dark-text-secondary uppercase tracking-wider w-24">Total</th>
+                    <th className="px-3 py-2.5 text-center text-xs font-semibold text-muted dark:text-dark-text-secondary uppercase tracking-wider w-20">%</th>
+                    <th className="px-3 py-2.5 text-center text-xs font-semibold text-muted dark:text-dark-text-secondary uppercase tracking-wider w-20">Result</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border/40">
+                <tbody className="divide-y divide-border/40 dark:divide-dark-border bg-white dark:bg-dark-card">
                   {filteredResults.length === 0 ? (
                     <tr>
-                      <td colSpan={subjects.length + 6} className="px-4 py-12 text-center text-muted">
+                      <td colSpan={subjects.length + 6} className="px-4 py-12 text-center text-muted dark:text-dark-text-muted">
                         {searchTerm || filterStatus !== 'all' ? 'No students match your filters' : 'No students found for this exam'}
                       </td>
                     </tr>
@@ -584,29 +588,29 @@ export default function MarksEntry() {
                         <tr
                           key={row.student._id}
                           className={`transition-colors ${
-                            isFailed ? 'bg-danger-light/30 hover:bg-danger-light/50'
-                            : isIncomplete ? 'hover:bg-surface/50'
-                            : 'hover:bg-sage-soft/50'
+                            isFailed ? 'bg-danger-light/30 dark:bg-rose-950/20 hover:bg-danger-light/50 dark:hover:bg-rose-950/30'
+                            : isIncomplete ? 'hover:bg-surface/50 dark:hover:bg-dark-hover'
+                            : 'hover:bg-sage-soft/50 dark:hover:bg-dark-hover'
                           }`}
                         >
                           {/* Rank */}
                           <td className="px-3 py-2 text-center">
                             {row.rank !== null ? (
                               <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold ${
-                                row.rank === 1 ? 'bg-warning-light text-warning-text' :
-                                row.rank === 2 ? 'bg-surface text-secondary' :
-                                row.rank === 3 ? 'bg-warning-light/60 text-warning-text' :
-                                'bg-surface text-muted'
+                                row.rank === 1 ? 'bg-warning-light dark:bg-amber-500/20 text-warning-text dark:text-amber-400' :
+                                row.rank === 2 ? 'bg-surface dark:bg-dark-hover text-secondary dark:text-dark-text-secondary' :
+                                row.rank === 3 ? 'bg-warning-light/60 dark:bg-amber-500/15 text-warning-text dark:text-amber-400' :
+                                'bg-surface dark:bg-dark-hover text-muted dark:text-dark-text-muted'
                               }`}>
                                 {row.rank}
                               </span>
                             ) : (
-                              <span className="text-muted">—</span>
+                              <span className="text-muted dark:text-dark-text-muted">—</span>
                             )}
                           </td>
 
                           {/* Roll No */}
-                          <td className="px-3 py-2 text-center text-secondary text-xs">
+                          <td className="px-3 py-2 text-center text-secondary dark:text-dark-text-secondary text-xs">
                             {row.student.rollNo || '—'}
                           </td>
 
@@ -620,13 +624,13 @@ export default function MarksEntry() {
                                 admissionNo={row.student.admissionNo}
                                 name={`${row.student.firstName} ${row.student.lastName}`}
                                 size="sm"
-                                className="shrink-0 ring-1 ring-border/50"
+                                className="shrink-0 ring-1 ring-border/50 dark:ring-dark-border"
                               />
                               <div>
-                                <div className="font-medium text-deep text-[13px]">
+                                <div className="font-medium text-deep dark:text-dark-text text-[13px]">
                                   {row.student.firstName} {row.student.lastName}
                                 </div>
-                                <div className="text-[11px] text-muted">{row.student.admissionNo}</div>
+                                <div className="text-[11px] text-muted dark:text-dark-text-muted">{row.student.admissionNo}</div>
                               </div>
                             </div>
                           </td>
@@ -654,10 +658,10 @@ export default function MarksEntry() {
                                       onKeyDown={(e) => handleKeyDown(e, studentIndex, subjIndex)}
                                       className={`w-full max-w-[72px] mx-auto px-2 py-1.5 text-center text-sm rounded-md border transition-all focus:outline-none focus:ring-2 ${
                                         hasError
-                                          ? 'border-danger bg-danger-light/30 text-danger-text focus:ring-danger/30'
+                                          ? 'border-danger bg-danger-light/30 dark:bg-rose-950/40 text-danger-text dark:text-rose-400 focus:ring-danger/30'
                                           : isBelowPass
-                                          ? 'border-warning bg-warning-light/30 text-warning-text focus:ring-warning/30'
-                                          : 'border-border bg-white text-deep focus:ring-forest/30 focus:border-forest'
+                                          ? 'border-warning bg-warning-light/30 dark:bg-amber-500/20 text-warning-text dark:text-amber-400 focus:ring-warning/30'
+                                          : 'border-border dark:border-dark-border bg-white dark:bg-dark-elevated text-deep dark:text-dark-text focus:ring-forest/30 dark:focus:ring-emerald-500/30 focus:border-forest dark:focus:border-emerald-500'
                                       }`}
                                       placeholder="—"
                                     />
@@ -669,7 +673,7 @@ export default function MarksEntry() {
                                   </div>
                                 ) : (
                                   <span className={`text-sm font-medium ${
-                                    isBelowPass ? 'text-danger' : cellValue !== '' ? 'text-deep' : 'text-muted'
+                                    isBelowPass ? 'text-danger dark:text-rose-400' : cellValue !== '' ? 'text-deep dark:text-dark-text' : 'text-muted dark:text-dark-text-muted'
                                   }`}>
                                     {cellValue !== '' ? cellValue : '—'}
                                   </span>
@@ -681,11 +685,11 @@ export default function MarksEntry() {
                           {/* Total */}
                           <td className="px-3 py-2 text-center">
                             {row.totalObtained !== null ? (
-                              <span className="font-semibold text-deep text-[13px]">
-                                {row.totalObtained}<span className="text-muted font-normal">/{maxTotal}</span>
+                              <span className="font-semibold text-deep dark:text-dark-text text-[13px]">
+                                {row.totalObtained}<span className="text-muted dark:text-dark-text-muted font-normal">/{maxTotal}</span>
                               </span>
                             ) : (
-                              <span className="text-muted text-xs">—</span>
+                              <span className="text-muted dark:text-dark-text-muted text-xs">—</span>
                             )}
                           </td>
 
@@ -693,15 +697,15 @@ export default function MarksEntry() {
                           <td className="px-3 py-2 text-center">
                             {row.percentage !== null ? (
                               <span className={`font-semibold text-[13px] ${
-                                row.percentage >= 80 ? 'text-success' :
-                                row.percentage >= 60 ? 'text-info-text' :
-                                row.percentage >= 40 ? 'text-warning-text' :
-                                'text-danger'
+                                row.percentage >= 80 ? 'text-success dark:text-emerald-400' :
+                                row.percentage >= 60 ? 'text-info-text dark:text-blue-400' :
+                                row.percentage >= 40 ? 'text-warning-text dark:text-amber-400' :
+                                'text-danger dark:text-rose-400'
                               }`}>
                                 {row.percentage}%
                               </span>
                             ) : (
-                              <span className="text-muted text-xs">—</span>
+                              <span className="text-muted dark:text-dark-text-muted text-xs">—</span>
                             )}
                           </td>
 
@@ -721,9 +725,9 @@ export default function MarksEntry() {
 
             {/* Bottom Actions */}
             {viewMode === 'entry' && filteredResults.length > 0 && (
-              <div className="flex items-center justify-between p-4 border-t border-border bg-surface/30">
-                <p className="text-xs text-muted">
-                  Showing {filteredResults.length} of {computedResults.length} student{computedResults.length !== 1 ? 's' : ''} · Use <kbd className="px-1 py-0.5 bg-white border border-border rounded text-[10px]">Tab</kbd> to move between subjects, <kbd className="px-1 py-0.5 bg-white border border-border rounded text-[10px]">Enter</kbd> for next student
+              <div className="flex items-center justify-between p-4 border-t border-border dark:border-dark-border bg-surface/30 dark:bg-dark-elevated">
+                <p className="text-xs text-muted dark:text-dark-text-muted">
+                  Showing {filteredResults.length} of {computedResults.length} student{computedResults.length !== 1 ? 's' : ''} · Use <kbd className="px-1 py-0.5 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded text-[10px]">Tab</kbd> to move between subjects, <kbd className="px-1 py-0.5 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded text-[10px]">Enter</kbd> for next student
                 </p>
                 <div className="flex items-center gap-2">
                   <Button variant="outline" size="sm" onClick={() => handleSave('draft')} loading={saving} disabled={saving}>
@@ -742,9 +746,9 @@ export default function MarksEntry() {
       {!loading && examDetails && students.length === 0 && (
         <Card>
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <Users size={40} className="text-muted mb-3" />
-            <h3 className="text-lg font-medium text-deep mb-1">No Students Found</h3>
-            <p className="text-sm text-muted max-w-md">
+            <Users size={40} className="text-muted dark:text-dark-text-muted mb-3" />
+            <h3 className="text-lg font-medium text-deep dark:text-dark-text mb-1">No Students Found</h3>
+            <p className="text-sm text-muted dark:text-dark-text-muted max-w-md">
               No active students are assigned to {examDetails.schoolClass?.name || 'the class'} for this exam. Please ensure students are enrolled in the correct class.
             </p>
           </div>
@@ -754,9 +758,9 @@ export default function MarksEntry() {
       {!loading && !examDetails && !examLoading && (
         <Card>
           <div className="flex flex-col items-center justify-center py-16 text-center">
-            <ClipboardList size={48} className="text-muted mb-4" />
-            <h3 className="text-lg font-semibold text-deep mb-2">Select an Exam to Begin</h3>
-            <p className="text-sm text-muted max-w-md">
+            <ClipboardList size={48} className="text-muted dark:text-dark-text-muted mb-4" />
+            <h3 className="text-lg font-semibold text-deep dark:text-dark-text mb-2">Select an Exam to Begin</h3>
+            <p className="text-sm text-muted dark:text-dark-text-muted max-w-md">
               Choose an exam from the dropdown above. Students from the assigned class will be automatically loaded with a marks entry grid.
             </p>
           </div>
@@ -770,12 +774,12 @@ export default function MarksEntry() {
 
 function SummaryCard({ icon: Icon, label, value, color }) {
   return (
-    <div className="bg-white border border-border rounded-xl p-3 flex items-center gap-3 shadow-card">
-      <div className={`p-2 rounded-lg bg-surface ${color}`}>
+    <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3 flex items-center gap-3 shadow-card">
+      <div className={`p-2 rounded-lg bg-surface dark:bg-dark-elevated ${color}`}>
         <Icon size={16} />
       </div>
       <div>
-        <p className="text-[11px] text-muted font-medium uppercase tracking-wider">{label}</p>
+        <p className="text-[11px] text-muted dark:text-dark-text-muted font-medium uppercase tracking-wider">{label}</p>
         <p className={`text-lg font-bold ${color}`}>{value}</p>
       </div>
     </div>

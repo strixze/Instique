@@ -290,17 +290,17 @@ export default function Leaderboard() {
 
           {examData && (
             <div className="flex flex-wrap items-center gap-2.5 text-sm pt-2 lg:pt-0">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface border border-border">
-                <School size={14} className="text-forest" />
-                <span className="font-semibold text-deep">{examData.exam.schoolClass?.name || 'Class'}</span>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface dark:bg-dark-elevated border border-border dark:border-dark-border">
+                <School size={14} className="text-forest dark:text-emerald-400" />
+                <span className="font-semibold text-deep dark:text-dark-text">{examData.exam.schoolClass?.name || 'Class'}</span>
               </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface border border-border">
-                <Calendar size={14} className="text-secondary" />
-                <span className="text-secondary">{examData.exam.academicYear?.name || 'Academic Year'}</span>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface dark:bg-dark-elevated border border-border dark:border-dark-border">
+                <Calendar size={14} className="text-secondary dark:text-dark-text-secondary" />
+                <span className="text-secondary dark:text-dark-text-secondary">{examData.exam.academicYear?.name || 'Academic Year'}</span>
               </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface border border-border">
-                <BookOpen size={14} className="text-secondary" />
-                <span className="text-secondary">{examData.subjects?.length || 0} Subjects ({examData.maxTotal} Marks)</span>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface dark:bg-dark-elevated border border-border dark:border-dark-border">
+                <BookOpen size={14} className="text-secondary dark:text-dark-text-secondary" />
+                <span className="text-secondary dark:text-dark-text-secondary">{examData.subjects?.length || 0} Subjects ({examData.maxTotal} Marks)</span>
               </div>
               <Badge color={examData.exam.status === 'published' ? 'success' : examData.exam.status === 'completed' ? 'gray' : 'info'}>
                 {examData.exam.status}
@@ -334,15 +334,15 @@ export default function Leaderboard() {
         <div className="space-y-6">
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-20 bg-white border border-border rounded-xl animate-pulse p-4" />
+              <div key={i} className="h-20 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl animate-pulse p-4" />
             ))}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-44 bg-white border border-border rounded-xl animate-pulse" />
+              <div key={i} className="h-44 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl animate-pulse" />
             ))}
           </div>
-          <div className="h-64 bg-white border border-border rounded-xl animate-pulse" />
+          <div className="h-64 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl animate-pulse" />
         </div>
       )}
 
@@ -350,9 +350,9 @@ export default function Leaderboard() {
       {!loading && error && (
         <Card>
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <AlertCircle size={40} className="text-danger mb-3" />
-            <h3 className="text-lg font-semibold text-deep mb-1">Unable to Load Leaderboard</h3>
-            <p className="text-sm text-muted max-w-md mb-4">
+            <AlertCircle size={40} className="text-danger dark:text-rose-400 mb-3" />
+            <h3 className="text-lg font-semibold text-deep dark:text-dark-text mb-1">Unable to Load Leaderboard</h3>
+            <p className="text-sm text-muted dark:text-dark-text-muted max-w-md mb-4">
               Something went wrong while retrieving examination results.
             </p>
             <Button size="sm" onClick={() => loadResults(selectedExamId)}>
@@ -366,11 +366,11 @@ export default function Leaderboard() {
       {!loading && !error && examData && !hasMarks && (
         <Card>
           <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="w-14 h-14 rounded-2xl bg-sage-soft flex items-center justify-center text-forest mb-4">
+            <div className="w-14 h-14 rounded-2xl bg-sage-soft dark:bg-dark-elevated flex items-center justify-center text-forest dark:text-emerald-400 mb-4">
               <Trophy size={28} />
             </div>
-            <h3 className="text-lg font-semibold text-deep mb-1">No Leaderboard Available Yet</h3>
-            <p className="text-sm text-secondary max-w-md mb-6">
+            <h3 className="text-lg font-semibold text-deep dark:text-dark-text mb-1">No Leaderboard Available Yet</h3>
+            <p className="text-sm text-secondary dark:text-dark-text-secondary max-w-md mb-6">
               Marks have not been entered for <strong>{examData.exam.name}</strong>. Once subject marks are entered, the leaderboard and rankings will automatically calculate.
             </p>
             {user?.role !== 'student' && user?.role !== 'parent' && (
@@ -392,80 +392,80 @@ export default function Leaderboard() {
               label="Total Students"
               value={summary.totalStudents || 0}
               sub={`${summary.completed || 0} evaluated`}
-              color="text-deep"
+              color="text-deep dark:text-dark-text"
             />
             <StatCard
               icon={CheckCircle}
               label="Passed"
               value={summary.passed || 0}
               sub={summary.completed ? `${Math.round((summary.passed / summary.completed) * 100)}% pass rate` : '—'}
-              color="text-success"
+              color="text-success dark:text-emerald-400"
             />
             <StatCard
               icon={XCircle}
               label="Failed"
               value={summary.failed || 0}
               sub={summary.failed ? `${summary.failed} student${summary.failed > 1 ? 's' : ''}` : 'None'}
-              color="text-danger"
+              color="text-danger dark:text-rose-400"
             />
             <StatCard
               icon={AlertCircle}
               label="Incomplete"
               value={summary.incomplete || 0}
               sub="Pending marks"
-              color="text-warning-text"
+              color="text-warning-text dark:text-amber-400"
             />
             <StatCard
               icon={BarChart3}
               label="Class Average"
               value={summary.classAverage !== null ? `${summary.classAverage}%` : '—'}
               sub="Overall performance"
-              color="text-info-text"
+              color="text-info-text dark:text-blue-400"
             />
             <StatCard
               icon={TrendingUp}
               label="Highest Score"
               value={summary.highestPercentage !== null ? `${summary.highestPercentage}%` : '—'}
               sub={summary.lowestPercentage !== null ? `Low: ${summary.lowestPercentage}%` : '—'}
-              color="text-forest"
+              color="text-forest dark:text-emerald-400"
             />
           </div>
 
           {/* ── Current Student Highlight Card (if logged in user is student) ── */}
           {currentStudentResult && (
-            <div className="bg-forest/5 border-2 border-forest/30 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-card">
+            <div className="bg-forest/5 dark:bg-dark-accent-soft border-2 border-forest/30 dark:border-emerald-500/30 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-card">
               <div className="flex items-center gap-3.5">
-                <div className="w-12 h-12 rounded-xl bg-forest text-white flex items-center justify-center text-lg font-bold shadow-sm">
+                <div className="w-12 h-12 rounded-xl bg-forest dark:bg-emerald-500 text-white dark:text-gray-900 flex items-center justify-center text-lg font-bold shadow-sm">
                   {currentStudentResult.rank !== null ? `#${currentStudentResult.rank}` : '—'}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-forest bg-forest/10 px-2 py-0.5 rounded-md">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-forest dark:text-emerald-400 bg-forest/10 dark:bg-emerald-500/10 px-2 py-0.5 rounded-md">
                       Your Academic Standing
                     </span>
                     {currentStudentResult.result === 'pass' && <Badge color="success">PASS</Badge>}
                     {currentStudentResult.result === 'fail' && <Badge color="danger">FAIL</Badge>}
                   </div>
-                  <h4 className="text-base font-bold text-deep mt-0.5">
+                  <h4 className="text-base font-bold text-deep dark:text-dark-text mt-0.5">
                     {currentStudentResult.student.firstName} {currentStudentResult.student.lastName}
                   </h4>
-                  <p className="text-xs text-secondary">
+                  <p className="text-xs text-secondary dark:text-dark-text-secondary">
                     Roll No: {currentStudentResult.student.rollNo || '—'} · Admission: {currentStudentResult.student.admissionNo || '—'}
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-6 border-t sm:border-t-0 sm:border-l border-border pt-3 sm:pt-0 sm:pl-6 w-full sm:w-auto justify-between sm:justify-start">
+              <div className="flex items-center gap-6 border-t sm:border-t-0 sm:border-l border-border dark:border-dark-border pt-3 sm:pt-0 sm:pl-6 w-full sm:w-auto justify-between sm:justify-start">
                 <div>
-                  <p className="text-[11px] text-muted uppercase font-medium">Total Marks</p>
-                  <p className="text-lg font-bold text-deep">
+                  <p className="text-[11px] text-muted dark:text-dark-text-muted uppercase font-medium">Total Marks</p>
+                  <p className="text-lg font-bold text-deep dark:text-dark-text">
                     {currentStudentResult.totalObtained !== null ? currentStudentResult.totalObtained : '—'}
-                    <span className="text-xs font-normal text-muted">/{examData.maxTotal}</span>
+                    <span className="text-xs font-normal text-muted dark:text-dark-text-muted">/{examData.maxTotal}</span>
                   </p>
                 </div>
                 <div>
-                  <p className="text-[11px] text-muted uppercase font-medium">Percentage</p>
-                  <p className="text-lg font-bold text-forest">
+                  <p className="text-[11px] text-muted dark:text-dark-text-muted uppercase font-medium">Percentage</p>
+                  <p className="text-lg font-bold text-forest dark:text-emerald-400">
                     {currentStudentResult.percentage !== null ? `${currentStudentResult.percentage}%` : '—'}
                   </p>
                 </div>
@@ -477,8 +477,8 @@ export default function Leaderboard() {
           {podiumStudents.length > 0 && (
             <div className="space-y-3">
               <div className="flex items-center gap-2 px-1">
-                <Award size={18} className="text-forest" />
-                <h3 className="text-sm font-bold uppercase tracking-wider text-deep">
+                <Award size={18} className="text-forest dark:text-emerald-400" />
+                <h3 className="text-sm font-bold uppercase tracking-wider text-deep dark:text-dark-text">
                   Top Academic Performers
                 </h3>
               </div>
@@ -525,17 +525,17 @@ export default function Leaderboard() {
           {/* ── Main Leaderboard Table & Filters ── */}
           <Card padding={false}>
             {/* Filter & Search Toolbar */}
-            <div className="p-4 border-b border-border bg-white rounded-t-card print:hidden">
+            <div className="p-4 border-b border-border dark:border-dark-border bg-white dark:bg-dark-card rounded-t-card print:hidden">
               <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
                 {/* Search */}
                 <div className="relative flex-1 max-w-sm">
-                  <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+                  <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted dark:text-dark-text-muted" />
                   <input
                     type="text"
                     placeholder="Search by student name or roll no..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-9 pr-3 py-1.5 bg-white border border-border rounded-lg text-sm text-deep placeholder-muted focus:outline-none focus:ring-2 focus:ring-forest/30 focus:border-forest transition-all"
+                    className="w-full pl-9 pr-3 py-1.5 bg-white dark:bg-dark-elevated border border-border dark:border-dark-border rounded-lg text-sm text-deep dark:text-dark-text placeholder-muted dark:placeholder-dark-text-muted focus:outline-none focus:ring-2 focus:ring-forest/30 dark:focus:ring-emerald-500/30 transition-all"
                   />
                 </div>
 
@@ -543,11 +543,11 @@ export default function Leaderboard() {
                   {/* Section Filter (if multiple sections exist) */}
                   {sectionsList.length > 1 && (
                     <div className="flex items-center gap-1.5 text-xs">
-                      <span className="text-muted font-medium">Section:</span>
+                      <span className="text-muted dark:text-dark-text-muted font-medium">Section:</span>
                       <select
                         value={filterSection}
                         onChange={(e) => setFilterSection(e.target.value)}
-                        className="px-2.5 py-1.5 bg-surface border border-border rounded-lg text-deep text-xs font-medium focus:outline-none focus:ring-2 focus:ring-forest/30"
+                        className="px-2.5 py-1.5 bg-surface dark:bg-dark-elevated border border-border dark:border-dark-border rounded-lg text-deep dark:text-dark-text text-xs font-medium focus:outline-none focus:ring-2 focus:ring-forest/30"
                       >
                         <option value="all">All Sections</option>
                         {sectionsList.map((s) => (
@@ -558,15 +558,15 @@ export default function Leaderboard() {
                   )}
 
                   {/* Result Status Filter */}
-                  <div className="flex items-center rounded-lg bg-surface p-0.5">
+                  <div className="flex items-center rounded-lg bg-surface dark:bg-dark-elevated p-0.5">
                     {['all', 'pass', 'fail', 'incomplete'].map((f) => (
                       <button
                         key={f}
                         onClick={() => setFilterResult(f)}
                         className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
                           filterResult === f
-                            ? 'bg-white text-forest shadow-card'
-                            : 'text-muted hover:text-deep'
+                            ? 'bg-white dark:bg-dark-card text-forest dark:text-emerald-400 shadow-card'
+                            : 'text-muted dark:text-dark-text-muted hover:text-deep dark:hover:text-dark-text'
                         }`}
                       >
                         {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
@@ -579,7 +579,7 @@ export default function Leaderboard() {
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
-                      className="px-2.5 py-1.5 bg-surface border border-border rounded-lg text-deep text-xs font-medium focus:outline-none"
+                      className="px-2.5 py-1.5 bg-surface dark:bg-dark-elevated border border-border dark:border-dark-border rounded-lg text-deep dark:text-dark-text text-xs font-medium focus:outline-none"
                     >
                       <option value="rank">Sort by Rank</option>
                       <option value="percentage">Sort by %</option>
@@ -594,11 +594,11 @@ export default function Leaderboard() {
 
             {/* Complete Table */}
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full text-sm border-collapse">
                 <thead>
-                  <tr className="bg-surface/80 border-b border-border">
+                  <tr className="bg-surface/80 dark:bg-dark-elevated border-b border-border dark:border-dark-border">
                     <th
-                      className="px-4 py-3 text-center text-xs font-semibold text-muted uppercase tracking-wider w-16 cursor-pointer select-none"
+                      className="px-4 py-3 text-center text-xs font-semibold text-muted dark:text-dark-text-secondary uppercase tracking-wider w-16 cursor-pointer select-none"
                       onClick={() => toggleSort('rank')}
                     >
                       <div className="flex items-center justify-center gap-1">
@@ -606,7 +606,7 @@ export default function Leaderboard() {
                       </div>
                     </th>
                     <th
-                      className="px-4 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wider min-w-[200px] cursor-pointer select-none"
+                      className="px-4 py-3 text-left text-xs font-semibold text-muted dark:text-dark-text-secondary uppercase tracking-wider min-w-[200px] cursor-pointer select-none"
                       onClick={() => toggleSort('name')}
                     >
                       <div className="flex items-center gap-1">
@@ -614,7 +614,7 @@ export default function Leaderboard() {
                       </div>
                     </th>
                     <th
-                      className="px-3 py-3 text-center text-xs font-semibold text-muted uppercase tracking-wider w-20 cursor-pointer select-none"
+                      className="px-3 py-3 text-center text-xs font-semibold text-muted dark:text-dark-text-secondary uppercase tracking-wider w-20 cursor-pointer select-none"
                       onClick={() => toggleSort('roll')}
                     >
                       <div className="flex items-center justify-center gap-1">
@@ -622,12 +622,12 @@ export default function Leaderboard() {
                       </div>
                     </th>
                     {sectionsList.length > 0 && (
-                      <th className="px-3 py-3 text-center text-xs font-semibold text-muted uppercase tracking-wider w-20">
+                      <th className="px-3 py-3 text-center text-xs font-semibold text-muted dark:text-dark-text-secondary uppercase tracking-wider w-20">
                         Section
                       </th>
                     )}
                     <th
-                      className="px-4 py-3 text-center text-xs font-semibold text-muted uppercase tracking-wider w-32 cursor-pointer select-none"
+                      className="px-4 py-3 text-center text-xs font-semibold text-muted dark:text-dark-text-secondary uppercase tracking-wider w-32 cursor-pointer select-none"
                       onClick={() => toggleSort('total')}
                     >
                       <div className="flex items-center justify-center gap-1">
@@ -635,22 +635,22 @@ export default function Leaderboard() {
                       </div>
                     </th>
                     <th
-                      className="px-4 py-3 text-center text-xs font-semibold text-muted uppercase tracking-wider w-28 cursor-pointer select-none"
+                      className="px-4 py-3 text-center text-xs font-semibold text-muted dark:text-dark-text-secondary uppercase tracking-wider w-28 cursor-pointer select-none"
                       onClick={() => toggleSort('percentage')}
                     >
                       <div className="flex items-center justify-center gap-1">
                         Percentage <SortIcon field="percentage" />
                       </div>
                     </th>
-                    <th className="px-4 py-3 text-center text-xs font-semibold text-muted uppercase tracking-wider w-24">
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-muted dark:text-dark-text-secondary uppercase tracking-wider w-24">
                       Result
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border/40 bg-white">
+                <tbody className="divide-y divide-border/40 dark:divide-dark-border bg-white dark:bg-dark-card">
                   {processedResults.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="px-4 py-12 text-center text-muted">
+                      <td colSpan={7} className="px-4 py-12 text-center text-muted dark:text-dark-text-muted">
                         No students match the current filters.
                       </td>
                     </tr>
@@ -672,18 +672,18 @@ export default function Leaderboard() {
                           key={row.student._id}
                           className={`transition-colors ${
                             isCurrentUser
-                              ? 'bg-forest/10 border-l-4 border-l-forest font-medium'
+                              ? 'bg-forest/10 dark:bg-emerald-500/10 border-l-4 border-l-forest dark:border-l-emerald-400 font-medium'
                               : isFirst
-                              ? 'bg-amber-50/40 hover:bg-amber-50/70'
+                              ? 'bg-amber-50/40 dark:bg-amber-500/10 hover:bg-amber-50/70 dark:hover:bg-amber-500/20'
                               : isSecond
-                              ? 'bg-slate-50/60 hover:bg-slate-100/60'
+                              ? 'bg-slate-50/60 dark:bg-dark-elevated/40 hover:bg-slate-100/60 dark:hover:bg-dark-hover'
                               : isThird
-                              ? 'bg-amber-50/20 hover:bg-amber-50/40'
+                              ? 'bg-amber-50/20 dark:bg-amber-500/5 hover:bg-amber-50/40 dark:hover:bg-amber-500/15'
                               : isFailed
-                              ? 'hover:bg-danger-light/30'
+                              ? 'hover:bg-danger-light/30 dark:hover:bg-rose-950/20'
                               : isIncomplete
-                              ? 'hover:bg-surface/50 text-secondary'
-                              : 'hover:bg-sage-soft/40'
+                              ? 'hover:bg-surface/50 dark:hover:bg-dark-hover text-secondary dark:text-dark-text-secondary'
+                              : 'hover:bg-sage-soft/40 dark:hover:bg-dark-hover'
                           }`}
                         >
                           {/* Rank Column */}
@@ -692,18 +692,18 @@ export default function Leaderboard() {
                               <span
                                 className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold ${
                                   isFirst
-                                    ? 'bg-amber-100 text-amber-900 ring-2 ring-amber-300'
+                                    ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 ring-2 ring-amber-300 dark:ring-amber-500/40'
                                     : isSecond
-                                    ? 'bg-slate-200 text-slate-800 ring-2 ring-slate-300'
+                                    ? 'bg-slate-200 dark:bg-dark-elevated text-slate-800 dark:text-dark-text-secondary ring-2 ring-slate-300 dark:ring-dark-border'
                                     : isThird
-                                    ? 'bg-amber-100/70 text-amber-800 ring-1 ring-amber-200'
-                                    : 'bg-surface text-secondary'
+                                    ? 'bg-amber-100/70 dark:bg-amber-500/15 text-amber-800 dark:text-amber-300 ring-1 ring-amber-200 dark:ring-amber-500/30'
+                                    : 'bg-surface dark:bg-dark-hover text-secondary dark:text-dark-text-secondary'
                                 }`}
                               >
                                 {row.rank}
                               </span>
                             ) : (
-                              <span className="text-muted text-xs">—</span>
+                              <span className="text-muted dark:text-dark-text-muted text-xs">—</span>
                             )}
                           </td>
 
@@ -717,18 +717,18 @@ export default function Leaderboard() {
                                 admissionNo={row.student.admissionNo}
                                 name={`${row.student.firstName} ${row.student.lastName}`}
                                 size="sm"
-                                className="shrink-0 ring-1 ring-border/50"
+                                className="shrink-0 ring-1 ring-border/50 dark:ring-dark-border"
                               />
                               <div>
-                                <div className="font-semibold text-deep flex items-center gap-1.5">
+                                <div className="font-semibold text-deep dark:text-dark-text flex items-center gap-1.5">
                                   <span>{row.student.firstName} {row.student.lastName}</span>
                                   {isCurrentUser && (
-                                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-forest text-white font-medium">
+                                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-forest dark:bg-emerald-500 text-white dark:text-gray-900 font-medium">
                                       You
                                     </span>
                                   )}
                                 </div>
-                                <div className="text-[11px] text-muted">
+                                <div className="text-[11px] text-muted dark:text-dark-text-muted">
                                   {row.student.admissionNo || '—'}
                                 </div>
                               </div>
@@ -736,13 +736,13 @@ export default function Leaderboard() {
                           </td>
 
                           {/* Roll No */}
-                          <td className="px-3 py-3 text-center text-secondary font-medium text-xs">
+                          <td className="px-3 py-3 text-center text-secondary dark:text-dark-text-secondary font-medium text-xs">
                             {row.student.rollNo || '—'}
                           </td>
 
                           {/* Section */}
                           {sectionsList.length > 0 && (
-                            <td className="px-3 py-3 text-center text-secondary text-xs">
+                            <td className="px-3 py-3 text-center text-secondary dark:text-dark-text-secondary text-xs">
                               {row.student.section?.name || '—'}
                             </td>
                           )}
@@ -750,12 +750,12 @@ export default function Leaderboard() {
                           {/* Total Marks */}
                           <td className="px-4 py-3 text-center">
                             {row.totalObtained !== null ? (
-                              <span className="font-semibold text-deep text-[13px]">
+                              <span className="font-semibold text-deep dark:text-dark-text text-[13px]">
                                 {row.totalObtained}
-                                <span className="text-muted font-normal text-xs">/{examData.maxTotal}</span>
+                                <span className="text-muted dark:text-dark-text-muted font-normal text-xs">/{examData.maxTotal}</span>
                               </span>
                             ) : (
-                              <span className="text-muted text-xs">—</span>
+                              <span className="text-muted dark:text-dark-text-muted text-xs">—</span>
                             )}
                           </td>
 
@@ -765,18 +765,18 @@ export default function Leaderboard() {
                               <span
                                 className={`font-bold text-[13px] ${
                                   row.percentage >= 85
-                                    ? 'text-forest'
+                                    ? 'text-forest dark:text-emerald-400'
                                     : row.percentage >= 70
-                                    ? 'text-info-text'
+                                    ? 'text-info-text dark:text-blue-400'
                                     : row.percentage >= 40
-                                    ? 'text-warning-text'
-                                    : 'text-danger'
+                                    ? 'text-warning-text dark:text-amber-400'
+                                    : 'text-danger dark:text-rose-400'
                                 }`}
                               >
                                 {row.percentage.toFixed(2)}%
                               </span>
                             ) : (
-                              <span className="text-muted text-xs">—</span>
+                              <span className="text-muted dark:text-dark-text-muted text-xs">—</span>
                             )}
                           </td>
 
@@ -795,7 +795,7 @@ export default function Leaderboard() {
             </div>
 
             {/* Table Footer */}
-            <div className="p-4 border-t border-border bg-surface/30 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted">
+            <div className="p-4 border-t border-border dark:border-dark-border bg-surface/30 dark:bg-dark-elevated flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted dark:text-dark-text-muted">
               <span>
                 Showing {processedResults.length} of {examData.results.length} students
               </span>
@@ -814,16 +814,16 @@ export default function Leaderboard() {
 
 function StatCard({ icon: Icon, label, value, sub, color }) {
   return (
-    <div className="bg-white border border-border rounded-xl p-3.5 shadow-card flex flex-col justify-between">
+    <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3.5 shadow-card flex flex-col justify-between">
       <div className="flex items-center justify-between mb-1.5">
-        <span className="text-[11px] font-semibold text-muted uppercase tracking-wider">{label}</span>
-        <div className={`p-1.5 rounded-lg bg-surface ${color}`}>
+        <span className="text-[11px] font-semibold text-muted dark:text-dark-text-muted uppercase tracking-wider">{label}</span>
+        <div className={`p-1.5 rounded-lg bg-surface dark:bg-dark-elevated ${color}`}>
           <Icon size={15} />
         </div>
       </div>
       <div>
         <div className={`text-xl font-bold ${color}`}>{value}</div>
-        {sub && <p className="text-[11px] text-muted mt-0.5 truncate">{sub}</p>}
+        {sub && <p className="text-[11px] text-muted dark:text-dark-text-muted mt-0.5 truncate">{sub}</p>}
       </div>
     </div>
   );
@@ -834,24 +834,24 @@ function StatCard({ icon: Icon, label, value, sub, color }) {
 function PodiumCard({ position, data, maxTotal, accent, isFirst = false }) {
   const rankColors = {
     gold: {
-      card: 'bg-gradient-to-b from-amber-50/70 to-white border-amber-300 ring-2 ring-amber-400/30',
+      card: 'bg-gradient-to-b from-amber-500/10 via-amber-500/5 to-white dark:to-dark-card border-amber-300 dark:border-amber-500/40 ring-2 ring-amber-400/30',
       badge: 'bg-amber-500 text-white',
-      pill: 'bg-amber-100 text-amber-900 border-amber-300',
-      ring: 'ring-amber-300',
+      pill: 'bg-amber-100 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 border-amber-300 dark:border-amber-500/30',
+      ring: 'ring-amber-300 dark:ring-amber-500/40',
       rankLabel: '1st Place',
     },
     slate: {
-      card: 'bg-gradient-to-b from-slate-50/70 to-white border-slate-300 ring-1 ring-slate-300/40',
+      card: 'bg-gradient-to-b from-slate-100/70 to-white dark:to-dark-card border-slate-300 dark:border-dark-border ring-1 ring-slate-300/40 dark:ring-dark-border',
       badge: 'bg-slate-500 text-white',
-      pill: 'bg-slate-100 text-slate-800 border-slate-300',
-      ring: 'ring-slate-300',
+      pill: 'bg-slate-100 dark:bg-dark-elevated text-slate-800 dark:text-dark-text-secondary border-slate-300 dark:border-dark-border',
+      ring: 'ring-slate-300 dark:ring-dark-border',
       rankLabel: '2nd Place',
     },
     bronze: {
-      card: 'bg-gradient-to-b from-amber-50/30 to-white border-amber-200 ring-1 ring-amber-200/40',
+      card: 'bg-gradient-to-b from-amber-500/10 via-amber-500/5 to-white dark:to-dark-card border-amber-200 dark:border-amber-600/30 ring-1 ring-amber-200/40',
       badge: 'bg-amber-700 text-white',
-      pill: 'bg-amber-100/60 text-amber-900 border-amber-200',
-      ring: 'ring-amber-200',
+      pill: 'bg-amber-100/60 dark:bg-amber-500/15 text-amber-900 dark:text-amber-300 border-amber-200 dark:border-amber-600/30',
+      ring: 'ring-amber-200 dark:ring-amber-600/30',
       rankLabel: '3rd Place',
     },
   };
@@ -872,7 +872,7 @@ function PodiumCard({ position, data, maxTotal, accent, isFirst = false }) {
           <Award size={12} />
           {currentTheme.rankLabel}
         </span>
-        <span className="text-xs font-semibold text-secondary">
+        <span className="text-xs font-semibold text-secondary dark:text-dark-text-secondary">
           Roll #{data.student.rollNo || '—'}
         </span>
       </div>
@@ -888,25 +888,25 @@ function PodiumCard({ position, data, maxTotal, accent, isFirst = false }) {
           size="lg"
           className={`mb-2 ring-2 ${currentTheme.ring} shadow-md`}
         />
-        <h4 className="text-base font-bold text-deep line-clamp-1">
+        <h4 className="text-base font-bold text-deep dark:text-dark-text line-clamp-1">
           {data.student.firstName} {data.student.lastName}
         </h4>
-        <p className="text-xs text-muted">{data.student.admissionNo || ''}</p>
+        <p className="text-xs text-muted dark:text-dark-text-muted">{data.student.admissionNo || ''}</p>
       </div>
 
       {/* Scores */}
-      <div className="mt-3 pt-3 border-t border-border/70 flex items-center justify-around bg-surface/50 rounded-xl py-2 px-3">
+      <div className="mt-3 pt-3 border-t border-border/70 dark:border-dark-border flex items-center justify-around bg-surface/50 dark:bg-dark-elevated rounded-xl py-2 px-3">
         <div>
-          <p className="text-[10px] uppercase font-semibold text-muted">Total</p>
-          <p className="text-sm font-bold text-deep">
+          <p className="text-[10px] uppercase font-semibold text-muted dark:text-dark-text-muted">Total</p>
+          <p className="text-sm font-bold text-deep dark:text-dark-text">
             {data.totalObtained}
-            <span className="text-[10px] text-muted font-normal">/{maxTotal}</span>
+            <span className="text-[10px] text-muted dark:text-dark-text-muted font-normal">/{maxTotal}</span>
           </p>
         </div>
-        <div className="h-6 w-px bg-border" />
+        <div className="h-6 w-px bg-border dark:bg-dark-border" />
         <div>
-          <p className="text-[10px] uppercase font-semibold text-muted">Score</p>
-          <p className="text-sm font-bold text-forest">{data.percentage.toFixed(2)}%</p>
+          <p className="text-[10px] uppercase font-semibold text-muted dark:text-dark-text-muted">Score</p>
+          <p className="text-sm font-bold text-forest dark:text-emerald-400">{data.percentage.toFixed(2)}%</p>
         </div>
       </div>
     </div>

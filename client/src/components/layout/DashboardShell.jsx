@@ -6,7 +6,7 @@ export default function DashboardShell({ children }) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-page w-full">
+    <div className="flex h-screen overflow-hidden bg-page dark:bg-dark-bg w-full">
       {/* Fixed Sidebar */}
       <Sidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 

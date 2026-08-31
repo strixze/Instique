@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -90,6 +91,19 @@ export default {
           text: '#1D4ED8',
           dark: '#1E40AF',
         },
+        // ── Dark Theme Palette ──
+        'dark-bg': '#07090B',
+        'dark-surface': '#090C0E',
+        'dark-card': '#101315',
+        'dark-elevated': '#15191C',
+        'dark-hover': '#181D20',
+        'dark-border': 'rgba(255,255,255,0.06)',
+        'dark-border-strong': 'rgba(255,255,255,0.10)',
+        'dark-text': '#F5F7F8',
+        'dark-text-secondary': '#A7AFB5',
+        'dark-text-muted': '#707980',
+        'dark-accent': '#34D399',
+        'dark-accent-soft': 'rgba(52,211,153,0.10)',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],

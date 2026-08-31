@@ -14,15 +14,15 @@ export default function Select({
   return (
     <div className="space-y-1 w-full text-left">
       {label && (
-        <label htmlFor={selectId} className="block text-xs font-semibold text-deep">
+        <label htmlFor={selectId} className="block text-xs font-semibold text-deep dark:text-dark-text">
           {label}
           {required && <span className="text-danger ml-0.5">*</span>}
         </label>
       )}
       <select
         id={selectId}
-        className={`w-full px-3 py-2 bg-white border border-border rounded-lg text-xs sm:text-sm text-deep focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest transition-all duration-150 ${
-          error ? 'border-danger focus:ring-danger/20 focus:border-danger' : 'hover:border-slate-300'
+        className={`w-full px-3 py-2 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-lg text-xs sm:text-sm text-deep dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-forest/20 dark:focus:ring-emerald-500/20 focus:border-forest dark:focus:border-emerald-500 transition-all duration-150 ${
+          error ? 'border-danger focus:ring-danger/20 focus:border-danger' : 'hover:border-slate-300 dark:hover:border-dark-border-strong'
         } ${className}`}
         {...props}
       >
@@ -36,7 +36,7 @@ export default function Select({
       {error ? (
         <p className="text-xs text-danger mt-0.5">{error}</p>
       ) : helperText ? (
-        <p className="text-[11px] text-muted mt-0.5">{helperText}</p>
+        <p className="text-[11px] text-muted dark:text-dark-text-muted mt-0.5">{helperText}</p>
       ) : null}
     </div>
   );

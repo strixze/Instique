@@ -50,7 +50,7 @@ const SIZE_MAP = {
 
 const STATUS_COLOR_MAP = {
   online: 'bg-emerald-500',
-  offline: 'bg-slate-400',
+  offline: 'bg-slate-400 dark:bg-slate-500',
   busy: 'bg-rose-500',
   away: 'bg-amber-500',
 };
@@ -100,7 +100,7 @@ export default function UserAvatar({
 
   // Size styling
   const sizeClass = SIZE_MAP[size] || SIZE_MAP.md;
-  const ringClass = ring === true ? 'ring-2 ring-forest/20' : ring || '';
+  const ringClass = ring === true ? 'ring-2 ring-forest/20 dark:ring-emerald-500/20' : ring || '';
 
   return (
     <div
@@ -123,7 +123,7 @@ export default function UserAvatar({
       {/* Optional Status Badge */}
       {status && STATUS_COLOR_MAP[status] && (
         <span
-          className={`absolute bottom-0 right-0 rounded-full ring-2 ring-white ${STATUS_COLOR_MAP[status]} ${
+          className={`absolute bottom-0 right-0 rounded-full ring-2 ring-white dark:ring-dark-card ${STATUS_COLOR_MAP[status]} ${
             size === 'xs' || size === 'sm' ? 'w-2 h-2' : size === 'lg' || size === 'xl' || size === '2xl' ? 'w-3.5 h-3.5' : 'w-2.5 h-2.5'
           }`}
         />

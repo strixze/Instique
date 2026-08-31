@@ -54,6 +54,12 @@ export default function TeacherDashboard() {
   }, []);
 
   const greeting = getGreeting();
+  const todayDateFormatted = new Date().toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
   const teacher = data?.teacher;
   const summary = data?.summary || {};
   const todaysSchedule = data?.todaysSchedule || [];
@@ -68,12 +74,6 @@ export default function TeacherDashboard() {
   const events = data?.events || [];
   const parentMeetings = data?.parentMeetings || [];
 
-  const todayDateFormatted = new Date().toLocaleDateString('en-GB', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
 
   if (loading) {
     return (
@@ -116,8 +116,8 @@ export default function TeacherDashboard() {
           <AlertCircle size={28} />
         </div>
         <div className="space-y-1">
-          <h2 className="text-xl font-bold text-deep">Unable to load dashboard</h2>
-          <p className="text-sm text-muted max-w-md">{error}</p>
+          <h2 className="text-xl font-bold text-deep dark:text-dark-text">Unable to load dashboard</h2>
+          <p className="text-sm text-muted dark:text-dark-text-muted max-w-md">{error}</p>
         </div>
         <Button onClick={fetchDashboard} className="mt-2 bg-forest hover:bg-forest/90 text-white">
           <RefreshCw size={16} className="mr-2" /> Try Again
@@ -137,9 +137,6 @@ export default function TeacherDashboard() {
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-400/30">
-                {todayDateFormatted}
-              </span>
               {teacher?.employeeId && (
                 <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-white/10 text-slate-300 border border-white/10">
                   ID: {teacher.employeeId}
@@ -216,88 +213,88 @@ export default function TeacherDashboard() {
         {/* Today's Classes */}
         <Card className="!p-4 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted">Today's Classes</span>
-            <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+            <span className="text-xs font-semibold text-muted dark:text-dark-text-muted">Today's Classes</span>
+            <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
               <Calendar size={16} />
             </div>
           </div>
           <div className="mt-2 flex items-baseline gap-1.5">
-            <span className="text-2xl font-bold text-deep">{summary.todaysClasses ?? 0}</span>
-            <span className="text-xs text-muted">periods</span>
+            <span className="text-2xl font-bold text-deep dark:text-dark-text">{summary.todaysClasses ?? 0}</span>
+            <span className="text-xs text-muted dark:text-dark-text-muted">periods</span>
           </div>
         </Card>
 
         {/* Students Taught */}
         <Card className="!p-4 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted">Students Taught</span>
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <span className="text-xs font-semibold text-muted dark:text-dark-text-muted">Students Taught</span>
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
               <GraduationCap size={16} />
             </div>
           </div>
           <div className="mt-2 flex items-baseline gap-1.5">
-            <span className="text-2xl font-bold text-deep">{summary.studentsTaught ?? 0}</span>
-            <span className="text-xs text-muted">enrolled</span>
+            <span className="text-2xl font-bold text-deep dark:text-dark-text">{summary.studentsTaught ?? 0}</span>
+            <span className="text-xs text-muted dark:text-dark-text-muted">enrolled</span>
           </div>
         </Card>
 
         {/* Pending Attendance */}
-        <Card className={`!p-4 hover:shadow-md transition-shadow ${summary.attendancePending > 0 ? 'border-amber-300 bg-amber-50/30' : ''}`}>
+        <Card className={`!p-4 hover:shadow-md transition-shadow ${summary.attendancePending > 0 ? 'border-amber-300 dark:border-amber-500/30 bg-amber-50/30 dark:bg-amber-500/10' : ''}`}>
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted">Attendance Pending</span>
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${summary.attendancePending > 0 ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'}`}>
+            <span className="text-xs font-semibold text-muted dark:text-dark-text-muted">Attendance Pending</span>
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${summary.attendancePending > 0 ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300' : 'bg-slate-100 dark:bg-dark-hover text-slate-600 dark:text-dark-text-secondary'}`}>
               <ClipboardList size={16} />
             </div>
           </div>
           <div className="mt-2 flex items-baseline gap-1.5">
-            <span className={`text-2xl font-bold ${summary.attendancePending > 0 ? 'text-amber-600' : 'text-deep'}`}>
+            <span className={`text-2xl font-bold ${summary.attendancePending > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-deep dark:text-dark-text'}`}>
               {summary.attendancePending ?? 0}
             </span>
-            <span className="text-xs text-muted">classes</span>
+            <span className="text-xs text-muted dark:text-dark-text-muted">classes</span>
           </div>
         </Card>
 
         {/* Pending Homework */}
         <Card className="!p-4 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted">Active Homework</span>
-            <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+            <span className="text-xs font-semibold text-muted dark:text-dark-text-muted">Active Homework</span>
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
               <BookOpen size={16} />
             </div>
           </div>
           <div className="mt-2 flex items-baseline gap-1.5">
-            <span className="text-2xl font-bold text-deep">{summary.homeworkPending ?? 0}</span>
-            <span className="text-xs text-muted">assigned</span>
+            <span className="text-2xl font-bold text-deep dark:text-dark-text">{summary.homeworkPending ?? 0}</span>
+            <span className="text-xs text-muted dark:text-dark-text-muted">assigned</span>
           </div>
         </Card>
 
         {/* Upcoming Exams */}
         <Card className="!p-4 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted">Upcoming Exams</span>
-            <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
+            <span className="text-xs font-semibold text-muted dark:text-dark-text-muted">Upcoming Exams</span>
+            <div className="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center">
               <Trophy size={16} />
             </div>
           </div>
           <div className="mt-2 flex items-baseline gap-1.5">
-            <span className="text-2xl font-bold text-deep">{summary.upcomingExams ?? 0}</span>
-            <span className="text-xs text-muted">exams</span>
+            <span className="text-2xl font-bold text-deep dark:text-dark-text">{summary.upcomingExams ?? 0}</span>
+            <span className="text-xs text-muted dark:text-dark-text-muted">exams</span>
           </div>
         </Card>
 
         {/* Pending Marks */}
-        <Card className={`!p-4 hover:shadow-md transition-shadow ${summary.marksPending > 0 ? 'border-red-300 bg-red-50/20' : ''}`}>
+        <Card className={`!p-4 hover:shadow-md transition-shadow ${summary.marksPending > 0 ? 'border-red-300 dark:border-rose-500/30 bg-red-50/20 dark:bg-rose-500/10' : ''}`}>
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted">Marks Pending</span>
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${summary.marksPending > 0 ? 'bg-red-100 text-red-600' : 'bg-slate-100 text-slate-600'}`}>
+            <span className="text-xs font-semibold text-muted dark:text-dark-text-muted">Marks Pending</span>
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${summary.marksPending > 0 ? 'bg-red-100 dark:bg-rose-500/20 text-red-600 dark:text-rose-400' : 'bg-slate-100 dark:bg-dark-hover text-slate-600 dark:text-dark-text-secondary'}`}>
               <FileEdit size={16} />
             </div>
           </div>
           <div className="mt-2 flex items-baseline gap-1.5">
-            <span className={`text-2xl font-bold ${summary.marksPending > 0 ? 'text-red-600' : 'text-deep'}`}>
+            <span className={`text-2xl font-bold ${summary.marksPending > 0 ? 'text-red-600 dark:text-rose-400' : 'text-deep dark:text-dark-text'}`}>
               {summary.marksPending ?? 0}
             </span>
-            <span className="text-xs text-muted">tasks</span>
+            <span className="text-xs text-muted dark:text-dark-text-muted">tasks</span>
           </div>
         </Card>
       </div>
@@ -309,13 +306,13 @@ export default function TeacherDashboard() {
         <div className="lg:col-span-2 space-y-6">
           
           {/* ── Today's Timetable Schedule ── */}
-          <Card className="!p-0 overflow-hidden border border-border shadow-sm">
-            <div className="p-5 border-b border-border bg-slate-50/60 flex items-center justify-between">
+          <Card className="!p-0 overflow-hidden border border-border dark:border-dark-border shadow-sm">
+            <div className="p-5 border-b border-border dark:border-dark-border bg-slate-50/60 dark:bg-dark-elevated flex items-center justify-between">
               <div className="space-y-0.5">
-                <h2 className="text-base font-bold text-deep flex items-center gap-2">
-                  <Clock size={18} className="text-forest" /> Today's Lecture Schedule
+                <h2 className="text-base font-bold text-deep dark:text-dark-text flex items-center gap-2">
+                  <Clock size={18} className="text-forest dark:text-emerald-400" /> Today's Lecture Schedule
                 </h2>
-                <p className="text-xs text-muted">
+                <p className="text-xs text-muted dark:text-dark-text-muted">
                   Chronological schedule for {todayDateFormatted}
                 </p>
               </div>
@@ -331,48 +328,48 @@ export default function TeacherDashboard() {
 
             {todaysSchedule.length === 0 ? (
               <div className="p-8 text-center space-y-2">
-                <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+                <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-dark-hover text-slate-400 dark:text-dark-text-muted flex items-center justify-center mx-auto">
                   <CalendarDays size={24} />
                 </div>
-                <p className="text-sm font-semibold text-deep">No classes scheduled today</p>
-                <p className="text-xs text-muted max-w-sm mx-auto">
+                <p className="text-sm font-semibold text-deep dark:text-dark-text">No classes scheduled today</p>
+                <p className="text-xs text-muted dark:text-dark-text-muted max-w-sm mx-auto">
                   You have no teaching periods assigned for today. You can use this time for lesson preparation or grading.
                 </p>
               </div>
             ) : (
-              <div className="divide-y divide-border">
+              <div className="divide-y divide-border dark:divide-dark-border">
                 {todaysSchedule.map((lecture, idx) => {
                   const isBreak = lecture.isBreak || lecture.isLunch;
                   return (
                     <div
                       key={idx}
                       className={`p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors ${
-                        isBreak ? 'bg-slate-50/80 text-muted' : 'hover:bg-slate-50/50'
+                        isBreak ? 'bg-slate-50/80 dark:bg-dark-elevated text-muted dark:text-dark-text-muted' : 'hover:bg-slate-50/50 dark:hover:bg-dark-hover'
                       }`}
                     >
                       {/* Left: Period & Time */}
                       <div className="flex items-center gap-3.5">
                         <div className={`w-11 h-11 rounded-xl flex flex-col items-center justify-center font-bold text-xs shrink-0 ${
                           isBreak
-                            ? 'bg-slate-200 text-slate-600'
-                            : 'bg-forest/10 text-forest border border-forest/20'
+                            ? 'bg-slate-200 dark:bg-dark-hover text-slate-600 dark:text-dark-text-secondary'
+                            : 'bg-forest/10 dark:bg-dark-accent-soft text-forest dark:text-emerald-400 border border-forest/20 dark:border-emerald-500/20'
                         }`}>
                           <span>P{lecture.periodNo}</span>
                         </div>
 
                         <div className="space-y-0.5">
                           <div className="flex items-center gap-2">
-                            <span className="font-bold text-sm text-deep">
+                            <span className="font-bold text-sm text-deep dark:text-dark-text">
                               {isBreak ? (lecture.label || 'Break / Recess') : (lecture.subject?.name || 'Lecture')}
                             </span>
                             {lecture.subject?.code && !isBreak && (
-                              <span className="text-[11px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 font-mono">
+                              <span className="text-[11px] px-1.5 py-0.2 rounded bg-slate-100 dark:bg-dark-hover text-slate-600 dark:text-dark-text-secondary font-mono">
                                 {lecture.subject.code}
                               </span>
                             )}
                           </div>
 
-                          <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
+                          <div className="flex flex-wrap items-center gap-2 text-xs text-muted dark:text-dark-text-muted">
                             <span className="flex items-center gap-1">
                               <Clock size={12} className="opacity-70" />
                               {lecture.startTime && lecture.endTime ? `${lecture.startTime} – ${lecture.endTime}` : 'Time TBD'}
@@ -380,7 +377,7 @@ export default function TeacherDashboard() {
                             {!isBreak && lecture.schoolClass && (
                               <>
                                 <span>•</span>
-                                <span className="font-medium text-slate-700">
+                                <span className="font-medium text-slate-700 dark:text-dark-text-secondary">
                                   {lecture.schoolClass?.name}{lecture.section?.name ? ` - ${lecture.section.name}` : ''}
                                 </span>
                               </>
@@ -401,8 +398,8 @@ export default function TeacherDashboard() {
                       {!isBreak && (
                         <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
                           {lecture.attendanceMarked ? (
-                            <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                              <CheckCircle2 size={13} className="text-emerald-600" /> Attendance Marked
+                            <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
+                              <CheckCircle2 size={13} className="text-emerald-600 dark:text-emerald-400" /> Attendance Marked
                             </span>
                           ) : (
                             <Button
@@ -430,25 +427,25 @@ export default function TeacherDashboard() {
           </Card>
 
           {/* ── My Classes & Assigned Subjects Tabbed Card ── */}
-          <Card className="!p-0 overflow-hidden border border-border shadow-sm">
-            <div className="p-5 border-b border-border bg-slate-50/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <Card className="!p-0 overflow-hidden border border-border dark:border-dark-border shadow-sm">
+            <div className="p-5 border-b border-border dark:border-dark-border bg-slate-50/60 dark:bg-dark-elevated flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="space-y-0.5">
-                <h2 className="text-base font-bold text-deep flex items-center gap-2">
-                  <GraduationCap size={18} className="text-forest" /> Teaching Assignments
+                <h2 className="text-base font-bold text-deep dark:text-dark-text flex items-center gap-2">
+                  <GraduationCap size={18} className="text-forest dark:text-emerald-400" /> Teaching Assignments
                 </h2>
-                <p className="text-xs text-muted">
+                <p className="text-xs text-muted dark:text-dark-text-muted">
                   Classes, sections, and subjects assigned to your profile
                 </p>
               </div>
 
               {/* Tab Selector */}
-              <div className="inline-flex p-1 rounded-xl bg-slate-200/70 text-xs font-semibold">
+              <div className="inline-flex p-1 rounded-xl bg-slate-200/70 dark:bg-dark-hover text-xs font-semibold">
                 <button
                   onClick={() => setActiveTab('classes')}
                   className={`px-3 py-1.5 rounded-lg transition-all ${
                     activeTab === 'classes'
-                      ? 'bg-white text-forest shadow-sm'
-                      : 'text-slate-600 hover:text-slate-900'
+                      ? 'bg-white dark:bg-dark-card text-forest dark:text-emerald-400 shadow-sm'
+                      : 'text-slate-600 dark:text-dark-text-secondary hover:text-slate-900 dark:hover:text-dark-text'
                   }`}
                 >
                   My Classes ({classes.length})
@@ -457,8 +454,8 @@ export default function TeacherDashboard() {
                   onClick={() => setActiveTab('subjects')}
                   className={`px-3 py-1.5 rounded-lg transition-all ${
                     activeTab === 'subjects'
-                      ? 'bg-white text-forest shadow-sm'
-                      : 'text-slate-600 hover:text-slate-900'
+                      ? 'bg-white dark:bg-dark-card text-forest dark:text-emerald-400 shadow-sm'
+                      : 'text-slate-600 dark:text-dark-text-secondary hover:text-slate-900 dark:hover:text-dark-text'
                   }`}
                 >
                   My Subjects ({subjects.length})

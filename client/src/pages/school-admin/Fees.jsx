@@ -732,32 +732,32 @@ export default function Fees() {
       <PageHeader title="Fees" description="Manage fee structures, payments, and collections." />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
-        <div className="p-4 bg-white border border-border rounded-xl shadow-2xs">
-          <p className="text-[11px] font-semibold text-muted uppercase tracking-wide">Total Collected</p>
-          <p className="text-2xl font-bold text-emerald-700 mt-1">₹{report?.totalCollected?.toLocaleString() ?? '-'}</p>
+        <div className="p-4 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl shadow-2xs">
+          <p className="text-[11px] font-semibold text-muted dark:text-dark-text-muted uppercase tracking-wide">Total Collected</p>
+          <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-400 mt-1">₹{report?.totalCollected?.toLocaleString() ?? '-'}</p>
         </div>
-        <div className="p-4 bg-white border border-border rounded-xl shadow-2xs">
-          <p className="text-[11px] font-semibold text-muted uppercase tracking-wide">Total Pending Fees</p>
-          <p className="text-2xl font-bold text-rose-600 mt-1">₹{report?.totalPending?.toLocaleString() ?? '-'}</p>
+        <div className="p-4 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl shadow-2xs">
+          <p className="text-[11px] font-semibold text-muted dark:text-dark-text-muted uppercase tracking-wide">Total Pending Fees</p>
+          <p className="text-2xl font-bold text-rose-600 dark:text-rose-400 mt-1">₹{report?.totalPending?.toLocaleString() ?? '-'}</p>
         </div>
       </div>
 
-      <div className="flex gap-1 p-1 bg-white border border-border rounded-xl w-fit shadow-2xs">
+      <div className="flex gap-1 p-1 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl w-fit shadow-2xs">
         <button
           onClick={() => setActive('structures')}
-          className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${active === 'structures' ? 'bg-forest text-white shadow-2xs' : 'text-secondary hover:bg-surface hover:text-deep font-medium'}`}
+          className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${active === 'structures' ? 'bg-forest dark:bg-emerald-500 text-white dark:text-gray-900 shadow-2xs' : 'text-secondary dark:text-dark-text-secondary hover:bg-surface dark:hover:bg-dark-hover hover:text-deep dark:hover:text-dark-text font-medium'}`}
         >
           Structures
         </button>
         <button
           onClick={() => setActive('transactions')}
-          className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${active === 'transactions' ? 'bg-forest text-white shadow-2xs' : 'text-secondary hover:bg-surface hover:text-deep font-medium'}`}
+          className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${active === 'transactions' ? 'bg-forest dark:bg-emerald-500 text-white dark:text-gray-900 shadow-2xs' : 'text-secondary dark:text-dark-text-secondary hover:bg-surface dark:hover:bg-dark-hover hover:text-deep dark:hover:text-dark-text font-medium'}`}
         >
           Transactions
         </button>
         <button
           onClick={() => setActive('pending')}
-          className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${active === 'pending' ? 'bg-forest text-white shadow-2xs' : 'text-secondary hover:bg-surface hover:text-deep font-medium'}`}
+          className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${active === 'pending' ? 'bg-forest dark:bg-emerald-500 text-white dark:text-gray-900 shadow-2xs' : 'text-secondary dark:text-dark-text-secondary hover:bg-surface dark:hover:bg-dark-hover hover:text-deep dark:hover:text-dark-text font-medium'}`}
         >
           Pending Fees
         </button>
