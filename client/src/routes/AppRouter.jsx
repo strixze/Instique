@@ -7,6 +7,7 @@ import Register from '../pages/auth/Register';
 import ActivateAccount from '../pages/auth/ActivateAccount';
 import ForgotPassword from '../pages/auth/ForgotPassword';
 import ResetPassword from '../pages/auth/ResetPassword';
+import NotFound from '../pages/NotFound';
 
 import SuperAdminDashboard from '../pages/super-admin/Dashboard';
 import SchoolAdminDashboard from '../pages/school-admin/Dashboard';
@@ -134,7 +135,7 @@ export default function AppRouter() {
       <Route path="/reports" element={<ModulePage><Reports /></ModulePage>} />
 
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }
