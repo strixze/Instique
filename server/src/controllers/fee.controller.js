@@ -2,6 +2,7 @@ import asyncHandler from '../utils/asyncHandler.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import ApiError from '../utils/ApiError.js';
 import * as feeService from '../services/fee.service.js';
+import { verifyParentAccessToStudent } from '../services/authorization.service.js';
 
 export const createFeeStructure = asyncHandler(async (req, res) => {
   const structure = await feeService.createFeeStructure(req.schoolId, req.body);
@@ -39,6 +40,8 @@ export const getFeeTransactions = asyncHandler(async (req, res) => {
 });
 
 export const getStudentFeeStatus = asyncHandler(async (req, res) => {
+  // Enforce parent access restrictions
+  await verifyParentAccessToStudent(req.user, req.schoolId, req.params.studentId);
   const result = await feeService.getStudentFeeStatus(req.schoolId, req.params.studentId);
   res.status(200).json(new ApiResponse(200, result));
 });

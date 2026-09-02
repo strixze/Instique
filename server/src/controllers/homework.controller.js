@@ -1,6 +1,10 @@
 import asyncHandler from '../utils/asyncHandler.js';
 import ApiResponse from '../utils/ApiResponse.js';
+import ApiError from '../utils/ApiError.js';
 import * as homeworkService from '../services/homework.service.js';
+import {
+  getTeacherScope,
+} from '../services/authorization.service.js';
 
 export const getTeacherAssignments = asyncHandler(async (req, res) => {
   const assignments = await homeworkService.getTeacherAssignments(req.schoolId, req.user);
@@ -20,6 +24,19 @@ export const getHomework = asyncHandler(async (req, res) => {
 
 export const getHomeworkById = asyncHandler(async (req, res) => {
   const homework = await homeworkService.getHomeworkById(req.params.id, req.schoolId, req.user);
+  // Teacher scope verification
+  if (req.user.role === 'teacher') {
+    const scope = await getTeacherScope(req.user, req.schoolId);
+    if (!scope.classIds.includes(homework.schoolClass?.toString())) {
+      throw new ApiError(403, 'Access denied: You are not authorized for this homework class');
+    }
+    if (homework.section && !scope.sectionIds.includes(homework.section?.toString())) {
+      throw new ApiError(403, 'Access denied: You are not authorized for this homework section');
+    }
+    if (homework.subject && !scope.subjectIds.includes(homework.subject?.toString())) {
+      throw new ApiError(403, 'Access denied: You are not authorized for this homework subject');
+    }
+  }
   res.status(200).json(new ApiResponse(200, homework, 'Homework details fetched'));
 });
 
