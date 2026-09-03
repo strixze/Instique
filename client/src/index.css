@@ -82,8 +82,10 @@ html.theme-transition *::after {
 }
 
 /* Focus ring utility */
-.focus-ring {
-  @apply focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary;
+@layer components {
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary;
+  }
 }
 
 /* Animations */
