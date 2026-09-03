@@ -197,6 +197,38 @@ html.theme-transition *::after {
 .dark .text-slate-400 {
   color: #94A3B8 !important;
 }
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 10mm;
+  }
+
+  body {
+    visibility: hidden !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .print\\:block {
+    display: block !important;
+  }
+
+  .print-timetable,
+  .print-timetable * {
+    visibility: visible !important;
+  }
+
+  .print-timetable {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
+}
 
 .dark th {
   color: #CBD5E1 !important;
@@ -300,4 +332,12 @@ html.theme-transition *::after {
   background-color: rgba(99, 102, 241, 0.12) !important;
   color: #818CF8 !important;
   border-color: rgba(99, 102, 241, 0.25) !important;
+}
+
+/* Print Styles */
+@media print {
+  body * { visibility: hidden; }
+  .print-timetable, .print-timetable * { visibility: visible; }
+  .print-timetable { position: absolute; left: 0; top: 0; width: 100%; }
+  @page { size: A4 landscape; margin: 1cm; }
 }

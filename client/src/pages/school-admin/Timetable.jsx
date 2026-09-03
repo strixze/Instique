@@ -5,7 +5,7 @@ import {
   Plus, Trash2, Eye, Send, Lock, Unlock, Download, RotateCcw,
   BarChart3, RefreshCw, Layers, Edit2, AlertCircle, FileText, CheckCircle,
   Search, Filter, MoreVertical, ChevronLeft, ChevronRight, ChevronUp, ChevronDown,
-  ChevronsUpDown, Calendar, CheckCircle2, AlertTriangle, Layers3
+  ChevronsUpDown, Calendar, CheckCircle2, AlertTriangle, Layers3, Printer, Coffee
 } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
@@ -16,6 +16,9 @@ import { timetableApi } from '../../api/timetable.api';
 import { academicApi } from '../../api/academic.api';
 import { teacherApi } from '../../api/teacher.api';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { getSubjectStyle, DEFAULT_PERIOD_TIMES } from '../../utils/timetableTheme';
+import TimetablePrintView from '../../components/timetable/TimetablePrintView';
+import { generateTimetablePdf } from '../../utils/timetablePdf';
 
 const DAYS = [
   { value: 1, label: 'Monday' },
@@ -527,6 +530,7 @@ export default function Timetable() {
     const periodCount = configSnapshot?.periodsPerDay || 8;
     const isBreakPeriod = (p) => (configSnapshot?.breakPeriods || []).includes(p);
     const daysList = DAYS.filter(d => d.value !== 0);
+    const periodTimings = configSnapshot?.periodTimings || DEFAULT_PERIOD_TIMES;
 
     let displayPeriods = gridPeriods;
 
@@ -537,69 +541,160 @@ export default function Timetable() {
     }
 
     return (
-      <div className="overflow-x-auto border border-border rounded-xl bg-white shadow-2xs">
-        <table className="w-full text-center border-collapse text-xs">
-          <thead>
-            <tr className="bg-surface/70 border-b border-border text-secondary font-semibold uppercase tracking-wider">
-              <th className="px-3 py-2.5 w-24 text-left border-r border-border">Day / Period</th>
-              {Array.from({ length: periodCount }, (_, i) => i + 1).map((p) => (
-                <th key={p} className={`px-2 py-2.5 border-r border-border min-w-[110px] ${isBreakPeriod(p) ? 'bg-amber-50/50 text-amber-700' : ''}`}>
-                  P{p} {isBreakPeriod(p) && '(Break)'}
+      <div className="bg-white dark:bg-[#101315] border border-border dark:border-white/10 rounded-2xl p-4 sm:p-6 shadow-xl dark:shadow-2xl space-y-4">
+        {/* Container Header inside Timetable Grid Card */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-border/60 dark:border-white/10">
+          <div>
+            <h2 className="text-xl font-bold text-deep dark:text-white tracking-tight">Timetable</h2>
+            <p className="text-xs text-secondary dark:text-slate-400 font-medium mt-0.5">
+              Class {activeTimetable?.schoolClass?.name || classMap[activeTimetable?.schoolClass] || '1 A'} • Section {activeTimetable?.section?.name || sectionMap[activeTimetable?.section] || 'A'}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.print()}
+              className="text-xs gap-1.5 dark:bg-[#15191C] dark:border-white/10 dark:text-slate-200 dark:hover:bg-[#181D20]"
+            >
+              <Printer size={14} /> Print
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => {
+                generateTimetablePdf({
+                  activeTimetable,
+                  displayPeriods,
+                  daysList,
+                  periodCount,
+                  subjects,
+                  teachers,
+                  configSnapshot,
+                });
+              }}
+              className="text-xs gap-1.5 bg-forest hover:bg-forest/90 dark:bg-emerald-500 dark:hover:bg-emerald-600 dark:text-slate-950 font-semibold shadow-2xs"
+            >
+              <Download size={14} /> Download
+            </Button>
+          </div>
+        </div>
+
+        {/* Timetable Table Grid */}
+        <div className="overflow-x-auto rounded-xl border border-border/80 dark:border-white/10">
+          <table className="w-full text-center border-collapse text-xs min-w-[760px]">
+            <thead>
+              <tr className="bg-surface/70 dark:bg-[#101315] border-b border-border dark:border-white/10 text-secondary dark:text-slate-400 font-semibold uppercase tracking-wider">
+                <th className="px-4 py-3.5 w-32 text-left border-r border-border dark:border-white/10 font-bold text-deep dark:text-slate-200">
+                  PERIOD
                 </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border/60">
-            {daysList.map((dayObj) => (
-              <tr key={dayObj.value} className="hover:bg-surface/30">
-                <td className="px-3 py-3 font-bold text-deep border-r border-border bg-surface/40 text-left">
-                  {dayObj.label}
-                </td>
-                {Array.from({ length: periodCount }, (_, i) => i + 1).map((pNo) => {
-                  const isBreak = isBreakPeriod(pNo);
-                  const periodData = displayPeriods.find((p) => p.day === dayObj.value && p.periodNo === pNo);
-
-                  if (isBreak) {
-                    return (
-                      <td key={pNo} className="px-2 py-3 border-r border-border bg-amber-50/30 text-amber-600 font-semibold text-[11px] select-none">
-                        Break
-                      </td>
-                    );
-                  }
-
-                  const subName = periodData?.subject?.name || (typeof periodData?.subject === 'string' ? subjects.find(s => s._id === periodData.subject)?.name : null);
-                  const tchName = periodData?.teacher ? `${periodData.teacher.firstName || ''} ${periodData.teacher.lastName || ''}`.trim() || (teachers.find(t => t._id === periodData.teacher) ? `${teachers.find(t => t._id === periodData.teacher).firstName} ${teachers.find(t => t._id === periodData.teacher).lastName}` : null) : null;
-
-                  return (
-                    <td
-                      key={pNo}
-                      draggable={activeView === 'class' && !!periodData}
-                      onDragStart={(e) => activeView === 'class' && handleDragStart(e, dayObj.value, pNo)}
-                      onDragOver={(e) => e.preventDefault()}
-                      onDrop={(e) => activeView === 'class' && handleDrop(e, dayObj.value, pNo)}
-                      onClick={() => activeView === 'class' && openCellModal(dayObj.value, pNo)}
-                      className={`px-2 py-2 border-r border-border transition-all cursor-pointer select-none ${
-                        periodData
-                          ? 'bg-forest-soft/40 hover:bg-forest-soft/80 border-forest/20'
-                          : 'hover:bg-surface/60 text-muted'
-                      }`}
-                    >
-                      {periodData ? (
-                        <div className="space-y-0.5 text-left p-1">
-                          <p className="font-bold text-deep text-xs truncate">{subName || 'Subject'}</p>
-                          <p className="text-[10px] text-forest font-medium truncate">{tchName || 'Teacher'}</p>
-                          {periodData.room && <p className="text-[9px] text-muted truncate">Rm: {periodData.room}</p>}
-                        </div>
-                      ) : (
-                        <span className="text-[10px] text-muted/60">— Free —</span>
-                      )}
-                    </td>
-                  );
-                })}
+                {daysList.map((dayObj) => (
+                  <th key={dayObj.value} className="px-3 py-3.5 border-r border-border dark:border-white/10 min-w-[130px] sm:min-w-[145px]">
+                    <div className="flex items-center justify-center gap-1.5 text-deep dark:text-slate-200 font-bold text-xs">
+                      <Calendar size={13} className="text-forest dark:text-emerald-400" />
+                      <span>{dayObj.label.toUpperCase()}</span>
+                    </div>
+                  </th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-border/60 dark:divide-white/[0.06] bg-white dark:bg-[#101315]">
+              {Array.from({ length: periodCount }, (_, i) => i + 1).map((pNo) => {
+                const isBreak = isBreakPeriod(pNo);
+                const pTime = periodTimings.find(pt => (pt.periodNo || pt.pNo) === pNo) || DEFAULT_PERIOD_TIMES[pNo - 1] || {};
+
+                return (
+                  <tr key={pNo} className="hover:bg-surface/30 dark:hover:bg-white/[0.01] transition-colors">
+                    {/* Fixed/Sticky Period Column */}
+                    <td className="px-3.5 py-3.5 font-bold border-r border-border dark:border-white/10 bg-surface/40 dark:bg-[#101315] text-left select-none align-middle w-32">
+                      <div className="font-extrabold text-sm text-deep dark:text-slate-200 tracking-tight">
+                        P{pNo}
+                      </div>
+                      <div className="text-[10px] text-muted dark:text-slate-400 font-normal mt-0.5 whitespace-nowrap">
+                        {pTime.startTime || pTime.start || '08:00'} – {pTime.endTime || pTime.end || '08:45'}
+                      </div>
+                    </td>
+
+                    {/* Day Columns */}
+                    {daysList.map((dayObj) => {
+                      const periodData = displayPeriods.find((p) => p.day === dayObj.value && p.periodNo === pNo);
+
+                      if (isBreak) {
+                        return (
+                          <td key={dayObj.value} className="px-2 py-2.5 border-r border-border dark:border-white/10 bg-amber-50/30 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 font-semibold text-[11px] select-none text-center align-middle">
+                            <div className="flex items-center justify-center gap-1">
+                              <Coffee size={12} className="opacity-70" />
+                              <span>Break</span>
+                            </div>
+                          </td>
+                        );
+                      }
+
+                      const subName = periodData?.subject?.name || (typeof periodData?.subject === 'string' ? subjects.find(s => s._id === periodData.subject)?.name : null);
+                      const tchName = periodData?.teacher ? `${periodData.teacher.firstName || ''} ${periodData.teacher.lastName || ''}`.trim() || (teachers.find(t => t._id === periodData.teacher) ? `${teachers.find(t => t._id === periodData.teacher).firstName} ${teachers.find(t => t._id === periodData.teacher).lastName}` : null) : null;
+                      
+                      const style = getSubjectStyle(subName);
+                      const Icon = style.Icon;
+
+                      return (
+                        <td
+                          key={dayObj.value}
+                          draggable={activeView === 'class' && !!periodData}
+                          onDragStart={(e) => activeView === 'class' && handleDragStart(e, dayObj.value, pNo)}
+                          onDragOver={(e) => e.preventDefault()}
+                          onDrop={(e) => activeView === 'class' && handleDrop(e, dayObj.value, pNo)}
+                          onClick={() => activeView === 'class' && openCellModal(dayObj.value, pNo)}
+                          className="px-2 py-2 border-r border-border dark:border-white/10 align-top cursor-pointer select-none transition-all"
+                        >
+                          {periodData ? (
+                            <div className={`h-full min-h-[72px] bg-forest-soft/40 dark:bg-[#15191C] hover:dark:bg-[#181D20] border border-border/70 dark:border-white/[0.08] ${style.borderHover} rounded-xl p-2.5 space-y-1 text-left transition-all duration-150 shadow-2xs hover:shadow-md dark:shadow-none group`}>
+                              <div className="flex items-center gap-2">
+                                <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${style.iconBox}`}>
+                                  <Icon size={13} />
+                                </div>
+                                <div className="font-bold text-xs text-deep dark:text-slate-100 truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                                  {subName || 'Subject'}
+                                </div>
+                              </div>
+                              <div className="text-[11px] text-secondary dark:text-slate-400 font-medium truncate pl-0.5">
+                                {tchName || '—'}
+                              </div>
+                              {periodData.room && (
+                                <div className="text-[10px] text-muted dark:text-slate-500 font-semibold pl-0.5">
+                                  Rm: {periodData.room}
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="h-full min-h-[72px] border border-dashed border-border/60 dark:border-white/[0.06] rounded-xl flex items-center justify-center text-muted/60 dark:text-slate-600 text-[11px] font-medium hover:dark:border-white/15 transition-all bg-surface/20 dark:bg-white/[0.01]">
+                              — Free —
+                            </div>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Footer Note */}
+        <div className="pt-1 text-xs text-forest dark:text-emerald-400/80 font-medium flex items-center gap-1.5">
+          <span className="font-bold text-forest dark:text-emerald-400">Note:</span> Timetable is subject to change. Please check regularly for updates.
+        </div>
+        <div className="hidden print:block">
+          <TimetablePrintView
+            activeTimetable={activeTimetable}
+            displayPeriods={displayPeriods}
+            daysList={daysList}
+            periodCount={periodCount}
+            subjects={subjects}
+            teachers={teachers}
+            configSnapshot={configSnapshot}
+          />
+        </div>
       </div>
     );
   };
