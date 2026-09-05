@@ -1,10 +1,11 @@
 import { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import {
   Plus, Trash2, Edit2, Upload, GraduationCap, Users, BookOpen, Building2,
   Search, RotateCcw, Filter, MoreVertical, ChevronLeft, ChevronRight,
-  ChevronUp, ChevronDown, ChevronsUpDown,
+  ChevronUp, ChevronDown, ChevronsUpDown, Eye,
   Key, Mail, AlertTriangle, RefreshCw, ShieldCheck,
 } from 'lucide-react';
 import Button from '../../components/ui/Button';
@@ -37,6 +38,7 @@ const emptyForm = {
 };
 
 export default function Teachers() {
+  const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [meta, setMeta] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -434,7 +436,11 @@ export default function Teachers() {
                   const accountStatus = row.accountStatus || 'NOT_LINKED';
 
                   return (
-                    <tr key={row._id} className="hover:bg-surface/50 dark:hover:bg-dark-hover transition-colors">
+                    <tr
+                      key={row._id}
+                      onClick={() => navigate(`/teachers/${row._id}`)}
+                      className="hover:bg-surface/50 dark:hover:bg-dark-hover transition-colors cursor-pointer"
+                    >
                       <td className="px-3.5 py-2.5 font-bold text-xs text-deep dark:text-dark-text font-mono">{row.employeeId || '—'}</td>
                       <td className="px-3.5 py-2.5">
                         <div className="flex items-center gap-2.5">
@@ -448,7 +454,9 @@ export default function Teachers() {
                             className="shrink-0 ring-1 ring-border/50 dark:ring-dark-border"
                           />
                           <div>
-                            <p className="font-bold text-xs text-deep dark:text-dark-text leading-tight">{row.firstName} {row.lastName}</p>
+                            <p className="font-bold text-xs text-deep dark:text-dark-text leading-tight hover:text-forest dark:hover:text-emerald-400 transition-colors">
+                              {row.firstName} {row.lastName}
+                            </p>
                             {row.contact?.email && <p className="text-[11px] text-muted dark:text-dark-text-muted leading-tight mt-0.5">{row.contact.email}</p>}
                           </div>
                         </div>
@@ -474,8 +482,15 @@ export default function Teachers() {
                       </td>
                       <td className="px-3.5 py-2.5">{renderAccountStatusBadge(accountStatus)}</td>
                       <td className="px-3.5 py-2.5">{renderStatusBadge(row.status)}</td>
-                      <td className="px-3.5 py-2.5 text-right relative">
+                      <td className="px-3.5 py-2.5 text-right relative" onClick={(e) => e.stopPropagation()}>
                         <div className="inline-flex items-center gap-1">
+                          <button
+                            onClick={() => navigate(`/teachers/${row._id}`)}
+                            className="p-1.5 text-forest dark:text-emerald-400 hover:bg-forest/10 border border-forest/20 rounded-lg transition-colors"
+                            title="View Teacher Profile"
+                          >
+                            <Eye size={13} />
+                          </button>
                           <button
                             onClick={() => setActiveMenuId(activeMenuId === row._id ? null : row._id)}
                             className="p-1.5 text-muted dark:text-dark-text-muted hover:text-deep dark:hover:text-dark-text hover:bg-surface dark:hover:bg-dark-hover border border-border dark:border-dark-border rounded-lg transition-colors cursor-pointer"

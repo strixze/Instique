@@ -1,11 +1,12 @@
 import { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import {
   Plus, Trash2, Upload, Users, UserCheck, UserX,
   Search, RotateCcw, MoreVertical, ChevronLeft, ChevronRight,
   ChevronUp, ChevronDown, ChevronsUpDown, GraduationCap,
-  Key, Mail, AlertTriangle, UserX as UserXIcon,
+  Key, Mail, AlertTriangle, UserX as UserXIcon, Eye
 } from 'lucide-react';
 
 import Button from '../../components/ui/Button';
@@ -40,6 +41,7 @@ const emptyForm = {
 };
 
 export default function Students() {
+  const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [meta, setMeta] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -509,9 +511,11 @@ export default function Students() {
 
                   return (
                     <tr key={row._id} className="hover:bg-surface/50 dark:hover:bg-dark-hover transition-colors">
-                      <td className="px-3.5 py-2.5 font-bold text-xs text-deep dark:text-dark-text font-mono">{row.admissionNo || '—'}</td>
+                      <td className="px-3.5 py-2.5 font-bold text-xs text-deep dark:text-dark-text font-mono cursor-pointer hover:text-forest dark:hover:text-emerald-400" onClick={() => navigate(`/students/${row._id}`)}>
+                        {row.admissionNo || '—'}
+                      </td>
                       <td className="px-3.5 py-2.5">
-                        <div className="flex items-center gap-2.5">
+                        <div className="flex items-center gap-2.5 cursor-pointer group" onClick={() => navigate(`/students/${row._id}`)}>
                           <UserAvatar
                             type="student"
                             gender={row.gender}
@@ -519,10 +523,12 @@ export default function Students() {
                             admissionNo={row.admissionNo}
                             name={`${row.firstName} ${row.lastName}`}
                             size="sm"
-                            className="shrink-0 ring-1 ring-border/50 dark:ring-dark-border"
+                            className="shrink-0 ring-1 ring-border/50 dark:ring-dark-border group-hover:ring-forest dark:group-hover:ring-emerald-500 transition-all"
                           />
                           <div>
-                            <p className="font-bold text-xs text-deep dark:text-dark-text leading-tight">{row.firstName} {row.lastName}</p>
+                            <p className="font-bold text-xs text-deep dark:text-dark-text leading-tight group-hover:text-forest dark:group-hover:text-emerald-400 transition-colors">
+                              {row.firstName} {row.lastName}
+                            </p>
                             {row.contact?.phone && <p className="text-[11px] text-muted dark:text-dark-text-muted leading-tight mt-0.5">{row.contact.phone}</p>}
                           </div>
                         </div>
@@ -537,6 +543,13 @@ export default function Students() {
                       <td className="px-3.5 py-2.5 text-right relative">
                         <div className="inline-flex items-center gap-1">
                           <button
+                            onClick={() => navigate(`/students/${row._id}`)}
+                            className="p-1.5 text-forest dark:text-emerald-400 hover:bg-forest/10 border border-forest/20 rounded-lg transition-colors cursor-pointer"
+                            title="View Student Profile"
+                          >
+                            <Eye size={14} />
+                          </button>
+                          <button
                             onClick={() => setActiveMenuId(activeMenuId === row._id ? null : row._id)}
                             className="p-1.5 text-muted dark:text-dark-text-muted hover:text-deep dark:hover:text-dark-text hover:bg-surface dark:hover:bg-dark-hover border border-border dark:border-dark-border rounded-lg transition-colors cursor-pointer"
                             title="More actions"
@@ -546,6 +559,13 @@ export default function Students() {
                         </div>
                         {activeMenuId === row._id && (
                           <div ref={menuRef} className="absolute right-4 top-10 w-52 bg-white dark:bg-dark-elevated border border-border dark:border-dark-border rounded-xl shadow-dropdown z-40 py-1 text-left animate-scale-in">
+                            <button
+                              onClick={() => { setActiveMenuId(null); navigate(`/students/${row._id}`); }}
+                              className="w-full px-3 py-2 text-xs text-deep dark:text-dark-text hover:bg-surface dark:hover:bg-dark-hover flex items-center gap-2 font-medium cursor-pointer border-b border-border/50"
+                            >
+                              <Eye size={13} className="text-forest shrink-0" />
+                              <span>View Full Profile</span>
+                            </button>
                             {/* Send Parent Password Reset Action */}
                             {hasParent && isParentActive ? (
                               <button

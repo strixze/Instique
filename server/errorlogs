@@ -27274,3 +27274,1257 @@ Stack Trace: Error: Insufficient permissions
 Details: []
 ================================================================================
 
+
+================================================================================
+Timestamp: 2026-09-05T10:10:50.979Z
+Method: GET
+URL: /api/v1/auth/profile
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:10:51.031Z
+Method: GET
+URL: /api/v1/auth/profile
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:10:51.234Z
+Method: GET
+URL: /api/v1/notifications/unread-count
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\projects\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:10:51.278Z
+Method: GET
+URL: /api/v1/dashboards/school-admin?attendancePeriod=week&classAttendancePeriod=week&feePeriod=month
+User ID: Unauthenticated
+Query: {"attendancePeriod":"week","classAttendancePeriod":"week","feePeriod":"month"}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\projects\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:10:51.293Z
+Method: GET
+URL: /api/v1/notifications/unread-count
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\projects\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:10:51.316Z
+Method: GET
+URL: /api/v1/dashboards/school-admin?attendancePeriod=week&classAttendancePeriod=week&feePeriod=month
+User ID: Unauthenticated
+Query: {"attendancePeriod":"week","classAttendancePeriod":"week","feePeriod":"month"}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\projects\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:13:06.309Z
+Method: GET
+URL: /api/v1/academic/classes?limit=100
+User ID: Unauthenticated
+Query: {"limit":"100"}
+Body: 
+Error Name: Error
+Error Message: Invalid or expired token
+Stack Trace: Error: Invalid or expired token
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:26:11
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:13:06.317Z
+Method: GET
+URL: /api/v1/academic/sections?limit=100
+User ID: Unauthenticated
+Query: {"limit":"100"}
+Body: 
+Error Name: Error
+Error Message: Invalid or expired token
+Stack Trace: Error: Invalid or expired token
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:26:11
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:13:07.040Z
+Method: GET
+URL: /api/v1/academic/classes?limit=100
+User ID: Unauthenticated
+Query: {"limit":"100"}
+Body: 
+Error Name: Error
+Error Message: Invalid or expired token
+Stack Trace: Error: Invalid or expired token
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:26:11
+    at runNextTicks (node:internal/process/task_queues:65:5)
+    at listOnTimeout (node:internal/timers:549:9)
+    at process.processTimers (node:internal/timers:523:7)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:13:07.047Z
+Method: GET
+URL: /api/v1/academic/sections?limit=100
+User ID: Unauthenticated
+Query: {"limit":"100"}
+Body: 
+Error Name: Error
+Error Message: Invalid or expired token
+Stack Trace: Error: Invalid or expired token
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:26:11
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:13:19.275Z
+Method: GET
+URL: /api/v1/notifications/unread-count
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Invalid or expired token
+Stack Trace: Error: Invalid or expired token
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:26:11
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:13:36.337Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: MongoServerSelectionError
+Error Message: getaddrinfo ENOTFOUND ac-gzz0qth-shard-00-00.lvembw4.mongodb.net
+Stack Trace: MongoServerSelectionError: getaddrinfo ENOTFOUND ac-gzz0qth-shard-00-00.lvembw4.mongodb.net
+    at Topology.selectServer (D:\projects\Instique\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at async tryOperation (D:\projects\Instique\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (D:\projects\Instique\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async FindCursor._initialize (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\find_cursor.js:62:26)
+    at async FindCursor.cursorInit (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async FindCursor.fetchBatch (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async FindCursor.next (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+    at async Collection.findOne (D:\projects\Instique\server\node_modules\mongodb\lib\collection.js:313:24)
+    at async model.Query._findOne (D:\projects\Instique\server\node_modules\mongoose\lib\query.js:2719:15)
+    at async model.Query.exec (D:\projects\Instique\server\node_modules\mongoose\lib\query.js:4637:63)
+    at async Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:111:16)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:18
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:13:36.355Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: MongoServerSelectionError
+Error Message: getaddrinfo ENOTFOUND ac-gzz0qth-shard-00-00.lvembw4.mongodb.net
+Stack Trace: MongoServerSelectionError: getaddrinfo ENOTFOUND ac-gzz0qth-shard-00-00.lvembw4.mongodb.net
+    at Topology.selectServer (D:\projects\Instique\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at async tryOperation (D:\projects\Instique\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (D:\projects\Instique\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async FindCursor._initialize (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\find_cursor.js:62:26)
+    at async FindCursor.cursorInit (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async FindCursor.fetchBatch (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async FindCursor.next (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+    at async Collection.findOne (D:\projects\Instique\server\node_modules\mongodb\lib\collection.js:313:24)
+    at async model.Query._findOne (D:\projects\Instique\server\node_modules\mongoose\lib\query.js:2719:15)
+    at async model.Query.exec (D:\projects\Instique\server\node_modules\mongoose\lib\query.js:4637:63)
+    at async Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:111:16)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:18
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:13:37.060Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: MongoServerSelectionError
+Error Message: getaddrinfo ENOTFOUND ac-gzz0qth-shard-00-00.lvembw4.mongodb.net
+Stack Trace: MongoServerSelectionError: getaddrinfo ENOTFOUND ac-gzz0qth-shard-00-00.lvembw4.mongodb.net
+    at Topology.selectServer (D:\projects\Instique\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at async tryOperation (D:\projects\Instique\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (D:\projects\Instique\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async FindCursor._initialize (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\find_cursor.js:62:26)
+    at async FindCursor.cursorInit (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async FindCursor.fetchBatch (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async FindCursor.next (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+    at async Collection.findOne (D:\projects\Instique\server\node_modules\mongodb\lib\collection.js:313:24)
+    at async model.Query._findOne (D:\projects\Instique\server\node_modules\mongoose\lib\query.js:2719:15)
+    at async model.Query.exec (D:\projects\Instique\server\node_modules\mongoose\lib\query.js:4637:63)
+    at async Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:111:16)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:18
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:13:37.120Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: MongoServerSelectionError
+Error Message: getaddrinfo ENOTFOUND ac-gzz0qth-shard-00-00.lvembw4.mongodb.net
+Stack Trace: MongoServerSelectionError: getaddrinfo ENOTFOUND ac-gzz0qth-shard-00-00.lvembw4.mongodb.net
+    at Topology.selectServer (D:\projects\Instique\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at async tryOperation (D:\projects\Instique\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (D:\projects\Instique\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async FindCursor._initialize (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\find_cursor.js:62:26)
+    at async FindCursor.cursorInit (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async FindCursor.fetchBatch (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async FindCursor.next (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+    at async Collection.findOne (D:\projects\Instique\server\node_modules\mongodb\lib\collection.js:313:24)
+    at async model.Query._findOne (D:\projects\Instique\server\node_modules\mongoose\lib\query.js:2719:15)
+    at async model.Query.exec (D:\projects\Instique\server\node_modules\mongoose\lib\query.js:4637:63)
+    at async Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:111:16)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:18
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:13:49.295Z
+Method: GET
+URL: /api/v1/notifications/unread-count
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Invalid or expired token
+Stack Trace: Error: Invalid or expired token
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:26:11
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:13:49.305Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: MongoServerSelectionError
+Error Message: getaddrinfo ENOTFOUND ac-gzz0qth-shard-00-00.lvembw4.mongodb.net
+Stack Trace: MongoServerSelectionError: getaddrinfo ENOTFOUND ac-gzz0qth-shard-00-00.lvembw4.mongodb.net
+    at Topology.selectServer (D:\projects\Instique\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at async tryOperation (D:\projects\Instique\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (D:\projects\Instique\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async FindCursor._initialize (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\find_cursor.js:62:26)
+    at async FindCursor.cursorInit (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async FindCursor.fetchBatch (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async FindCursor.next (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+    at async Collection.findOne (D:\projects\Instique\server\node_modules\mongodb\lib\collection.js:313:24)
+    at async model.Query._findOne (D:\projects\Instique\server\node_modules\mongoose\lib\query.js:2719:15)
+    at async model.Query.exec (D:\projects\Instique\server\node_modules\mongoose\lib\query.js:4637:63)
+    at async Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:111:16)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:18
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:14:10.928Z
+Method: GET
+URL: /api/v1/auth/profile
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Invalid or expired token
+Stack Trace: Error: Invalid or expired token
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:26:11
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:14:11.736Z
+Method: GET
+URL: /api/v1/notifications/unread-count
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Invalid or expired token
+Stack Trace: Error: Invalid or expired token
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:26:11
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:14:11.935Z
+Method: GET
+URL: /api/v1/dashboards/school-admin?attendancePeriod=week&classAttendancePeriod=week&feePeriod=month
+User ID: Unauthenticated
+Query: {"attendancePeriod":"week","classAttendancePeriod":"week","feePeriod":"month"}
+Body: 
+Error Name: Error
+Error Message: Invalid or expired token
+Stack Trace: Error: Invalid or expired token
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:26:11
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:14:30.973Z
+Method: GET
+URL: /api/v1/auth/profile
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Invalid or expired token
+Stack Trace: Error: Invalid or expired token
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:26:11
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:14:31.959Z
+Method: GET
+URL: /api/v1/notifications/unread-count
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Invalid or expired token
+Stack Trace: Error: Invalid or expired token
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:26:11
+    at runNextTicks (node:internal/process/task_queues:65:5)
+    at listOnTimeout (node:internal/timers:549:9)
+    at process.processTimers (node:internal/timers:523:7)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:14:31.965Z
+Method: GET
+URL: /api/v1/dashboards/school-admin?attendancePeriod=week&classAttendancePeriod=week&feePeriod=month
+User ID: Unauthenticated
+Query: {"attendancePeriod":"week","classAttendancePeriod":"week","feePeriod":"month"}
+Body: 
+Error Name: Error
+Error Message: Invalid or expired token
+Stack Trace: Error: Invalid or expired token
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:26:11
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:14:40.957Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: MongoServerSelectionError
+Error Message: getaddrinfo ENOTFOUND ac-gzz0qth-shard-00-00.lvembw4.mongodb.net
+Stack Trace: MongoServerSelectionError: getaddrinfo ENOTFOUND ac-gzz0qth-shard-00-00.lvembw4.mongodb.net
+    at Topology.selectServer (D:\projects\Instique\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at async tryOperation (D:\projects\Instique\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (D:\projects\Instique\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async FindCursor._initialize (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\find_cursor.js:62:26)
+    at async FindCursor.cursorInit (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async FindCursor.fetchBatch (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async FindCursor.next (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+    at async Collection.findOne (D:\projects\Instique\server\node_modules\mongodb\lib\collection.js:313:24)
+    at async model.Query._findOne (D:\projects\Instique\server\node_modules\mongoose\lib\query.js:2719:15)
+    at async model.Query.exec (D:\projects\Instique\server\node_modules\mongoose\lib\query.js:4637:63)
+    at async Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:111:16)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:18
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:14:41.760Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: MongoServerSelectionError
+Error Message: getaddrinfo ENOTFOUND ac-gzz0qth-shard-00-00.lvembw4.mongodb.net
+Stack Trace: MongoServerSelectionError: getaddrinfo ENOTFOUND ac-gzz0qth-shard-00-00.lvembw4.mongodb.net
+    at Topology.selectServer (D:\projects\Instique\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at async tryOperation (D:\projects\Instique\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (D:\projects\Instique\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async FindCursor._initialize (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\find_cursor.js:62:26)
+    at async FindCursor.cursorInit (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async FindCursor.fetchBatch (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async FindCursor.next (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+    at async Collection.findOne (D:\projects\Instique\server\node_modules\mongodb\lib\collection.js:313:24)
+    at async model.Query._findOne (D:\projects\Instique\server\node_modules\mongoose\lib\query.js:2719:15)
+    at async model.Query.exec (D:\projects\Instique\server\node_modules\mongoose\lib\query.js:4637:63)
+    at async Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:111:16)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:18
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:14:41.967Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: MongoServerSelectionError
+Error Message: getaddrinfo ENOTFOUND ac-gzz0qth-shard-00-00.lvembw4.mongodb.net
+Stack Trace: MongoServerSelectionError: getaddrinfo ENOTFOUND ac-gzz0qth-shard-00-00.lvembw4.mongodb.net
+    at Topology.selectServer (D:\projects\Instique\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at async tryOperation (D:\projects\Instique\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (D:\projects\Instique\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async FindCursor._initialize (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\find_cursor.js:62:26)
+    at async FindCursor.cursorInit (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async FindCursor.fetchBatch (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async FindCursor.next (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+    at async Collection.findOne (D:\projects\Instique\server\node_modules\mongodb\lib\collection.js:313:24)
+    at async model.Query._findOne (D:\projects\Instique\server\node_modules\mongoose\lib\query.js:2719:15)
+    at async model.Query.exec (D:\projects\Instique\server\node_modules\mongoose\lib\query.js:4637:63)
+    at async Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:111:16)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:18
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:15:00.996Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: MongoServerSelectionError
+Error Message: getaddrinfo ENOTFOUND ac-gzz0qth-shard-00-00.lvembw4.mongodb.net
+Stack Trace: MongoServerSelectionError: getaddrinfo ENOTFOUND ac-gzz0qth-shard-00-00.lvembw4.mongodb.net
+    at Topology.selectServer (D:\projects\Instique\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at async tryOperation (D:\projects\Instique\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (D:\projects\Instique\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async FindCursor._initialize (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\find_cursor.js:62:26)
+    at async FindCursor.cursorInit (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async FindCursor.fetchBatch (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async FindCursor.next (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+    at async Collection.findOne (D:\projects\Instique\server\node_modules\mongodb\lib\collection.js:313:24)
+    at async model.Query._findOne (D:\projects\Instique\server\node_modules\mongoose\lib\query.js:2719:15)
+    at async model.Query.exec (D:\projects\Instique\server\node_modules\mongoose\lib\query.js:4637:63)
+    at async Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:111:16)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:18
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:15:01.990Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: MongoServerSelectionError
+Error Message: getaddrinfo ENOTFOUND ac-gzz0qth-shard-00-00.lvembw4.mongodb.net
+Stack Trace: MongoServerSelectionError: getaddrinfo ENOTFOUND ac-gzz0qth-shard-00-00.lvembw4.mongodb.net
+    at Topology.selectServer (D:\projects\Instique\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at runNextTicks (node:internal/process/task_queues:65:5)
+    at listOnTimeout (node:internal/timers:549:9)
+    at process.processTimers (node:internal/timers:523:7)
+    at async tryOperation (D:\projects\Instique\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (D:\projects\Instique\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async FindCursor._initialize (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\find_cursor.js:62:26)
+    at async FindCursor.cursorInit (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async FindCursor.fetchBatch (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async FindCursor.next (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+    at async Collection.findOne (D:\projects\Instique\server\node_modules\mongodb\lib\collection.js:313:24)
+    at async model.Query._findOne (D:\projects\Instique\server\node_modules\mongoose\lib\query.js:2719:15)
+    at async model.Query.exec (D:\projects\Instique\server\node_modules\mongoose\lib\query.js:4637:63)
+    at async Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:111:16)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:18
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:15:02.000Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: MongoServerSelectionError
+Error Message: getaddrinfo ENOTFOUND ac-gzz0qth-shard-00-00.lvembw4.mongodb.net
+Stack Trace: MongoServerSelectionError: getaddrinfo ENOTFOUND ac-gzz0qth-shard-00-00.lvembw4.mongodb.net
+    at Topology.selectServer (D:\projects\Instique\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at async tryOperation (D:\projects\Instique\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (D:\projects\Instique\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async FindCursor._initialize (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\find_cursor.js:62:26)
+    at async FindCursor.cursorInit (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async FindCursor.fetchBatch (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async FindCursor.next (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+    at async Collection.findOne (D:\projects\Instique\server\node_modules\mongodb\lib\collection.js:313:24)
+    at async model.Query._findOne (D:\projects\Instique\server\node_modules\mongoose\lib\query.js:2719:15)
+    at async model.Query.exec (D:\projects\Instique\server\node_modules\mongoose\lib\query.js:4637:63)
+    at async Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:111:16)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:18
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:15:12.352Z
+Method: GET
+URL: /api/v1/auth/profile
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Invalid or expired token
+Stack Trace: Error: Invalid or expired token
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:26:11
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:15:32.382Z
+Method: GET
+URL: /api/v1/auth/profile
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Invalid or expired token
+Stack Trace: Error: Invalid or expired token
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:26:11
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:15:42.376Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: MongoServerSelectionError
+Error Message: getaddrinfo ENOTFOUND ac-gzz0qth-shard-00-00.lvembw4.mongodb.net
+Stack Trace: MongoServerSelectionError: getaddrinfo ENOTFOUND ac-gzz0qth-shard-00-00.lvembw4.mongodb.net
+    at Topology.selectServer (D:\projects\Instique\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at async tryOperation (D:\projects\Instique\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (D:\projects\Instique\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async FindCursor._initialize (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\find_cursor.js:62:26)
+    at async FindCursor.cursorInit (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async FindCursor.fetchBatch (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async FindCursor.next (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+    at async Collection.findOne (D:\projects\Instique\server\node_modules\mongodb\lib\collection.js:313:24)
+    at async model.Query._findOne (D:\projects\Instique\server\node_modules\mongoose\lib\query.js:2719:15)
+    at async model.Query.exec (D:\projects\Instique\server\node_modules\mongoose\lib\query.js:4637:63)
+    at async Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:111:16)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:18
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:16:02.411Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: MongoServerSelectionError
+Error Message: getaddrinfo ENOTFOUND ac-gzz0qth-shard-00-00.lvembw4.mongodb.net
+Stack Trace: MongoServerSelectionError: getaddrinfo ENOTFOUND ac-gzz0qth-shard-00-00.lvembw4.mongodb.net
+    at Topology.selectServer (D:\projects\Instique\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at async tryOperation (D:\projects\Instique\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (D:\projects\Instique\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async FindCursor._initialize (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\find_cursor.js:62:26)
+    at async FindCursor.cursorInit (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async FindCursor.fetchBatch (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async FindCursor.next (D:\projects\Instique\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+    at async Collection.findOne (D:\projects\Instique\server\node_modules\mongodb\lib\collection.js:313:24)
+    at async model.Query._findOne (D:\projects\Instique\server\node_modules\mongoose\lib\query.js:2719:15)
+    at async model.Query.exec (D:\projects\Instique\server\node_modules\mongoose\lib\query.js:4637:63)
+    at async Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:111:16)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:18
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:32:17.773Z
+Method: GET
+URL: /api/v1/roles?page=1&limit=10
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {"page":"1","limit":"10"}
+Body: 
+Error Name: TypeError
+Error Message: roleService.getRoles is not a function
+Stack Trace: TypeError: roleService.getRoles is not a function
+    at file:///D:/projects/Instique/server/src/controllers/role.controller.js:11:36
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///D:/projects/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at tenantMiddleware (file:///D:/projects/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:32:17.882Z
+Method: GET
+URL: /api/v1/roles?page=1&limit=10
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {"page":"1","limit":"10"}
+Body: 
+Error Name: TypeError
+Error Message: roleService.getRoles is not a function
+Stack Trace: TypeError: roleService.getRoles is not a function
+    at file:///D:/projects/Instique/server/src/controllers/role.controller.js:11:36
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///D:/projects/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at tenantMiddleware (file:///D:/projects/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:32:44.884Z
+Method: GET
+URL: /api/v1/notifications/unread-count
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\projects\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T10:48:02.996Z
+Method: GET
+URL: /api/v1/notifications/unread-count
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\projects\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T11:03:32.637Z
+Method: GET
+URL: /api/v1/notifications/unread-count
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\projects\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T11:11:02.013Z
+Method: GET
+URL: /api/v1/syllabus/analytics/overview
+User ID: 6a940e083346e25236ae0b43
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Insufficient permissions
+Stack Trace: Error: Insufficient permissions
+    at file:///D:/projects/Instique/server/src/middlewares/rbac.middleware.js:9:13
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at tenantMiddleware (file:///D:/projects/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:23:5
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T11:11:03.140Z
+Method: GET
+URL: /api/v1/syllabus/analytics/overview
+User ID: 6a940e083346e25236ae0b43
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Insufficient permissions
+Stack Trace: Error: Insufficient permissions
+    at file:///D:/projects/Instique/server/src/middlewares/rbac.middleware.js:9:13
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at tenantMiddleware (file:///D:/projects/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:23:5
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T11:11:52.093Z
+Method: GET
+URL: /api/v1/auth/profile
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T11:11:52.100Z
+Method: GET
+URL: /api/v1/auth/profile
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T11:11:52.292Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Invalid refresh token
+Stack Trace: Error: Invalid refresh token
+    at Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:113:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T11:11:52.299Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Invalid refresh token
+Stack Trace: Error: Invalid refresh token
+    at Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:113:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T11:13:15.763Z
+Method: GET
+URL: /api/v1/exams/6a880fd2f86599e9391bb6d6/results
+User ID: 6a940e083346e25236ae0b43
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Access denied: You are not authorized to view results for this exam
+Stack Trace: Error: Access denied: You are not authorized to view results for this exam
+    at file:///D:/projects/Instique/server/src/controllers/exam.controller.js:104:13
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T11:13:15.809Z
+Method: GET
+URL: /api/v1/exams/6a880fd2f86599e9391bb6d6/students
+User ID: 6a940e083346e25236ae0b43
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Access denied: You are not authorized for this exam
+Stack Trace: Error: Access denied: You are not authorized for this exam
+    at file:///D:/projects/Instique/server/src/controllers/exam.controller.js:80:13
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T11:13:37.151Z
+Method: GET
+URL: /api/v1/exams/6a880fd2f86599e9391bb6d6
+User ID: 6a940e083346e25236ae0b43
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Access denied: You are not authorized for this exam
+Stack Trace: Error: Access denied: You are not authorized for this exam
+    at file:///D:/projects/Instique/server/src/controllers/exam.controller.js:32:13
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T11:27:02.013Z
+Method: GET
+URL: /api/v1/academic/subjects?limit=200
+User ID: Unauthenticated
+Query: {"limit":"200"}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\projects\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T11:27:03.026Z
+Method: GET
+URL: /api/v1/teachers?page=1&limit=10&sort=-createdAt
+User ID: Unauthenticated
+Query: {"page":"1","limit":"10","sort":"-createdAt"}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\projects\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T11:28:45.068Z
+Method: GET
+URL: /api/v1/auth/profile
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T11:28:45.077Z
+Method: GET
+URL: /api/v1/auth/profile
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T11:28:45.122Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Refresh token required
+Stack Trace: Error: Refresh token required
+    at Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:101:11)
+    at file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:36
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-05T11:28:45.131Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Refresh token required
+Stack Trace: Error: Refresh token required
+    at Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:101:11)
+    at file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:36
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+Details: []
+================================================================================
+

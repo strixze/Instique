@@ -43,6 +43,12 @@ import ParentParentMeetings from '../pages/parent/ParentMeetings';
 import ParentAttendance from '../pages/parent/ParentAttendance';
 import Homework from '../pages/school-admin/Homework';
 import Reports from '../pages/school-admin/Reports';
+import StudentProfile from '../pages/school-admin/StudentProfile';
+import TeacherProfile from '../pages/school-admin/TeacherProfile';
+import SyllabusManagement from '../pages/school-admin/SyllabusManagement';
+import SyllabusDetail from '../pages/school-admin/SyllabusDetail';
+import SectionSyllabusTrackView from '../pages/teacher/SectionSyllabusTrackView';
+import ParentSyllabusView from '../pages/parent/ParentSyllabusView';
 
 function RoleDashboard() {
   const user = useUserStore((s) => s.user);
@@ -85,6 +91,12 @@ function UnifiedLeaves() {
   return <Leaves />;
 }
 
+function UnifiedSyllabus() {
+  const user = useUserStore((s) => s.user);
+  if (user?.role === 'parent') return <ParentSyllabusView />;
+  return <SyllabusManagement />;
+}
+
 function ModulePage({ children, allowedRoles }) {
   return (
     <ProtectedRoute allowedRoles={allowedRoles}>
@@ -115,7 +127,9 @@ export default function AppRouter() {
 
       {/* Admin-Only Management Modules */}
       <Route path="/students" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/students']}><Students /></ModulePage>} />
+      <Route path="/students/:studentId" element={<ModulePage allowedRoles={[ROLES.SCHOOL_ADMIN, ROLES.SUPER_ADMIN, ROLES.TEACHER, ROLES.PARENT]}><StudentProfile /></ModulePage>} />
       <Route path="/teachers" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/teachers']}><Teachers /></ModulePage>} />
+      <Route path="/teachers/:teacherId" element={<ModulePage allowedRoles={[ROLES.SCHOOL_ADMIN, ROLES.SUPER_ADMIN, ROLES.TEACHER]}><TeacherProfile /></ModulePage>} />
       <Route path="/admissions" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/admissions']}><Admissions /></ModulePage>} />
       <Route path="/academic" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/academic']}><Academic /></ModulePage>} />
       <Route path="/timetable-config" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/timetable-config']}><TimetableConfig /></ModulePage>} />
@@ -127,6 +141,10 @@ export default function AppRouter() {
       <Route path="/timetable" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/timetable']}><UnifiedTimetable /></ModulePage>} />
       <Route path="/attendance" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/attendance']}><UnifiedAttendance /></ModulePage>} />
       <Route path="/homework" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/homework']}><Homework /></ModulePage>} />
+      <Route path="/syllabus" element={<ModulePage allowedRoles={[ROLES.SUPER_ADMIN, ROLES.SCHOOL_ADMIN, ROLES.TEACHER, ROLES.PARENT, ROLES.STUDENT]}><UnifiedSyllabus /></ModulePage>} />
+      <Route path="/syllabus/:syllabusId" element={<ModulePage allowedRoles={[ROLES.SUPER_ADMIN, ROLES.SCHOOL_ADMIN, ROLES.TEACHER]}><SyllabusDetail /></ModulePage>} />
+      <Route path="/syllabus/tracks/:trackId" element={<ModulePage allowedRoles={[ROLES.SUPER_ADMIN, ROLES.SCHOOL_ADMIN, ROLES.TEACHER, ROLES.PARENT, ROLES.STUDENT]}><SectionSyllabusTrackView /></ModulePage>} />
+      <Route path="/parent/syllabus" element={<ModulePage allowedRoles={[ROLES.PARENT, ROLES.SCHOOL_ADMIN, ROLES.SUPER_ADMIN]}><ParentSyllabusView /></ModulePage>} />
       <Route path="/exams" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/exams']}><Exams /></ModulePage>} />
       <Route path="/marks-entry" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/marks-entry']}><MarksEntry /></ModulePage>} />
       <Route path="/leaderboard" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/leaderboard']}><Leaderboard /></ModulePage>} />

@@ -65,3 +65,11 @@ export const sendParentPasswordReset = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponse(200, result, result.message));
 });
 
+export const getStudentProfile = asyncHandler(async (req, res) => {
+  await verifyParentAccessToStudent(req.user, req.schoolId, req.params.id);
+  await verifyTeacherStudentAccess(req.user, req.schoolId, req.params.id);
+  const profile = await studentService.getStudentProfile(req.params.id, req.schoolId, req.user);
+  res.status(200).json(new ApiResponse(200, profile, 'Student profile fetched successfully'));
+});
+
+

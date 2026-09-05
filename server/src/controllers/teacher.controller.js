@@ -25,6 +25,11 @@ export const getTeacherById = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponse(200, teacher));
 });
 
+export const getTeacherProfile = asyncHandler(async (req, res) => {
+  const profile = await teacherService.getTeacherProfile(req.params.id, req.schoolId, req.user);
+  res.status(200).json(new ApiResponse(200, profile));
+});
+
 export const updateTeacher = asyncHandler(async (req, res) => {
   const teacher = await teacherService.updateTeacher(req.params.id, req.schoolId, req.body);
   res.status(200).json(new ApiResponse(200, teacher, 'Teacher updated'));

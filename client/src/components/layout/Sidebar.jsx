@@ -26,6 +26,7 @@ const navSections = {
         { to: '/students', icon: Users, label: 'Students' },
         { to: '/teachers', icon: GraduationCap, label: 'Teachers' },
         { to: '/academic', icon: BookOpen, label: 'Classes' },
+        { to: '/syllabus', icon: FileText, label: 'Syllabus' },
         { to: '/timetable', icon: Calendar, label: 'Timetable' },
         { to: '/attendance', icon: ClipboardList, label: 'Attendance' },
         { to: '/homework', icon: BookMarked, label: 'Homework' },
@@ -150,6 +151,7 @@ const navSections = {
       items: [
         { to: '/attendance', icon: ClipboardList, label: 'Attendance' },
         { to: '/homework', icon: BookMarked, label: 'Homework' },
+        { to: '/syllabus', icon: BookOpen, label: 'Syllabus' },
         { to: '/exams', icon: Trophy, label: 'Results' },
         { to: '/leaderboard', icon: Award, label: 'Leaderboard' },
         { to: '/timetable', icon: Calendar, label: 'Timetable' },
