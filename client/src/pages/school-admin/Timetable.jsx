@@ -90,8 +90,39 @@ export default function Timetable() {
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [saving, setSaving] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const [activeView, setActiveView] = useState('class'); // class | teacher | subject | daily
   const [viewEntityId, setViewEntityId] = useState(''); // Selected teacher or subject id for respective views
+
+  const handleDownloadPdf = async () => {
+    if (!activeTimetable) {
+      toast.error('No timetable selected for download');
+      return;
+    }
+    setIsDownloading(true);
+    try {
+      generateTimetablePdf({
+        role: 'admin',
+        activeTimetable,
+        gridPeriods,
+        displayPeriods: gridPeriods,
+        daysList: DAYS.filter(d => d.value !== 0),
+        periodCount: configSnapshot?.periodsPerDay || 8,
+        subjects,
+        teachers,
+        configSnapshot,
+        academicYear: activeTimetable?.academicYear?.name || activeTimetable?.academicYear || '2026-2027',
+        schoolClass: activeTimetable?.schoolClass,
+        section: activeTimetable?.section,
+      });
+      toast.success('Timetable PDF downloaded successfully!');
+    } catch (err) {
+      console.error('PDF export error:', err);
+      toast.error('Unable to generate timetable PDF. Please try again.');
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   // Edit Cell Modal
   const [editCell, setEditCell] = useState(null); // { day, periodNo, subject, teacher, room }
@@ -553,29 +584,12 @@ export default function Timetable() {
 
           <div className="flex flex-wrap items-center gap-2">
             <Button
-              variant="outline"
               size="sm"
-              onClick={() => window.print()}
-              className="text-xs gap-1.5 dark:bg-[#15191C] dark:border-white/10 dark:text-slate-200 dark:hover:bg-[#181D20]"
-            >
-              <Printer size={14} /> Print
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => {
-                generateTimetablePdf({
-                  activeTimetable,
-                  displayPeriods,
-                  daysList,
-                  periodCount,
-                  subjects,
-                  teachers,
-                  configSnapshot,
-                });
-              }}
+              onClick={handleDownloadPdf}
+              disabled={isDownloading || !activeTimetable}
               className="text-xs gap-1.5 bg-forest hover:bg-forest/90 dark:bg-emerald-500 dark:hover:bg-emerald-600 dark:text-slate-950 font-semibold shadow-2xs"
             >
-              <Download size={14} /> Download
+              <Download size={14} /> {isDownloading ? 'Generating PDF...' : 'Download'}
             </Button>
           </div>
         </div>

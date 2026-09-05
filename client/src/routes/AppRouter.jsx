@@ -1,7 +1,9 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useUserStore } from '../store/userStore';
 import ProtectedRoute from '../components/guards/ProtectedRoute';
+import ProtectedRouteAuth from '../components/guards/ProtectedRouteAuth';
 import DashboardShell from '../components/layout/DashboardShell';
+import { ROUTE_PERMISSIONS, ROLES } from '../utils/rbac';
 import Login from '../pages/auth/Login';
 import Register from '../pages/auth/Register';
 import ActivateAccount from '../pages/auth/ActivateAccount';
@@ -42,8 +44,6 @@ import ParentAttendance from '../pages/parent/ParentAttendance';
 import Homework from '../pages/school-admin/Homework';
 import Reports from '../pages/school-admin/Reports';
 
-
-
 function RoleDashboard() {
   const user = useUserStore((s) => s.user);
   const dashboards = {
@@ -66,7 +66,7 @@ function UnifiedParentMeetings() {
 
 function UnifiedTimetable() {
   const user = useUserStore((s) => s.user);
-  if (user?.role === 'school_admin') return <Timetable />;
+  if (user?.role === 'school_admin' || user?.role === 'super_admin') return <Timetable />;
   if (user?.role === 'teacher') return <TeacherTimetable />;
   if (user?.role === 'student') return <StudentTimetable />;
   if (user?.role === 'parent') return <ParentTimetable />;
@@ -85,9 +85,9 @@ function UnifiedLeaves() {
   return <Leaves />;
 }
 
-function ModulePage({ children }) {
+function ModulePage({ children, allowedRoles }) {
   return (
-    <ProtectedRoute>
+    <ProtectedRoute allowedRoles={allowedRoles}>
       <DashboardShell>{children}</DashboardShell>
     </ProtectedRoute>
   );
@@ -96,43 +96,57 @@ function ModulePage({ children }) {
 export default function AppRouter() {
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+      {/* Public Auth Routes */}
+      <Route path="/login" element={<ProtectedRouteAuth><Login /></ProtectedRouteAuth>} />
+      <Route path="/register" element={<ProtectedRouteAuth><Register /></ProtectedRouteAuth>} />
       <Route path="/activate-account" element={<ActivateAccount />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
-      <Route
 
+      {/* Role Dashboard */}
+      <Route
         path="/dashboard"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS['/dashboard']}>
             <RoleDashboard />
           </ProtectedRoute>
         }
       />
 
-      <Route path="/students" element={<ModulePage><Students /></ModulePage>} />
-      <Route path="/teachers" element={<ModulePage><Teachers /></ModulePage>} />
-      <Route path="/admissions" element={<ModulePage><Admissions /></ModulePage>} />
-      <Route path="/academic" element={<ModulePage><Academic /></ModulePage>} />
-      <Route path="/timetable" element={<ModulePage><UnifiedTimetable /></ModulePage>} />
-      <Route path="/timetable-config" element={<ModulePage><TimetableConfig /></ModulePage>} />
-      <Route path="/attendance" element={<ModulePage><UnifiedAttendance /></ModulePage>} />
-      <Route path="/homework" element={<ModulePage><Homework /></ModulePage>} />
+      {/* Admin-Only Management Modules */}
+      <Route path="/students" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/students']}><Students /></ModulePage>} />
+      <Route path="/teachers" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/teachers']}><Teachers /></ModulePage>} />
+      <Route path="/admissions" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/admissions']}><Admissions /></ModulePage>} />
+      <Route path="/academic" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/academic']}><Academic /></ModulePage>} />
+      <Route path="/timetable-config" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/timetable-config']}><TimetableConfig /></ModulePage>} />
+      <Route path="/roles" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/roles']}><Roles /></ModulePage>} />
+      <Route path="/settings" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/settings']}><Settings /></ModulePage>} />
+      <Route path="/reports" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/reports']}><Reports /></ModulePage>} />
 
+      {/* Shared Role Modules */}
+      <Route path="/timetable" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/timetable']}><UnifiedTimetable /></ModulePage>} />
+      <Route path="/attendance" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/attendance']}><UnifiedAttendance /></ModulePage>} />
+      <Route path="/homework" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/homework']}><Homework /></ModulePage>} />
+      <Route path="/exams" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/exams']}><Exams /></ModulePage>} />
+      <Route path="/marks-entry" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/marks-entry']}><MarksEntry /></ModulePage>} />
+      <Route path="/leaderboard" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/leaderboard']}><Leaderboard /></ModulePage>} />
+      <Route path="/fees" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/fees']}><Fees /></ModulePage>} />
+      <Route path="/notices" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/notices']}><Notices /></ModulePage>} />
+      <Route path="/events" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/events']}><Events /></ModulePage>} />
+      <Route path="/parent-meetings" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/parent-meetings']}><UnifiedParentMeetings /></ModulePage>} />
+      <Route path="/leaves" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/leaves']}><Leaves /></ModulePage>} />
+      <Route path="/complaints" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/complaints']}><Complaints /></ModulePage>} />
 
-      <Route path="/exams" element={<ModulePage><Exams /></ModulePage>} />
-      <Route path="/marks-entry" element={<ModulePage><MarksEntry /></ModulePage>} />
-      <Route path="/leaderboard" element={<ModulePage><Leaderboard /></ModulePage>} />
-      <Route path="/fees" element={<ModulePage><Fees /></ModulePage>} />
-      <Route path="/notices" element={<ModulePage><Notices /></ModulePage>} />
-      <Route path="/events" element={<ModulePage><Events /></ModulePage>} />
-      <Route path="/parent-meetings" element={<ModulePage><UnifiedParentMeetings /></ModulePage>} />
-      <Route path="/leaves" element={<ModulePage><UnifiedLeaves /></ModulePage>} />
-      <Route path="/complaints" element={<ModulePage><Complaints /></ModulePage>} />
-      <Route path="/roles" element={<ModulePage><Roles /></ModulePage>} />
-      <Route path="/settings" element={<ModulePage><Settings /></ModulePage>} />
-      <Route path="/reports" element={<ModulePage><Reports /></ModulePage>} />
+      {/* Common Route Aliases */}
+      <Route path="/admission" element={<Navigate to="/admissions" replace />} />
+      <Route path="/admin/admission" element={<Navigate to="/admissions" replace />} />
+      <Route path="/admin/admissions" element={<Navigate to="/admissions" replace />} />
+      <Route path="/admin/students" element={<Navigate to="/students" replace />} />
+      <Route path="/admin/teachers" element={<Navigate to="/teachers" replace />} />
+      <Route path="/admin/fees" element={<Navigate to="/fees" replace />} />
+      <Route path="/admin/reports" element={<Navigate to="/reports" replace />} />
+      <Route path="/admin/settings" element={<Navigate to="/settings" replace />} />
+      <Route path="/admin/roles" element={<Navigate to="/roles" replace />} />
 
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<NotFound />} />

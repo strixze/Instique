@@ -189,7 +189,7 @@ export default function ParentAttendance() {
   const isCritical = rate < 75;
 
   return (
-    <div className="space-y-6 w-full pb-16 print:p-0">
+    <div className="space-y-6 w-full pb-16 print:p-0 print-timetable">
 
       {/* ── Page Header & Action Controls ── */}
       <div className="print:hidden">

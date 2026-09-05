@@ -1053,6 +1053,7 @@ export const getTeacherDashboard = async (user, schoolId, query = {}) => {
     Event.find({
       schoolId,
       status: { $in: ['upcoming', 'ongoing'] },
+      type: { $ne: 'ptm' },
       startDate: { $gte: startOfToday },
       audience: { $in: ['all', 'teachers'] },
     }).sort({ startDate: 1 }).limit(5).select('title type startDate endDate startTime endTime location isFullDay color'),

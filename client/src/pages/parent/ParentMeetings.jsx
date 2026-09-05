@@ -29,6 +29,16 @@ const formatDate = (d) => {
   return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
+const isMeetingActive = (m) => {
+  if (!m || !m.date) return false;
+  if (m.status && m.status !== 'PUBLISHED') return false;
+  const now = new Date();
+  const dateObj = new Date(m.date);
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const meetingDayStart = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate()).getTime();
+  return meetingDayStart >= todayStart;
+};
+
 export default function ParentMeetings() {
   const [meetings, setMeetings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -97,13 +107,13 @@ export default function ParentMeetings() {
         <div className="space-y-3">
           {[1, 2, 3].map((i) => <div key={i} className="h-28 bg-white border border-border rounded-xl animate-pulse" />)}
         </div>
-      ) : meetings.length === 0 ? (
+      ) : meetings.filter(isMeetingActive).length === 0 ? (
         <Card>
           <EmptyState title="No upcoming parent meetings" description="You will see meetings here when your child's school schedules one." />
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {meetings.map((m) => (
+          {meetings.filter(isMeetingActive).map((m) => (
             <Card key={m._id} className="!p-4">
               <div className="flex items-start justify-between gap-2">
                 <div>

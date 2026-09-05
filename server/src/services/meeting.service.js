@@ -9,7 +9,6 @@ import Student from '../models/Student.js';
 import Parent from '../models/Parent.js';
 import Teacher from '../models/Teacher.js';
 import { User } from '../models/User.js';
-import Event from '../models/Event.js';
 import ApiError from '../utils/ApiError.js';
 import { paginate } from '../utils/pagination.js';
 import { createNotification } from './notification.service.js';
@@ -30,6 +29,20 @@ const formatDate = (d) => {
   return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
+const getParentProfileId = async (user, schoolId) => {
+  if (!user || user.role !== 'parent') return null;
+  if (user.profileId) return user.profileId;
+
+  let parent = null;
+  if (user.email) {
+    parent = await Parent.findOne({ schoolId, 'contact.email': user.email.toLowerCase().trim() });
+  }
+  if (!parent && user.phone) {
+    parent = await Parent.findOne({ schoolId, 'contact.phone': user.phone });
+  }
+  return parent ? parent._id : null;
+};
+
 const getParentProfile = (user) => {
   if (!user || user.role !== 'parent') return null;
   return user.profileId || null;
@@ -38,6 +51,15 @@ const getParentProfile = (user) => {
 const getTeacherProfile = (user) => {
   if (!user || user.role !== 'teacher') return null;
   return user.profileId || null;
+};
+
+export const isMeetingPast = (m) => {
+  if (!m || !m.date) return true;
+  const now = new Date();
+  const dateObj = new Date(m.date);
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const meetingDayStart = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate()).getTime();
+  return meetingDayStart < todayStart;
 };
 
 const syncMeetingClasses = async (schoolId, meetingId, classes) => {
@@ -81,14 +103,41 @@ const resolveParticipants = async (schoolId, classes) => {
   const match = buildClassMatchQuery(classes);
   if (!match) return { students: [], parents: [] };
 
-  const students = await Student.find({ schoolId, status: 'active', ...match })
+  const students = await Student.find({
+    schoolId,
+    status: { $in: ['active', 'promoted'] },
+    ...match,
+  })
     .populate('currentClass', 'name')
     .populate('currentSection', 'name');
 
-  const parentIds = [...new Set(students.flatMap((s) => s.parents || []))];
-  const parents = parentIds.length
-    ? await Parent.find({ _id: { $in: parentIds }, schoolId })
-    : [];
+  if (!students.length) return { students: [], parents: [] };
+
+  const studentIds = students.map((s) => s._id);
+
+  const parents = await Parent.find({
+    schoolId,
+    $or: [
+      { students: { $in: studentIds } },
+      { _id: { $in: students.flatMap((s) => s.parents || []) } },
+    ],
+  });
+
+  const parentMapByStudent = new Map();
+  parents.forEach((p) => {
+    (p.students || []).forEach((sid) => {
+      const key = sid.toString();
+      if (!parentMapByStudent.has(key)) parentMapByStudent.set(key, new Set());
+      parentMapByStudent.get(key).add(p._id.toString());
+    });
+  });
+
+  students.forEach((s) => {
+    const existing = new Set((s.parents || []).map((id) => id.toString()));
+    const fromParentDoc = parentMapByStudent.get(s._id.toString()) || new Set();
+    fromParentDoc.forEach((pid) => existing.add(pid));
+    s.resolvedParentIds = Array.from(existing);
+  });
 
   return { students, parents };
 };
@@ -148,21 +197,6 @@ const getTeacherSuggestions = async (schoolId, classes) => {
     return { classId, sectionId, className, sectionName, suggestions };
   });
 };
-
-const buildEventPayload = (meeting, classIds = []) => ({
-  title: meeting.title,
-  type: 'ptm',
-  description: meeting.description || `Parent meeting scheduled for ${formatDate(meeting.date)}.`,
-  startDate: meeting.date,
-  endDate: meeting.date,
-  isFullDay: false,
-  startTime: meeting.startTime,
-  endTime: meeting.endTime,
-  location: meeting.location || '',
-  audience: 'parents',
-  targetClasses: classIds,
-  status: 'upcoming',
-});
 
 const notifyParents = async (meeting, action, actorId) => {
   const participants = await ParentMeetingParticipant.find({ meetingId: meeting._id, schoolId: meeting.schoolId })
@@ -319,16 +353,6 @@ export const updateMeeting = async (id, schoolId, data, userId) => {
   if (wasPublished) {
     const dateOrTimeChanged = dateChanged || startChanged || endChanged || locationChanged;
 
-    if (meeting.eventId) {
-      const classRows = await ParentMeetingClass.find({ meetingId: meeting._id, schoolId });
-      const classIds = classRows.map((r) => r.schoolClass);
-      await Event.findOneAndUpdate(
-        { _id: meeting.eventId, schoolId },
-        { $set: buildEventPayload(meeting, classIds) },
-        { new: true, runValidators: true }
-      );
-    }
-
     if (dateOrTimeChanged) {
       try {
         await notifyParents(meeting, 'updated', userId);
@@ -348,9 +372,6 @@ export const deleteMeeting = async (id, schoolId, userId) => {
     throw new ApiError(400, 'Only draft or cancelled meetings can be deleted');
   }
 
-  if (meeting.eventId) {
-    await Event.deleteOne({ _id: meeting.eventId, schoolId });
-  }
   await Promise.all([
     ParentMeetingClass.deleteMany({ meetingId: id, schoolId }),
     ParentMeetingTeacher.deleteMany({ meetingId: id, schoolId }),
@@ -382,9 +403,44 @@ export const getMeetings = async (schoolId, options, user) => {
     const teacherIdProfile = getTeacherProfile(user);
     scopedMeetingIds = await ParentMeetingTeacher.find({ schoolId, teacher: teacherIdProfile }).distinct('meetingId');
   } else if (role === 'parent') {
-    const parentId = getParentProfile(user);
-    scopedMeetingIds = await ParentMeetingParticipant.find({ schoolId, parent: parentId }).distinct('meetingId');
-    filterQuery.status = { $in: ['PUBLISHED', 'COMPLETED', 'CANCELLED'] };
+    const parentId = await getParentProfileId(user, schoolId);
+    let participantMeetingIds = [];
+    if (parentId) {
+      participantMeetingIds = await ParentMeetingParticipant.find({ schoolId, parent: parentId }).distinct('meetingId');
+    }
+
+    let classMeetingIds = [];
+    let parentDoc = null;
+    if (parentId) {
+      parentDoc = await Parent.findOne({ _id: parentId, schoolId }).select('students');
+    }
+    if (!parentDoc && user.email) {
+      parentDoc = await Parent.findOne({ schoolId, 'contact.email': user.email.toLowerCase().trim() }).select('students');
+    }
+    if (!parentDoc && user.phone) {
+      parentDoc = await Parent.findOne({ schoolId, 'contact.phone': user.phone }).select('students');
+    }
+
+    if (parentDoc?.students?.length) {
+      const children = await Student.find({ _id: { $in: parentDoc.students }, schoolId }).select('currentClass');
+      const classIds = children.map((c) => c.currentClass).filter(Boolean);
+      if (classIds.length) {
+        classMeetingIds = await ParentMeetingClass.find({ schoolId, schoolClass: { $in: classIds } }).distinct('meetingId');
+      }
+    }
+
+    const mergedIds = [...new Set([
+      ...participantMeetingIds.map((id) => id.toString()),
+      ...classMeetingIds.map((id) => id.toString()),
+    ])];
+
+    scopedMeetingIds = mergedIds;
+
+    if (!status || status === 'upcoming') {
+      filterQuery.status = 'PUBLISHED';
+    } else if (status !== 'all') {
+      filterQuery.status = status;
+    }
   }
 
   if (classId) {
@@ -417,9 +473,12 @@ export const getMeetings = async (schoolId, options, user) => {
     searchFields: ['title', 'type', 'location'],
   });
 
-  const decorated = await attachMeetingDetails(schoolId, result.data);
+  let decorated = await attachMeetingDetails(schoolId, result.data);
 
   if (role === 'parent' && decorated.length) {
+    if (!status || status === 'upcoming') {
+      decorated = decorated.filter((m) => m.status === 'PUBLISHED' && !isMeetingPast(m));
+    }
     const parentId = getParentProfile(user);
     const myRows = await ParentMeetingParticipant.find({
       meetingId: { $in: decorated.map((m) => m._id) },
@@ -530,12 +589,26 @@ export const getMeetingById = async (id, schoolId, user) => {
   }
 
   if (role === 'parent') {
-    if (meeting.status === 'DRAFT') throw new ApiError(403, 'This meeting is not available');
-    const isParticipant = await ParentMeetingParticipant.exists({ meetingId: id, schoolId, parent: parentProfileId });
+    if (meeting.status !== 'PUBLISHED' || isMeetingPast(meeting)) throw new ApiError(403, 'This meeting is no longer available');
+    const parentId = await getParentProfileId(user, schoolId);
+    let isParticipant = parentId
+      ? await ParentMeetingParticipant.exists({ meetingId: id, schoolId, parent: parentId })
+      : false;
+
+    if (!isParticipant && parentId) {
+      const classRows = await ParentMeetingClass.find({ meetingId: id, schoolId }).distinct('schoolClass');
+      if (classRows.length) {
+        const pDoc = await Parent.findOne({ _id: parentId, schoolId }).select('students');
+        if (pDoc?.students?.length) {
+          const hasChildInClass = await Student.exists({ _id: { $in: pDoc.students }, schoolId, currentClass: { $in: classRows } });
+          if (hasChildInClass) isParticipant = true;
+        }
+      }
+    }
     if (!isParticipant) throw new ApiError(403, 'You are not invited to this meeting');
   }
 
-  const [classRows, teacherRows, participantRows, noteRows, event] = await Promise.all([
+  const [classRows, teacherRows, participantRows, noteRows] = await Promise.all([
     ParentMeetingClass.find({ meetingId: id, schoolId })
       .populate('schoolClass', 'name')
       .populate('section', 'name'),
@@ -557,7 +630,6 @@ export const getMeetingById = async (id, schoolId, user) => {
       .populate('teacher', 'firstName lastName')
       .populate('student', 'firstName lastName')
       .populate('createdBy', 'name role'),
-    meeting.eventId ? Event.findOne({ _id: meeting.eventId, schoolId }) : null,
   ]);
 
   let classes = classRows.map((r) => ({
@@ -649,7 +721,6 @@ export const getMeetingById = async (id, schoolId, user) => {
   obj.totalParticipants = totalParticipants;
   obj.parentsInvited = new Set(participants.map((p) => p.parentId?.toString())).size;
   obj.attendanceRate = attendanceRate;
-  obj.event = event;
   obj.permissions = {
     canEdit: role === 'school_admin' && meeting.status === 'DRAFT',
     canPublish: role === 'school_admin' && meeting.status === 'DRAFT',
@@ -678,7 +749,11 @@ export const publishMeeting = async (id, schoolId, user, ip, userAgent) => {
   const now = new Date();
   const participantDocs = [];
   students.forEach((s) => {
-    (s.parents || []).forEach((parentId) => {
+    const pIds = s.resolvedParentIds && s.resolvedParentIds.length
+      ? s.resolvedParentIds
+      : (s.parents || []).map((id) => id.toString());
+
+    pIds.forEach((parentId) => {
       participantDocs.push({
         schoolId,
         meetingId: id,
@@ -695,14 +770,6 @@ export const publishMeeting = async (id, schoolId, user, ip, userAgent) => {
     await ParentMeetingParticipant.insertMany(participantDocs);
   }
 
-  const classIds = classRows.map((r) => r.schoolClass);
-  const event = await Event.create({
-    ...buildEventPayload(meeting, classIds),
-    schoolId,
-    createdBy: user._id,
-  });
-
-  meeting.eventId = event._id;
   meeting.status = 'PUBLISHED';
   meeting.publishedAt = now;
   meeting.cancelledAt = undefined;
@@ -726,14 +793,6 @@ export const cancelMeeting = async (id, schoolId, user, reason, ip, userAgent) =
   meeting.cancelledReason = reason || '';
   await meeting.save();
 
-  if (meeting.eventId) {
-    await Event.findOneAndUpdate(
-      { _id: meeting.eventId, schoolId },
-      { $set: { status: 'cancelled' } },
-      { new: true }
-    );
-  }
-
   await notifyParents(meeting, 'cancelled', user._id).catch(() => {});
   await recordAudit({ schoolId, actor: user._id, action: 'meeting_cancelled', entityId: id, after: { status: 'CANCELLED' }, ip, userAgent });
 
@@ -756,14 +815,6 @@ export const completeMeeting = async (id, schoolId, user, ip, userAgent) => {
   meeting.status = 'COMPLETED';
   meeting.completedAt = now;
   await meeting.save();
-
-  if (meeting.eventId) {
-    await Event.findOneAndUpdate(
-      { _id: meeting.eventId, schoolId },
-      { $set: { status: 'completed' } },
-      { new: true }
-    );
-  }
 
   await recordAudit({ schoolId, actor: user._id, action: 'meeting_completed', entityId: id, after: { status: 'COMPLETED' }, ip, userAgent });
 

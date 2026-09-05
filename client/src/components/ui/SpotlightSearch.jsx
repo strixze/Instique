@@ -11,6 +11,8 @@ import { studentApi } from '../../api/student.api';
 import { teacherApi } from '../../api/teacher.api';
 import { academicApi } from '../../api/academic.api';
 import UserAvatar from './UserAvatar';
+import { useUserStore } from '../../store/userStore';
+import { canAccessRoute } from '../../utils/rbac';
 
 // All main application navigation pages
 const APP_PAGES = [
@@ -39,9 +41,13 @@ const APP_PAGES = [
 
 export default function SpotlightSearch({ isOpen, onClose }) {
   const navigate = useNavigate();
+  const user = useUserStore((s) => s.user);
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const isParent = user?.role === 'parent';
+  const isStudent = user?.role === 'student';
 
   // Async search results from backend APIs
   const [students, setStudents] = useState([]);
@@ -56,19 +62,29 @@ export default function SpotlightSearch({ isOpen, onClose }) {
     return typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
   }, []);
 
+  // Filter pages allowed for current user role
+  const allowedPages = useMemo(() => {
+    return APP_PAGES.filter((p) => canAccessRoute(user, p.path)).map((p) => {
+      if ((isParent || isStudent) && p.path === '/exams') {
+        return { ...p, title: 'Results', subtitle: 'View student exam results and grade card' };
+      }
+      return p;
+    });
+  }, [user, isParent, isStudent]);
+
   // Filter pages matching query locally
   const matchingPages = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return APP_PAGES.slice(0, 5); // Default top 5 pages when query is empty
-    return APP_PAGES.filter(
+    if (!q) return allowedPages;
+    return allowedPages.filter(
       (p) => p.title.toLowerCase().includes(q) || p.subtitle.toLowerCase().includes(q)
     );
-  }, [query]);
+  }, [query, allowedPages]);
 
-  // Fetch dynamic data when query changes
+  // Fetch dynamic data when query changes (only for admin/faculty roles)
   useEffect(() => {
     const q = query.trim();
-    if (!q) {
+    if (!q || isParent || isStudent) {
       setStudents([]);
       setTeachers([]);
       setClasses([]);
@@ -113,10 +129,55 @@ export default function SpotlightSearch({ isOpen, onClose }) {
     }, 220);
 
     return () => clearTimeout(timer);
-  }, [query]);
+  }, [query, isParent, isStudent]);
 
-  // Group all results together into a single flat list for keyboard navigation
+  // Group all results together into structured categories
   const groupedResults = useMemo(() => {
+    if (isParent) {
+      const academicsOrder = ['/attendance', '/homework', '/exams', '/leaderboard', '/timetable'];
+      const servicesOrder = ['/events', '/parent-meetings', '/fees', '/notices', '/complaints'];
+
+      const academicsItems = academicsOrder
+        .map((path) => matchingPages.find((p) => p.path === path))
+        .filter(Boolean)
+        .map((p) => ({
+          type: 'page',
+          id: `pg-${p.id}`,
+          title: p.title,
+          subtitle: p.subtitle,
+          icon: p.icon,
+          route: p.path,
+          badge: 'Academic',
+          badgeStyle: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+        }));
+
+      const servicesItems = servicesOrder
+        .map((path) => matchingPages.find((p) => p.path === path))
+        .filter(Boolean)
+        .map((p) => ({
+          type: 'page',
+          id: `pg-${p.id}`,
+          title: p.title,
+          subtitle: p.subtitle,
+          icon: p.icon,
+          route: p.path,
+          badge: 'Service',
+          badgeStyle: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20',
+        }));
+
+      const groups = [];
+
+      if (academicsItems.length > 0) {
+        groups.push({ category: 'ACADEMICS', items: academicsItems });
+      }
+
+      if (servicesItems.length > 0) {
+        groups.push({ category: 'SERVICES', items: servicesItems });
+      }
+
+      return groups;
+    }
+
     const groups = [];
 
     if (students.length > 0) {
@@ -186,7 +247,7 @@ export default function SpotlightSearch({ isOpen, onClose }) {
     }
 
     return groups;
-  }, [students, teachers, classes, matchingPages]);
+  }, [isParent, isStudent, students, teachers, classes, matchingPages]);
 
   // Flattened array for index selection
   const flatItems = useMemo(() => {
@@ -272,7 +333,7 @@ export default function SpotlightSearch({ isOpen, onClose }) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Search students, teachers, classes, pages..."
+            placeholder={isParent ? "Search attendance, homework, fees, notices..." : "Search students, teachers, classes, pages..."}
             className="w-full bg-transparent text-sm sm:text-base font-medium text-deep dark:text-slate-100 placeholder-muted dark:placeholder-slate-500 focus:outline-none"
           />
 

@@ -36,6 +36,16 @@ const getRelativeDue = (dueDate) => {
   return { label: formatDate(dueDate), color: 'gray' };
 };
 
+const isMeetingActive = (m) => {
+  if (!m || !m.date) return false;
+  if (m.status && m.status !== 'PUBLISHED') return false;
+  const now = new Date();
+  const dateObj = new Date(m.date);
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const meetingDayStart = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate()).getTime();
+  return meetingDayStart >= todayStart;
+};
+
 export default function ParentDashboard() {
   const user = useUserStore((s) => s.user);
   const navigate = useNavigate();
@@ -412,13 +422,13 @@ export default function ParentDashboard() {
                         key={idx}
                         className={`flex items-center justify-between p-2.5 rounded-xl border text-xs ${
                           p.isBreak
-                            ? 'bg-slate-50 border-slate-200 text-slate-500 font-medium'
-                            : 'bg-white border-border/80 hover:border-forest/40 hover:bg-forest/5 transition-colors'
+                            ? 'bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 font-medium'
+                            : 'bg-white dark:bg-[#15191C] border-border/80 dark:border-white/10 hover:border-forest/40 hover:bg-forest/5 transition-colors'
                         }`}
                       >
                         <div className="flex items-center gap-2.5">
                           <span className={`w-6 h-6 rounded-lg flex items-center justify-center font-bold text-[11px] ${
-                            p.isBreak ? 'bg-slate-200 text-slate-600' : 'bg-forest/10 text-forest'
+                            p.isBreak ? 'bg-slate-200 dark:bg-white/10 text-slate-600 dark:text-slate-300' : 'bg-forest/10 text-forest dark:bg-emerald-500/20 dark:text-emerald-400'
                           }`}>
                             P{p.periodNo}
                           </span>
@@ -430,7 +440,7 @@ export default function ParentDashboard() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <span className="font-semibold text-slate-700">
+                          <span className="font-semibold text-slate-700 dark:text-slate-300">
                             {p.startTime || '—'}
                           </span>
                           {p.room && (
@@ -459,7 +469,7 @@ export default function ParentDashboard() {
                 {dashboardLoading ? (
                   <div className="space-y-3 py-2">
                     {[1, 2, 3].map((i) => (
-                      <div key={i} className="h-16 bg-slate-100 rounded-xl animate-pulse" />
+                      <div key={i} className="h-16 bg-slate-100 dark:bg-dark-hover rounded-xl animate-pulse" />
                     ))}
                   </div>
                 ) : !dashboardData?.homework?.items || dashboardData.homework.items.length === 0 ? (
@@ -475,11 +485,11 @@ export default function ParentDashboard() {
                       return (
                         <div
                           key={hw._id}
-                          className="p-3 bg-slate-50/70 border border-border/80 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 hover:bg-white hover:border-border transition-all"
+                          className="p-3 bg-slate-50/70 dark:bg-[#15191C] border border-border/80 dark:border-white/10 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 hover:bg-white dark:hover:bg-[#181D20] hover:border-border transition-all"
                         >
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
-                              <span className="text-xs font-bold text-forest bg-forest/10 px-2 py-0.5 rounded-md">
+                              <span className="text-xs font-bold text-forest dark:text-emerald-400 bg-forest/10 dark:bg-emerald-500/20 px-2 py-0.5 rounded-md">
                                 {hw.subjectName}
                               </span>
                               <h3 className="text-sm font-bold text-deep">{hw.title}</h3>
@@ -531,7 +541,7 @@ export default function ParentDashboard() {
                 {dashboardLoading ? (
                   <div className="space-y-3">
                     {[1, 2, 3].map((i) => (
-                      <div key={i} className="h-14 bg-slate-100 rounded-xl animate-pulse" />
+                      <div key={i} className="h-14 bg-slate-100 dark:bg-dark-hover rounded-xl animate-pulse" />
                     ))}
                   </div>
                 ) : (
@@ -542,10 +552,10 @@ export default function ParentDashboard() {
                         <p className="text-xs font-bold uppercase tracking-wider text-muted">Recent Exam Marks</p>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           {dashboardData.exams.recentResults.map((r) => (
-                            <div key={r._id} className="p-2.5 bg-slate-50 border border-border/80 rounded-xl space-y-1">
+                            <div key={r._id} className="p-2.5 bg-slate-50 dark:bg-[#15191C] border border-border/80 dark:border-white/10 rounded-xl space-y-1">
                               <div className="flex items-center justify-between">
                                 <span className="text-xs font-bold text-deep">{r.subjectName}</span>
-                                <span className="text-xs font-extrabold text-forest">{r.marksObtained}/{r.maxMarks}</span>
+                                <span className="text-xs font-extrabold text-forest dark:text-emerald-400">{r.marksObtained}/{r.maxMarks}</span>
                               </div>
                               <div className="flex items-center justify-between text-[11px] text-muted">
                                 <span className="truncate max-w-[110px]">{r.examName}</span>
@@ -563,13 +573,13 @@ export default function ParentDashboard() {
 
                     {/* Upcoming Exam Schedule */}
                     {dashboardData?.exams?.upcoming?.length > 0 && (
-                      <div className="space-y-2 pt-2 border-t border-border/60">
+                      <div className="space-y-2 pt-2 border-t border-border/60 dark:border-white/10">
                         <p className="text-xs font-bold uppercase tracking-wider text-muted">Upcoming Exams</p>
                         <div className="space-y-1.5">
                           {dashboardData.exams.upcoming.map((e) => (
-                            <div key={e._id} className="flex items-center justify-between p-2 bg-blue-50/50 border border-blue-100 rounded-lg text-xs">
-                              <span className="font-semibold text-blue-900">{e.name}</span>
-                              <span className="text-blue-700 font-medium">{formatDate(e.startDate)}</span>
+                            <div key={e._id} className="flex items-center justify-between p-2.5 bg-blue-50/60 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-800/40 rounded-lg text-xs">
+                              <span className="font-semibold text-blue-900 dark:text-blue-300">{e.name}</span>
+                              <span className="text-blue-700 dark:text-blue-400 font-medium">{formatDate(e.startDate)}</span>
                             </div>
                           ))}
                         </div>
@@ -597,7 +607,7 @@ export default function ParentDashboard() {
                   </div>
                 ) : (
                   <>
-                    <div className="grid grid-cols-3 gap-2 text-center p-3 bg-slate-50 rounded-xl border border-border/80">
+                    <div className="grid grid-cols-3 gap-2 text-center p-3 bg-slate-50 dark:bg-[#15191C] rounded-xl border border-border/80 dark:border-white/10">
                       <div>
                         <p className="text-[11px] text-muted">Total Assigned</p>
                         <p className="text-sm font-extrabold text-deep">
@@ -606,13 +616,13 @@ export default function ParentDashboard() {
                       </div>
                       <div>
                         <p className="text-[11px] text-muted">Paid So Far</p>
-                        <p className="text-sm font-extrabold text-emerald-600">
+                        <p className="text-sm font-extrabold text-emerald-600 dark:text-emerald-400">
                           ₹{dashboardData?.fees?.totalPaid?.toLocaleString('en-IN') ?? 0}
                         </p>
                       </div>
                       <div>
                         <p className="text-[11px] text-muted">Remaining Due</p>
-                        <p className="text-sm font-extrabold text-amber-600">
+                        <p className="text-sm font-extrabold text-amber-600 dark:text-amber-400">
                           ₹{dashboardData?.fees?.balance?.toLocaleString('en-IN') ?? 0}
                         </p>
                       </div>
@@ -623,7 +633,7 @@ export default function ParentDashboard() {
                       {dashboardData?.fees?.transactions?.length > 0 ? (
                         <div className="space-y-1.5">
                           {dashboardData.fees.transactions.map((t) => (
-                            <div key={t._id} className="flex items-center justify-between p-2 bg-white border border-border rounded-lg text-xs">
+                            <div key={t._id} className="flex items-center justify-between p-2 bg-white dark:bg-[#15191C] border border-border dark:border-white/10 rounded-lg text-xs">
                               <div>
                                 <span className="font-semibold text-deep">Paid ₹{t.paidAmount?.toLocaleString('en-IN')}</span>
                                 <p className="text-[10px] text-muted">{formatDate(t.paymentDate)} via {t.paymentMethod || 'Manual'}</p>
@@ -652,7 +662,7 @@ export default function ParentDashboard() {
                 <h2 className="text-base font-bold text-deep flex items-center gap-2">
                   <Users size={18} className="text-forest" /> Parent-Teacher Meetings
                 </h2>
-                <Link to="/parent-meetings" className="text-xs font-semibold text-forest hover:underline">
+                <Link to="/parent-meetings" className="text-xs font-semibold text-forest dark:text-emerald-400 hover:underline">
                   View all →
                 </Link>
               </div>
@@ -660,18 +670,18 @@ export default function ParentDashboard() {
               <Card className="!p-4 min-h-[220px]">
                 {dashboardLoading ? (
                   <div className="space-y-3">
-                    {[1, 2].map((i) => <div key={i} className="h-20 bg-slate-100 rounded-xl animate-pulse" />)}
+                    {[1, 2].map((i) => <div key={i} className="h-20 bg-slate-100 dark:bg-dark-hover rounded-xl animate-pulse" />)}
                   </div>
-                ) : !dashboardData?.meetings || dashboardData.meetings.length === 0 ? (
+                ) : !dashboardData?.meetings || dashboardData.meetings.filter(isMeetingActive).length === 0 ? (
                   <div className="py-8 text-center text-muted space-y-1.5">
-                    <Users size={28} className="mx-auto opacity-30 text-forest" />
+                    <Users size={28} className="mx-auto opacity-30 text-forest dark:text-emerald-400" />
                     <p className="text-xs font-semibold text-deep">No Upcoming Meetings</p>
                     <p className="text-[11px] text-muted">You are all set. No parent conferences are currently scheduled.</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {dashboardData.meetings.map((m) => (
-                      <div key={m._id} className="p-3 bg-slate-50 border border-border rounded-xl space-y-2.5">
+                    {dashboardData.meetings.filter(isMeetingActive).map((m) => (
+                      <div key={m._id} className="p-3 bg-slate-50 dark:bg-[#15191C] border border-border dark:border-white/10 rounded-xl space-y-2.5">
                         <div className="flex items-start justify-between gap-2">
                           <div>
                             <h3 className="font-bold text-deep text-xs sm:text-sm">{m.title}</h3>
@@ -679,7 +689,7 @@ export default function ParentDashboard() {
                               <CalendarIcon size={11} /> {formatDate(m.date)} • {m.startTime} – {m.endTime}
                             </p>
                             {m.location && (
-                              <p className="text-[11px] text-secondary flex items-center gap-1.5 mt-0.5">
+                              <p className="text-[11px] text-secondary dark:text-slate-400 flex items-center gap-1.5 mt-0.5">
                                 <MapPin size={11} /> {m.location}
                               </p>
                             )}
@@ -690,7 +700,7 @@ export default function ParentDashboard() {
                         </div>
 
                         {/* Interactive RSVP Action */}
-                        <div className="pt-1 border-t border-border/50 flex items-center justify-between">
+                        <div className="pt-1 border-t border-border/50 dark:border-white/10 flex items-center justify-between">
                           <span className="text-[11px] text-muted font-medium">Your RSVP:</span>
                           <div className="flex items-center gap-1.5">
                             <Button
@@ -735,7 +745,7 @@ export default function ParentDashboard() {
                 <h2 className="text-base font-bold text-deep flex items-center gap-2">
                   <Bell size={18} className="text-forest" /> School Notices & Announcements
                 </h2>
-                <Link to="/notices" className="text-xs font-semibold text-forest hover:underline">
+                <Link to="/notices" className="text-xs font-semibold text-forest dark:text-emerald-400 hover:underline">
                   Notice Board →
                 </Link>
               </div>
@@ -743,18 +753,18 @@ export default function ParentDashboard() {
               <Card className="!p-4 min-h-[220px]">
                 {dashboardLoading ? (
                   <div className="space-y-3">
-                    {[1, 2, 3].map((i) => <div key={i} className="h-12 bg-slate-100 rounded-xl animate-pulse" />)}
+                    {[1, 2, 3].map((i) => <div key={i} className="h-12 bg-slate-100 dark:bg-dark-hover rounded-xl animate-pulse" />)}
                   </div>
                 ) : !dashboardData?.notices || dashboardData.notices.length === 0 ? (
                   <div className="py-8 text-center text-muted space-y-1">
-                    <Bell size={28} className="mx-auto opacity-30 text-forest" />
+                    <Bell size={28} className="mx-auto opacity-30 text-forest dark:text-emerald-400" />
                     <p className="text-xs font-semibold text-deep">No Circulars Published</p>
                     <p className="text-[11px] text-muted">All clear. Check back later for announcements.</p>
                   </div>
                 ) : (
                   <div className="space-y-2">
                     {dashboardData.notices.map((n) => (
-                      <div key={n._id} className="p-2.5 bg-slate-50 border border-border/80 rounded-xl space-y-1 hover:bg-white transition-colors">
+                      <div key={n._id} className="p-2.5 bg-slate-50 dark:bg-[#15191C] border border-border/80 dark:border-white/10 rounded-xl space-y-1 hover:bg-white dark:hover:bg-[#181D20] transition-colors">
                         <div className="flex items-center justify-between gap-2">
                           <h4 className="text-xs font-bold text-deep line-clamp-1">{n.title}</h4>
                           <Badge size="sm" color={n.category === 'emergency' ? 'danger' : n.category === 'academic' ? 'info' : 'gray'}>
@@ -781,7 +791,7 @@ export default function ParentDashboard() {
                 <h2 className="text-base font-bold text-deep flex items-center gap-2">
                   <CalendarIcon size={18} className="text-forest" /> Upcoming School Events
                 </h2>
-                <Link to="/events" className="text-xs font-semibold text-forest hover:underline">
+                <Link to="/events" className="text-xs font-semibold text-forest dark:text-emerald-400 hover:underline">
                   School Calendar →
                 </Link>
               </div>
@@ -789,7 +799,7 @@ export default function ParentDashboard() {
               <Card className="!p-4 min-h-[200px]">
                 {dashboardLoading ? (
                   <div className="space-y-2.5">
-                    {[1, 2].map((i) => <div key={i} className="h-14 bg-slate-100 rounded-xl animate-pulse" />)}
+                    {[1, 2].map((i) => <div key={i} className="h-14 bg-slate-100 dark:bg-dark-hover rounded-xl animate-pulse" />)}
                   </div>
                 ) : !dashboardData?.events || dashboardData.events.length === 0 ? (
                   <div className="py-6 text-center text-muted">
@@ -798,7 +808,7 @@ export default function ParentDashboard() {
                 ) : (
                   <div className="space-y-2">
                     {dashboardData.events.map((e) => (
-                      <div key={e._id} className="flex items-center justify-between p-2.5 bg-slate-50 border border-border rounded-xl">
+                      <div key={e._id} className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-[#15191C] border border-border dark:border-white/10 rounded-xl">
                         <div className="space-y-0.5">
                           <span className="text-xs font-bold text-deep">{e.title}</span>
                           <p className="text-[11px] text-muted flex items-center gap-1">
@@ -817,33 +827,33 @@ export default function ParentDashboard() {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <h2 className="text-base font-bold text-deep flex items-center gap-2">
-                  <Sparkles size={18} className="text-purple-600" /> Recognition & Praise
+                  <Sparkles size={18} className="text-purple-600 dark:text-purple-400" /> Recognition & Praise
                 </h2>
               </div>
 
               <Card className="!p-4 min-h-[200px]">
                 {dashboardLoading ? (
                   <div className="space-y-2.5">
-                    {[1, 2].map((i) => <div key={i} className="h-14 bg-slate-100 rounded-xl animate-pulse" />)}
+                    {[1, 2].map((i) => <div key={i} className="h-14 bg-slate-100 dark:bg-dark-hover rounded-xl animate-pulse" />)}
                   </div>
                 ) : !dashboardData?.recognition?.items || dashboardData.recognition.items.length === 0 ? (
                   <div className="py-6 text-center text-muted">
-                    <Award size={28} className="mx-auto opacity-30 text-purple-600 mb-1" />
+                    <Award size={28} className="mx-auto opacity-30 text-purple-600 dark:text-purple-400 mb-1" />
                     <p className="text-xs text-muted">No recognition points recorded yet for this session.</p>
                   </div>
                 ) : (
                   <div className="space-y-2 max-h-[240px] overflow-y-auto pr-1">
                     {dashboardData.recognition.items.map((r) => (
-                      <div key={r._id} className="p-2.5 bg-purple-50/50 border border-purple-100 rounded-xl flex items-center justify-between">
+                      <div key={r._id} className="p-2.5 bg-purple-50/50 dark:bg-purple-950/30 border border-purple-100 dark:border-purple-800/40 rounded-xl flex items-center justify-between">
                         <div>
                           <div className="flex items-center gap-1.5">
-                            <Award size={13} className="text-purple-600" />
-                            <span className="text-xs font-bold text-purple-900">{r.category?.toUpperCase() || 'PRAISE'}</span>
+                            <Award size={13} className="text-purple-600 dark:text-purple-400" />
+                            <span className="text-xs font-bold text-purple-900 dark:text-purple-300">{r.category?.toUpperCase() || 'PRAISE'}</span>
                           </div>
-                          {r.note && <p className="text-[11px] text-slate-600 mt-0.5">{r.note}</p>}
+                          {r.note && <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5">{r.note}</p>}
                           <p className="text-[10px] text-muted">By {r.awardedBy} • {formatDate(r.createdAt)}</p>
                         </div>
-                        <span className="text-sm font-extrabold text-purple-700">+{r.points}</span>
+                        <span className="text-sm font-extrabold text-purple-700 dark:text-purple-400">+{r.points}</span>
                       </div>
                     ))}
                   </div>

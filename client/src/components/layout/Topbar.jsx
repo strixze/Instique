@@ -84,7 +84,7 @@ export default function Topbar({ setMobileOpen }) {
         >
           <div className="flex items-center gap-2 truncate">
             <Search size={13} className="text-muted dark:text-slate-400 group-hover:text-forest dark:group-hover:text-emerald-400 transition-colors shrink-0" />
-            <span className="truncate">Search students, classes...</span>
+            <span className="truncate">{user?.role === 'parent' ? 'Search options...' : 'Search students, classes...'}</span>
           </div>
           <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.5 text-[10px] font-bold text-muted dark:text-slate-400 bg-white dark:bg-white/5 border border-border/80 dark:border-white/10 rounded shadow-2xs shrink-0 select-none">
             {isMac ? '⌘ K' : 'Ctrl K'}

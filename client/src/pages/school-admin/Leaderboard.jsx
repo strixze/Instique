@@ -243,7 +243,7 @@ export default function Leaderboard() {
   const hasMarks = examData?.results?.some((r) => r.result !== 'incomplete' || r.totalObtained !== null);
 
   return (
-    <div className="space-y-6 pb-12 print:p-0 print:space-y-4">
+    <div className="space-y-6 pb-12 print:p-0 print:space-y-4 print-timetable">
       {/* Page Header */}
       <div className="print:hidden">
         <PageHeader
