@@ -1,5 +1,6 @@
 import { X } from 'lucide-react';
 import { useEffect } from 'react';
+import { uiSound } from '../../utils/soundManager';
 
 export default function Modal({
   isOpen,
@@ -11,12 +12,23 @@ export default function Modal({
   footer,
 }) {
   useEffect(() => {
-    if (isOpen) document.body.style.overflow = 'hidden';
-    else document.body.style.overflow = '';
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      uiSound.modal();
+    } else {
+      document.body.style.overflow = '';
+    }
     return () => {
       document.body.style.overflow = '';
     };
   }, [isOpen]);
+
+  const handleClose = () => {
+    uiSound.modal();
+    if (onClose) {
+      onClose();
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -33,7 +45,7 @@ export default function Modal({
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-slate-950/40 dark:bg-black/60 backdrop-blur-xs transition-opacity"
-        onClick={onClose}
+        onClick={handleClose}
       />
 
       {/* Modal Dialog */}
@@ -51,7 +63,7 @@ export default function Modal({
             )}
           </div>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="p-1.5 text-muted dark:text-dark-text-muted hover:text-deep dark:hover:text-dark-text rounded-lg hover:bg-surface dark:hover:bg-dark-hover transition-colors ml-4"
             title="Close dialog"
           >

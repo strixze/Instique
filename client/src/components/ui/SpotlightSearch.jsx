@@ -13,6 +13,7 @@ import { academicApi } from '../../api/academic.api';
 import UserAvatar from './UserAvatar';
 import { useUserStore } from '../../store/userStore';
 import { canAccessRoute } from '../../utils/rbac';
+import { uiSound } from '../../utils/soundManager';
 
 // All main application navigation pages
 const APP_PAGES = [
@@ -278,6 +279,7 @@ export default function SpotlightSearch({ isOpen, onClose }) {
   const handleSelect = useCallback(
     (item) => {
       if (!item) return;
+      uiSound.navigation();
       onClose();
       navigate(item.route);
     },
@@ -288,6 +290,7 @@ export default function SpotlightSearch({ isOpen, onClose }) {
   const handleKeyDown = (e) => {
     if (e.key === 'Escape') {
       e.preventDefault();
+      uiSound.modal();
       onClose();
       return;
     }
@@ -296,9 +299,11 @@ export default function SpotlightSearch({ isOpen, onClose }) {
 
     if (e.key === 'ArrowDown') {
       e.preventDefault();
+      uiSound.select();
       setSelectedIndex((prev) => (prev < flatItems.length - 1 ? prev + 1 : 0));
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
+      uiSound.select();
       setSelectedIndex((prev) => (prev > 0 ? prev - 1 : flatItems.length - 1));
     } else if (e.key === 'Enter') {
       e.preventDefault();

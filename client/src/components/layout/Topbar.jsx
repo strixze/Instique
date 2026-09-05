@@ -1,18 +1,24 @@
-import { Bell, Calendar, Clock, Menu, Search } from 'lucide-react';
-import { useState, useEffect, useMemo } from 'react';
+import { Bell, Calendar, Clock, Menu, Search, Volume2, VolumeX } from 'lucide-react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useUserStore } from '../../store/userStore';
 import { notificationApi } from '../../api/notification.api';
 import { useNavigate } from 'react-router-dom';
 import UserAvatar from '../ui/UserAvatar';
 import ThemeToggle from '../ui/ThemeToggle';
 import SpotlightSearch from '../ui/SpotlightSearch';
+import SoundSettings from '../ui/SoundSettings';
+import { useUISound } from '../../services/sound';
+import { uiSound } from '../../utils/soundManager';
 
 export default function Topbar({ setMobileOpen }) {
   const user = useUserStore((s) => s.user);
   const navigate = useNavigate();
+  const { enabled, volume } = useUISound();
   const [unreadCount, setUnreadCount] = useState(0);
   const [spotlightOpen, setSpotlightOpen] = useState(false);
+  const [soundMenuOpen, setSoundMenuOpen] = useState(false);
   const [now, setNow] = useState(new Date());
+  const soundMenuRef = useRef(null);
 
   const isMac = useMemo(() => {
     return typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
@@ -60,13 +66,24 @@ export default function Topbar({ setMobileOpen }) {
     hour12: true,
   });
 
+  // Close sound menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (soundMenuRef.current && !soundMenuRef.current.contains(e.target)) {
+        setSoundMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
     <header className="sticky top-0 z-30 flex items-center justify-between h-14 px-4 lg:px-5 bg-white dark:bg-dark-surface border-b border-border dark:border-dark-border">
       {/* Mobile Toggle */}
       <div className="flex items-center gap-3">
         <button
           className="lg:hidden p-1.5 text-secondary dark:text-dark-text-secondary hover:text-deep dark:hover:text-dark-text rounded-lg hover:bg-surface dark:hover:bg-dark-hover transition-colors"
-          onClick={() => setMobileOpen?.(true)}
+          onClick={() => { setMobileOpen?.(true); uiSound.tap(); }}
           title="Open menu"
         >
           <Menu size={18} />
@@ -78,7 +95,7 @@ export default function Topbar({ setMobileOpen }) {
         {/* Global Spotlight Search Trigger */}
         <button
           type="button"
-          onClick={() => setSpotlightOpen(true)}
+          onClick={() => { setSpotlightOpen(true); uiSound.modal(); }}
           className="relative flex items-center justify-between w-52 sm:w-60 lg:w-64 px-3 py-1.5 bg-slate-50 dark:bg-[#101315] hover:bg-slate-100 dark:hover:bg-[#181D20] border border-border/80 dark:border-[#262A2E] rounded-lg text-xs text-secondary dark:text-slate-400 cursor-pointer transition-all group focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
           title="Search students, teachers, classes, pages... (Cmd/Ctrl + K)"
         >
@@ -98,6 +115,28 @@ export default function Topbar({ setMobileOpen }) {
           <span className="text-border dark:text-dark-border-strong">|</span>
           <Clock size={12} className="text-forest dark:text-emerald-400" />
           <span className="font-mono text-deep dark:text-dark-text font-semibold">{timeFormatted}</span>
+        </div>
+
+        {/* UI Sound Controls */}
+        <div className="relative" ref={soundMenuRef}>
+          <button
+            type="button"
+            className="p-1.5 text-secondary dark:text-dark-text-secondary hover:text-deep dark:hover:text-dark-text rounded-lg hover:bg-surface dark:hover:bg-dark-hover transition-colors flex items-center justify-center"
+            onClick={() => { setSoundMenuOpen((prev) => !prev); uiSound.select(); }}
+            title={enabled ? `UI Sounds: ON (${Math.round(volume * 100)}%)` : 'UI Sounds: OFF'}
+          >
+            {enabled && volume > 0 ? (
+              <Volume2 size={17} className="text-forest dark:text-emerald-400" />
+            ) : (
+              <VolumeX size={17} className="text-muted dark:text-dark-text-muted" />
+            )}
+          </button>
+
+          {soundMenuOpen && (
+            <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-dark-elevated border border-border dark:border-dark-border rounded-2xl shadow-xl z-50 animate-scale-in">
+              <SoundSettings compact />
+            </div>
+          )}
         </div>
 
         {/* Theme Toggle */}

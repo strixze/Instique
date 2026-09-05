@@ -1,6 +1,7 @@
 import { ChevronUp, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Button from './Button';
+import { uiSound } from '../../utils/soundManager';
 
 export default function DataTable({
   columns,
@@ -31,6 +32,7 @@ export default function DataTable({
   }, [searchValue, onSearch, debouncedValue]);
 
   const handleSort = (field) => {
+    uiSound.select();
     const order = sortField === field && sortOrder === 'asc' ? 'desc' : 'asc';
     setSortField(field);
     setSortOrder(order);

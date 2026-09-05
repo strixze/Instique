@@ -1,14 +1,20 @@
 import { Sun, Moon } from 'lucide-react';
 import { useThemeStore } from '../../store/useThemeStore';
+import { uiSound } from '../../utils/soundManager';
 
 export default function ThemeToggle() {
   const { theme, toggleTheme } = useThemeStore();
   const isDark = theme === 'dark';
 
+  const handleToggle = () => {
+    uiSound.toggle();
+    toggleTheme();
+  };
+
   const handleKeyDown = (e) => {
     if (e.key === ' ' || e.key === 'Enter') {
       e.preventDefault();
-      toggleTheme();
+      handleToggle();
     }
   };
 
@@ -19,7 +25,7 @@ export default function ThemeToggle() {
       aria-checked={isDark}
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
       tabIndex={0}
-      onClick={toggleTheme}
+      onClick={handleToggle}
       onKeyDown={handleKeyDown}
       className="group relative flex items-center justify-between h-8 px-2 rounded-full border border-slate-200/80 dark:border-[#262A2E] bg-slate-100/90 dark:bg-[#101315] hover:bg-slate-200/70 dark:hover:bg-[#181D20] active:bg-slate-200 dark:active:bg-[#15191C] active:scale-[0.98] transition-all duration-200 ease-in-out cursor-pointer select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[#34D399]/60"
     >

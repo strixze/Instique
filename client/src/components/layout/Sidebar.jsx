@@ -10,6 +10,7 @@ import { useAppStore } from '../../store/appStore';
 import { authApi } from '../../api/auth.api';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { uiSound } from '../../utils/soundManager';
 
 const navSections = {
   school_admin: [
@@ -224,7 +225,10 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                 <NavLink
                   key={item.to}
                   to={item.to}
-                  onClick={() => setMobileOpen?.(false)}
+                  onClick={() => {
+                    uiSound.navigation();
+                    setMobileOpen?.(false);
+                  }}
                   title={sidebarCollapsed ? item.label : undefined}
                   className={({ isActive }) =>
                     `flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-2.5'} px-2 py-2 rounded-lg text-[13px] transition-all duration-150 ${

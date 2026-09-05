@@ -1,3 +1,5 @@
+import { uiSound } from '../../utils/soundManager';
+
 export default function Select({
   label,
   error,
@@ -7,9 +9,17 @@ export default function Select({
   className = '',
   id,
   required,
+  onChange,
   ...props
 }) {
   const selectId = id || (label ? label.toLowerCase().replace(/\s+/g, '-') : undefined);
+
+  const handleChange = (e) => {
+    uiSound.select();
+    if (onChange) {
+      onChange(e);
+    }
+  };
 
   return (
     <div className="space-y-1 w-full text-left">
@@ -21,6 +31,7 @@ export default function Select({
       )}
       <select
         id={selectId}
+        onChange={handleChange}
         className={`w-full px-3 py-2 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-lg text-xs sm:text-sm text-deep dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-forest/20 dark:focus:ring-emerald-500/20 focus:border-forest dark:focus:border-emerald-500 transition-all duration-150 ${
           error ? 'border-danger focus:ring-danger/20 focus:border-danger' : 'hover:border-slate-300 dark:hover:border-dark-border-strong'
         } ${className}`}

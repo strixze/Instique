@@ -5,6 +5,7 @@ import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import Input from '../../components/ui/Input';
+import SoundSettings from '../../components/ui/SoundSettings';
 import { settingApi } from '../../api/setting.api';
 
 export default function Settings() {
@@ -127,6 +128,11 @@ export default function Settings() {
  onChange={(e) => set('academicSettings', 'maxPeriodsPerDay', Number(e.target.value))}
  />
  </div>
+ </Card>
+
+ <Card>
+ <h2 className="text-lg font-semibold text-deep mb-4">UI Interaction Sounds</h2>
+ <SoundSettings />
  </Card>
 
  <Card>
