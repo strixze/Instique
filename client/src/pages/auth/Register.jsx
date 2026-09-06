@@ -20,7 +20,7 @@ export default function Register() {
     setLoading(true);
     try {
       const res = await authApi.register({ name, email, password, role });
-      setUser(res.data.user);
+      setUser(res.data.user, res.data.accessToken, res.data.refreshToken);
       toast.success('Registration successful! Welcome to Instique.');
       navigate('/dashboard');
     } catch (err) {

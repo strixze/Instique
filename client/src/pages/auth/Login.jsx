@@ -20,7 +20,7 @@ export default function Login() {
     setLoading(true);
     try {
       const res = await authApi.login({ email, password });
-      setUser(res.data.user);
+      setUser(res.data.user, res.data.accessToken, res.data.refreshToken);
       toast.success('Welcome back!');
       navigate('/dashboard');
     } catch (err) {

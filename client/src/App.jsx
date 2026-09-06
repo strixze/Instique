@@ -20,15 +20,18 @@ export default function App() {
 
   useEffect(() => {
     const checkAuth = async () => {
+      const { user, token } = useUserStore.getState();
+      if (!user && !token) return;
+
       try {
         const res = await authApi.getProfile();
         setUser(res.data);
       } catch {
-        logout();
+        // If refresh fails in axios interceptor, user will be logged out cleanly
       }
     };
     checkAuth();
-  }, []);
+  }, [setUser]);
 
   return (
     <QueryClientProvider client={queryClient}>

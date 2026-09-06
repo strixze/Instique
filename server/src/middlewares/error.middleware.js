@@ -8,13 +8,42 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const logFilePath = path.join(__dirname, '../../errorlogs');
 
+const SENSITIVE_KEYS = new Set([
+  'password',
+  'currentpassword',
+  'newpassword',
+  'confirmpassword',
+  'token',
+  'accesstoken',
+  'refreshtoken',
+  'authorization',
+  'secret',
+  'apikey',
+]);
+
+const sanitizeData = (data) => {
+  if (!data || typeof data !== 'object') return data;
+  if (Array.isArray(data)) return data.map(sanitizeData);
+  const clean = {};
+  for (const [key, value] of Object.entries(data)) {
+    if (SENSITIVE_KEYS.has(key.toLowerCase()) || key.toLowerCase().includes('password')) {
+      clean[key] = '[REDACTED]';
+    } else if (typeof value === 'object' && value !== null) {
+      clean[key] = sanitizeData(value);
+    } else {
+      clean[key] = value;
+    }
+  }
+  return clean;
+};
+
 const logToFile = (err, req) => {
   try {
     const timestamp = new Date().toISOString();
     const method = req?.method || 'N/A';
     const url = req?.originalUrl || req?.url || 'N/A';
-    const body = req?.body ? JSON.stringify(req.body) : '';
-    const query = req?.query ? JSON.stringify(req.query) : '';
+    const body = req?.body ? JSON.stringify(sanitizeData(req.body)) : '';
+    const query = req?.query ? JSON.stringify(sanitizeData(req.query)) : '';
     const userId = req?.user?._id ? req.user._id.toString() : 'Unauthenticated';
 
     let errorDetails = '';
