@@ -12,7 +12,7 @@ const app = express();
 const httpServer = createServer(app);
 
 // app.use(helmet());
-app.use(cors({ origin: [env.CLIENT_URL, "http://localhost:5173"], methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], credentials: true }));
+app.use(cors({ origin: [env.CLIENT_URL, "http://localhost:5173", "https://instique.vercel.app"], methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], credentials: true }));
 app.use(morgan('dev'));
 // app.use(generalLimiter);
 app.use(express.json({ limit: '10mb' }));

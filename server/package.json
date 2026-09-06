@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "nodemon src/index.js",
     "start": "node src/index.js",
+    
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --no-cache --detectOpenHandles --forceExit",
     "test:unit": "node --experimental-vm-modules node_modules/jest/bin/jest.js --testPathPatterns unit --no-cache --detectOpenHandles --forceExit",
     "test:integration": "node --experimental-vm-modules node_modules/jest/bin/jest.js --testPathPatterns integration --no-cache --detectOpenHandles --forceExit",
