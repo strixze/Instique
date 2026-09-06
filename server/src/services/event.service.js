@@ -29,6 +29,8 @@ export const getEvents = async (schoolId, options = {}) => {
 
   if (type && type !== 'all') {
     filter.type = type;
+  } else {
+    filter.type = { $ne: 'ptm' };
   }
 
   if (status && status !== 'all') {

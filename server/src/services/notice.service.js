@@ -1,8 +1,16 @@
 import Notice from '../models/Notice.js';
+import Setting from '../models/Setting.js';
 import ApiError from '../utils/ApiError.js';
 import { paginate } from '../utils/pagination.js';
 
-export const createNotice = async (schoolId, data, userId) => {
+export const createNotice = async (schoolId, data, userId, userRole = null) => {
+  if (userRole === 'teacher') {
+    const setting = await Setting.findOne({ schoolId }).select('visibility communication');
+    if (setting?.visibility?.teacherPolicy?.canCreateNotices === false || 
+        setting?.communication?.notices?.whoCanCreate === 'admin_only') {
+      throw new ApiError(403, 'Posting bulletins and notices is not permitted for teachers by school policy');
+    }
+  }
   const notice = await Notice.create({ ...data, schoolId, createdBy: userId });
   return notice;
 };

@@ -1,9 +1,11 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import {
   Calendar, Check, X, Clock, AlertCircle, CheckCircle, XCircle, Users,
   Search, Filter, RefreshCw, User, BookOpen, MapPin, Award, ArrowRight,
-  ShieldAlert, ChevronRight, CheckSquare, Eye, Edit3, ClipboardList, ChevronDown,
+  ShieldAlert, ChevronRight, CheckSquare, Eye, Edit3, ClipboardList, ChevronDown, FileText,
+  GraduationCap, Paperclip, Phone, ExternalLink, ChevronLeft,
 } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 import Card from '../../components/ui/Card';
@@ -33,7 +35,28 @@ const leaveTypeLabels = {
 };
 
 export default function Leaves() {
-  const [activeTab, setActiveTab] = useState('pending'); // 'pending' | 'approved' | 'history' | 'substitutions'
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const initialCategory = tabParam === 'students' ? 'students' : tabParam === 'substitutions' ? 'substitutions' : 'teachers';
+  const [categoryTab, setCategoryTab] = useState(initialCategory); // 'teachers' | 'students' | 'substitutions'
+  const [activeTab, setActiveTab] = useState('pending'); // 'pending' | 'approved' | 'history'
+
+  // Summary counts for badges
+  const [counts, setCounts] = useState({
+    pendingTeachers: 0,
+    pendingStudents: 0,
+    approvedTeachers: 0,
+    approvedStudents: 0,
+  });
+
+  // Switch category
+  const handleSwitchCategory = (cat) => {
+    setCategoryTab(cat);
+    setPage(1);
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set('tab', cat);
+    setSearchParams(nextParams, { replace: true });
+  };
 
   // Data State
   const [leaves, setLeaves] = useState([]);
@@ -72,6 +95,30 @@ export default function Leaves() {
   // --- VIEW DETAILS MODAL STATE ---
   const [selectedLeaveDetails, setSelectedLeaveDetails] = useState(null);
 
+  // Fetch KPI Counts
+  const fetchCounts = useCallback(async () => {
+    try {
+      const [pT, pS, aT, aS] = await Promise.all([
+        leaveApi.getAll({ role: 'teacher', status: 'pending', limit: 1 }),
+        leaveApi.getAll({ role: 'student', status: 'pending', limit: 1 }),
+        leaveApi.getAll({ role: 'teacher', status: 'approved', limit: 1 }),
+        leaveApi.getAll({ role: 'student', status: 'approved', limit: 1 }),
+      ]);
+      setCounts({
+        pendingTeachers: pT.meta?.total || 0,
+        pendingStudents: pS.meta?.total || 0,
+        approvedTeachers: aT.meta?.total || 0,
+        approvedStudents: aS.meta?.total || 0,
+      });
+    } catch {
+      // silently ignore
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCounts();
+  }, [fetchCounts]);
+
   // Fetch Leaves
   const fetchLeaves = useCallback(async () => {
     setLoading(true);
@@ -83,6 +130,12 @@ export default function Leaves() {
 
       if (filterType !== 'all') params.type = filterType;
 
+      if (categoryTab === 'teachers') {
+        params.role = 'teacher';
+      } else if (categoryTab === 'students') {
+        params.role = 'student';
+      }
+
       const res = await leaveApi.getAll(params);
       setLeaves(res.data || []);
       setLeavesMeta(res.meta || null);
@@ -91,7 +144,7 @@ export default function Leaves() {
     } finally {
       setLoading(false);
     }
-  }, [page, activeTab, filterType]);
+  }, [page, activeTab, filterType, categoryTab]);
 
   // Fetch Substitutions
   const fetchSubstitutions = useCallback(async () => {
@@ -110,14 +163,30 @@ export default function Leaves() {
   }, [subsPage, subsStatusFilter]);
 
   useEffect(() => {
-    if (activeTab === 'substitutions') {
+    if (categoryTab === 'substitutions') {
       fetchSubstitutions();
     } else {
       fetchLeaves();
     }
-  }, [activeTab, fetchLeaves, fetchSubstitutions]);
+  }, [categoryTab, activeTab, fetchLeaves, fetchSubstitutions]);
 
-  // --- OPEN APPROVAL WORKFLOW MODAL (Auto-fetches affected lectures & free teacher lists) ---
+  // Direct Student Leave Approval
+  const handleDirectApproveStudent = async (leave) => {
+    const studentName = leave.student ? `${leave.student.firstName} ${leave.student.lastName}` : 'this student';
+    if (!window.confirm(`Approve leave request for ${studentName}? Student attendance for the leave dates will be automatically marked as 'Leave'.`)) {
+      return;
+    }
+    try {
+      await leaveApi.approve(leave._id);
+      toast.success(`Leave approved for ${studentName}. Attendance updated.`);
+      fetchLeaves();
+      fetchCounts();
+    } catch (err) {
+      toast.error(err?.message || 'Failed to approve student leave');
+    }
+  };
+
+  // --- OPEN APPROVAL WORKFLOW MODAL (For Teacher Leaves: Affected Lectures & Free Teacher Allocation) ---
   const handleStartApproval = async (leave) => {
     setApprovalModalLeave(leave);
     setSelectedSubstitutes({});
@@ -226,10 +295,18 @@ export default function Leaves() {
   const filteredLeaves = leaves.filter((l) => {
     if (!searchTerm) return true;
     const name = l.requester?.name || '';
+    const studentName = l.student ? `${l.student.firstName} ${l.student.lastName}` : '';
+    const parentName = l.parent ? `${l.parent.firstName} ${l.parent.lastName}` : '';
     const reason = l.reason || '';
     const type = l.type || '';
     const search = searchTerm.toLowerCase();
-    return name.toLowerCase().includes(search) || reason.toLowerCase().includes(search) || type.toLowerCase().includes(search);
+    return (
+      name.toLowerCase().includes(search) ||
+      studentName.toLowerCase().includes(search) ||
+      parentName.toLowerCase().includes(search) ||
+      reason.toLowerCase().includes(search) ||
+      type.toLowerCase().includes(search)
+    );
   });
 
   const assignedCount = Object.keys(selectedSubstitutes).length;
@@ -239,131 +316,283 @@ export default function Leaves() {
     <div className="space-y-6 pb-12">
       <PageHeader
         title="Leave & Substitution Management"
-        description="Review teacher leave applications, resolve affected lecture coverage, and assign substitute teachers prior to approval"
+        description="Review teacher leave applications, lecture substitutions, and student leave requests"
         action={
-          <Button variant="outline" size="sm" onClick={() => { fetchLeaves(); fetchSubstitutions(); }}>
+          <Button variant="outline" size="sm" onClick={() => { fetchLeaves(); fetchSubstitutions(); fetchCounts(); }}>
             <RefreshCw size={14} className="mr-1.5" /> Refresh Data
           </Button>
         }
       />
 
-      {/* Summary KPI Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-card flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-500">
-            <AlertCircle size={20} />
-          </div>
-          <div>
-            <p className="text-xs text-muted dark:text-dark-text-muted font-medium uppercase">Pending Leaves</p>
-            <p className="text-xl font-bold text-deep dark:text-dark-text">
-              {leaves.filter((l) => l.status === 'pending').length}
-            </p>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-card flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-500">
-            <CheckCircle size={20} />
-          </div>
-          <div>
-            <p className="text-xs text-muted dark:text-dark-text-muted font-medium uppercase">Approved Leaves</p>
-            <p className="text-xl font-bold text-deep dark:text-dark-text">
-              {leaves.filter((l) => l.status === 'approved').length}
-            </p>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-card flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-rose-500/10 text-rose-500">
-            <XCircle size={20} />
-          </div>
-          <div>
-            <p className="text-xs text-muted dark:text-dark-text-muted font-medium uppercase">Rejected / Cancelled</p>
-            <p className="text-xl font-bold text-deep dark:text-dark-text">
-              {leaves.filter((l) => l.status === 'rejected' || l.status === 'cancelled').length}
-            </p>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-card flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-500">
-            <Users size={20} />
-          </div>
-          <div>
-            <p className="text-xs text-muted dark:text-dark-text-muted font-medium uppercase">Total Substitutions</p>
-            <p className="text-xl font-bold text-deep dark:text-dark-text">{substitutions.length}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Tabs Navigation */}
-      <div className="flex border-b border-border dark:border-dark-border">
+      {/* Primary Category Switcher: Teachers vs Students vs Substitutions */}
+      <div className="flex flex-wrap items-center gap-2 p-1.5 bg-surface dark:bg-dark-elevated rounded-2xl border border-border dark:border-dark-border w-fit max-w-full">
         <button
-          onClick={() => { setActiveTab('pending'); setPage(1); }}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all ${
-            activeTab === 'pending'
-              ? 'border-forest text-forest dark:border-emerald-400 dark:text-emerald-400'
-              : 'border-transparent text-muted dark:text-dark-text-muted hover:text-deep dark:hover:text-dark-text'
+          type="button"
+          onClick={() => handleSwitchCategory('teachers')}
+          className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+            categoryTab === 'teachers'
+              ? 'bg-white dark:bg-dark-card text-forest dark:text-emerald-400 shadow-sm'
+              : 'text-muted dark:text-dark-text-muted hover:text-deep dark:hover:text-dark-text'
           }`}
         >
-          <AlertCircle size={15} /> Pending Requests
+          <User size={16} />
+          <span>Teachers Leave Requests</span>
+          {counts.pendingTeachers > 0 && (
+            <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400">
+              {counts.pendingTeachers} pending
+            </span>
+          )}
         </button>
 
         <button
-          onClick={() => { setActiveTab('approved'); setPage(1); }}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all ${
-            activeTab === 'approved'
-              ? 'border-forest text-forest dark:border-emerald-400 dark:text-emerald-400'
-              : 'border-transparent text-muted dark:text-dark-text-muted hover:text-deep dark:hover:text-dark-text'
+          type="button"
+          onClick={() => handleSwitchCategory('students')}
+          className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+            categoryTab === 'students'
+              ? 'bg-white dark:bg-dark-card text-forest dark:text-emerald-400 shadow-sm'
+              : 'text-muted dark:text-dark-text-muted hover:text-deep dark:hover:text-dark-text'
           }`}
         >
-          <CheckCircle size={15} /> Approved Leaves
+          <GraduationCap size={16} />
+          <span>Students Leave Requests</span>
+          {counts.pendingStudents > 0 && (
+            <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400">
+              {counts.pendingStudents} pending
+            </span>
+          )}
         </button>
 
         <button
-          onClick={() => { setActiveTab('history'); setPage(1); }}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all ${
-            activeTab === 'history'
-              ? 'border-forest text-forest dark:border-emerald-400 dark:text-emerald-400'
-              : 'border-transparent text-muted dark:text-dark-text-muted hover:text-deep dark:hover:text-dark-text'
+          type="button"
+          onClick={() => handleSwitchCategory('substitutions')}
+          className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+            categoryTab === 'substitutions'
+              ? 'bg-white dark:bg-dark-card text-forest dark:text-emerald-400 shadow-sm'
+              : 'text-muted dark:text-dark-text-muted hover:text-deep dark:hover:text-dark-text'
           }`}
         >
-          <Calendar size={15} /> All History
-        </button>
-
-        <button
-          onClick={() => { setActiveTab('substitutions'); setSubsPage(1); }}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all ${
-            activeTab === 'substitutions'
-              ? 'border-forest text-forest dark:border-emerald-400 dark:text-emerald-400'
-              : 'border-transparent text-muted dark:text-dark-text-muted hover:text-deep dark:hover:text-dark-text'
-          }`}
-        >
-          <ClipboardList size={15} /> Substitutions Coverage Manager
+          <ClipboardList size={16} />
+          <span>Substitution Coverage</span>
+          {substitutions.length > 0 && (
+            <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-blue-500/20 text-blue-600 dark:text-blue-400">
+              {substitutions.length}
+            </span>
+          )}
         </button>
       </div>
 
-      {/* LEAVES TABLE (TAB 1, 2, 3) */}
-      {activeTab !== 'substitutions' && (
+      {/* Teachers KPI Cards */}
+      {categoryTab === 'teachers' && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-card flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-500">
+              <AlertCircle size={20} />
+            </div>
+            <div>
+              <p className="text-xs text-muted dark:text-dark-text-muted font-medium uppercase">Pending Teacher Leaves</p>
+              <p className="text-xl font-bold text-deep dark:text-dark-text">{counts.pendingTeachers}</p>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-card flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-500">
+              <CheckCircle size={20} />
+            </div>
+            <div>
+              <p className="text-xs text-muted dark:text-dark-text-muted font-medium uppercase">Approved Teacher Leaves</p>
+              <p className="text-xl font-bold text-deep dark:text-dark-text">{counts.approvedTeachers}</p>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-card flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-500">
+              <ClipboardList size={20} />
+            </div>
+            <div>
+              <p className="text-xs text-muted dark:text-dark-text-muted font-medium uppercase">Total Substitutions</p>
+              <p className="text-xl font-bold text-deep dark:text-dark-text">{substitutions.length}</p>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-card flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-500">
+              <Users size={20} />
+            </div>
+            <div>
+              <p className="text-xs text-muted dark:text-dark-text-muted font-medium uppercase">Total Teacher Records</p>
+              <p className="text-xl font-bold text-deep dark:text-dark-text">{leavesMeta?.total || leaves.length}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Students KPI Cards */}
+      {categoryTab === 'students' && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-card flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-500">
+              <AlertCircle size={20} />
+            </div>
+            <div>
+              <p className="text-xs text-muted dark:text-dark-text-muted font-medium uppercase">Pending Student Leaves</p>
+              <p className="text-xl font-bold text-deep dark:text-dark-text">{counts.pendingStudents}</p>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-card flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-500">
+              <CheckCircle size={20} />
+            </div>
+            <div>
+              <p className="text-xs text-muted dark:text-dark-text-muted font-medium uppercase">Approved Student Leaves</p>
+              <p className="text-xl font-bold text-deep dark:text-dark-text">{counts.approvedStudents}</p>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-card flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-rose-500/10 text-rose-500">
+              <XCircle size={20} />
+            </div>
+            <div>
+              <p className="text-xs text-muted dark:text-dark-text-muted font-medium uppercase">Rejected / Cancelled</p>
+              <p className="text-xl font-bold text-deep dark:text-dark-text">
+                {leaves.filter((l) => l.status === 'rejected' || l.status === 'cancelled').length}
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-card flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-500">
+              <GraduationCap size={20} />
+            </div>
+            <div>
+              <p className="text-xs text-muted dark:text-dark-text-muted font-medium uppercase">Total Student Records</p>
+              <p className="text-xl font-bold text-deep dark:text-dark-text">{leavesMeta?.total || leaves.length}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Substitutions KPI Cards */}
+      {categoryTab === 'substitutions' && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-card flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-500">
+              <ClipboardList size={20} />
+            </div>
+            <div>
+              <p className="text-xs text-muted dark:text-dark-text-muted font-medium uppercase">Total Substitutions</p>
+              <p className="text-xl font-bold text-deep dark:text-dark-text">{subsMeta?.total || substitutions.length}</p>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-card flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-500">
+              <CheckCircle size={20} />
+            </div>
+            <div>
+              <p className="text-xs text-muted dark:text-dark-text-muted font-medium uppercase">Teacher Assigned</p>
+              <p className="text-xl font-bold text-deep dark:text-dark-text">
+                {substitutions.filter((s) => s.substituteTeacher).length}
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-card flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-500">
+              <AlertCircle size={20} />
+            </div>
+            <div>
+              <p className="text-xs text-muted dark:text-dark-text-muted font-medium uppercase">Unassigned Coverage</p>
+              <p className="text-xl font-bold text-deep dark:text-dark-text">
+                {substitutions.filter((s) => !s.substituteTeacher && s.status === 'assigned').length}
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-card flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-500">
+              <CheckSquare size={20} />
+            </div>
+            <div>
+              <p className="text-xs text-muted dark:text-dark-text-muted font-medium uppercase">Completed</p>
+              <p className="text-xl font-bold text-deep dark:text-dark-text">
+                {substitutions.filter((s) => s.status === 'completed').length}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Secondary Status Tabs (Pending, Approved, History) */}
+      {categoryTab !== 'substitutions' && (
+        <div className="flex border-b border-border dark:border-dark-border">
+          <button
+            onClick={() => { setActiveTab('pending'); setPage(1); }}
+            className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all ${
+              activeTab === 'pending'
+                ? 'border-forest text-forest dark:border-emerald-400 dark:text-emerald-400'
+                : 'border-transparent text-muted dark:text-dark-text-muted hover:text-deep dark:hover:text-dark-text'
+            }`}
+          >
+            <AlertCircle size={15} />
+            <span>Pending Requests</span>
+            {(categoryTab === 'teachers' ? counts.pendingTeachers : counts.pendingStudents) > 0 && (
+              <span className="px-1.5 py-0.2 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-600 dark:text-amber-400">
+                {categoryTab === 'teachers' ? counts.pendingTeachers : counts.pendingStudents}
+              </span>
+            )}
+          </button>
+
+          <button
+            onClick={() => { setActiveTab('approved'); setPage(1); }}
+            className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all ${
+              activeTab === 'approved'
+                ? 'border-forest text-forest dark:border-emerald-400 dark:text-emerald-400'
+                : 'border-transparent text-muted dark:text-dark-text-muted hover:text-deep dark:hover:text-dark-text'
+            }`}
+          >
+            <CheckCircle size={15} />
+            <span>Approved Leaves</span>
+          </button>
+
+          <button
+            onClick={() => { setActiveTab('history'); setPage(1); }}
+            className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all ${
+              activeTab === 'history'
+                ? 'border-forest text-forest dark:border-emerald-400 dark:text-emerald-400'
+                : 'border-transparent text-muted dark:text-dark-text-muted hover:text-deep dark:hover:text-dark-text'
+            }`}
+          >
+            <Calendar size={15} />
+            <span>All History</span>
+          </button>
+        </div>
+      )}
+
+      {/* ======================================================================= */}
+      {/* 1. TEACHER LEAVES TABLE (categoryTab === 'teachers')                    */}
+      {/* ======================================================================= */}
+      {categoryTab === 'teachers' && (
         <Card padding={false}>
           <div className="p-4 border-b border-border dark:border-dark-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="relative flex-1 max-w-sm">
               <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted dark:text-dark-text-muted" />
               <input
                 type="text"
-                placeholder="Search requester, reason, type..."
+                placeholder="Search teacher, reason, type..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-9 pr-3 py-1.5 bg-white dark:bg-dark-elevated border border-border dark:border-dark-border rounded-lg text-sm text-deep dark:text-dark-text placeholder-muted dark:placeholder-dark-text-muted focus:outline-none focus:ring-2 focus:ring-forest/30 dark:focus:ring-emerald-500/30"
               />
             </div>
 
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 flex-wrap">
               <Filter size={14} className="text-muted dark:text-dark-text-muted" />
-              {['all', 'sick', 'casual', 'personal', 'emergency'].map((t) => (
+              {['all', 'sick', 'casual', 'personal', 'emergency', 'earned'].map((t) => (
                 <button
                   key={t}
-                  onClick={() => setFilterType(t)}
+                  onClick={() => { setFilterType(t); setPage(1); }}
                   className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
                     filterType === t
                       ? 'bg-sage dark:bg-emerald-500/20 text-forest dark:text-emerald-400 font-bold'
@@ -380,8 +609,7 @@ export default function Leaves() {
             <table className="w-full text-sm border-collapse">
               <thead>
                 <tr className="bg-surface/80 dark:bg-dark-elevated border-b border-border dark:border-dark-border">
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted dark:text-dark-text-secondary uppercase">Requester</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted dark:text-dark-text-secondary uppercase">Role</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted dark:text-dark-text-secondary uppercase">Teacher</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-muted dark:text-dark-text-secondary uppercase">Leave Type</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-muted dark:text-dark-text-secondary uppercase">Date Range</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-muted dark:text-dark-text-secondary uppercase min-w-[180px]">Reason</th>
@@ -392,40 +620,49 @@ export default function Leaves() {
               <tbody className="divide-y divide-border/40 dark:divide-dark-border bg-white dark:bg-dark-card">
                 {loading ? (
                   <tr>
-                    <td colSpan={7} className="px-4 py-12 text-center text-muted dark:text-dark-text-muted">
-                      Loading leave applications...
+                    <td colSpan={6} className="px-4 py-12 text-center text-muted dark:text-dark-text-muted">
+                      Loading teacher leave requests...
                     </td>
                   </tr>
                 ) : filteredLeaves.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-4 py-16 text-center text-muted dark:text-dark-text-muted">
-                      No leave requests found for this filter.
+                    <td colSpan={6} className="px-4 py-16 text-center text-muted dark:text-dark-text-muted">
+                      No teacher leave requests found for this filter.
                     </td>
                   </tr>
                 ) : (
                   filteredLeaves.map((row) => (
                     <tr key={row._id} className="hover:bg-surface/50 dark:hover:bg-dark-hover transition-colors">
-                      <td className="px-4 py-3 font-semibold text-deep dark:text-dark-text">
-                        {row.requester?.name || '—'}
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-full bg-forest/10 dark:bg-emerald-500/20 text-forest dark:text-emerald-400 flex items-center justify-center font-bold text-xs">
+                            {row.requester?.name ? row.requester.name.charAt(0).toUpperCase() : 'T'}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-deep dark:text-dark-text text-sm">
+                              {row.requester?.name || '—'}
+                            </p>
+                            <p className="text-[11px] text-muted dark:text-dark-text-muted">
+                              {row.requester?.email || 'Teacher'}
+                            </p>
+                          </div>
+                        </div>
                       </td>
                       <td className="px-4 py-3">
-                        <Badge color={row.requesterModel === 'Teacher' ? 'info' : 'gray'}>
-                          {row.requesterModel || 'User'}
-                        </Badge>
-                      </td>
-                      <td className="px-4 py-3 font-medium text-deep dark:text-dark-text text-xs capitalize">
-                        {leaveTypeLabels[row.type] || row.type}
+                        <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-surface dark:bg-dark-elevated text-deep dark:text-dark-text border border-border dark:border-dark-border capitalize">
+                          {leaveTypeLabels[row.type] || row.type}
+                        </span>
                       </td>
                       <td className="px-4 py-3 text-xs text-deep dark:text-dark-text">
-                        <div>{new Date(row.startDate).toLocaleDateString()} – {new Date(row.endDate).toLocaleDateString()}</div>
+                        <div className="font-medium">{new Date(row.startDate).toLocaleDateString()} – {new Date(row.endDate).toLocaleDateString()}</div>
                         {row.isPartialDay && (
-                          <span className="text-[10px] text-blue-400 font-semibold">
+                          <span className="text-[10px] text-blue-500 dark:text-blue-400 font-semibold block mt-0.5">
                             Partial Day ({row.startTime} - {row.endTime})
                           </span>
                         )}
                       </td>
                       <td className="px-4 py-3 text-xs text-muted dark:text-dark-text-muted">
-                        <p className="line-clamp-2">{row.reason}</p>
+                        <p className="line-clamp-2 max-w-xs">{row.reason}</p>
                       </td>
                       <td className="px-4 py-3 text-center">
                         <Badge color={statusColors[row.status] || 'gray'}>
@@ -448,9 +685,9 @@ export default function Leaves() {
                               <Button
                                 size="sm"
                                 onClick={() => handleStartApproval(row)}
-                                className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
+                                className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
                               >
-                                Approve Leave
+                                <Check size={13} className="mr-1" /> Approve & Cover
                               </Button>
                               <Button
                                 variant="outline"
@@ -470,22 +707,268 @@ export default function Leaves() {
               </tbody>
             </table>
           </div>
+
+          {leavesMeta && leavesMeta.totalPages > 1 && (
+            <div className="p-3 border-t border-border dark:border-dark-border flex items-center justify-between text-xs text-muted dark:text-dark-text-muted">
+              <span>Showing page {leavesMeta.page} of {leavesMeta.totalPages} ({leavesMeta.total} total)</span>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={!leavesMeta.hasPrevPage || loading}
+                  onClick={() => setPage((p) => p - 1)}
+                  className="px-2 py-1 text-xs"
+                >
+                  <ChevronLeft size={14} />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={!leavesMeta.hasNextPage || loading}
+                  onClick={() => setPage((p) => p + 1)}
+                  className="px-2 py-1 text-xs"
+                >
+                  <ChevronRight size={14} />
+                </Button>
+              </div>
+            </div>
+          )}
         </Card>
       )}
 
-      {/* SUBSTITUTIONS MANAGER TAB */}
-      {activeTab === 'substitutions' && (
+      {/* ======================================================================= */}
+      {/* 2. STUDENT LEAVES TABLE (categoryTab === 'students')                   */}
+      {/* ======================================================================= */}
+      {categoryTab === 'students' && (
+        <Card padding={false}>
+          <div className="p-4 border-b border-border dark:border-dark-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="relative flex-1 max-w-sm">
+              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted dark:text-dark-text-muted" />
+              <input
+                type="text"
+                placeholder="Search student, parent, reason, class..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-9 pr-3 py-1.5 bg-white dark:bg-dark-elevated border border-border dark:border-dark-border rounded-lg text-sm text-deep dark:text-dark-text placeholder-muted dark:placeholder-dark-text-muted focus:outline-none focus:ring-2 focus:ring-forest/30 dark:focus:ring-emerald-500/30"
+              />
+            </div>
+
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <Filter size={14} className="text-muted dark:text-dark-text-muted" />
+              {['all', 'sick', 'casual', 'emergency', 'other'].map((t) => (
+                <button
+                  key={t}
+                  onClick={() => { setFilterType(t); setPage(1); }}
+                  className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
+                    filterType === t
+                      ? 'bg-sage dark:bg-emerald-500/20 text-forest dark:text-emerald-400 font-bold'
+                      : 'text-muted dark:text-dark-text-muted hover:bg-surface dark:hover:bg-dark-hover'
+                  }`}
+                >
+                  {t === 'all' ? 'All Types' : leaveTypeLabels[t] || t}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="bg-surface/80 dark:bg-dark-elevated border-b border-border dark:border-dark-border">
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted dark:text-dark-text-secondary uppercase">Student</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted dark:text-dark-text-secondary uppercase">Class & Section</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted dark:text-dark-text-secondary uppercase">Parent / Contact</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted dark:text-dark-text-secondary uppercase">Class Teacher</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted dark:text-dark-text-secondary uppercase">Leave Type</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted dark:text-dark-text-secondary uppercase">Dates</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted dark:text-dark-text-secondary uppercase min-w-[150px]">Reason & Proof</th>
+                  <th className="px-4 py-3 text-center text-xs font-semibold text-muted dark:text-dark-text-secondary uppercase">Status</th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold text-muted dark:text-dark-text-secondary uppercase">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/40 dark:divide-dark-border bg-white dark:bg-dark-card">
+                {loading ? (
+                  <tr>
+                    <td colSpan={9} className="px-4 py-12 text-center text-muted dark:text-dark-text-muted">
+                      Loading student leave requests...
+                    </td>
+                  </tr>
+                ) : filteredLeaves.length === 0 ? (
+                  <tr>
+                    <td colSpan={9} className="px-4 py-16 text-center text-muted dark:text-dark-text-muted">
+                      No student leave requests found for this filter.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredLeaves.map((row) => (
+                    <tr key={row._id} className="hover:bg-surface/50 dark:hover:bg-dark-hover transition-colors">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-xs">
+                            {row.student?.firstName ? row.student.firstName.charAt(0).toUpperCase() : 'S'}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-deep dark:text-dark-text text-sm">
+                              {row.student ? `${row.student.firstName} ${row.student.lastName}` : (row.requester?.name || '—')}
+                            </p>
+                            {row.student?.admissionNo && (
+                              <p className="text-[11px] text-muted dark:text-dark-text-muted">
+                                Adm: {row.student.admissionNo}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+
+                      <td className="px-4 py-3 text-xs font-medium text-deep dark:text-dark-text">
+                        {row.student?.currentClass?.name ? (
+                          <span>
+                            Class {row.student.currentClass.name} {row.student.currentSection?.name ? `- ${row.student.currentSection.name}` : ''}
+                            {row.student.rollNo ? ` (Roll: ${row.student.rollNo})` : ''}
+                          </span>
+                        ) : (
+                          <span className="text-muted dark:text-dark-text-muted">—</span>
+                        )}
+                      </td>
+
+                      <td className="px-4 py-3 text-xs">
+                        <p className="font-semibold text-deep dark:text-dark-text">
+                          {row.parent ? `${row.parent.firstName} ${row.parent.lastName}` : (row.requester?.name || '—')}
+                        </p>
+                        {row.parent?.contact?.phone && (
+                          <p className="text-[11px] text-muted dark:text-dark-text-muted flex items-center gap-1 mt-0.5">
+                            <Phone size={11} /> {row.parent.contact.phone}
+                          </p>
+                        )}
+                      </td>
+
+                      <td className="px-4 py-3 text-xs">
+                        {row.approverTeacher ? (
+                          <span className="font-medium text-deep dark:text-dark-text">
+                            {row.approverTeacher.firstName} {row.approverTeacher.lastName}
+                          </span>
+                        ) : (
+                          <span className="text-muted dark:text-dark-text-muted italic">Not Assigned</span>
+                        )}
+                      </td>
+
+                      <td className="px-4 py-3">
+                        <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-surface dark:bg-dark-elevated text-deep dark:text-dark-text border border-border dark:border-dark-border capitalize">
+                          {leaveTypeLabels[row.type] || row.type}
+                        </span>
+                      </td>
+
+                      <td className="px-4 py-3 text-xs text-deep dark:text-dark-text">
+                        <div className="font-medium">{new Date(row.startDate).toLocaleDateString()} – {new Date(row.endDate).toLocaleDateString()}</div>
+                        {row.isPartialDay && (
+                          <span className="text-[10px] text-blue-500 dark:text-blue-400 font-semibold block mt-0.5">
+                            Partial ({row.startTime} - {row.endTime})
+                          </span>
+                        )}
+                      </td>
+
+                      <td className="px-4 py-3 text-xs text-muted dark:text-dark-text-muted">
+                        <p className="line-clamp-2 max-w-xs">{row.reason}</p>
+                        {row.document?.url && (
+                          <a
+                            href={row.document.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1 text-[11px] text-forest dark:text-emerald-400 font-semibold mt-1 hover:underline"
+                          >
+                            <Paperclip size={11} /> Attachment
+                          </a>
+                        )}
+                      </td>
+
+                      <td className="px-4 py-3 text-center">
+                        <Badge color={statusColors[row.status] || 'gray'}>
+                          {row.status}
+                        </Badge>
+                      </td>
+
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleOpenDetails(row._id)}
+                            className="text-xs"
+                          >
+                            <Eye size={14} className="mr-1" /> View
+                          </Button>
+
+                          {row.status === 'pending' && (
+                            <>
+                              <Button
+                                size="sm"
+                                onClick={() => handleDirectApproveStudent(row)}
+                                className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
+                              >
+                                <Check size={13} className="mr-1" /> Approve
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => { setRejectOpenLeave(row); setRejectionReason(''); }}
+                                className="text-xs text-rose-500 border-rose-500/30 hover:bg-rose-500/10"
+                              >
+                                Reject
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {leavesMeta && leavesMeta.totalPages > 1 && (
+            <div className="p-3 border-t border-border dark:border-dark-border flex items-center justify-between text-xs text-muted dark:text-dark-text-muted">
+              <span>Showing page {leavesMeta.page} of {leavesMeta.totalPages} ({leavesMeta.total} total)</span>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={!leavesMeta.hasPrevPage || loading}
+                  onClick={() => setPage((p) => p - 1)}
+                  className="px-2 py-1 text-xs"
+                >
+                  <ChevronLeft size={14} />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={!leavesMeta.hasNextPage || loading}
+                  onClick={() => setPage((p) => p + 1)}
+                  className="px-2 py-1 text-xs"
+                >
+                  <ChevronRight size={14} />
+                </Button>
+              </div>
+            </div>
+          )}
+        </Card>
+      )}
+
+      {/* ======================================================================= */}
+      {/* 3. SUBSTITUTIONS MANAGER TAB (categoryTab === 'substitutions')          */}
+      {/* ======================================================================= */}
+      {categoryTab === 'substitutions' && (
         <Card padding={false}>
           <div className="p-4 border-b border-border dark:border-dark-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <h3 className="text-sm font-bold text-deep dark:text-dark-text">
               Active & Historical Substitution Records
             </h3>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 flex-wrap">
               <Filter size={14} className="text-muted dark:text-dark-text-muted" />
               {['all', 'assigned', 'completed', 'cancelled'].map((st) => (
                 <button
                   key={st}
-                  onClick={() => setSubsStatusFilter(st)}
+                  onClick={() => { setSubsStatusFilter(st); setSubsPage(1); }}
                   className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
                     subsStatusFilter === st
                       ? 'bg-sage dark:bg-emerald-500/20 text-forest dark:text-emerald-400 font-bold'
@@ -562,6 +1045,32 @@ export default function Leaves() {
               </tbody>
             </table>
           </div>
+
+          {subsMeta && subsMeta.totalPages > 1 && (
+            <div className="p-3 border-t border-border dark:border-dark-border flex items-center justify-between text-xs text-muted dark:text-dark-text-muted">
+              <span>Showing page {subsMeta.page} of {subsMeta.totalPages} ({subsMeta.total} total)</span>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={!subsMeta.hasPrevPage || subsLoading}
+                  onClick={() => setSubsPage((p) => p - 1)}
+                  className="px-2 py-1 text-xs"
+                >
+                  <ChevronLeft size={14} />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={!subsMeta.hasNextPage || subsLoading}
+                  onClick={() => setSubsPage((p) => p + 1)}
+                  className="px-2 py-1 text-xs"
+                >
+                  <ChevronRight size={14} />
+                </Button>
+              </div>
+            </div>
+          )}
         </Card>
       )}
 
@@ -865,7 +1374,7 @@ export default function Leaves() {
         {rejectOpenLeave && (
           <form onSubmit={handleRejectLeaveSubmit} className="space-y-4">
             <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-500 font-semibold">
-              Rejecting leave for {rejectOpenLeave.requester?.name}. No substitute teacher assignments are required.
+              Rejecting leave for {rejectOpenLeave.student ? `${rejectOpenLeave.student.firstName} ${rejectOpenLeave.student.lastName}` : (rejectOpenLeave.requester?.name || 'requester')}. No substitute teacher assignments are required.
             </div>
 
             <div>
@@ -905,11 +1414,23 @@ export default function Leaves() {
             <div className="flex items-center justify-between p-4 rounded-xl bg-surface dark:bg-dark-elevated border border-border dark:border-dark-border">
               <div>
                 <h4 className="text-sm font-bold text-deep dark:text-dark-text">
-                  {selectedLeaveDetails.leave?.requester?.name}
+                  {selectedLeaveDetails.leave?.student
+                    ? `${selectedLeaveDetails.leave?.student.firstName} ${selectedLeaveDetails.leave?.student.lastName}`
+                    : (selectedLeaveDetails.leave?.requester?.name || 'Applicant')}
                 </h4>
                 <p className="text-xs text-muted dark:text-dark-text-muted capitalize">
-                  {selectedLeaveDetails.leave?.requesterModel} · {selectedLeaveDetails.leave?.type} Leave
+                  {selectedLeaveDetails.leave?.student ? 'Student Leave' : selectedLeaveDetails.leave?.requesterModel} · {selectedLeaveDetails.leave?.type} Leave
                 </p>
+                {selectedLeaveDetails.leave?.parent && (
+                  <p className="text-[11px] text-muted dark:text-dark-text-muted mt-0.5">
+                    Parent: {selectedLeaveDetails.leave.parent.firstName} {selectedLeaveDetails.leave.parent.lastName} ({selectedLeaveDetails.leave.parent.phone || '—'})
+                  </p>
+                )}
+                {selectedLeaveDetails.leave?.approverTeacher && (
+                  <p className="text-[11px] text-forest dark:text-emerald-400 mt-0.5 font-medium">
+                    Assigned Class Teacher: {selectedLeaveDetails.leave.approverTeacher.firstName} {selectedLeaveDetails.leave.approverTeacher.lastName}
+                  </p>
+                )}
               </div>
               <Badge color={statusColors[selectedLeaveDetails.leave?.status] || 'gray'}>
                 {selectedLeaveDetails.leave?.status}
@@ -927,6 +1448,19 @@ export default function Leaves() {
                 <p className="text-rose-500 font-semibold">
                   <strong>Rejection Reason:</strong> {selectedLeaveDetails.leave?.rejectionReason}
                 </p>
+              )}
+              {selectedLeaveDetails.leave?.document?.url && (
+                <div className="pt-2">
+                  <a
+                    href={selectedLeaveDetails.leave.document.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs text-forest dark:text-emerald-400 font-semibold hover:underline"
+                  >
+                    <FileText size={14} />
+                    <span>View Supporting / Medical Document</span>
+                  </a>
+                </div>
               )}
             </div>
 

@@ -1,15 +1,23 @@
 /**
  * Password Reset Email Template
  * @param {Object} data
- * @param {string} data.userName - Name of the user
+ * @param {string} [data.userName] - Name of the user
+ * @param {string} [data.parentName] - Name of the parent (if parent password reset)
+ * @param {string} [data.teacherName] - Name of the teacher (if teacher password reset)
  * @param {string} data.resetUrl - Full password reset URL
  * @param {number} [data.expiryMinutes=60] - Expiry time in minutes
+ * @param {string} [data.schoolName] - Name of the school
  */
 export const getPasswordResetEmailTemplate = ({
   userName = 'User',
+  parentName,
+  teacherName,
   resetUrl,
-  expiryMinutes = 60
+  expiryMinutes = 60,
+  schoolName,
 }) => {
+  const displayName = parentName || teacherName || userName || 'User';
+
   return `<!DOCTYPE html>
 <html lang="en" style="margin: 0; padding: 0;">
   <head>
@@ -27,8 +35,9 @@ export const getPasswordResetEmailTemplate = ({
             <tr>
               <td style="padding: 36px 40px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); text-align: left; border-bottom: 3px solid #3b82f6;">
                 <div style="font-size: 28px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px;">
-                  Instique <span style="color: #60a5fa; font-weight: 400; font-size: 18px;">| Security</span>
+                  Instique <span style="color: #60a5fa; font-weight: 400; font-size: 18px;">| ${parentName ? 'Parent Portal' : (teacherName ? 'Teacher Portal' : 'Security')}</span>
                 </div>
+                ${schoolName ? `<div style="margin-top: 6px; font-size: 14px; color: #94a3b8;">${schoolName}</div>` : ''}
               </td>
             </tr>
 
@@ -39,7 +48,7 @@ export const getPasswordResetEmailTemplate = ({
                   Password Reset Request
                 </h1>
                 <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 1.6; color: #475569;">
-                  Hello ${userName},
+                  Hello ${displayName},
                 </p>
                 <p style="margin: 0 0 24px 0; font-size: 15px; line-height: 1.6; color: #475569;">
                   We received a request to reset your Instique account password. Click the button below to choose a new password.

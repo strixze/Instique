@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
-import { Plus, Trash2, Send, Trophy, ClipboardCheck, Award } from 'lucide-react';
+import { Plus, Trash2, Send, Trophy, ClipboardCheck, Award, EyeOff } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 import DataTable from '../../components/ui/DataTable';
 import Button from '../../components/ui/Button';
@@ -12,6 +12,8 @@ import Select from '../../components/ui/Select';
 import Badge from '../../components/ui/Badge';
 import { examApi } from '../../api/exam.api';
 import { academicApi } from '../../api/academic.api';
+import { settingApi } from '../../api/setting.api';
+import { useUserStore } from '../../store/userStore';
 
 const statusColors = {
   upcoming: 'info',
@@ -22,9 +24,17 @@ const statusColors = {
 
 export default function Exams() {
   const navigate = useNavigate();
+  const user = useUserStore((s) => s.user);
+  const isParentOrStudent = user?.role === 'parent' || user?.role === 'student';
+  const isAdmin = user?.role === 'school_admin' || user?.role === 'super_admin';
+  const isTeacher = user?.role === 'teacher';
+
   const [data, setData] = useState([]);
   const [meta, setMeta] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [canPublishMarks, setCanPublishMarks] = useState(false);
+  const [isModuleDisabled, setIsModuleDisabled] = useState(false);
+  const [checkingSettings, setCheckingSettings] = useState(true);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [reload, setReload] = useState(0);
@@ -48,7 +58,22 @@ export default function Exams() {
     academicApi.getClasses({ limit: 100 }).then((res) => setClasses(res.data)).catch(() => { });
     academicApi.getAcademicYears({ limit: 100 }).then((res) => setYears(res.data)).catch(() => { });
     academicApi.getSubjects({ limit: 100 }).then((res) => setSubjects(res.data)).catch(() => { });
-  }, []);
+
+    settingApi.getPublic()
+      .then((res) => {
+        const sData = res.data?.data || res.data;
+        if (user?.role === 'teacher' && sData?.visibility?.teacherPolicy?.canPublishMarks) {
+          setCanPublishMarks(true);
+        }
+        if (user?.role === 'parent' && (sData?.visibility?.parent?.marks === false || sData?.features?.exams === false)) {
+          setIsModuleDisabled(true);
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        setCheckingSettings(false);
+      });
+  }, [user?.role]);
 
   useEffect(() => {
     let active = true;
@@ -183,23 +208,29 @@ export default function Exams() {
       label: '',
       render: (r) => (
         <div className="flex items-center gap-1">
-          <button onClick={() => navigate(`/marks-entry?examId=${r._id}`)} className="p-2 text-muted hover:text-forest rounded-lg hover:bg-sage-soft transition-colors" title="Marks Entry">
-            <ClipboardCheck size={16} />
-          </button>
-          <button onClick={() => navigate(`/leaderboard?examId=${r._id}`)} className="p-2 text-muted hover:text-forest rounded-lg hover:bg-sage-soft transition-colors" title="Leaderboard">
-            <Award size={16} />
-          </button>
           <button onClick={() => openMarks(r)} className="p-2 text-muted hover:text-forest rounded-lg hover:bg-sage-soft transition-colors" title="View marks summary">
             <Trophy size={16} />
           </button>
-          {r.status !== 'published' && (
+          {!isParentOrStudent && (
+            <>
+              <button onClick={() => navigate(`/marks-entry?examId=${r._id}`)} className="p-2 text-muted hover:text-forest rounded-lg hover:bg-sage-soft transition-colors" title="Marks Entry">
+                <ClipboardCheck size={16} />
+              </button>
+              <button onClick={() => navigate(`/leaderboard?examId=${r._id}`)} className="p-2 text-muted hover:text-forest rounded-lg hover:bg-sage-soft transition-colors" title="Leaderboard">
+                <Award size={16} />
+              </button>
+            </>
+          )}
+          {!isParentOrStudent && r.status !== 'published' && (isAdmin || (isTeacher && canPublishMarks)) && (
             <button onClick={() => handlePublish(r)} className="p-2 text-muted hover:text-success rounded-lg hover:bg-success-light transition-colors" title="Publish results">
               <Send size={16} />
             </button>
           )}
-          <button onClick={() => handleDelete(r)} className="p-2 text-muted hover:text-danger rounded-lg hover:bg-danger-light transition-colors" title="Delete">
-            <Trash2 size={16} />
-          </button>
+          {!isParentOrStudent && isAdmin && (
+            <button onClick={() => handleDelete(r)} className="p-2 text-muted hover:text-danger rounded-lg hover:bg-danger-light transition-colors" title="Delete">
+              <Trash2 size={16} />
+            </button>
+          )}
         </div>
       ),
     },
@@ -207,23 +238,46 @@ export default function Exams() {
 
   const subjectOptions = subjects.map((s) => ({ value: s._id, label: `${s.name} (${s.code})` }));
 
+  if (!checkingSettings && user?.role === 'parent' && isModuleDisabled) {
+    return (
+      <div className="max-w-xl mx-auto my-16 text-center p-8 bg-white dark:bg-dark-surface border border-border dark:border-dark-border rounded-2xl shadow-xs space-y-4">
+        <div className="w-14 h-14 mx-auto rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center">
+          <EyeOff size={28} />
+        </div>
+        <h2 className="text-lg font-bold text-deep dark:text-dark-text">Exam Results Restricted</h2>
+        <p className="text-xs text-muted max-w-md mx-auto">
+          Viewing student exam marks and grade reports is currently disabled for parents by your school administrator.
+        </p>
+        <div className="pt-2">
+          <Button onClick={() => window.location.href = '/dashboard'} variant="primary" size="sm">
+            Return to Dashboard
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Examinations"
-        description="Create exams, manage schedules, and publish results"
+        title={isParentOrStudent ? 'Results' : 'Examinations'}
+        description={isParentOrStudent ? 'View exam schedules, subjects, and grade cards' : 'Create exams, manage schedules, and publish results'}
         action={
-          <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={() => navigate('/leaderboard')}>
-              <Award size={16} className="mr-2" />Leaderboard
-            </Button>
-            <Button variant="secondary" onClick={() => navigate('/marks-entry')}>
-              <ClipboardCheck size={16} className="mr-2" />Marks Entry
-            </Button>
-            <Button onClick={() => setOpen(true)}>
-              <Plus size={16} className="mr-2" />Create Exam
-            </Button>
-          </div>
+          !isParentOrStudent ? (
+            <div className="flex items-center gap-2">
+              <Button variant="outline" onClick={() => navigate('/leaderboard')}>
+                <Award size={16} className="mr-2" />Leaderboard
+              </Button>
+              <Button variant="secondary" onClick={() => navigate('/marks-entry')}>
+                <ClipboardCheck size={16} className="mr-2" />Marks Entry
+              </Button>
+              {isAdmin && (
+                <Button onClick={() => setOpen(true)}>
+                  <Plus size={16} className="mr-2" />Create Exam
+                </Button>
+              )}
+            </div>
+          ) : null
         }
       />
 

@@ -4,6 +4,14 @@ import { User } from '../models/User.js';
 import School from '../models/School.js';
 import AccountToken from '../models/AccountToken.js';
 import AuditLog from '../models/AuditLog.js';
+import Timetable from '../models/Timetable.js';
+import Attendance from '../models/Attendance.js';
+import Leave from '../models/Leave.js';
+import Homework from '../models/Homework.js';
+import Mark from '../models/Mark.js';
+import Student from '../models/Student.js';
+import Substitution from '../models/Substitution.js';
+import RecognitionPoint from '../models/RecognitionPoint.js';
 import ApiError from '../utils/ApiError.js';
 import { paginate } from '../utils/pagination.js';
 import env from '../config/env.js';
@@ -374,11 +382,13 @@ export const sendTeacherPasswordReset = async (teacherId, schoolId, adminUser, i
   });
 
   const school = await School.findById(schoolId).select('name');
-  const teacherName = user.name || `${teacher.firstName} ${teacher.lastName}`.trim();
+  const teacherName = `${teacher.firstName} ${teacher.lastName}`.trim() || user.name || 'Teacher';
   const resetUrl = `${env.CLIENT_URL}/reset-password?token=${rawToken}`;
 
   const emailHtml = getPasswordResetEmailTemplate({
     userName: teacherName,
+    teacherName,
+    schoolName: school?.name,
     resetUrl,
     expiryMinutes: 60,
   });
@@ -423,5 +433,201 @@ export const sendTeacherPasswordReset = async (teacherId, schoolId, adminUser, i
     message: `Password reset link sent to ${user.email}`,
     email: user.email,
     teacherName,
+  };
+};
+
+export const getTeacherProfile = async (id, schoolId, user) => {
+  // 1. School Isolation & Authorization check
+  const teacher = await Teacher.findOne({ _id: id, schoolId })
+    .populate('subjects', 'name code category')
+    .populate('assignedClasses', 'name grade code')
+    .populate('assignedSections', 'name schoolClass')
+    .populate('classTeacherOf', 'name grade code')
+    .populate('classTeacherSection', 'name');
+
+  if (!teacher) {
+    throw new ApiError(404, 'Teacher not found');
+  }
+
+  // Find linked User account
+  const teacherEmail = teacher.contact?.email?.toLowerCase().trim();
+  const userAccount = await User.findOne({
+    schoolId,
+    role: 'teacher',
+    $or: [
+      { profileId: teacher._id },
+      ...(teacherEmail ? [{ email: teacherEmail }] : []),
+    ],
+  }).select('_id email status isActive lastLogin avatar name phone createdAt');
+
+  const userId = userAccount?._id;
+
+  // 2. Parallel aggregated queries
+  const [
+    timetables,
+    attendanceDocs,
+    leaveDocs,
+    homeworkDocs,
+    markDocs,
+    studentsDocs,
+    substitutionDocs,
+    recognitionDocs,
+    auditLogs,
+  ] = await Promise.all([
+    // Timetables for school
+    Timetable.find({ schoolId, status: 'published' })
+      .populate('schoolClass', 'name grade code')
+      .populate('section', 'name')
+      .populate('periods.subject', 'name code'),
+
+    // Attendance marked by teacher's user account
+    userId ? Attendance.find({ schoolId, markedBy: userId })
+      .populate('schoolClass', 'name')
+      .populate('section', 'name')
+      .populate('subject', 'name code')
+      .sort({ date: -1 })
+      .limit(30) : Promise.resolve([]),
+
+    // Leave requests by teacher
+    Leave.find({
+      schoolId,
+      $or: [
+        { requesterModel: 'Teacher', requester: teacher._id },
+        ...(userId ? [{ requester: userId }] : []),
+      ],
+    }).populate('substituteTeacher', 'firstName lastName employeeId')
+      .populate('approvedBy', 'name')
+      .sort({ createdAt: -1 }),
+
+    // Homework created by teacher
+    Homework.find({ schoolId, teacher: teacher._id })
+      .populate('schoolClass', 'name')
+      .populate('section', 'name')
+      .populate('subject', 'name code')
+      .sort({ createdAt: -1 }),
+
+    // Marks entered by teacher
+    userId ? Mark.find({ schoolId, enteredBy: userId })
+      .populate('exam', 'name type status startDate')
+      .populate('subject', 'name code')
+      .sort({ createdAt: -1 })
+      .limit(100) : Promise.resolve([]),
+
+    // Students taught in assigned classes
+    (teacher.assignedClasses && teacher.assignedClasses.length > 0)
+      ? Student.find({
+          schoolId,
+          status: 'active',
+          currentClass: { $in: teacher.assignedClasses.map((c) => c._id || c) },
+        }).populate('currentClass', 'name').populate('currentSection', 'name').select('firstName lastName admissionNo rollNo gender status currentClass currentSection')
+      : Promise.resolve([]),
+
+    // Substitutions (as original or substitute teacher)
+    Substitution.find({
+      schoolId,
+      $or: [{ originalTeacher: teacher._id }, { substituteTeacher: teacher._id }],
+    }).populate('originalTeacher', 'firstName lastName')
+      .populate('substituteTeacher', 'firstName lastName')
+      .populate('schoolClass', 'name')
+      .populate('section', 'name')
+      .populate('subject', 'name code')
+      .sort({ date: -1 }),
+
+    // Recognition points awarded by teacher
+    userId ? RecognitionPoint.find({ schoolId, awardedBy: userId })
+      .populate('student', 'firstName lastName admissionNo')
+      .sort({ createdAt: -1 })
+      .limit(20) : Promise.resolve([]),
+
+    // Audit logs for activity timeline
+    AuditLog.find({
+      schoolId,
+      $or: [
+        { entity: 'Teacher', entityId: id },
+        { 'before.teacherId': id },
+        { 'after.teacherId': id },
+        ...(userId ? [{ actor: userId }] : []),
+      ],
+    }).populate('actor', 'name role').sort({ createdAt: -1 }).limit(30),
+  ]);
+
+  // Construct Teacher's Timetable Schedule and Period Counts
+  const weeklyPeriods = [];
+  let totalWeeklyPeriods = 0;
+  const periodsByDay = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+
+  timetables.forEach((tt) => {
+    (tt.periods || []).forEach((p) => {
+      if (p.teacher && p.teacher.toString() === id.toString()) {
+        totalWeeklyPeriods++;
+        if (typeof p.day === 'number') {
+          periodsByDay[p.day] = (periodsByDay[p.day] || 0) + 1;
+        }
+        weeklyPeriods.push({
+          day: p.day,
+          periodNo: p.periodNo,
+          startTime: p.startTime,
+          endTime: p.endTime,
+          room: p.room,
+          subject: p.subject ? { _id: p.subject._id, name: p.subject.name, code: p.subject.code } : null,
+          schoolClass: tt.schoolClass ? { _id: tt.schoolClass._id, name: tt.schoolClass.name } : null,
+          section: tt.section ? { _id: tt.section._id, name: tt.section.name } : null,
+        });
+      }
+    });
+  });
+
+  // Calculate homework stats
+  const activeHomework = homeworkDocs.filter((h) => h.status === 'published' && new Date(h.dueDate) >= new Date()).length;
+
+  // Calculate leave stats
+  const leaveStats = {
+    total: leaveDocs.length,
+    approved: leaveDocs.filter((l) => l.status === 'approved').length,
+    pending: leaveDocs.filter((l) => l.status === 'pending').length,
+    rejected: leaveDocs.filter((l) => l.status === 'rejected').length,
+  };
+
+  // Account Status
+  let accountStatus = 'NOT_LINKED';
+  if (userAccount) {
+    if (userAccount.status === 'pending_activation') accountStatus = 'PENDING_ACTIVATION';
+    else if (userAccount.status === 'suspended' || !userAccount.isActive) accountStatus = 'SUSPENDED';
+    else accountStatus = 'ACTIVE';
+  }
+
+  return {
+    teacher,
+    userAccount: userAccount ? {
+      _id: userAccount._id,
+      email: userAccount.email,
+      avatar: userAccount.avatar,
+      isActive: userAccount.isActive,
+      status: userAccount.status,
+      lastLogin: userAccount.lastLogin,
+      accountStatus,
+    } : null,
+    kpis: {
+      assignedClassesCount: teacher.assignedClasses?.length || 0,
+      assignedSubjectsCount: teacher.subjects?.length || 0,
+      weeklyPeriods: totalWeeklyPeriods,
+      studentsTaughtCount: studentsDocs.length,
+      activeHomeworkCount: activeHomework,
+      leaveTakenCount: leaveStats.approved,
+    },
+    timetable: {
+      periods: weeklyPeriods,
+      totalWeeklyPeriods,
+      periodsByDay,
+    },
+    attendanceMarked: attendanceDocs,
+    leaves: leaveDocs,
+    leaveStats,
+    homework: homeworkDocs,
+    marksActivity: markDocs,
+    studentsTaught: studentsDocs,
+    substitutions: substitutionDocs,
+    recognitionGiven: recognitionDocs,
+    auditLogs,
   };
 };

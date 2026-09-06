@@ -4,11 +4,13 @@ const validate = (schema, source = 'body') => {
   return (req, res, next) => {
     const result = schema.safeParse(req[source]);
     if (!result.success) {
-      const errors = result.error.errors.map((e) => ({
-        field: e.path.join('.'),
+      const issueList = result.error?.issues || result.error?.errors || [];
+      const errors = issueList.map((e) => ({
+        field: Array.isArray(e.path) ? e.path.join('.') : e.path || '',
         message: e.message,
       }));
-      throw new ApiError(400, 'Validation failed', errors);
+      const primaryMessage = errors[0]?.message || 'Validation failed';
+      return next(new ApiError(400, primaryMessage, errors));
     }
     if (source === 'query') {
       Object.defineProperty(req, 'query', {

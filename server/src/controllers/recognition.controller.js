@@ -1,6 +1,7 @@
 import asyncHandler from '../utils/asyncHandler.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import * as recognitionService from '../services/recognition.service.js';
+import { verifyTeacherStudentAccess } from '../services/authorization.service.js';
 
 export const awardPoints = asyncHandler(async (req, res) => {
   const point = await recognitionService.awardPoints(req.schoolId, req.body, req.user._id);

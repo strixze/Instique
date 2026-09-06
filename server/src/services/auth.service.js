@@ -6,6 +6,8 @@ import School from '../models/School.js';
 import env from '../config/env.js';
 import { generateTokens, verifyRefreshToken } from '../utils/generateTokens.js';
 import AuditLog from '../models/AuditLog.js';
+import Parent from '../models/Parent.js';
+import Teacher from '../models/Teacher.js';
 import { sendEmail } from './brevoMail.service.js';
 import { getPasswordResetEmailTemplate } from './emailTemplates/passwordReset.template.js';
 
@@ -324,18 +326,62 @@ export const forgotPassword = async (email, ip, userAgent) => {
     emailDeliveryStatus: 'pending'
   });
 
+  // Resolve role-specific details
+  let parentName = null;
+  let teacherName = null;
+  let schoolName = null;
+
+  if (user.schoolId) {
+    const school = await School.findById(user.schoolId).select('name');
+    schoolName = school?.name;
+  }
+
+  // Check if there is a matching Parent document
+  const parentDoc = await Parent.findOne({
+    $or: [
+      ...(user.profileId ? [{ _id: user.profileId }] : []),
+      { 'contact.email': normalizedEmail }
+    ]
+  });
+
+  if (parentDoc) {
+    parentName = `${parentDoc.firstName} ${parentDoc.lastName}`.trim();
+  }
+
+  if (!parentName && (user.role === 'teacher' || user.profileModel === 'Teacher')) {
+    const teacherDoc = await Teacher.findOne({
+      $or: [
+        ...(user.profileId ? [{ _id: user.profileId }] : []),
+        { 'contact.email': normalizedEmail }
+      ]
+    });
+    if (teacherDoc) {
+      teacherName = `${teacherDoc.firstName} ${teacherDoc.lastName}`.trim();
+    }
+  }
+
+  const displayName = parentName || teacherName || user.name || 'User';
   const resetUrl = `${env.CLIENT_URL}/reset-password?token=${rawToken}`;
   const emailHtml = getPasswordResetEmailTemplate({
-    userName: user.name,
+    userName: displayName,
+    parentName,
+    teacherName,
+    schoolName,
     resetUrl,
     expiryMinutes: 60
   });
 
+  const subject = parentName
+    ? `Reset Your Instique Parent Account Password — ${schoolName || 'Instique'}`
+    : teacherName
+      ? `Reset Your Instique Teacher Account Password — ${schoolName || 'Instique'}`
+      : 'Reset Your Instique Password';
+
   const emailResult = await sendEmail(
     user.email,
-    'Reset Your Instique Password',
+    subject,
     emailHtml,
-    user.name
+    displayName
   );
 
   if (emailResult.success) {

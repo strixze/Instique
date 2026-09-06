@@ -82,8 +82,10 @@ html.theme-transition *::after {
 }
 
 /* Focus ring utility */
-.focus-ring {
-  @apply focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary;
+@layer components {
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary;
+  }
 }
 
 /* Animations */
@@ -301,3 +303,96 @@ html.theme-transition *::after {
   color: #818CF8 !important;
   border-color: rgba(99, 102, 241, 0.25) !important;
 }
+
+/* Print Styles - Placed at end of file to override all light/dark utility styles */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 5mm;
+  }
+
+  html, body {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .print-timetable,
+  .print-timetable *,
+  .print-area,
+  .print-area * {
+    visibility: visible !important;
+  }
+
+  .print-timetable,
+  .print-area {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
+
+  .print-timetable table,
+  .print-area table,
+  .print-timetable tr,
+  .print-area tr {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Override dark mode text/border colors during print so text is crisp black on white paper */
+  .dark .print-timetable,
+  .dark .print-area {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .dark th,
+  .dark td,
+  .dark th span,
+  .dark th div,
+  .dark td div,
+  .dark td span,
+  .dark p,
+  .dark h1,
+  .dark h2,
+  .dark h3 {
+    color: #0f172a !important;
+  }
+
+  .dark .border-border,
+  .dark .border-border\/50,
+  .dark .border-border\/60,
+  .dark .border-border\/70,
+  .dark .border-border\/80,
+  .dark .border-slate-200,
+  .dark .border-slate-300 {
+    border-color: #e2e8f0 !important;
+  }
+
+  .print\:hidden {
+    display: none !important;
+  }
+
+  .print\:block {
+    display: block !important;
+  }
+}
+
+
+

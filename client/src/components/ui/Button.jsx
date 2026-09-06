@@ -1,3 +1,5 @@
+import { uiSound } from '../../utils/soundManager';
+
 const variants = {
   primary: 'bg-forest text-white hover:bg-forest-hover focus:ring-forest/20 shadow-2xs active:bg-forest-dark dark:bg-emerald-500 dark:hover:bg-emerald-400 dark:active:bg-emerald-600 dark:text-gray-900 dark:focus:ring-emerald-500/20',
   secondary: 'bg-white text-deep border border-border hover:bg-surface hover:border-slate-300 focus:ring-forest/20 shadow-2xs dark:bg-dark-card dark:text-dark-text dark:border-dark-border dark:hover:bg-dark-hover dark:hover:border-dark-border-strong dark:focus:ring-emerald-500/20',
@@ -25,12 +27,23 @@ export default function Button({
   disabled,
   loading,
   type = 'button',
+  onClick,
   ...props
 }) {
+  const handleClick = (e) => {
+    if (!disabled && !loading) {
+      uiSound.tap();
+    }
+    if (onClick) {
+      onClick(e);
+    }
+  };
+
   return (
     <button
       type={type}
       disabled={disabled || loading}
+      onClick={handleClick}
       className={`inline-flex items-center justify-center font-medium select-none focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-offset-white dark:focus:ring-offset-dark-bg transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant] || variants.primary} ${sizes[size] || sizes.md} ${className}`}
       {...props}
     >

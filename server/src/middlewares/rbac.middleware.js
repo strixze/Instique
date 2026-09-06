@@ -1,4 +1,5 @@
 import ApiError from '../utils/ApiError.js';
+import { isFeatureEnabled } from '../services/setting.service.js';
 
 export const requireRole = (...roles) => {
   return (req, res, next) => {
@@ -45,5 +46,22 @@ export const requirePermission = (module, action) => {
     }
 
     throw new ApiError(403, `Insufficient permissions for ${module}:${action}`);
+  };
+};
+
+export const requireFeature = (moduleKey) => {
+  return async (req, res, next) => {
+    try {
+      if (req.user?.role === 'super_admin') return next();
+      if (!req.schoolId) return next();
+
+      const enabled = await isFeatureEnabled(req.schoolId, moduleKey);
+      if (!enabled) {
+        throw new ApiError(403, `The '${moduleKey}' module has been disabled by your school administrator.`);
+      }
+      next();
+    } catch (err) {
+      next(err);
+    }
   };
 };

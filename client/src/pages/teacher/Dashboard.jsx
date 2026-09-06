@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import {
   Calendar, Clock, BookOpen, ClipboardList, Trophy, Users, CheckCircle2,
   AlertCircle, ChevronRight, Plus, MapPin, Award, FileText, ArrowRight,
   TrendingUp, RefreshCw, Sparkles, UserCheck, CalendarDays, ExternalLink,
-  GraduationCap, Bell, AlertTriangle, FileEdit
+  GraduationCap, Bell, AlertTriangle, FileEdit, Check, X,
 } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
 import { dashboardApi } from '../../api/dashboard.api';
+import { leaveApi } from '../../api/leave.api';
 import { useUserStore } from '../../store/userStore';
 
 const formatDate = (d) => {
@@ -34,6 +36,7 @@ export default function TeacherDashboard() {
   const [error, setError] = useState(null);
   const [data, setData] = useState(null);
   const [activeTab, setActiveTab] = useState('classes'); // 'classes' | 'subjects'
+  const [actionLoadingId, setActionLoadingId] = useState(null);
 
   const fetchDashboard = async () => {
     setLoading(true);
@@ -46,6 +49,20 @@ export default function TeacherDashboard() {
       setError(err?.message || 'Unable to load teacher dashboard. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleQuickApprove = async (leaveId, studentName) => {
+    if (!window.confirm(`Approve leave for ${studentName}? Attendance will be marked as 'Leave'.`)) return;
+    setActionLoadingId(leaveId);
+    try {
+      await leaveApi.approve(leaveId);
+      toast.success(`Leave approved for ${studentName}`);
+      fetchDashboard();
+    } catch (err) {
+      toast.error(err?.message || 'Failed to approve student leave');
+    } finally {
+      setActionLoadingId(null);
     }
   };
 
@@ -73,6 +90,7 @@ export default function TeacherDashboard() {
   const notices = data?.notices || [];
   const events = data?.events || [];
   const parentMeetings = data?.parentMeetings || [];
+  const classLeaves = data?.classLeaves || { pending: [], pendingCount: 0 };
 
 
   if (loading) {
@@ -207,6 +225,32 @@ export default function TeacherDashboard() {
           </div>
         </div>
       </div>
+
+      {/* ── Class Teacher Student Leave Pending Alert ── */}
+      {(summary.studentLeavesPending > 0 || classLeaves.pendingCount > 0) && (
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-amber-900 dark:text-amber-200">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-amber-500 text-white shrink-0 shadow-sm">
+              <GraduationCap size={20} />
+            </div>
+            <div>
+              <p className="text-sm font-bold">
+                {summary.studentLeavesPending || classLeaves.pendingCount} Pending Student Leave Request{(summary.studentLeavesPending || classLeaves.pendingCount) > 1 ? 's' : ''}
+              </p>
+              <p className="text-xs text-amber-800/80 dark:text-amber-300/80">
+                Parents of your class students have submitted leave applications waiting for your approval.
+              </p>
+            </div>
+          </div>
+          <Button
+            size="sm"
+            onClick={() => navigate('/leaves')}
+            className="bg-amber-600 hover:bg-amber-700 text-white shrink-0 font-medium"
+          >
+            Review Applications <ArrowRight size={14} className="ml-1" />
+          </Button>
+        </div>
+      )}
 
       {/* ── 2. Top Summary KPI Stats ── */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
@@ -678,6 +722,92 @@ export default function TeacherDashboard() {
 
         {/* ── RIGHT COLUMN (1 COL) ── */}
         <div className="space-y-6">
+
+          {/* ── Student Leave Requests (Class Teacher Widget) ── */}
+          {(teacher?.isClassTeacher || classLeaves.pendingCount > 0) && (
+            <Card className="!p-5 space-y-3.5 border border-border shadow-sm">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-600">
+                    <GraduationCap size={16} />
+                  </div>
+                  <h3 className="text-sm font-bold text-deep dark:text-dark-text">
+                    Class Leave Requests
+                  </h3>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate('/leaves')}
+                  className="text-xs text-forest dark:text-emerald-400 font-semibold"
+                >
+                  View All <ChevronRight size={13} />
+                </Button>
+              </div>
+
+              {classLeaves.pending.length === 0 ? (
+                <div className="p-4 rounded-xl bg-slate-50 dark:bg-dark-elevated text-center text-xs text-muted dark:text-dark-text-muted space-y-1">
+                  <CheckCircle2 size={24} className="mx-auto text-emerald-500/80 mb-1" />
+                  <p className="font-semibold text-deep dark:text-dark-text">No Pending Requests</p>
+                  <p>All student leave requests for your class are reviewed.</p>
+                </div>
+              ) : (
+                <div className="space-y-2.5">
+                  {classLeaves.pending.slice(0, 3).map((item) => {
+                    const studentName = item.student ? `${item.student.firstName} ${item.student.lastName}` : 'Student';
+                    const startStr = new Date(item.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    const endStr = new Date(item.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    const datesStr = startStr === endStr ? startStr : `${startStr} – ${endStr}`;
+
+                    return (
+                      <div
+                        key={item._id}
+                        className="p-3 rounded-xl border border-border bg-slate-50/60 dark:bg-dark-elevated/60 hover:bg-slate-50 dark:hover:bg-dark-hover transition-all text-xs space-y-2"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <p className="font-bold text-deep dark:text-dark-text">{studentName}</p>
+                            <p className="text-[11px] text-muted dark:text-dark-text-muted">
+                              {datesStr} • <span className="capitalize">{item.type}</span>
+                            </p>
+                          </div>
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                            Pending
+                          </span>
+                        </div>
+
+                        {item.reason && (
+                          <p className="text-[11px] text-deep/80 dark:text-dark-text/80 line-clamp-1 italic">
+                            "{item.reason}"
+                          </p>
+                        )}
+
+                        <div className="flex items-center justify-end gap-1.5 pt-1 border-t border-border/50">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            loading={actionLoadingId === item._id}
+                            onClick={() => handleQuickApprove(item._id, studentName)}
+                            className="text-xs text-emerald-600 border-emerald-600/30 hover:bg-emerald-500/10 font-medium py-1 px-2.5 h-auto"
+                          >
+                            <Check size={12} className="mr-1" /> Approve
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => navigate('/leaves')}
+                            className="text-xs text-rose-600 border-rose-600/30 hover:bg-rose-500/10 font-medium py-1 px-2.5 h-auto"
+                          >
+                            <X size={12} className="mr-1" /> Review
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </Card>
+          )}
 
           {/* ── Teaching Workload Gauge ── */}
           <Card className="!p-5 space-y-4 border border-border shadow-sm">

@@ -5,10 +5,12 @@ import { useUserStore } from '../../store/userStore';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import toast from 'react-hot-toast';
+import { Eye, EyeOff } from 'lucide-react'; // or use react-icons
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false); // ← added
   const [loading, setLoading] = useState(false);
   const setUser = useUserStore((s) => s.setUser);
   const navigate = useNavigate();
@@ -40,11 +42,27 @@ export default function Login() {
           <h2 className="text-lg font-semibold text-deep dark:text-dark-text">Sign in</h2>
 
           <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@instique.com" required />
-          <div>
-            <Input label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="password123" required />
-            <div className="text-right mt-1">
-              <Link to="/forgot-password" className="text-xs text-forest dark:text-emerald-400 hover:underline">Forgot password?</Link>
-            </div>
+
+          <div className="relative">
+            <Input
+              label="Password"
+              type={showPassword ? 'text' : 'password'} // ← dynamic type
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="password123"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)} // ← toggle
+              className="absolute right-3 bottom-3 text-muted dark:text-dark-text-muted hover:text-deep dark:hover:text-dark-text cursor-pointer"
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
+
+          <div className="text-right mt-1 -mb-2">
+            <Link to="/forgot-password" className="text-xs text-forest dark:text-emerald-400 hover:underline">Forgot password?</Link>
           </div>
 
           <Button type="submit" loading={loading} className="w-full">Sign in</Button>
@@ -59,4 +77,4 @@ export default function Login() {
       </div>
     </div>
   );
-}
+}   

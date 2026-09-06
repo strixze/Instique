@@ -3,6 +3,7 @@ import {
   createTeacher,
   getTeachers,
   getTeacherById,
+  getTeacherProfile,
   updateTeacher,
   deleteTeacher,
   getWorkloadAnalytics,
@@ -22,8 +23,9 @@ router.use(authMiddleware, tenantMiddleware);
 // Analytics — must be before /:id routes
 router.get('/workload', requireRole('school_admin'), getWorkloadAnalytics);
 
-// Core CRUD
+// Core CRUD & Profile
 router.get('/', requireRole('school_admin', 'teacher'), getTeachers);
+router.get('/:id/profile', requireRole('school_admin', 'teacher'), getTeacherProfile);
 router.get('/:id', requireRole('school_admin', 'teacher'), getTeacherById);
 router.post('/', requireRole('school_admin'), validate(createTeacherSchema), createTeacher);
 router.put('/:id', requireRole('school_admin'), validate(updateTeacherSchema), updateTeacher);

@@ -1,3 +1,4 @@
+import { useEffect, useState, useMemo } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, GraduationCap, Users, BookOpen, Calendar, DollarSign,
@@ -8,8 +9,10 @@ import {
 import { useUserStore } from '../../store/userStore';
 import { useAppStore } from '../../store/appStore';
 import { authApi } from '../../api/auth.api';
+import { settingApi } from '../../api/setting.api';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { uiSound } from '../../utils/soundManager';
 
 const navSections = {
   school_admin: [
@@ -22,43 +25,44 @@ const navSections = {
     {
       title: 'Academics',
       items: [
-        { to: '/students', icon: Users, label: 'Students' },
-        { to: '/teachers', icon: GraduationCap, label: 'Teachers' },
-        { to: '/academic', icon: BookOpen, label: 'Classes' },
-        { to: '/timetable', icon: Calendar, label: 'Timetable' },
-        { to: '/attendance', icon: ClipboardList, label: 'Attendance' },
-        { to: '/homework', icon: BookMarked, label: 'Homework' },
+        { to: '/students', icon: Users, label: 'Students', feature: 'students' },
+        { to: '/teachers', icon: GraduationCap, label: 'Teachers', feature: 'teachers' },
+        { to: '/academic', icon: BookOpen, label: 'Classes', feature: 'classes' },
+        { to: '/syllabus', icon: FileText, label: 'Syllabus', feature: 'syllabus' },
+        { to: '/timetable', icon: Calendar, label: 'Timetable', feature: 'timetable' },
+        { to: '/attendance', icon: ClipboardList, label: 'Attendance', feature: 'attendance' },
+        { to: '/homework', icon: BookMarked, label: 'Homework', feature: 'homework' },
       ],
     },
     {
       title: 'Examinations',
       items: [
-        { to: '/exams', icon: Trophy, label: 'Exams' },
-        { to: '/marks-entry', icon: ClipboardCheck, label: 'Marks Entry' },
-        { to: '/leaderboard', icon: Award, label: 'Leaderboard' },
+        { to: '/exams', icon: Trophy, label: 'Exams', feature: 'exams' },
+        { to: '/marks-entry', icon: ClipboardCheck, label: 'Marks Entry', feature: 'marksEntry' },
+        { to: '/leaderboard', icon: Award, label: 'Leaderboard', feature: 'leaderboard' },
       ],
     },
     {
       title: 'Administration',
       items: [
-        { to: '/admissions', icon: FileText, label: 'Admissions' },
-        { to: '/fees', icon: DollarSign, label: 'Fees' },
-        { to: '/leaves', icon: Calendar, label: 'Leaves' },
-        { to: '/notices', icon: Bell, label: 'Notices' },
+        { to: '/admissions', icon: FileText, label: 'Admissions', feature: 'admissions' },
+        { to: '/fees', icon: DollarSign, label: 'Fees', feature: 'fees' },
+        { to: '/leaves', icon: Calendar, label: 'Leaves', feature: 'leaves' },
+        { to: '/notices', icon: Bell, label: 'Notices', feature: 'notices' },
       ],
     },
     {
       title: 'Communication',
       items: [
-        { to: '/events', icon: Calendar, label: 'Events' },
-        { to: '/complaints', icon: MessageSquare, label: 'Complaints' },
-        { to: '/parent-meetings', icon: Users, label: 'Parent Meetings' },
+        { to: '/events', icon: Calendar, label: 'Events', feature: 'events' },
+        { to: '/complaints', icon: MessageSquare, label: 'Complaints', feature: 'complaints' },
+        { to: '/parent-meetings', icon: Users, label: 'Parent Meetings', feature: 'parentMeetings' },
       ],
     },
     {
       title: 'Reports',
       items: [
-        { to: '/reports', icon: BarChart3, label: 'Reports & Analytics' },
+        { to: '/reports', icon: BarChart3, label: 'Reports & Analytics', feature: 'reports' },
       ],
     },
     {
@@ -91,22 +95,22 @@ const navSections = {
     {
       title: 'Academics',
       items: [
-        { to: '/timetable', icon: Calendar, label: 'Timetable' },
-        { to: '/attendance', icon: ClipboardList, label: 'Attendance' },
-        { to: '/homework', icon: BookMarked, label: 'Homework' },
-        { to: '/exams', icon: Trophy, label: 'Exams' },
-        { to: '/marks-entry', icon: ClipboardCheck, label: 'Marks Entry' },
-        { to: '/leaderboard', icon: Award, label: 'Leaderboard' },
-        { to: '/syllabus', icon: FileText, label: 'Syllabus' },
+        { to: '/timetable', icon: Calendar, label: 'Timetable', feature: 'timetable' },
+        { to: '/attendance', icon: ClipboardList, label: 'Attendance', feature: 'attendance' },
+        { to: '/homework', icon: BookMarked, label: 'Homework', feature: 'homework' },
+        { to: '/exams', icon: Trophy, label: 'Exams', feature: 'exams' },
+        { to: '/marks-entry', icon: ClipboardCheck, label: 'Marks Entry', feature: 'marksEntry' },
+        { to: '/leaderboard', icon: Award, label: 'Leaderboard', feature: 'leaderboard' },
+        { to: '/syllabus', icon: FileText, label: 'Syllabus', feature: 'syllabus' },
       ],
     },
     {
       title: 'Administration',
       items: [
-        { to: '/events', icon: Calendar, label: 'Events' },
-        { to: '/parent-meetings', icon: Users, label: 'Parent Meetings' },
-        { to: '/leaves', icon: Calendar, label: 'Leaves' },
-        { to: '/notices', icon: Bell, label: 'Notices' },
+        { to: '/events', icon: Calendar, label: 'Events', feature: 'events' },
+        { to: '/parent-meetings', icon: Users, label: 'Parent Meetings', feature: 'parentMeetings' },
+        { to: '/leaves', icon: Calendar, label: 'Leaves', feature: 'leaves' },
+        { to: '/notices', icon: Bell, label: 'Notices', feature: 'notices' },
       ],
     },
   ],
@@ -120,20 +124,20 @@ const navSections = {
     {
       title: 'Academics',
       items: [
-        { to: '/timetable', icon: Calendar, label: 'Timetable' },
-        { to: '/attendance', icon: ClipboardList, label: 'Attendance' },
-        { to: '/homework', icon: BookMarked, label: 'Homework' },
-        { to: '/exams', icon: Trophy, label: 'Results' },
-        { to: '/leaderboard', icon: Award, label: 'Leaderboard' },
+        { to: '/timetable', icon: Calendar, label: 'Timetable', feature: 'timetable' },
+        { to: '/attendance', icon: ClipboardList, label: 'Attendance', feature: 'attendance' },
+        { to: '/homework', icon: BookMarked, label: 'Homework', feature: 'homework' },
+        { to: '/exams', icon: Trophy, label: 'Results', feature: 'exams' },
+        { to: '/leaderboard', icon: Award, label: 'Leaderboard', feature: 'leaderboard' },
       ],
     },
     {
       title: 'Services',
       items: [
-        { to: '/events', icon: Calendar, label: 'Events' },
-        { to: '/fees', icon: DollarSign, label: 'Fees' },
-        { to: '/notices', icon: Bell, label: 'Notices' },
-        { to: '/complaints', icon: MessageSquare, label: 'Complaints' },
+        { to: '/events', icon: Calendar, label: 'Events', feature: 'events' },
+        { to: '/fees', icon: DollarSign, label: 'Fees', feature: 'fees' },
+        { to: '/notices', icon: Bell, label: 'Notices', feature: 'notices' },
+        { to: '/complaints', icon: MessageSquare, label: 'Complaints', feature: 'complaints' },
       ],
     },
   ],
@@ -147,21 +151,23 @@ const navSections = {
     {
       title: 'Academics',
       items: [
-        { to: '/attendance', icon: ClipboardList, label: 'Attendance' },
-        { to: '/homework', icon: BookMarked, label: 'Homework' },
-        { to: '/exams', icon: Trophy, label: 'Results' },
-        { to: '/leaderboard', icon: Award, label: 'Leaderboard' },
-        { to: '/timetable', icon: Calendar, label: 'Timetable' },
+        { to: '/attendance', icon: ClipboardList, label: 'Attendance', feature: 'attendance', parentVisKey: 'attendance' },
+        { to: '/homework', icon: BookMarked, label: 'Homework', feature: 'homework', parentVisKey: 'homework' },
+        { to: '/syllabus', icon: BookOpen, label: 'Syllabus', feature: 'syllabus' },
+        { to: '/exams', icon: Trophy, label: 'Results', feature: 'exams', parentVisKey: 'marks' },
+        { to: '/leaderboard', icon: Award, label: 'Leaderboard', feature: 'leaderboard', parentVisKey: 'marks' },
+        { to: '/timetable', icon: Calendar, label: 'Timetable', feature: 'timetable', parentVisKey: 'timetable' },
       ],
     },
     {
       title: 'Services',
       items: [
-        { to: '/events', icon: Calendar, label: 'Events' },
-        { to: '/parent-meetings', icon: Users, label: 'Parent Meetings' },
-        { to: '/fees', icon: DollarSign, label: 'Fees' },
-        { to: '/notices', icon: Bell, label: 'Notices' },
-        { to: '/complaints', icon: MessageSquare, label: 'Complaints' },
+        { to: '/events', icon: Calendar, label: 'Events', feature: 'events' },
+        { to: '/leaves', icon: Calendar, label: 'Leave Requests', feature: 'leaves', parentVisKey: 'leaves' },
+        { to: '/parent-meetings', icon: Users, label: 'Parent Meetings', feature: 'parentMeetings' },
+        { to: '/fees', icon: DollarSign, label: 'Fees', feature: 'fees', parentVisKey: 'fees' },
+        { to: '/notices', icon: Bell, label: 'Notices', feature: 'notices' },
+        { to: '/complaints', icon: MessageSquare, label: 'Complaints', feature: 'complaints' },
       ],
     },
   ],
@@ -173,7 +179,46 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
   const { sidebarCollapsed, toggleSidebar } = useAppStore();
   const navigate = useNavigate();
 
-  const sections = navSections[user?.role] || [];
+  const [publicSettings, setPublicSettings] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+    if (user?.role && user.role !== 'super_admin') {
+      settingApi.getPublic()
+        .then((res) => {
+          if (active) {
+            const data = res.data?.data || res.data;
+            setPublicSettings(data || {});
+          }
+        })
+        .catch(() => {});
+    }
+    return () => { active = false; };
+  }, [user?.role]);
+
+  const rawSections = navSections[user?.role] || [];
+  const sections = useMemo(() => {
+    if (!publicSettings) return rawSections;
+    const features = publicSettings.features || {};
+    const parentVisibility = publicSettings.visibility?.parent || {};
+    const teacherPolicy = publicSettings.visibility?.teacherPolicy || {};
+
+    return rawSections
+      .map((sec) => ({
+        ...sec,
+        items: sec.items.filter((item) => {
+          if (item.feature && features[item.feature] === false) return false;
+          if (user?.role === 'parent' && item.parentVisKey) {
+            if (parentVisibility[item.parentVisKey] === false) return false;
+          }
+          if (user?.role === 'teacher' && item.to === '/fees') {
+            if (teacherPolicy.canViewFeeInfo !== true) return false;
+          }
+          return true;
+        }),
+      }))
+      .filter((sec) => sec.items.length > 0);
+  }, [rawSections, publicSettings, user?.role]);
 
   const handleLogout = async () => {
     try { await authApi.logout(); } catch {}
@@ -224,7 +269,10 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                 <NavLink
                   key={item.to}
                   to={item.to}
-                  onClick={() => setMobileOpen?.(false)}
+                  onClick={() => {
+                    uiSound.navigation();
+                    setMobileOpen?.(false);
+                  }}
                   title={sidebarCollapsed ? item.label : undefined}
                   className={({ isActive }) =>
                     `flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-2.5'} px-2 py-2 rounded-lg text-[13px] transition-all duration-150 ${

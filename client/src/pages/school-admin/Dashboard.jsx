@@ -332,9 +332,9 @@ export default function SchoolAdminDashboard() {
               <ChevronRight size={15} className="text-muted dark:text-dark-text-muted group-hover:text-deep dark:group-hover:text-dark-text transition-colors" />
             </div>
 
-            {/* Leave Requests */}
+            {/* Teacher Leave Requests */}
             <div
-              onClick={() => navigate('/leaves')}
+              onClick={() => navigate('/leaves?tab=teachers')}
               className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-dark-hover transition-colors cursor-pointer group"
             >
               <div className="flex items-center gap-3">
@@ -343,9 +343,28 @@ export default function SchoolAdminDashboard() {
                 </div>
                 <div>
                   <p className="text-xs font-bold text-deep dark:text-dark-text group-hover:text-forest dark:group-hover:text-emerald-400 transition-colors">
-                    {needsAttention.pendingLeaves ?? 0} Requests
+                    {needsAttention.pendingTeacherLeaves ?? needsAttention.pendingLeaves ?? 0} Requests
                   </p>
                   <p className="text-[11px] text-muted dark:text-dark-text-muted">Teacher leave requests pending</p>
+                </div>
+              </div>
+              <ChevronRight size={15} className="text-muted dark:text-dark-text-muted group-hover:text-deep dark:group-hover:text-dark-text transition-colors" />
+            </div>
+
+            {/* Student Leave Requests */}
+            <div
+              onClick={() => navigate('/leaves?tab=students')}
+              className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-dark-hover transition-colors cursor-pointer group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                  <Users size={16} strokeWidth={1.8} />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-deep dark:text-dark-text group-hover:text-forest dark:group-hover:text-emerald-400 transition-colors">
+                    {needsAttention.pendingStudentLeaves ?? 0} Requests
+                  </p>
+                  <p className="text-[11px] text-muted dark:text-dark-text-muted">Student leave requests pending</p>
                 </div>
               </div>
               <ChevronRight size={15} className="text-muted dark:text-dark-text-muted group-hover:text-deep dark:group-hover:text-dark-text transition-colors" />

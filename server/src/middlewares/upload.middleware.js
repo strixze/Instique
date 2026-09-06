@@ -1,19 +1,26 @@
 import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { v4 as uuidv4 } from 'uuid';
 import ApiError from '../utils/ApiError.js';
 import env from '../config/env.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Configure multer to store files in a secure, school‑scoped directory.
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../../public/uploads'));
+    // Files are saved under storage/<schoolId>/<fieldname>
+    const schoolId = req.schoolId ? req.schoolId.toString() : 'temp';
+    const dest = path.join(__dirname, '../../storage', schoolId, file.fieldname);
+    // Ensure the directory exists.
+    require('fs').mkdirSync(dest, { recursive: true });
+    cb(null, dest);
   },
   filename: (req, file, cb) => {
-    const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, unique + path.extname(file.originalname));
+    // Use a UUID to avoid name collisions and prevent guessing.
+    cb(null, `${uuidv4()}${path.extname(file.originalname)}`);
   },
 });
 

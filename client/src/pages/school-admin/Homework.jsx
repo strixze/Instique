@@ -25,6 +25,7 @@ import {
   Image as ImageIcon,
   Sparkles,
   Upload,
+  EyeOff,
 } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
@@ -35,6 +36,7 @@ import Badge from '../../components/ui/Badge';
 import Card from '../../components/ui/Card';
 import { homeworkApi } from '../../api/homework.api';
 import { parentApi } from '../../api/parent.api';
+import { settingApi } from '../../api/setting.api';
 import { useUserStore } from '../../store/userStore';
 
 const statusConfig = {
@@ -132,8 +134,10 @@ export default function Homework() {
   const [submissionContent, setSubmissionContent] = useState('');
   const [submissionFiles, setSubmissionFiles] = useState([]);
   const [submitting, setSubmitting] = useState(false);
+  const [canCreateHomework, setCanCreateHomework] = useState(true);
+  const [isModuleDisabled, setIsModuleDisabled] = useState(false);
 
-  // ── 1. Fetch Teacher Assignments on Mount ──
+  // ── 1. Fetch Teacher Assignments & Permissions on Mount ──
   useEffect(() => {
     if (isTeacherOrAdmin) {
       homeworkApi.getMyAssignments()
@@ -141,21 +145,41 @@ export default function Homework() {
           setAssignments(res.data || { classes: [], sections: [], subjects: [], teachers: [] });
         })
         .catch(() => { });
-    }
-  }, [isTeacherOrAdmin]);
 
-  // ── 2. Fetch Parent Linked Children ──
+      if (user?.role === 'teacher') {
+        settingApi.getPublic()
+          .then((res) => {
+            const data = res.data?.data || res.data;
+            if (data?.visibility?.teacherPolicy?.canCreateHomework === false) {
+              setCanCreateHomework(false);
+            }
+          })
+          .catch(() => { });
+      }
+    }
+  }, [isTeacherOrAdmin, user?.role]);
+
+  // ── 2. Fetch Parent Linked Children & Visibility ──
   useEffect(() => {
     if (isParent) {
-      parentApi.getMyChildren()
-        .then((res) => {
-          const kids = res.data || [];
+      Promise.allSettled([
+        parentApi.getMyChildren(),
+        settingApi.getPublic()
+      ]).then(([kidsRes, settingsRes]) => {
+        if (settingsRes.status === 'fulfilled') {
+          const data = settingsRes.value?.data?.data || settingsRes.value?.data;
+          if (data?.visibility?.parent?.homework === false || data?.features?.homework === false) {
+            setIsModuleDisabled(true);
+          }
+        }
+        if (kidsRes.status === 'fulfilled') {
+          const kids = kidsRes.value?.data || [];
           setChildren(kids);
           if (kids.length > 0) {
             setSelectedChildId(kids[0].id || kids[0]._id);
           }
-        })
-        .catch(() => { });
+        }
+      }).catch(() => { });
     }
   }, [isParent]);
 
@@ -404,6 +428,25 @@ export default function Homework() {
     return { total, published, drafts, dueSoon };
   }, [homeworkList]);
 
+  if (isParent && isModuleDisabled) {
+    return (
+      <div className="max-w-xl mx-auto my-16 text-center p-8 bg-white dark:bg-dark-surface border border-border dark:border-dark-border rounded-2xl shadow-xs space-y-4">
+        <div className="w-14 h-14 mx-auto rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center">
+          <EyeOff size={28} />
+        </div>
+        <h2 className="text-lg font-bold text-deep dark:text-dark-text">Homework Portal Restricted</h2>
+        <p className="text-xs text-muted max-w-md mx-auto">
+          Viewing student homework assignments is currently disabled for parents by your school administrator.
+        </p>
+        <div className="pt-2">
+          <Button onClick={() => window.location.href = '/dashboard'} variant="primary" size="sm">
+            Return to Dashboard
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 w-full pb-16">
       {/* ── Page Header ── */}
@@ -415,7 +458,7 @@ export default function Homework() {
             : 'Track upcoming assignments, download attachments, and view submission statuses.'
         }
         action={
-          isTeacherOrAdmin ? (
+          isTeacherOrAdmin && (user?.role !== 'teacher' || canCreateHomework) ? (
             <Button onClick={handleOpenCreate} className="gap-2 text-xs">
               <Plus size={16} /> Create Homework
             </Button>

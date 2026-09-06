@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
-import { Plus, Trash2, Wallet, Upload, ArrowRight } from 'lucide-react';
+import { Plus, Trash2, Wallet, Upload, ArrowRight, EyeOff } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 import DataTable from '../../components/ui/DataTable';
 import Button from '../../components/ui/Button';
@@ -12,6 +12,7 @@ import Badge from '../../components/ui/Badge';
 import { feeApi } from '../../api/fee.api';
 import { academicApi } from '../../api/academic.api';
 import { studentApi } from '../../api/student.api';
+import { settingApi } from '../../api/setting.api';
 import { useUserStore } from '../../store/userStore';
 
 const statusColors = {
@@ -713,13 +714,43 @@ function PendingFees() {
 }
 
 export default function Fees() {
-  const [active, setActive] = useState('structures');
+  const user = useUserStore((s) => s.user);
+  const isTeacher = user?.role === 'teacher';
+  const isParent = user?.role === 'parent';
+
+  const [active, setActive] = useState(isTeacher ? 'pending' : 'structures');
   const [report, setReport] = useState(null);
   const [reloadReport, setReloadReport] = useState(0);
+  const [isModuleDisabled, setIsModuleDisabled] = useState(false);
+  const [disabledMessage, setDisabledMessage] = useState('');
+  const [checkingSettings, setCheckingSettings] = useState(true);
 
   useEffect(() => {
-    feeApi.getReport().then((res) => setReport(res.data)).catch(() => {});
-  }, [active, reloadReport]);
+    let activeSub = true;
+    settingApi.getPublic()
+      .then((res) => {
+        if (!activeSub) return;
+        const sData = res.data?.data || res.data;
+        if (isParent && sData?.visibility?.parent?.fees === false) {
+          setIsModuleDisabled(true);
+          setDisabledMessage('Viewing fee invoices and records is currently disabled for parents by your school administrator.');
+        } else if (isTeacher && !sData?.visibility?.teacherPolicy?.canViewFeeInfo) {
+          setIsModuleDisabled(true);
+          setDisabledMessage('Teachers do not have permission to view student fee defaulter lists or financial information.');
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (activeSub) setCheckingSettings(false);
+      });
+    return () => { activeSub = false; };
+  }, [isParent, isTeacher]);
+
+  useEffect(() => {
+    if (!isModuleDisabled && !isTeacher) {
+      feeApi.getReport().then((res) => setReport(res.data)).catch(() => {});
+    }
+  }, [active, reloadReport, isModuleDisabled, isTeacher]);
 
   useEffect(() => {
     const handleRefresh = () => setReloadReport((r) => r + 1);
@@ -727,41 +758,65 @@ export default function Fees() {
     return () => window.removeEventListener('refreshFeeReport', handleRefresh);
   }, []);
 
+  if (!checkingSettings && isModuleDisabled) {
+    return (
+      <div className="max-w-xl mx-auto my-16 text-center p-8 bg-white dark:bg-dark-surface border border-border dark:border-dark-border rounded-2xl shadow-xs space-y-4">
+        <div className="w-14 h-14 mx-auto rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center">
+          <EyeOff size={28} />
+        </div>
+        <h2 className="text-lg font-bold text-deep dark:text-dark-text">Fee Portal Access Restricted</h2>
+        <p className="text-xs text-muted max-w-md mx-auto">{disabledMessage}</p>
+        <div className="pt-2">
+          <Button onClick={() => window.location.href = '/dashboard'} variant="primary" size="sm">
+            Return to Dashboard
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4 w-full">
-      <PageHeader title="Fees" description="Manage fee structures, payments, and collections." />
+      <PageHeader
+        title={isTeacher ? "Student Fee Defaulters" : "Fees"}
+        description={isTeacher ? "View student fee pending and defaulter records." : "Manage fee structures, payments, and collections."}
+      />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
-        <div className="p-4 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl shadow-2xs">
-          <p className="text-[11px] font-semibold text-muted dark:text-dark-text-muted uppercase tracking-wide">Total Collected</p>
-          <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-400 mt-1">₹{report?.totalCollected?.toLocaleString() ?? '-'}</p>
+      {!isTeacher && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+          <div className="p-4 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl shadow-2xs">
+            <p className="text-[11px] font-semibold text-muted dark:text-dark-text-muted uppercase tracking-wide">Total Collected</p>
+            <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-400 mt-1">₹{report?.totalCollected?.toLocaleString() ?? '-'}</p>
+          </div>
+          <div className="p-4 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl shadow-2xs">
+            <p className="text-[11px] font-semibold text-muted dark:text-dark-text-muted uppercase tracking-wide">Total Pending Fees</p>
+            <p className="text-2xl font-bold text-rose-600 dark:text-rose-400 mt-1">₹{report?.totalPending?.toLocaleString() ?? '-'}</p>
+          </div>
         </div>
-        <div className="p-4 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl shadow-2xs">
-          <p className="text-[11px] font-semibold text-muted dark:text-dark-text-muted uppercase tracking-wide">Total Pending Fees</p>
-          <p className="text-2xl font-bold text-rose-600 dark:text-rose-400 mt-1">₹{report?.totalPending?.toLocaleString() ?? '-'}</p>
-        </div>
-      </div>
+      )}
 
-      <div className="flex gap-1 p-1 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl w-fit shadow-2xs">
-        <button
-          onClick={() => setActive('structures')}
-          className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${active === 'structures' ? 'bg-forest dark:bg-emerald-500 text-white dark:text-gray-900 shadow-2xs' : 'text-secondary dark:text-dark-text-secondary hover:bg-surface dark:hover:bg-dark-hover hover:text-deep dark:hover:text-dark-text font-medium'}`}
-        >
-          Structures
-        </button>
-        <button
-          onClick={() => setActive('transactions')}
-          className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${active === 'transactions' ? 'bg-forest dark:bg-emerald-500 text-white dark:text-gray-900 shadow-2xs' : 'text-secondary dark:text-dark-text-secondary hover:bg-surface dark:hover:bg-dark-hover hover:text-deep dark:hover:text-dark-text font-medium'}`}
-        >
-          Transactions
-        </button>
-        <button
-          onClick={() => setActive('pending')}
-          className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${active === 'pending' ? 'bg-forest dark:bg-emerald-500 text-white dark:text-gray-900 shadow-2xs' : 'text-secondary dark:text-dark-text-secondary hover:bg-surface dark:hover:bg-dark-hover hover:text-deep dark:hover:text-dark-text font-medium'}`}
-        >
-          Pending Fees
-        </button>
-      </div>
+      {!isTeacher && (
+        <div className="flex gap-1 p-1 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl w-fit shadow-2xs">
+          <button
+            onClick={() => setActive('structures')}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${active === 'structures' ? 'bg-forest dark:bg-emerald-500 text-white dark:text-gray-900 shadow-2xs' : 'text-secondary dark:text-dark-text-secondary hover:bg-surface dark:hover:bg-dark-hover hover:text-deep dark:hover:text-dark-text font-medium'}`}
+          >
+            Structures
+          </button>
+          <button
+            onClick={() => setActive('transactions')}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${active === 'transactions' ? 'bg-forest dark:bg-emerald-500 text-white dark:text-gray-900 shadow-2xs' : 'text-secondary dark:text-dark-text-secondary hover:bg-surface dark:hover:bg-dark-hover hover:text-deep dark:hover:text-dark-text font-medium'}`}
+          >
+            Transactions
+          </button>
+          <button
+            onClick={() => setActive('pending')}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${active === 'pending' ? 'bg-forest dark:bg-emerald-500 text-white dark:text-gray-900 shadow-2xs' : 'text-secondary dark:text-dark-text-secondary hover:bg-surface dark:hover:bg-dark-hover hover:text-deep dark:hover:text-dark-text font-medium'}`}
+          >
+            Pending Fees
+          </button>
+        </div>
+      )}
 
       {active === 'structures' ? <Structures /> : active === 'transactions' ? <Transactions /> : <PendingFees />}
     </div>

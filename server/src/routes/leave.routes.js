@@ -25,8 +25,8 @@ router.get('/:id/affected-lectures', requireRole('school_admin'), getAffectedLec
 router.get('/:id/substitution-options', requireRole('school_admin'), getAffectedLectures);
 router.get('/:id', requireRole('school_admin', 'teacher', 'student', 'parent'), getLeaveById);
 router.post('/', requireRole('teacher', 'student', 'parent'), validate(createLeaveSchema), createLeave);
-router.post('/:id/approve', requireRole('school_admin'), validate(approveLeaveSchema), approveLeave);
-router.post('/:id/reject', requireRole('school_admin'), validate(rejectLeaveSchema), rejectLeave);
+router.post('/:id/approve', requireRole('school_admin', 'teacher'), validate(approveLeaveSchema), approveLeave);
+router.post('/:id/reject', requireRole('school_admin', 'teacher'), validate(rejectLeaveSchema), rejectLeave);
 router.put('/:id/cancel', requireRole('school_admin', 'teacher', 'student', 'parent'), cancelLeave);
 
 export default router;

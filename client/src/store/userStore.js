@@ -11,3 +11,5 @@ export const useUserStore = create(
     { name: 'instique-user' }
   )
 );
+
+export const userAuthStore = useUserStore;

@@ -64,6 +64,15 @@ export const refresh = asyncHandler(async (req, res) => {
     maxAge: 15 * 60 * 1000,
   });
 
+  // Rotate refresh token
+  res.cookie('refreshToken', result.refreshToken, {
+    httpOnly: true,
+    secure: env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    path: '/api/v1/auth',
+  });
+
   res.status(200).json(new ApiResponse(200, { user: result.user }, 'Token refreshed'));
 });
 

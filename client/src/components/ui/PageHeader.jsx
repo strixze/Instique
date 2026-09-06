@@ -1,11 +1,16 @@
 export default function PageHeader({
   title,
   description,
+  subtitle,
   action,
+  actions,
   secondaryAction,
   badge,
   className = '',
 }) {
+  const mainAction = action || actions;
+  const descText = description || subtitle;
+
   return (
     <div className={`flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 pb-1 ${className}`}>
       <div>
@@ -15,16 +20,16 @@ export default function PageHeader({
           </h1>
           {badge && <div className="mt-0.5">{badge}</div>}
         </div>
-        {description && (
+        {descText && (
           <p className="text-secondary dark:text-dark-text-secondary text-xs mt-1 max-w-xl leading-relaxed">
-            {description}
+            {descText}
           </p>
         )}
       </div>
-      {(action || secondaryAction) && (
+      {(mainAction || secondaryAction) && (
         <div className="shrink-0 flex items-center gap-2 mt-0.5">
           {secondaryAction}
-          {action}
+          {mainAction}
         </div>
       )}
     </div>

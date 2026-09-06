@@ -15,10 +15,13 @@ import Notice from '../models/Notice.js';
 import Event from '../models/Event.js';
 import RecognitionPoint from '../models/RecognitionPoint.js';
 import Leave from '../models/Leave.js';
+import ParentMeeting from '../models/ParentMeeting.js';
+import ParentMeetingClass from '../models/ParentMeetingClass.js';
 import ParentMeetingParticipant from '../models/ParentMeetingParticipant.js';
 import ApiError from '../utils/ApiError.js';
 import { paginate } from '../utils/pagination.js';
 import env from '../config/env.js';
+import Setting from '../models/Setting.js';
 import { sendEmail } from './brevoMail.service.js';
 import { getParentActivationEmailTemplate } from './emailTemplates/parentActivation.template.js';
 
@@ -106,7 +109,7 @@ export const resendParentActivationEmail = async (parentId, schoolId, adminUserI
   const student = parent.students?.[0];
   const studentName = student ? `${student.firstName} ${student.lastName}`.trim() : 'Student';
   const className = student?.currentClass ? `${student.currentClass.name} ${student.currentSection?.name ? `- Section ${student.currentSection.name}` : ''}`.trim() : 'General';
-  const parentName = user.name || `${parent.firstName} ${parent.lastName}`.trim();
+  const parentName = `${parent.firstName} ${parent.lastName}`.trim() || user.name || 'Parent';
   const activationUrl = `${env.CLIENT_URL}/activate-account?token=${rawToken}`;
 
   const emailHtml = getParentActivationEmailTemplate({
@@ -310,10 +313,11 @@ export const getChildDashboard = async (studentId, user, schoolId) => {
       .sort('-createdAt')
       .limit(5),
 
-    // 8. Events
+    // 8. Events (excluding parent-teacher meetings)
     Event.find({
       schoolId,
       status: { $ne: 'cancelled' },
+      type: { $ne: 'ptm' },
       startDate: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
       $or: [
         { audience: { $in: ['all', 'parents', 'students'] } },
@@ -340,19 +344,29 @@ export const getChildDashboard = async (studentId, user, schoolId) => {
       .sort('-createdAt')
       .limit(5),
 
-    // 11. Parent Meetings
-    ParentMeetingParticipant.find({
-      schoolId,
-      parent: parent._id,
-      student: student._id
+    // 11. Parent Meetings (Upcoming published meetings matching child's class or parent participant)
+    Promise.all([
+      ParentMeetingClass.find({ schoolId, schoolClass: student.currentClass?._id }).distinct('meetingId'),
+      ParentMeetingParticipant.find({ schoolId, parent: parent._id, student: student._id }).distinct('meetingId'),
+    ]).then(async ([classMids, partMids]) => {
+      const combinedMids = [...new Set([...classMids.map((id) => id.toString()), ...partMids.map((id) => id.toString())])];
+      if (!combinedMids.length) return [];
+      const meetings = await ParentMeeting.find({ _id: { $in: combinedMids }, schoolId, status: 'PUBLISHED' })
+        .populate('createdBy', 'name')
+        .sort('-date')
+        .limit(10);
+      const myParticipants = await ParentMeetingParticipant.find({
+        schoolId,
+        parent: parent._id,
+        student: student._id,
+        meetingId: { $in: meetings.map((m) => m._id) }
+      });
+      const rsvpMap = new Map(myParticipants.map((p) => [p.meetingId.toString(), { participantId: p._id, rsvpStatus: p.rsvpStatus }]));
+      return meetings.map((m) => ({
+        meetingDoc: m,
+        participantInfo: rsvpMap.get(m._id.toString())
+      }));
     })
-      .populate({
-        path: 'meetingId',
-        match: { status: { $in: ['PUBLISHED', 'COMPLETED'] } },
-        populate: { path: 'createdBy', select: 'name' }
-      })
-      .sort('-createdAt')
-      .limit(5)
   ]);
 
   // --- Calculate Attendance Summary ---
@@ -460,21 +474,53 @@ export const getChildDashboard = async (studentId, user, schoolId) => {
   const totalRecognitionPoints = recognitionList.reduce((sum, r) => sum + (r.points || 0), 0);
 
   // --- Process Meetings ---
-  const validMeetings = meetingParticipants
-    .filter((p) => p.meetingId)
-    .map((p) => ({
-      _id: p.meetingId._id,
-      participantId: p._id,
-      title: p.meetingId.title,
-      type: p.meetingId.type,
-      date: p.meetingId.date,
-      startTime: p.meetingId.startTime,
-      endTime: p.meetingId.endTime,
-      location: p.meetingId.location,
-      instructions: p.meetingId.instructions,
-      status: p.meetingId.status,
-      myRsvp: p.rsvpStatus || 'PENDING'
+  const isMeetingPast = (m) => {
+    if (!m || !m.date) return true;
+    const now = new Date();
+    const dateObj = new Date(m.date);
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const meetingDayStart = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate()).getTime();
+    return meetingDayStart < todayStart;
+  };
+
+  const validMeetings = (meetingParticipants || [])
+    .filter(({ meetingDoc }) => meetingDoc && meetingDoc.status === 'PUBLISHED' && !isMeetingPast(meetingDoc))
+    .map(({ meetingDoc, participantInfo }) => ({
+      _id: meetingDoc._id,
+      participantId: participantInfo?.participantId,
+      title: meetingDoc.title,
+      type: meetingDoc.type,
+      date: meetingDoc.date,
+      startTime: meetingDoc.startTime,
+      endTime: meetingDoc.endTime,
+      location: meetingDoc.location,
+      instructions: meetingDoc.instructions,
+      status: meetingDoc.status,
+      myRsvp: participantInfo?.rsvpStatus || 'PENDING'
     }));
+
+  const schoolSetting = await Setting.findOne({ schoolId }).select('visibility');
+  const parentVis = {
+    attendance: schoolSetting?.visibility?.parent?.attendance !== false,
+    homework: schoolSetting?.visibility?.parent?.homework !== false,
+    marks: schoolSetting?.visibility?.parent?.marks !== false,
+    timetable: schoolSetting?.visibility?.parent?.timetable !== false,
+    fees: schoolSetting?.visibility?.parent?.fees !== false,
+    leaves: schoolSetting?.visibility?.parent?.leaves !== false,
+    recognition: schoolSetting?.visibility?.parent?.recognition !== false,
+    documents: schoolSetting?.visibility?.parent?.documents !== false,
+    teacherInfo: schoolSetting?.visibility?.parent?.teacherInfo !== false,
+  };
+
+  const sanitizedPeriods = todayPeriods.map((p) => ({
+    ...p,
+    teacherName: parentVis.teacherInfo ? p.teacherName : '',
+  }));
+
+  const sanitizedHomework = formattedHomework.map((h) => ({
+    ...h,
+    teacherName: parentVis.teacherInfo ? h.teacherName : '',
+  }));
 
   return {
     student: {
@@ -496,7 +542,8 @@ export const getChildDashboard = async (studentId, user, schoolId) => {
       relationship: parent.relation ? (parent.relation.charAt(0).toUpperCase() + parent.relation.slice(1)) : 'Parent',
       status: student.status
     },
-    attendance: {
+    visibility: parentVis,
+    attendance: parentVis.attendance ? {
       percentage: attendancePercentage,
       totalDays: totalAttendanceDays,
       present: presentCount,
@@ -504,12 +551,12 @@ export const getChildDashboard = async (studentId, user, schoolId) => {
       late: lateCount,
       leave: leaveCount,
       recentLogs: recentAttendanceLogs
-    },
-    homework: {
-      items: formattedHomework,
-      pendingCount: formattedHomework.filter((h) => h.submissionStatus === 'pending' || h.submissionStatus === 'overdue').length
-    },
-    exams: {
+    } : null,
+    homework: parentVis.homework ? {
+      items: sanitizedHomework,
+      pendingCount: sanitizedHomework.filter((h) => h.submissionStatus === 'pending' || h.submissionStatus === 'overdue').length
+    } : null,
+    exams: parentVis.marks ? {
       upcoming: upcomingExams.map((e) => ({
         _id: e._id,
         name: e.name,
@@ -528,8 +575,8 @@ export const getChildDashboard = async (studentId, user, schoolId) => {
         percentage: m.percentage || (m.maxMarks > 0 ? Math.round((m.marksObtained / m.maxMarks) * 100) : 0),
         remarks: m.remarks || ''
       }))
-    },
-    fees: {
+    } : null,
+    fees: parentVis.fees ? {
       totalAssigned: totalAssignedFee,
       totalPaid: totalPaidFee,
       balance: Math.max(0, totalBalanceFee),
@@ -545,12 +592,12 @@ export const getChildDashboard = async (studentId, user, schoolId) => {
         paymentDate: t.paymentDate,
         transactionId: t.transactionId
       }))
-    },
-    timetable: {
+    } : null,
+    timetable: parentVis.timetable ? {
       todayDay,
-      periods: todayPeriods,
-      hasSchedule: todayPeriods.length > 0
-    },
+      periods: sanitizedPeriods,
+      hasSchedule: sanitizedPeriods.length > 0
+    } : null,
     notices: noticesList.map((n) => ({
       _id: n._id,
       title: n.title,
@@ -570,22 +617,22 @@ export const getChildDashboard = async (studentId, user, schoolId) => {
       location: e.location,
       color: e.color
     })),
-    recognition: {
+    recognition: parentVis.recognition ? {
       totalPoints: totalRecognitionPoints,
       items: recognitionList.map((r) => ({
         _id: r._id,
         points: r.points,
         category: r.category,
         note: r.note,
-        awardedBy: r.awardedBy ? `${r.awardedBy.firstName} ${r.awardedBy.lastName}`.trim() : 'Teacher',
+        awardedBy: parentVis.teacherInfo ? (r.awardedBy ? `${r.awardedBy.firstName} ${r.awardedBy.lastName}`.trim() : 'Teacher') : 'School',
         createdAt: r.createdAt
       }))
-    },
-    leaves: {
+    } : null,
+    leaves: parentVis.leaves ? {
       approved: leaveList.filter((l) => l.status === 'approved').length,
       pending: leaveList.filter((l) => l.status === 'pending').length,
       recent: leaveList
-    },
+    } : null,
     meetings: validMeetings
   };
 };

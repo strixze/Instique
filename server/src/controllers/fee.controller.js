@@ -1,7 +1,9 @@
 import asyncHandler from '../utils/asyncHandler.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import ApiError from '../utils/ApiError.js';
+import Setting from '../models/Setting.js';
 import * as feeService from '../services/fee.service.js';
+import { verifyParentAccessToStudent } from '../services/authorization.service.js';
 
 export const createFeeStructure = asyncHandler(async (req, res) => {
   const structure = await feeService.createFeeStructure(req.schoolId, req.body);
@@ -9,11 +11,23 @@ export const createFeeStructure = asyncHandler(async (req, res) => {
 });
 
 export const getFeeStructures = asyncHandler(async (req, res) => {
+  if (req.user?.role === 'teacher') {
+    const setting = await Setting.findOne({ schoolId: req.schoolId }).select('visibility').lean();
+    if (!setting?.visibility?.teacherPolicy?.canViewFeeInfo) {
+      throw new ApiError(403, 'Teachers do not have permission to view fee structures');
+    }
+  }
   const result = await feeService.getFeeStructures(req.schoolId, req.query);
   res.status(200).json(new ApiResponse(200, result.data, 'Fee structures fetched', result.meta));
 });
 
 export const getFeeStructureById = asyncHandler(async (req, res) => {
+  if (req.user?.role === 'teacher') {
+    const setting = await Setting.findOne({ schoolId: req.schoolId }).select('visibility').lean();
+    if (!setting?.visibility?.teacherPolicy?.canViewFeeInfo) {
+      throw new ApiError(403, 'Teachers do not have permission to view fee structures');
+    }
+  }
   const structure = await feeService.getFeeStructureById(req.params.id, req.schoolId);
   res.status(200).json(new ApiResponse(200, structure));
 });
@@ -34,16 +48,42 @@ export const recordPayment = asyncHandler(async (req, res) => {
 });
 
 export const getFeeTransactions = asyncHandler(async (req, res) => {
+  if (req.user?.role === 'teacher') {
+    const setting = await Setting.findOne({ schoolId: req.schoolId }).select('visibility').lean();
+    if (!setting?.visibility?.teacherPolicy?.canViewFeeInfo) {
+      throw new ApiError(403, 'Teachers do not have permission to view fee transactions');
+    }
+  }
   const result = await feeService.getFeeTransactions(req.schoolId, req.query, req.user);
   res.status(200).json(new ApiResponse(200, result.data, 'Transactions fetched', result.meta));
 });
 
 export const getStudentFeeStatus = asyncHandler(async (req, res) => {
+  if (req.user?.role === 'parent') {
+    const setting = await Setting.findOne({ schoolId: req.schoolId }).select('visibility').lean();
+    if (setting?.visibility?.parent?.fees === false) {
+      throw new ApiError(403, 'Viewing student fee details is currently disabled for parents by school policy');
+    }
+  }
+  if (req.user?.role === 'teacher') {
+    const setting = await Setting.findOne({ schoolId: req.schoolId }).select('visibility').lean();
+    if (!setting?.visibility?.teacherPolicy?.canViewFeeInfo) {
+      throw new ApiError(403, 'Teachers do not have permission to view student fee information');
+    }
+  }
+  // Enforce parent access restrictions
+  await verifyParentAccessToStudent(req.user, req.schoolId, req.params.studentId);
   const result = await feeService.getStudentFeeStatus(req.schoolId, req.params.studentId);
   res.status(200).json(new ApiResponse(200, result));
 });
 
 export const getFeeReport = asyncHandler(async (req, res) => {
+  if (req.user?.role === 'teacher') {
+    const setting = await Setting.findOne({ schoolId: req.schoolId }).select('visibility').lean();
+    if (!setting?.visibility?.teacherPolicy?.canViewFeeInfo) {
+      throw new ApiError(403, 'Teachers do not have permission to view fee reports');
+    }
+  }
   const report = await feeService.getFeeReport(req.schoolId, req.user);
   res.status(200).json(new ApiResponse(200, report));
 });

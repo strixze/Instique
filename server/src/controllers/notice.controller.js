@@ -3,7 +3,7 @@ import ApiResponse from '../utils/ApiResponse.js';
 import * as noticeService from '../services/notice.service.js';
 
 export const createNotice = asyncHandler(async (req, res) => {
-  const notice = await noticeService.createNotice(req.schoolId, req.body, req.user._id);
+  const notice = await noticeService.createNotice(req.schoolId, req.body, req.user._id, req.user.role);
   res.status(201).json(new ApiResponse(201, notice, 'Notice created'));
 });
 
