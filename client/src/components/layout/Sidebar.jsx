@@ -221,7 +221,10 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
   }, [rawSections, publicSettings, user?.role]);
 
   const handleLogout = async () => {
-    try { await authApi.logout(); } catch {}
+    try {
+      const refreshToken = useUserStore.getState().refreshToken;
+      await authApi.logout({ refreshToken });
+    } catch {}
     userLogout();
     navigate('/login');
     toast.success('Logged out');

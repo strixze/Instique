@@ -2,6 +2,14 @@ import asyncHandler from '../utils/asyncHandler.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import * as authService from '../services/auth.service.js';
 import env from '../config/env.js';
+import logger from '../config/logger.js';
+import { verifyRefreshToken } from '../utils/generateTokens.js';
+import {
+  getAccessTokenCookieOptions,
+  getRefreshTokenCookieOptions,
+  getClearAccessTokenCookieOptions,
+  getClearRefreshTokenCookieOptions,
+} from '../utils/cookie.helper.js';
 
 export const register = asyncHandler(async (req, res) => {
   const { name, email, password, role } = req.body;
@@ -10,22 +18,16 @@ export const register = asyncHandler(async (req, res) => {
 
   const result = await authService.registerUser({ name, email, password, role }, ip, userAgent);
 
-  res.cookie('accessToken', result.accessToken, {
-    httpOnly: true,
-    secure: env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    maxAge: 15 * 60 * 1000,
-  });
+  res.cookie('accessToken', result.accessToken, getAccessTokenCookieOptions());
+  res.cookie('refreshToken', result.refreshToken, getRefreshTokenCookieOptions());
 
-  res.cookie('refreshToken', result.refreshToken, {
-    httpOnly: true,
-    secure: env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-    path: '/api/v1/auth',
-  });
+  logger.info(`[AUTH] User registered: ${result.user.email} (${result.user.role})`);
 
-  res.status(201).json(new ApiResponse(201, { user: result.user }, 'Registration successful'));
+  res.status(201).json(new ApiResponse(201, {
+    user: result.user,
+    accessToken: result.accessToken,
+    refreshToken: result.refreshToken,
+  }, 'Registration successful'));
 });
 
 export const login = asyncHandler(async (req, res) => {
@@ -35,53 +37,57 @@ export const login = asyncHandler(async (req, res) => {
 
   const result = await authService.loginUser(email, password, ip, userAgent);
 
-  res.cookie('accessToken', result.accessToken, {
-    httpOnly: true,
-    secure: env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    maxAge: 15 * 60 * 1000,
-  });
+  res.cookie('accessToken', result.accessToken, getAccessTokenCookieOptions());
+  res.cookie('refreshToken', result.refreshToken, getRefreshTokenCookieOptions());
 
-  res.cookie('refreshToken', result.refreshToken, {
-    httpOnly: true,
-    secure: env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-    path: '/api/v1/auth',
-  });
+  logger.info(`[AUTH] User login successful: ${result.user.email} (${result.user.role})`);
 
-  res.status(200).json(new ApiResponse(200, { user: result.user }, 'Login successful'));
+  res.status(200).json(new ApiResponse(200, {
+    user: result.user,
+    accessToken: result.accessToken,
+    refreshToken: result.refreshToken,
+  }, 'Login successful'));
 });
 
 export const refresh = asyncHandler(async (req, res) => {
-  const refreshToken = req.cookies?.refreshToken;
+  const refreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
+  if (!refreshToken) {
+    logger.warn(`[AUTH] Refresh token missing from request (cookies: ${Boolean(req.cookies?.refreshToken)}, body: ${Boolean(req.body?.refreshToken)})`);
+  }
+
   const result = await authService.refreshUserToken(refreshToken);
 
-  res.cookie('accessToken', result.accessToken, {
-    httpOnly: true,
-    secure: env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    maxAge: 15 * 60 * 1000,
-  });
+  res.cookie('accessToken', result.accessToken, getAccessTokenCookieOptions());
+  res.cookie('refreshToken', result.refreshToken, getRefreshTokenCookieOptions());
 
-  // Rotate refresh token
-  res.cookie('refreshToken', result.refreshToken, {
-    httpOnly: true,
-    secure: env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-    path: '/api/v1/auth',
-  });
-
-  res.status(200).json(new ApiResponse(200, { user: result.user }, 'Token refreshed'));
+  res.status(200).json(new ApiResponse(200, {
+    user: result.user,
+    accessToken: result.accessToken,
+    refreshToken: result.refreshToken,
+  }, 'Token refreshed'));
 });
 
 export const logout = asyncHandler(async (req, res) => {
-  const refreshToken = req.cookies?.refreshToken;
-  await authService.logoutUser(req.user._id, refreshToken);
+  const refreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
+  const userId = req.user?._id;
 
-  res.clearCookie('accessToken');
-  res.clearCookie('refreshToken', { path: '/api/v1/auth' });
+  if (userId) {
+    await authService.logoutUser(userId, refreshToken);
+    logger.info(`[AUTH] User logged out: ${userId}`);
+  } else if (refreshToken) {
+    try {
+      const decoded = verifyRefreshToken(refreshToken);
+      if (decoded?._id) {
+        await authService.logoutUser(decoded._id, refreshToken);
+        logger.info(`[AUTH] User session cleared via refresh token: ${decoded._id}`);
+      }
+    } catch {
+      // Refresh token might already be expired or invalid; cookies will still be cleared
+    }
+  }
+
+  res.clearCookie('accessToken', getClearAccessTokenCookieOptions());
+  res.clearCookie('refreshToken', getClearRefreshTokenCookieOptions());
 
   res.status(200).json(new ApiResponse(200, null, 'Logged out successfully'));
 });

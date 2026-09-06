@@ -15,7 +15,7 @@ import {
   verifyResetToken,
   resetPassword
 } from '../controllers/auth.controller.js';
-import authMiddleware from '../middlewares/auth.middleware.js';
+import authMiddleware, { optionalAuth } from '../middlewares/auth.middleware.js';
 import validate from '../middlewares/validate.middleware.js';
 import { 
   registerSchema, 
@@ -32,7 +32,7 @@ const router = Router();
 router.post('/register', authLimiter, validate(registerSchema), register);
 router.post('/login', authLimiter, validate(loginSchema), login);
 router.post('/refresh', refresh);
-router.post('/logout', authMiddleware, logout);
+router.post('/logout', optionalAuth, logout);
 router.post('/change-password', authMiddleware, validate(changePasswordSchema), changePassword);
 router.get('/profile', authMiddleware, getProfile);
 router.put('/profile', authMiddleware, updateProfile);
