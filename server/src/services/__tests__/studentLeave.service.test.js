@@ -17,6 +17,7 @@ import SchoolClass from '../../models/SchoolClass.js';
 import Attendance from '../../models/Attendance.js';
 import AuditLog from '../../models/AuditLog.js';
 import Notification from '../../models/Notification.js';
+import Setting from '../../models/Setting.js';
 
 describe('Student Leave Management Workflow & Security Tests', () => {
   const schoolA = new mongoose.Types.ObjectId().toString();
@@ -68,6 +69,7 @@ describe('Student Leave Management Workflow & Security Tests', () => {
       NotificationCreate: Notification.create,
       NotificationInsertMany: Notification.insertMany,
       AuditLogCreate: AuditLog.create,
+      SettingFindOne: Setting.findOne,
     };
 
     // Default safe mocks for all queries
@@ -75,6 +77,7 @@ describe('Student Leave Management Workflow & Security Tests', () => {
     Student.findOne = () => ({ populate: () => ({ populate: async () => null }) });
     Teacher.findOne = async () => null;
     User.find = () => ({ select: async () => [] });
+    Setting.findOne = async () => null;
 
     // Notification spy
     Notification.create = async (doc) => {
@@ -111,6 +114,7 @@ describe('Student Leave Management Workflow & Security Tests', () => {
     Notification.create = originals.NotificationCreate;
     Notification.insertMany = originals.NotificationInsertMany;
     AuditLog.create = originals.AuditLogCreate;
+    Setting.findOne = originals.SettingFindOne;
   });
 
   // Helper mocks
@@ -683,5 +687,82 @@ describe('Student Leave Management Workflow & Security Tests', () => {
     const result = await cancelLeave('leave-1', schoolA, parentUserId, 'Family trip postponed');
     expect(result.status).toBe('cancelled');
     expect(auditLogsCreated.some((a) => a.action === 'STUDENT_LEAVE_CANCELLED')).toBe(true);
+  });
+
+  // 17. Settings enforcement: maxConsecutiveDays
+  it('17. should reject student leave if duration exceeds maxConsecutiveDays from settings', async () => {
+    mockParentUser();
+
+    Student.findOne = () => ({
+      populate: () => ({
+        populate: async () => ({
+          _id: studentAId,
+          schoolId: schoolA,
+          firstName: 'Aarav',
+          lastName: 'Sharma',
+          currentClass: { _id: class8AId, name: 'Grade 8' },
+          currentSection: { _id: section8AId, name: 'A' },
+        }),
+      }),
+    });
+
+    Leave.findOne = async () => null;
+
+    Setting.findOne = async () => ({
+      leave: {
+        studentLeave: {
+          maxConsecutiveDays: 5,
+        },
+      },
+    });
+
+    // 10 days leave
+    await expect(
+      createLeave(schoolA, {
+        studentId: studentAId,
+        startDate: '2026-10-01',
+        endDate: '2026-10-10',
+        reason: 'Long vacation',
+      }, parentUserId)
+    ).rejects.toThrow('exceeds maximum allowed limit of 5 days');
+  });
+
+  // 18. Settings enforcement: requireMedicalCertificateDays
+  it('18. should require medical certificate when leave duration reaches threshold in settings', async () => {
+    mockParentUser();
+
+    Student.findOne = () => ({
+      populate: () => ({
+        populate: async () => ({
+          _id: studentAId,
+          schoolId: schoolA,
+          firstName: 'Aarav',
+          lastName: 'Sharma',
+          currentClass: { _id: class8AId, name: 'Grade 8' },
+          currentSection: { _id: section8AId, name: 'A' },
+        }),
+      }),
+    });
+
+    Leave.findOne = async () => null;
+
+    Setting.findOne = async () => ({
+      leave: {
+        studentLeave: {
+          maxConsecutiveDays: 15,
+          requireMedicalCertificateDays: 3,
+        },
+      },
+    });
+
+    // 4 days leave without document
+    await expect(
+      createLeave(schoolA, {
+        studentId: studentAId,
+        startDate: '2026-10-01',
+        endDate: '2026-10-04',
+        reason: 'Severe illness',
+      }, parentUserId)
+    ).rejects.toThrow('medical certificate is required for student leaves of 3 days or more');
   });
 });

@@ -9,6 +9,7 @@ import Student from '../models/Student.js';
 import Parent from '../models/Parent.js';
 import SchoolClass from '../models/SchoolClass.js';
 import ApiError from '../utils/ApiError.js';
+import Setting from '../models/Setting.js';
 import { paginate } from '../utils/pagination.js';
 import { createNotification, sendBulkNotification } from './notification.service.js';
 import { createAuditLog } from './audit.service.js';
@@ -271,6 +272,19 @@ export const createLeave = async (schoolId, data, userId) => {
       throw new ApiError(409, 'An overlapping leave request already exists for this student.');
     }
 
+    // Validate against School Leave Policies
+    const schoolSettings = await Setting.findOne({ schoolId });
+    const studentPolicy = schoolSettings?.leave?.studentLeave;
+    const durationDays = Math.round((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+
+    if (studentPolicy?.maxConsecutiveDays && durationDays > studentPolicy.maxConsecutiveDays) {
+      throw new ApiError(400, `Student leave duration (${durationDays} days) exceeds maximum allowed limit of ${studentPolicy.maxConsecutiveDays} days.`);
+    }
+
+    if (studentPolicy?.requireMedicalCertificateDays && durationDays >= studentPolicy.requireMedicalCertificateDays && !data.document) {
+      throw new ApiError(400, `A medical certificate is required for student leaves of ${studentPolicy.requireMedicalCertificateDays} days or more.`);
+    }
+
     // Determine student's class teacher
     const classTeacher = await determineClassTeacher(schoolId, student);
     if (!classTeacher) {
@@ -370,6 +384,15 @@ export const createLeave = async (schoolId, data, userId) => {
 
   if (overlap) {
     throw new ApiError(409, 'Leave request overlaps with an existing pending or approved leave');
+  }
+
+  // Validate against School Leave Policies
+  const schoolSettingsForTeacher = await Setting.findOne({ schoolId });
+  const teacherPolicy = schoolSettingsForTeacher?.leave?.teacherLeave;
+  const teacherDurationDays = Math.round((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+
+  if (teacherPolicy?.maxConsecutiveDays && teacherDurationDays > teacherPolicy.maxConsecutiveDays) {
+    throw new ApiError(400, `Teacher leave duration (${teacherDurationDays} days) exceeds maximum allowed limit of ${teacherPolicy.maxConsecutiveDays} days.`);
   }
 
   const requesterModel = user.role === 'teacher' ? 'Teacher' : 'Student';

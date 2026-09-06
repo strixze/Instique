@@ -6,6 +6,7 @@ import SchoolClass from '../models/SchoolClass.js';
 import Section from '../models/Section.js';
 import Subject from '../models/Subject.js';
 import AcademicYear from '../models/AcademicYear.js';
+import Setting from '../models/Setting.js';
 import { User } from '../models/User.js';
 import ApiError from '../utils/ApiError.js';
 import { paginate } from '../utils/pagination.js';
@@ -100,6 +101,11 @@ export const createHomework = async (schoolId, user, data, files = []) => {
   let teacherName = user.name;
 
   if (user.role === 'teacher') {
+    const schoolSetting = await Setting.findOne({ schoolId }).select('visibility');
+    if (schoolSetting?.visibility?.teacherPolicy?.canCreateHomework === false) {
+      throw new ApiError(403, 'Creating and publishing homework is not permitted for teachers by school policy');
+    }
+
     const teacher = await Teacher.findOne({
       schoolId,
       $or: [{ _id: user.profileId }, { 'contact.email': user.email }],
@@ -327,6 +333,11 @@ export const getHomework = async (schoolId, user, options = {}) => {
     }
     query.status = 'published';
   } else if (user.role === 'parent') {
+    const schoolSetting = await Setting.findOne({ schoolId }).select('visibility').lean();
+    if (schoolSetting?.visibility?.parent?.homework === false) {
+      return { data: [], meta: { total: 0, page: 1, limit: options.limit || 10, totalPages: 0 } };
+    }
+
     const parent = await Parent.findOne({
       schoolId,
       $or: [{ _id: user.profileId }, { 'contact.email': user.email }],
@@ -353,7 +364,7 @@ export const getHomework = async (schoolId, user, options = {}) => {
     query.status = 'published';
   }
 
-  return paginate(Homework, query, {
+  const result = await paginate(Homework, query, {
     ...options,
     searchFields: ['title', 'description'],
     populate: [
@@ -364,6 +375,21 @@ export const getHomework = async (schoolId, user, options = {}) => {
     ],
     sort: options.sort || '-createdAt',
   });
+
+  if (user.role === 'parent') {
+    const schoolSetting = await Setting.findOne({ schoolId }).select('visibility').lean();
+    if (schoolSetting?.visibility?.parent?.teacherInfo === false && result.data) {
+      result.data = result.data.map((h) => {
+        const item = h.toObject ? h.toObject() : { ...h };
+        if (item.teacher) {
+          item.teacher = { firstName: 'Class', lastName: 'Teacher' };
+        }
+        return item;
+      });
+    }
+  }
+
+  return result;
 };
 
 /**

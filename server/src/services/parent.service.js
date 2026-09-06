@@ -21,6 +21,7 @@ import ParentMeetingParticipant from '../models/ParentMeetingParticipant.js';
 import ApiError from '../utils/ApiError.js';
 import { paginate } from '../utils/pagination.js';
 import env from '../config/env.js';
+import Setting from '../models/Setting.js';
 import { sendEmail } from './brevoMail.service.js';
 import { getParentActivationEmailTemplate } from './emailTemplates/parentActivation.template.js';
 
@@ -498,6 +499,29 @@ export const getChildDashboard = async (studentId, user, schoolId) => {
       myRsvp: participantInfo?.rsvpStatus || 'PENDING'
     }));
 
+  const schoolSetting = await Setting.findOne({ schoolId }).select('visibility');
+  const parentVis = {
+    attendance: schoolSetting?.visibility?.parent?.attendance !== false,
+    homework: schoolSetting?.visibility?.parent?.homework !== false,
+    marks: schoolSetting?.visibility?.parent?.marks !== false,
+    timetable: schoolSetting?.visibility?.parent?.timetable !== false,
+    fees: schoolSetting?.visibility?.parent?.fees !== false,
+    leaves: schoolSetting?.visibility?.parent?.leaves !== false,
+    recognition: schoolSetting?.visibility?.parent?.recognition !== false,
+    documents: schoolSetting?.visibility?.parent?.documents !== false,
+    teacherInfo: schoolSetting?.visibility?.parent?.teacherInfo !== false,
+  };
+
+  const sanitizedPeriods = todayPeriods.map((p) => ({
+    ...p,
+    teacherName: parentVis.teacherInfo ? p.teacherName : '',
+  }));
+
+  const sanitizedHomework = formattedHomework.map((h) => ({
+    ...h,
+    teacherName: parentVis.teacherInfo ? h.teacherName : '',
+  }));
+
   return {
     student: {
       _id: student._id,
@@ -518,7 +542,8 @@ export const getChildDashboard = async (studentId, user, schoolId) => {
       relationship: parent.relation ? (parent.relation.charAt(0).toUpperCase() + parent.relation.slice(1)) : 'Parent',
       status: student.status
     },
-    attendance: {
+    visibility: parentVis,
+    attendance: parentVis.attendance ? {
       percentage: attendancePercentage,
       totalDays: totalAttendanceDays,
       present: presentCount,
@@ -526,12 +551,12 @@ export const getChildDashboard = async (studentId, user, schoolId) => {
       late: lateCount,
       leave: leaveCount,
       recentLogs: recentAttendanceLogs
-    },
-    homework: {
-      items: formattedHomework,
-      pendingCount: formattedHomework.filter((h) => h.submissionStatus === 'pending' || h.submissionStatus === 'overdue').length
-    },
-    exams: {
+    } : null,
+    homework: parentVis.homework ? {
+      items: sanitizedHomework,
+      pendingCount: sanitizedHomework.filter((h) => h.submissionStatus === 'pending' || h.submissionStatus === 'overdue').length
+    } : null,
+    exams: parentVis.marks ? {
       upcoming: upcomingExams.map((e) => ({
         _id: e._id,
         name: e.name,
@@ -550,8 +575,8 @@ export const getChildDashboard = async (studentId, user, schoolId) => {
         percentage: m.percentage || (m.maxMarks > 0 ? Math.round((m.marksObtained / m.maxMarks) * 100) : 0),
         remarks: m.remarks || ''
       }))
-    },
-    fees: {
+    } : null,
+    fees: parentVis.fees ? {
       totalAssigned: totalAssignedFee,
       totalPaid: totalPaidFee,
       balance: Math.max(0, totalBalanceFee),
@@ -567,12 +592,12 @@ export const getChildDashboard = async (studentId, user, schoolId) => {
         paymentDate: t.paymentDate,
         transactionId: t.transactionId
       }))
-    },
-    timetable: {
+    } : null,
+    timetable: parentVis.timetable ? {
       todayDay,
-      periods: todayPeriods,
-      hasSchedule: todayPeriods.length > 0
-    },
+      periods: sanitizedPeriods,
+      hasSchedule: sanitizedPeriods.length > 0
+    } : null,
     notices: noticesList.map((n) => ({
       _id: n._id,
       title: n.title,
@@ -592,22 +617,22 @@ export const getChildDashboard = async (studentId, user, schoolId) => {
       location: e.location,
       color: e.color
     })),
-    recognition: {
+    recognition: parentVis.recognition ? {
       totalPoints: totalRecognitionPoints,
       items: recognitionList.map((r) => ({
         _id: r._id,
         points: r.points,
         category: r.category,
         note: r.note,
-        awardedBy: r.awardedBy ? `${r.awardedBy.firstName} ${r.awardedBy.lastName}`.trim() : 'Teacher',
+        awardedBy: parentVis.teacherInfo ? (r.awardedBy ? `${r.awardedBy.firstName} ${r.awardedBy.lastName}`.trim() : 'Teacher') : 'School',
         createdAt: r.createdAt
       }))
-    },
-    leaves: {
+    } : null,
+    leaves: parentVis.leaves ? {
       approved: leaveList.filter((l) => l.status === 'approved').length,
       pending: leaveList.filter((l) => l.status === 'pending').length,
       recent: leaveList
-    },
+    } : null,
     meetings: validMeetings
   };
 };

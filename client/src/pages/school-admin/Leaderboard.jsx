@@ -5,7 +5,7 @@ import {
   Trophy, Award, Users, CheckCircle, XCircle, AlertCircle, TrendingUp,
   BarChart3, Search, Filter, ArrowUpDown, ArrowUp, ArrowDown,
   Printer, Download, Edit3, ChevronRight, School, Calendar, BookOpen,
-  UserCheck, RefreshCw,
+  UserCheck, RefreshCw, EyeOff,
 } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 import Card from '../../components/ui/Card';
@@ -14,6 +14,7 @@ import Badge from '../../components/ui/Badge';
 import Select from '../../components/ui/Select';
 import UserAvatar from '../../components/ui/UserAvatar';
 import { examApi } from '../../api/exam.api';
+import { settingApi } from '../../api/setting.api';
 import { useUserStore } from '../../store/userStore';
 
 // ── Helpers ──
@@ -52,6 +53,7 @@ export default function Leaderboard() {
   const [loading, setLoading] = useState(false);
   const [examLoading, setExamLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isModuleDisabled, setIsModuleDisabled] = useState(false);
 
   // Filters & Sorting
   const [searchTerm, setSearchTerm] = useState('');
@@ -75,7 +77,18 @@ export default function Leaderboard() {
         toast.error('Failed to load exams list');
         setExamLoading(false);
       });
-  }, []);
+
+    if (user?.role === 'parent') {
+      settingApi.getPublic()
+        .then((res) => {
+          const sData = res.data?.data || res.data;
+          if (sData?.visibility?.parent?.marks === false || sData?.features?.leaderboard === false) {
+            setIsModuleDisabled(true);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [user?.role]);
 
   // Fetch results when exam changes
   const loadResults = async (examId) => {
@@ -241,6 +254,25 @@ export default function Leaderboard() {
 
   const summary = examData?.summary || {};
   const hasMarks = examData?.results?.some((r) => r.result !== 'incomplete' || r.totalObtained !== null);
+
+  if (user?.role === 'parent' && isModuleDisabled) {
+    return (
+      <div className="max-w-xl mx-auto my-16 text-center p-8 bg-white dark:bg-dark-surface border border-border dark:border-dark-border rounded-2xl shadow-xs space-y-4">
+        <div className="w-14 h-14 mx-auto rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center">
+          <EyeOff size={28} />
+        </div>
+        <h2 className="text-lg font-bold text-deep dark:text-dark-text">Leaderboard Restricted</h2>
+        <p className="text-xs text-muted max-w-md mx-auto">
+          Viewing exam leaderboards and marks is currently disabled for parents by your school administrator.
+        </p>
+        <div className="pt-2">
+          <Button onClick={() => window.location.href = '/dashboard'} variant="primary" size="sm">
+            Return to Dashboard
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 pb-12 print:p-0 print:space-y-4 print-timetable">

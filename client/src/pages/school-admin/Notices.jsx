@@ -10,6 +10,7 @@ import Input from '../../components/ui/Input';
 import Select from '../../components/ui/Select';
 import Badge from '../../components/ui/Badge';
 import { noticeApi } from '../../api/notice.api';
+import { settingApi } from '../../api/setting.api';
 import { useUserStore } from '../../store/userStore';
 
 const categoryColors = {
@@ -30,6 +31,7 @@ export default function Notices() {
   const [data, setData] = useState([]);
   const [meta, setMeta] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [canCreateNotices, setCanCreateNotices] = useState(true);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [reload, setReload] = useState(0);
@@ -55,6 +57,19 @@ export default function Notices() {
     load();
     return () => { active = false; };
   }, [page, search, reload]);
+
+  useEffect(() => {
+    if (user?.role === 'teacher') {
+      settingApi.getPublic()
+        .then((res) => {
+          const sData = res.data?.data || res.data;
+          if (sData?.visibility?.teacherPolicy?.canCreateNotices === false) {
+            setCanCreateNotices(false);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [user?.role]);
 
   const setField = (key, value) => setForm((f) => ({ ...f, [key]: value }));
   const resetAndClose = () => { setForm(emptyForm); setOpen(false); };
@@ -171,7 +186,7 @@ export default function Notices() {
       <PageHeader
         title="Notice Board"
         description={isAdmin ? "Create and manage school notices and circulars" : "Stay informed with official school notices and circulars"}
-        action={isAdmin ? <Button onClick={() => setOpen(true)}><Plus size={16} className="mr-2" />New Notice</Button> : null}
+        action={isAdmin && (user?.role !== 'teacher' || canCreateNotices) ? <Button onClick={() => setOpen(true)}><Plus size={16} className="mr-2" />New Notice</Button> : null}
       />
 
       <DataTable

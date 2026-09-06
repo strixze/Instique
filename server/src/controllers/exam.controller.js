@@ -1,6 +1,7 @@
 import asyncHandler from '../utils/asyncHandler.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import ApiError from '../utils/ApiError.js';
+import Setting from '../models/Setting.js';
 import * as examService from '../services/exam.service.js';
 import { getTeacherScope } from '../services/authorization.service.js';
 
@@ -51,11 +52,23 @@ export const enterMark = asyncHandler(async (req, res) => {
 });
 
 export const getMarks = asyncHandler(async (req, res) => {
+  if (req.user?.role === 'parent') {
+    const setting = await Setting.findOne({ schoolId: req.schoolId }).select('visibility').lean();
+    if (setting?.visibility?.parent?.marks === false) {
+      return res.status(200).json(new ApiResponse(200, [], 'Marks fetched', { total: 0, page: 1, limit: 10, totalPages: 0 }));
+    }
+  }
   const result = await examService.getMarks(req.schoolId, req.query);
   res.status(200).json(new ApiResponse(200, result.data, 'Marks fetched', result.meta));
 });
 
 export const getMarksByExam = asyncHandler(async (req, res) => {
+  if (req.user?.role === 'parent') {
+    const setting = await Setting.findOne({ schoolId: req.schoolId }).select('visibility').lean();
+    if (setting?.visibility?.parent?.marks === false) {
+      throw new ApiError(403, 'Viewing exam marks is currently disabled for parents by school policy');
+    }
+  }
   if (req.user.role === 'teacher') {
     const scope = await getTeacherScope(req.user, req.schoolId);
     const exam = await examService.getExamById(req.params.examId, req.schoolId);
@@ -68,6 +81,12 @@ export const getMarksByExam = asyncHandler(async (req, res) => {
 });
 
 export const publishResults = asyncHandler(async (req, res) => {
+  if (req.user.role === 'teacher') {
+    const setting = await Setting.findOne({ schoolId: req.schoolId }).select('visibility');
+    if (!setting?.visibility?.teacherPolicy?.canPublishMarks) {
+      throw new ApiError(403, 'Publishing exam results directly is not allowed for teachers. Only school admins can publish results.');
+    }
+  }
   const exam = await examService.publishResults(req.schoolId, req.params.examId);
   res.status(200).json(new ApiResponse(200, exam, 'Results published'));
 });
@@ -97,6 +116,12 @@ export const saveMarksBulk = asyncHandler(async (req, res) => {
 });
 
 export const getExamResults = asyncHandler(async (req, res) => {
+  if (req.user?.role === 'parent') {
+    const setting = await Setting.findOne({ schoolId: req.schoolId }).select('visibility').lean();
+    if (setting?.visibility?.parent?.marks === false) {
+      throw new ApiError(403, 'Viewing exam results is currently disabled for parents by school policy');
+    }
+  }
   if (req.user.role === 'teacher') {
     const scope = await getTeacherScope(req.user, req.schoolId);
     const exam = await examService.getExamById(req.params.examId, req.schoolId);

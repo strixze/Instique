@@ -2,9 +2,10 @@ import Attendance from '../models/Attendance.js';
 import Student from '../models/Student.js';
 import Leave from '../models/Leave.js';
 import ApiError from '../utils/ApiError.js';
+import Setting from '../models/Setting.js';
 import { paginate } from '../utils/pagination.js';
 
-export const markAttendance = async (schoolId, data, userId) => {
+export const markAttendance = async (schoolId, data, userId, userRole = null) => {
   const existing = await Attendance.findOne({
     schoolId,
     date: new Date(data.date),
@@ -19,6 +20,18 @@ export const markAttendance = async (schoolId, data, userId) => {
   }
 
   if (existing) {
+    if (userRole === 'teacher') {
+      const schoolSetting = await Setting.findOne({ schoolId }).select('visibility attendance');
+      if (schoolSetting?.visibility?.teacherPolicy?.canEditSubmittedAttendance === false || schoolSetting?.attendance?.allowTeacherEdit === false) {
+        throw new ApiError(403, 'Editing submitted attendance is not permitted for teachers by school policy');
+      }
+      const editWindowHours = schoolSetting?.attendance?.editWindowHours ?? 24;
+      const createdAtTime = new Date(existing.createdAt || existing.updatedAt || Date.now()).getTime();
+      if (Date.now() - createdAtTime > editWindowHours * 3600 * 1000) {
+        throw new ApiError(403, `Attendance edit window (${editWindowHours}h) has expired`);
+      }
+    }
+
     // Update existing attendance record (upsert behaviour)
     existing.students = data.students;
     existing.summary = summary;
@@ -39,7 +52,7 @@ export const markAttendance = async (schoolId, data, userId) => {
   return attendance;
 };
 
-export const markAllPresent = async (schoolId, data, userId) => {
+export const markAllPresent = async (schoolId, data, userId, userRole = null) => {
   const students = await Student.find({
     schoolId,
     currentClass: data.schoolClass,
@@ -89,6 +102,18 @@ export const markAllPresent = async (schoolId, data, userId) => {
   });
 
   if (existing) {
+    if (userRole === 'teacher') {
+      const schoolSetting = await Setting.findOne({ schoolId }).select('visibility attendance');
+      if (schoolSetting?.visibility?.teacherPolicy?.canEditSubmittedAttendance === false || schoolSetting?.attendance?.allowTeacherEdit === false) {
+        throw new ApiError(403, 'Editing submitted attendance is not permitted for teachers by school policy');
+      }
+      const editWindowHours = schoolSetting?.attendance?.editWindowHours ?? 24;
+      const createdAtTime = new Date(existing.createdAt || existing.updatedAt || Date.now()).getTime();
+      if (Date.now() - createdAtTime > editWindowHours * 3600 * 1000) {
+        throw new ApiError(403, `Attendance edit window (${editWindowHours}h) has expired`);
+      }
+    }
+
     existing.students = studentStatuses;
     existing.summary = summary;
     existing.markedBy = userId;
@@ -288,6 +313,9 @@ export const getStudentAttendance = async (schoolId, studentId, options = {}) =>
     }
   }
 
+  const schoolSetting = await Setting.findOne({ schoolId }).select('attendance');
+  const minAttendancePercentage = schoolSetting?.attendance?.minAttendancePercentage ?? 75;
+
   return {
     student: {
       _id: student?._id,
@@ -301,6 +329,8 @@ export const getStudentAttendance = async (schoolId, studentId, options = {}) =>
     },
     analytics: {
       attendanceRate,
+      minAttendancePercentage,
+      isBelowThreshold: attendanceRate < minAttendancePercentage,
       totalWorkingDays: effectiveWorkingDays,
       presentDays,
       absentDays,

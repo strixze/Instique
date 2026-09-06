@@ -285,391 +285,429 @@ export default function ParentDashboard() {
       )}
 
       {/* ────────────────── Main Dashboard Content ────────────────── */}
-      {selectedChildId && (
-        <>
-          {/* Row 1: KPI Stat Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            
-            {/* 1. Attendance */}
-            <Card className="hover:shadow-md transition-shadow">
-              {dashboardLoading ? (
-                <div className="space-y-2 animate-pulse">
-                  <div className="h-4 bg-slate-100 rounded w-1/2"></div>
-                  <div className="h-8 bg-slate-100 rounded w-3/4"></div>
-                </div>
-              ) : (
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-2xl bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
-                    <ClipboardList size={24} />
-                  </div>
-                  <div className="space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl font-extrabold text-deep">
-                        {dashboardData?.attendance?.percentage ?? 0}%
-                      </span>
-                      <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">
-                        {dashboardData?.attendance?.present ?? 0}/{dashboardData?.attendance?.totalDays ?? 0} days
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted font-medium">Overall Attendance</p>
-                  </div>
-                </div>
-              )}
-            </Card>
+      {selectedChildId && (() => {
+        const isAttVisible = dashboardData?.visibility?.attendance !== false && dashboardData?.attendance !== null;
+        const isFeesVisible = dashboardData?.visibility?.fees !== false && dashboardData?.fees !== null;
+        const isHwVisible = dashboardData?.visibility?.homework !== false && dashboardData?.homework !== null;
+        const isRecVisible = dashboardData?.visibility?.recognition !== false && dashboardData?.recognition !== null;
+        const isTimetableVisible = dashboardData?.visibility?.timetable !== false && dashboardData?.timetable !== null;
+        const isMarksVisible = dashboardData?.visibility?.marks !== false && dashboardData?.exams !== null;
+        const isLeavesVisible = dashboardData?.visibility?.leaves !== false && dashboardData?.leaves !== null;
+        const isTeacherInfoVisible = dashboardData?.visibility?.teacherInfo !== false;
 
-            {/* 2. Fee Status */}
-            <Card className="hover:shadow-md transition-shadow">
-              {dashboardLoading ? (
-                <div className="space-y-2 animate-pulse">
-                  <div className="h-4 bg-slate-100 rounded w-1/2"></div>
-                  <div className="h-8 bg-slate-100 rounded w-3/4"></div>
-                </div>
-              ) : (
-                <div className="flex items-center gap-4">
-                  <div className={`p-3 rounded-2xl border ${
-                    dashboardData?.fees?.balance === 0 
-                      ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' 
-                      : 'bg-amber-500/10 text-amber-600 border-amber-500/20'
-                  }`}>
-                    <DollarSign size={24} />
-                  </div>
-                  <div className="space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl font-extrabold text-deep">
-                        ₹{dashboardData?.fees?.balance?.toLocaleString('en-IN') ?? 0}
-                      </span>
-                      <Badge color={dashboardData?.fees?.status === 'PAID' ? 'success' : dashboardData?.fees?.status === 'PARTIAL' ? 'warning' : 'danger'}>
-                        {dashboardData?.fees?.status || 'PENDING'}
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-muted font-medium">
-                      {dashboardData?.fees?.balance === 0 ? 'All fees cleared' : 'Pending Balance'}
-                    </p>
-                  </div>
-                </div>
-              )}
-            </Card>
+        const visibleKpiCount = [isAttVisible, isFeesVisible, isHwVisible, isRecVisible].filter(Boolean).length;
 
-            {/* 3. Pending Homework */}
-            <Card className="hover:shadow-md transition-shadow">
-              {dashboardLoading ? (
-                <div className="space-y-2 animate-pulse">
-                  <div className="h-4 bg-slate-100 rounded w-1/2"></div>
-                  <div className="h-8 bg-slate-100 rounded w-3/4"></div>
-                </div>
-              ) : (
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-2xl bg-blue-500/10 text-blue-600 border border-blue-500/20">
-                    <BookOpen size={24} />
-                  </div>
-                  <div className="space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl font-extrabold text-deep">
-                        {dashboardData?.homework?.pendingCount ?? 0}
-                      </span>
-                      <span className="text-xs text-muted">
-                        of {dashboardData?.homework?.items?.length ?? 0} active
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted font-medium">Pending Homework</p>
-                  </div>
-                </div>
-              )}
-            </Card>
-
-            {/* 4. Recognition Points */}
-            <Card className="hover:shadow-md transition-shadow">
-              {dashboardLoading ? (
-                <div className="space-y-2 animate-pulse">
-                  <div className="h-4 bg-slate-100 rounded w-1/2"></div>
-                  <div className="h-8 bg-slate-100 rounded w-3/4"></div>
-                </div>
-              ) : (
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-2xl bg-purple-500/10 text-purple-600 border border-purple-500/20">
-                    <Trophy size={24} />
-                  </div>
-                  <div className="space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl font-extrabold text-deep">
-                        +{dashboardData?.recognition?.totalPoints ?? 0}
-                      </span>
-                      <span className="text-xs text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded font-semibold">
-                        {dashboardData?.recognition?.items?.length ?? 0} Badges
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted font-medium">Recognition Points</p>
-                  </div>
-                </div>
-              )}
-            </Card>
-
-          </div>
-
-          {/* Row 2: Today's Schedule & Upcoming Homework */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            {/* Today's Timetable (1 Column) */}
-            <div className="lg:col-span-1 space-y-3">
-              <div className="flex items-center justify-between">
-                <h2 className="text-base font-bold text-deep flex items-center gap-2">
-                  <Clock size={18} className="text-forest" /> Today's Schedule
-                </h2>
-                <Link to="/timetable" className="text-xs font-semibold text-forest hover:underline">
-                  Full week →
-                </Link>
-              </div>
-
-              <Card className="!p-4 space-y-3 min-h-[280px]">
-                {dashboardLoading ? (
-                  <div className="space-y-2.5 py-2">
-                    {[1, 2, 3, 4].map((i) => (
-                      <div key={i} className="h-12 bg-slate-100 rounded-xl animate-pulse" />
-                    ))}
-                  </div>
-                ) : !dashboardData?.timetable?.hasSchedule || dashboardData?.timetable?.periods?.length === 0 ? (
-                  <div className="py-12 text-center text-muted space-y-2">
-                    <Clock size={32} className="mx-auto opacity-30 text-forest" />
-                    <p className="text-sm font-semibold text-deep">No Classes Today</p>
-                    <p className="text-xs text-muted">No scheduled lectures for today or weekend break.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-2 max-h-[340px] overflow-y-auto pr-1">
-                    {dashboardData.timetable.periods.map((p, idx) => (
-                      <div
-                        key={idx}
-                        className={`flex items-center justify-between p-2.5 rounded-xl border text-xs ${
-                          p.isBreak
-                            ? 'bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 font-medium'
-                            : 'bg-white dark:bg-[#15191C] border-border/80 dark:border-white/10 hover:border-forest/40 hover:bg-forest/5 transition-colors'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <span className={`w-6 h-6 rounded-lg flex items-center justify-center font-bold text-[11px] ${
-                            p.isBreak ? 'bg-slate-200 dark:bg-white/10 text-slate-600 dark:text-slate-300' : 'bg-forest/10 text-forest dark:bg-emerald-500/20 dark:text-emerald-400'
-                          }`}>
-                            P{p.periodNo}
-                          </span>
-                          <div>
-                            <p className="font-bold text-deep">{p.subjectName}</p>
-                            {p.teacherName && (
-                              <p className="text-[11px] text-muted">{p.teacherName}</p>
-                            )}
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <span className="font-semibold text-slate-700 dark:text-slate-300">
-                            {p.startTime || '—'}
-                          </span>
-                          {p.room && (
-                            <p className="text-[10px] text-muted">Room: {p.room}</p>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </Card>
-            </div>
-
-            {/* Upcoming Homework (2 Columns) */}
-            <div className="lg:col-span-2 space-y-3">
-              <div className="flex items-center justify-between">
-                <h2 className="text-base font-bold text-deep flex items-center gap-2">
-                  <BookOpen size={18} className="text-forest" /> Assigned Homework
-                </h2>
-                <span className="text-xs text-muted">
-                  Class {selectedChild?.class} • Section {selectedChild?.section}
-                </span>
-              </div>
-
-              <Card className="!p-4 min-h-[280px]">
-                {dashboardLoading ? (
-                  <div className="space-y-3 py-2">
-                    {[1, 2, 3].map((i) => (
-                      <div key={i} className="h-16 bg-slate-100 dark:bg-dark-hover rounded-xl animate-pulse" />
-                    ))}
-                  </div>
-                ) : !dashboardData?.homework?.items || dashboardData.homework.items.length === 0 ? (
-                  <div className="py-12 text-center text-muted space-y-2">
-                    <CheckCircle2 size={32} className="mx-auto opacity-30 text-emerald-600" />
-                    <p className="text-sm font-semibold text-deep">All Caught Up!</p>
-                    <p className="text-xs text-muted">No pending homework assignments for this class.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-2.5">
-                    {dashboardData.homework.items.map((hw) => {
-                      const dueInfo = getRelativeDue(hw.dueDate);
-                      return (
-                        <div
-                          key={hw._id}
-                          className="p-3 bg-slate-50/70 dark:bg-[#15191C] border border-border/80 dark:border-white/10 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 hover:bg-white dark:hover:bg-[#181D20] hover:border-border transition-all"
-                        >
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-bold text-forest dark:text-emerald-400 bg-forest/10 dark:bg-emerald-500/20 px-2 py-0.5 rounded-md">
-                                {hw.subjectName}
-                              </span>
-                              <h3 className="text-sm font-bold text-deep">{hw.title}</h3>
-                            </div>
-                            <p className="text-xs text-muted line-clamp-1">
-                              {hw.description || 'No additional instructions'}
-                            </p>
-                            <div className="flex items-center gap-3 text-[11px] text-muted pt-0.5">
-                              <span>By: {hw.teacherName}</span>
-                              <span>•</span>
-                              <span>Due: {formatDate(hw.dueDate)}</span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
-                            <Badge color={dueInfo.color}>{dueInfo.label}</Badge>
-                            <Badge color={
-                              hw.submissionStatus === 'submitted' || hw.submissionStatus === 'graded' 
-                                ? 'success' 
-                                : hw.submissionStatus === 'overdue' 
-                                ? 'danger' 
-                                : 'warning'
-                            }>
-                              {hw.submissionStatus === 'graded' ? `Graded: ${hw.marks ?? ''}` : hw.submissionStatus}
-                            </Badge>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </Card>
-            </div>
-
-          </div>
-
-          {/* Row 3: Academic Results & Fee Overview */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            
-            {/* Academic Results & Exams */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <h2 className="text-base font-bold text-deep flex items-center gap-2">
-                  <GraduationCap size={18} className="text-forest" /> Academic Results & Exams
-                </h2>
-              </div>
-
-              <Card className="!p-4 min-h-[260px] space-y-4">
-                {dashboardLoading ? (
-                  <div className="space-y-3">
-                    {[1, 2, 3].map((i) => (
-                      <div key={i} className="h-14 bg-slate-100 dark:bg-dark-hover rounded-xl animate-pulse" />
-                    ))}
-                  </div>
-                ) : (
-                  <>
-                    {/* Recent Exam Scores */}
-                    {dashboardData?.exams?.recentResults?.length > 0 ? (
-                      <div className="space-y-2">
-                        <p className="text-xs font-bold uppercase tracking-wider text-muted">Recent Exam Marks</p>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                          {dashboardData.exams.recentResults.map((r) => (
-                            <div key={r._id} className="p-2.5 bg-slate-50 dark:bg-[#15191C] border border-border/80 dark:border-white/10 rounded-xl space-y-1">
-                              <div className="flex items-center justify-between">
-                                <span className="text-xs font-bold text-deep">{r.subjectName}</span>
-                                <span className="text-xs font-extrabold text-forest dark:text-emerald-400">{r.marksObtained}/{r.maxMarks}</span>
-                              </div>
-                              <div className="flex items-center justify-between text-[11px] text-muted">
-                                <span className="truncate max-w-[110px]">{r.examName}</span>
-                                <Badge size="sm" color={r.percentage >= 75 ? 'success' : r.percentage >= 50 ? 'warning' : 'danger'}>
-                                  {r.grade ? `Grade ${r.grade}` : `${r.percentage}%`}
-                                </Badge>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
+        return (
+          <>
+            {/* Row 1: KPI Stat Cards */}
+            {visibleKpiCount > 0 && (
+              <div className={`grid grid-cols-1 sm:grid-cols-2 ${visibleKpiCount >= 4 ? 'lg:grid-cols-4' : visibleKpiCount === 3 ? 'lg:grid-cols-3' : visibleKpiCount === 2 ? 'lg:grid-cols-2' : 'lg:grid-cols-1'} gap-4`}>
+                
+                {/* 1. Attendance */}
+                {isAttVisible && (
+                  <Card className="hover:shadow-md transition-shadow">
+                    {dashboardLoading ? (
+                      <div className="space-y-2 animate-pulse">
+                        <div className="h-4 bg-slate-100 rounded w-1/2"></div>
+                        <div className="h-8 bg-slate-100 rounded w-3/4"></div>
                       </div>
                     ) : (
-                      <p className="text-xs text-muted text-center py-4">No published exam results yet for this session.</p>
-                    )}
-
-                    {/* Upcoming Exam Schedule */}
-                    {dashboardData?.exams?.upcoming?.length > 0 && (
-                      <div className="space-y-2 pt-2 border-t border-border/60 dark:border-white/10">
-                        <p className="text-xs font-bold uppercase tracking-wider text-muted">Upcoming Exams</p>
-                        <div className="space-y-1.5">
-                          {dashboardData.exams.upcoming.map((e) => (
-                            <div key={e._id} className="flex items-center justify-between p-2.5 bg-blue-50/60 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-800/40 rounded-lg text-xs">
-                              <span className="font-semibold text-blue-900 dark:text-blue-300">{e.name}</span>
-                              <span className="text-blue-700 dark:text-blue-400 font-medium">{formatDate(e.startDate)}</span>
-                            </div>
-                          ))}
+                      <div className="flex items-center gap-4">
+                        <div className="p-3 rounded-2xl bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                          <ClipboardList size={24} />
+                        </div>
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-2">
+                            <span className="text-2xl font-extrabold text-deep">
+                              {dashboardData?.attendance?.percentage ?? 0}%
+                            </span>
+                            <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">
+                              {dashboardData?.attendance?.present ?? 0}/{dashboardData?.attendance?.totalDays ?? 0} days
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted font-medium">Overall Attendance</p>
                         </div>
                       </div>
                     )}
-                  </>
+                  </Card>
                 )}
-              </Card>
-            </div>
 
-            {/* Fee Breakdown */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <h2 className="text-base font-bold text-deep flex items-center gap-2">
-                  <DollarSign size={18} className="text-forest" /> Fee Breakdown & Receipts
-                </h2>
+                {/* 2. Fee Status */}
+                {isFeesVisible && (
+                  <Card className="hover:shadow-md transition-shadow">
+                    {dashboardLoading ? (
+                      <div className="space-y-2 animate-pulse">
+                        <div className="h-4 bg-slate-100 rounded w-1/2"></div>
+                        <div className="h-8 bg-slate-100 rounded w-3/4"></div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-4">
+                        <div className={`p-3 rounded-2xl border ${
+                          dashboardData?.fees?.balance === 0 
+                            ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' 
+                            : 'bg-amber-500/10 text-amber-600 border-amber-500/20'
+                        }`}>
+                          <DollarSign size={24} />
+                        </div>
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-2">
+                            <span className="text-2xl font-extrabold text-deep">
+                              ₹{dashboardData?.fees?.balance?.toLocaleString('en-IN') ?? 0}
+                            </span>
+                            <Badge color={dashboardData?.fees?.status === 'PAID' ? 'success' : dashboardData?.fees?.status === 'PARTIAL' ? 'warning' : 'danger'}>
+                              {dashboardData?.fees?.status || 'PENDING'}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-muted font-medium">
+                            {dashboardData?.fees?.balance === 0 ? 'All fees cleared' : 'Pending Balance'}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </Card>
+                )}
+
+                {/* 3. Pending Homework */}
+                {isHwVisible && (
+                  <Card className="hover:shadow-md transition-shadow">
+                    {dashboardLoading ? (
+                      <div className="space-y-2 animate-pulse">
+                        <div className="h-4 bg-slate-100 rounded w-1/2"></div>
+                        <div className="h-8 bg-slate-100 rounded w-3/4"></div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-4">
+                        <div className="p-3 rounded-2xl bg-blue-500/10 text-blue-600 border border-blue-500/20">
+                          <BookOpen size={24} />
+                        </div>
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-2">
+                            <span className="text-2xl font-extrabold text-deep">
+                              {dashboardData?.homework?.pendingCount ?? 0}
+                            </span>
+                            <span className="text-xs text-muted">
+                              of {dashboardData?.homework?.items?.length ?? 0} active
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted font-medium">Pending Homework</p>
+                        </div>
+                      </div>
+                    )}
+                  </Card>
+                )}
+
+                {/* 4. Recognition Points */}
+                {isRecVisible && (
+                  <Card className="hover:shadow-md transition-shadow">
+                    {dashboardLoading ? (
+                      <div className="space-y-2 animate-pulse">
+                        <div className="h-4 bg-slate-100 rounded w-1/2"></div>
+                        <div className="h-8 bg-slate-100 rounded w-3/4"></div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-4">
+                        <div className="p-3 rounded-2xl bg-purple-500/10 text-purple-600 border border-purple-500/20">
+                          <Trophy size={24} />
+                        </div>
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-2">
+                            <span className="text-2xl font-extrabold text-deep">
+                              +{dashboardData?.recognition?.totalPoints ?? 0}
+                            </span>
+                            <span className="text-xs text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded font-semibold">
+                              {dashboardData?.recognition?.items?.length ?? 0} Badges
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted font-medium">Recognition Points</p>
+                        </div>
+                      </div>
+                    )}
+                  </Card>
+                )}
+
               </div>
+            )}
 
-              <Card className="!p-4 min-h-[260px] space-y-4">
-                {dashboardLoading ? (
-                  <div className="space-y-3">
-                    {[1, 2, 3].map((i) => (
-                      <div key={i} className="h-14 bg-slate-100 rounded-xl animate-pulse" />
-                    ))}
-                  </div>
-                ) : (
-                  <>
-                    <div className="grid grid-cols-3 gap-2 text-center p-3 bg-slate-50 dark:bg-[#15191C] rounded-xl border border-border/80 dark:border-white/10">
-                      <div>
-                        <p className="text-[11px] text-muted">Total Assigned</p>
-                        <p className="text-sm font-extrabold text-deep">
-                          ₹{dashboardData?.fees?.totalAssigned?.toLocaleString('en-IN') ?? 0}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-[11px] text-muted">Paid So Far</p>
-                        <p className="text-sm font-extrabold text-emerald-600 dark:text-emerald-400">
-                          ₹{dashboardData?.fees?.totalPaid?.toLocaleString('en-IN') ?? 0}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-[11px] text-muted">Remaining Due</p>
-                        <p className="text-sm font-extrabold text-amber-600 dark:text-amber-400">
-                          ₹{dashboardData?.fees?.balance?.toLocaleString('en-IN') ?? 0}
-                        </p>
-                      </div>
+            {/* Row 2: Today's Schedule & Upcoming Homework */}
+            {(isTimetableVisible || isHwVisible) && (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                {/* Today's Timetable */}
+                {isTimetableVisible && (
+                  <div className={`${isHwVisible ? 'lg:col-span-1' : 'lg:col-span-3'} space-y-3`}>
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-base font-bold text-deep flex items-center gap-2">
+                        <Clock size={18} className="text-forest" /> Today's Schedule
+                      </h2>
+                      <Link to="/timetable" className="text-xs font-semibold text-forest hover:underline">
+                        Full week →
+                      </Link>
                     </div>
 
-                    <div className="space-y-2">
-                      <p className="text-xs font-bold uppercase tracking-wider text-muted">Recent Transactions</p>
-                      {dashboardData?.fees?.transactions?.length > 0 ? (
-                        <div className="space-y-1.5">
-                          {dashboardData.fees.transactions.map((t) => (
-                            <div key={t._id} className="flex items-center justify-between p-2 bg-white dark:bg-[#15191C] border border-border dark:border-white/10 rounded-lg text-xs">
-                              <div>
-                                <span className="font-semibold text-deep">Paid ₹{t.paidAmount?.toLocaleString('en-IN')}</span>
-                                <p className="text-[10px] text-muted">{formatDate(t.paymentDate)} via {t.paymentMethod || 'Manual'}</p>
-                              </div>
-                              <Badge color={t.status === 'paid' ? 'success' : 'warning'}>{t.status}</Badge>
-                            </div>
+                    <Card className="!p-4 space-y-3 min-h-[280px]">
+                      {dashboardLoading ? (
+                        <div className="space-y-2.5 py-2">
+                          {[1, 2, 3, 4].map((i) => (
+                            <div key={i} className="h-12 bg-slate-100 rounded-xl animate-pulse" />
                           ))}
+                        </div>
+                      ) : !dashboardData?.timetable?.hasSchedule || dashboardData?.timetable?.periods?.length === 0 ? (
+                        <div className="py-12 text-center text-muted space-y-2">
+                          <Clock size={32} className="mx-auto opacity-30 text-forest" />
+                          <p className="text-sm font-semibold text-deep">No Classes Today</p>
+                          <p className="text-xs text-muted">No scheduled lectures for today or weekend break.</p>
                         </div>
                       ) : (
-                        <p className="text-xs text-muted text-center py-2">No transaction history recorded yet.</p>
+                        <div className="space-y-2 max-h-[340px] overflow-y-auto pr-1">
+                          {dashboardData.timetable.periods.map((p, idx) => (
+                            <div
+                              key={idx}
+                              className={`flex items-center justify-between p-2.5 rounded-xl border text-xs ${
+                                p.isBreak
+                                  ? 'bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 font-medium'
+                                  : 'bg-white dark:bg-[#15191C] border-border/80 dark:border-white/10 hover:border-forest/40 hover:bg-forest/5 transition-colors'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2.5">
+                                <span className={`w-6 h-6 rounded-lg flex items-center justify-center font-bold text-[11px] ${
+                                  p.isBreak ? 'bg-slate-200 dark:bg-white/10 text-slate-600 dark:text-slate-300' : 'bg-forest/10 text-forest dark:bg-emerald-500/20 dark:text-emerald-400'
+                                }`}>
+                                  P{p.periodNo}
+                                </span>
+                                <div>
+                                  <p className="font-bold text-deep">{p.subjectName}</p>
+                                  {isTeacherInfoVisible && p.teacherName && (
+                                    <p className="text-[11px] text-muted">{p.teacherName}</p>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <span className="font-semibold text-slate-700 dark:text-slate-300">
+                                  {p.startTime || '—'}
+                                </span>
+                                {p.room && (
+                                  <p className="text-[10px] text-muted">Room: {p.room}</p>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       )}
-                    </div>
-                  </>
+                    </Card>
+                  </div>
                 )}
-              </Card>
-            </div>
 
-          </div>
+                {/* Upcoming Homework */}
+                {isHwVisible && (
+                  <div className={`${isTimetableVisible ? 'lg:col-span-2' : 'lg:col-span-3'} space-y-3`}>
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-base font-bold text-deep flex items-center gap-2">
+                        <BookOpen size={18} className="text-forest" /> Assigned Homework
+                      </h2>
+                      <span className="text-xs text-muted">
+                        Class {selectedChild?.class} • Section {selectedChild?.section}
+                      </span>
+                    </div>
+
+                    <Card className="!p-4 min-h-[280px]">
+                      {dashboardLoading ? (
+                        <div className="space-y-3 py-2">
+                          {[1, 2, 3].map((i) => (
+                            <div key={i} className="h-16 bg-slate-100 dark:bg-dark-hover rounded-xl animate-pulse" />
+                          ))}
+                        </div>
+                      ) : !dashboardData?.homework?.items || dashboardData.homework.items.length === 0 ? (
+                        <div className="py-12 text-center text-muted space-y-2">
+                          <CheckCircle2 size={32} className="mx-auto opacity-30 text-emerald-600" />
+                          <p className="text-sm font-semibold text-deep">All Caught Up!</p>
+                          <p className="text-xs text-muted">No pending homework assignments for this class.</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2.5">
+                          {dashboardData.homework.items.map((hw) => {
+                            const dueInfo = getRelativeDue(hw.dueDate);
+                            return (
+                              <div
+                                key={hw._id}
+                                className="p-3 bg-slate-50/70 dark:bg-[#15191C] border border-border/80 dark:border-white/10 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 hover:bg-white dark:hover:bg-[#181D20] hover:border-border transition-all"
+                              >
+                                <div className="space-y-1">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs font-bold text-forest dark:text-emerald-400 bg-forest/10 dark:bg-emerald-500/20 px-2 py-0.5 rounded-md">
+                                      {hw.subjectName}
+                                    </span>
+                                    <h3 className="text-sm font-bold text-deep">{hw.title}</h3>
+                                  </div>
+                                  <p className="text-xs text-muted line-clamp-1">
+                                    {hw.description || 'No additional instructions'}
+                                  </p>
+                                  <div className="flex items-center gap-3 text-[11px] text-muted pt-0.5">
+                                    {isTeacherInfoVisible && hw.teacherName && (
+                                      <>
+                                        <span>By: {hw.teacherName}</span>
+                                        <span>•</span>
+                                      </>
+                                    )}
+                                    <span>Due: {formatDate(hw.dueDate)}</span>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                                  <Badge color={dueInfo.color}>{dueInfo.label}</Badge>
+                                  <Badge color={
+                                    hw.submissionStatus === 'submitted' || hw.submissionStatus === 'graded' 
+                                      ? 'success' 
+                                      : hw.submissionStatus === 'overdue' 
+                                      ? 'danger' 
+                                      : 'warning'
+                                  }>
+                                    {hw.submissionStatus === 'graded' ? `Graded: ${hw.marks ?? ''}` : hw.submissionStatus}
+                                  </Badge>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </Card>
+                  </div>
+                )}
+
+              </div>
+            )}
+
+          {/* Row 3: Academic Results & Fee Overview */}
+          {(isMarksVisible || isFeesVisible) && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              
+              {/* Academic Results & Exams */}
+              {isMarksVisible && (
+                <div className={`${isFeesVisible ? '' : 'lg:col-span-2'} space-y-3`}>
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-base font-bold text-deep flex items-center gap-2">
+                      <GraduationCap size={18} className="text-forest" /> Academic Results & Exams
+                    </h2>
+                  </div>
+
+                  <Card className="!p-4 min-h-[260px] space-y-4">
+                    {dashboardLoading ? (
+                      <div className="space-y-3">
+                        {[1, 2, 3].map((i) => (
+                          <div key={i} className="h-14 bg-slate-100 dark:bg-dark-hover rounded-xl animate-pulse" />
+                        ))}
+                      </div>
+                    ) : (
+                      <>
+                        {/* Recent Exam Scores */}
+                        {dashboardData?.exams?.recentResults?.length > 0 ? (
+                          <div className="space-y-2">
+                            <p className="text-xs font-bold uppercase tracking-wider text-muted">Recent Exam Marks</p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                              {dashboardData.exams.recentResults.map((r) => (
+                                <div key={r._id} className="p-2.5 bg-slate-50 dark:bg-[#15191C] border border-border/80 dark:border-white/10 rounded-xl space-y-1">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-xs font-bold text-deep">{r.subjectName}</span>
+                                    <span className="text-xs font-extrabold text-forest dark:text-emerald-400">{r.marksObtained}/{r.maxMarks}</span>
+                                  </div>
+                                  <div className="flex items-center justify-between text-[11px] text-muted">
+                                    <span className="truncate max-w-[110px]">{r.examName}</span>
+                                    <Badge size="sm" color={r.percentage >= 75 ? 'success' : r.percentage >= 50 ? 'warning' : 'danger'}>
+                                      {r.grade ? `Grade ${r.grade}` : `${r.percentage}%`}
+                                    </Badge>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="text-xs text-muted text-center py-4">No published exam results yet for this session.</p>
+                        )}
+
+                        {/* Upcoming Exam Schedule */}
+                        {dashboardData?.exams?.upcoming?.length > 0 && (
+                          <div className="space-y-2 pt-2 border-t border-border/60 dark:border-white/10">
+                            <p className="text-xs font-bold uppercase tracking-wider text-muted">Upcoming Exams</p>
+                            <div className="space-y-1.5">
+                              {dashboardData.exams.upcoming.map((e) => (
+                                <div key={e._id} className="flex items-center justify-between p-2.5 bg-blue-50/60 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-800/40 rounded-lg text-xs">
+                                  <span className="font-semibold text-blue-900 dark:text-blue-300">{e.name}</span>
+                                  <span className="text-blue-700 dark:text-blue-400 font-medium">{formatDate(e.startDate)}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </Card>
+                </div>
+              )}
+
+              {/* Fee Breakdown */}
+              {isFeesVisible && (
+                <div className={`${isMarksVisible ? '' : 'lg:col-span-2'} space-y-3`}>
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-base font-bold text-deep flex items-center gap-2">
+                      <DollarSign size={18} className="text-forest" /> Fee Breakdown & Receipts
+                    </h2>
+                  </div>
+
+                  <Card className="!p-4 min-h-[260px] space-y-4">
+                    {dashboardLoading ? (
+                      <div className="space-y-3">
+                        {[1, 2, 3].map((i) => (
+                          <div key={i} className="h-14 bg-slate-100 rounded-xl animate-pulse" />
+                        ))}
+                      </div>
+                    ) : (
+                      <>
+                        <div className="grid grid-cols-3 gap-2 text-center p-3 bg-slate-50 dark:bg-[#15191C] rounded-xl border border-border/80 dark:border-white/10">
+                          <div>
+                            <p className="text-[11px] text-muted">Total Assigned</p>
+                            <p className="text-sm font-extrabold text-deep">
+                              ₹{dashboardData?.fees?.totalAssigned?.toLocaleString('en-IN') ?? 0}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-[11px] text-muted">Paid So Far</p>
+                            <p className="text-sm font-extrabold text-emerald-600 dark:text-emerald-400">
+                              ₹{dashboardData?.fees?.totalPaid?.toLocaleString('en-IN') ?? 0}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-[11px] text-muted">Remaining Due</p>
+                            <p className="text-sm font-extrabold text-amber-600 dark:text-amber-400">
+                              ₹{dashboardData?.fees?.balance?.toLocaleString('en-IN') ?? 0}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <p className="text-xs font-bold uppercase tracking-wider text-muted">Recent Transactions</p>
+                          {dashboardData?.fees?.transactions?.length > 0 ? (
+                            <div className="space-y-1.5">
+                              {dashboardData.fees.transactions.map((t) => (
+                                <div key={t._id} className="flex items-center justify-between p-2 bg-white dark:bg-[#15191C] border border-border dark:border-white/10 rounded-lg text-xs">
+                                  <div>
+                                    <span className="font-semibold text-deep">Paid ₹{t.paidAmount?.toLocaleString('en-IN')}</span>
+                                    <p className="text-[10px] text-muted">{formatDate(t.paymentDate)} via {t.paymentMethod || 'Manual'}</p>
+                                  </div>
+                                  <Badge color={t.status === 'paid' ? 'success' : 'warning'}>{t.status}</Badge>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-xs text-muted text-center py-2">No transaction history recorded yet.</p>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </Card>
+                </div>
+              )}
+
+            </div>
+          )}
 
           {/* Row 4: Parent Meetings & School Announcements */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -800,7 +838,7 @@ export default function ParentDashboard() {
 
           </div>
 
-          {/* Row 5: School Events & Recognition */}
+          {/* Row 5: School Events, Recognition & Leaves */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             
             {/* Upcoming School Events */}
@@ -842,113 +880,118 @@ export default function ParentDashboard() {
             </div>
 
             {/* Student Recognition & Badges */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <h2 className="text-base font-bold text-deep flex items-center gap-2">
-                  <Sparkles size={18} className="text-purple-600 dark:text-purple-400" /> Recognition & Praise
-                </h2>
-              </div>
+            {isRecVisible && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-base font-bold text-deep flex items-center gap-2">
+                    <Sparkles size={18} className="text-purple-600 dark:text-purple-400" /> Recognition & Praise
+                  </h2>
+                </div>
 
-              <Card className="!p-4 min-h-[200px]">
-                {dashboardLoading ? (
-                  <div className="space-y-2.5">
-                    {[1, 2].map((i) => <div key={i} className="h-14 bg-slate-100 dark:bg-dark-hover rounded-xl animate-pulse" />)}
-                  </div>
-                ) : !dashboardData?.recognition?.items || dashboardData.recognition.items.length === 0 ? (
-                  <div className="py-6 text-center text-muted">
-                    <Award size={28} className="mx-auto opacity-30 text-purple-600 dark:text-purple-400 mb-1" />
-                    <p className="text-xs text-muted">No recognition points recorded yet for this session.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-2 max-h-[240px] overflow-y-auto pr-1">
-                    {dashboardData.recognition.items.map((r) => (
-                      <div key={r._id} className="p-2.5 bg-purple-50/50 dark:bg-purple-950/30 border border-purple-100 dark:border-purple-800/40 rounded-xl flex items-center justify-between">
-                        <div>
-                          <div className="flex items-center gap-1.5">
-                            <Award size={13} className="text-purple-600 dark:text-purple-400" />
-                            <span className="text-xs font-bold text-purple-900 dark:text-purple-300">{r.category?.toUpperCase() || 'PRAISE'}</span>
+                <Card className="!p-4 min-h-[200px]">
+                  {dashboardLoading ? (
+                    <div className="space-y-2.5">
+                      {[1, 2].map((i) => <div key={i} className="h-14 bg-slate-100 dark:bg-dark-hover rounded-xl animate-pulse" />)}
+                    </div>
+                  ) : !dashboardData?.recognition?.items || dashboardData.recognition.items.length === 0 ? (
+                    <div className="py-6 text-center text-muted">
+                      <Award size={28} className="mx-auto opacity-30 text-purple-600 dark:text-purple-400 mb-1" />
+                      <p className="text-xs text-muted">No recognition points recorded yet for this session.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2 max-h-[240px] overflow-y-auto pr-1">
+                      {dashboardData.recognition.items.map((r) => (
+                        <div key={r._id} className="p-2.5 bg-purple-50/50 dark:bg-purple-950/30 border border-purple-100 dark:border-purple-800/40 rounded-xl flex items-center justify-between">
+                          <div>
+                            <div className="flex items-center gap-1.5">
+                              <Award size={13} className="text-purple-600 dark:text-purple-400" />
+                              <span className="text-xs font-bold text-purple-900 dark:text-purple-300">{r.category?.toUpperCase() || 'PRAISE'}</span>
+                            </div>
+                            {r.note && <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5">{r.note}</p>}
+                            <p className="text-[10px] text-muted">{isTeacherInfoVisible && r.awardedBy ? `By ${r.awardedBy} • ` : ''}{formatDate(r.createdAt)}</p>
                           </div>
-                          {r.note && <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5">{r.note}</p>}
-                          <p className="text-[10px] text-muted">By {r.awardedBy} • {formatDate(r.createdAt)}</p>
+                          <span className="text-sm font-extrabold text-purple-700 dark:text-purple-400">+{r.points}</span>
                         </div>
-                        <span className="text-sm font-extrabold text-purple-700 dark:text-purple-400">+{r.points}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </Card>
-            </div>
+                      ))}
+                    </div>
+                  )}
+                </Card>
+              </div>
+            )}
 
             {/* Leave Applications */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <h2 className="text-base font-bold text-deep flex items-center gap-2">
-                  <CalendarIcon size={18} className="text-emerald-600 dark:text-emerald-400" /> Leave Applications
-                </h2>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={() => navigate('/leaves?apply=true')}
-                    className="text-xs"
-                    icon={<Plus size={14} />}
-                  >
-                    Apply for Leave
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => navigate('/leaves')}
-                    className="text-xs text-emerald-600 hover:text-emerald-700 font-semibold"
-                  >
-                    View All <ArrowRight size={12} className="ml-1 inline" />
-                  </Button>
+            {isLeavesVisible && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-base font-bold text-deep flex items-center gap-2">
+                    <CalendarIcon size={18} className="text-emerald-600 dark:text-emerald-400" /> Leave Applications
+                  </h2>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={() => navigate('/leaves?apply=true')}
+                      className="text-xs"
+                      icon={<Plus size={14} />}
+                    >
+                      Apply for Leave
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => navigate('/leaves')}
+                      className="text-xs text-emerald-600 hover:text-emerald-700 font-semibold"
+                    >
+                      View All <ArrowRight size={12} className="ml-1 inline" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
 
-              <Card className="!p-4 min-h-[160px]">
-                {leavesLoading ? (
-                  <div className="space-y-2.5">
-                    {[1, 2].map((i) => <div key={i} className="h-14 bg-slate-100 dark:bg-dark-hover rounded-xl animate-pulse" />)}
-                  </div>
-                ) : recentLeaves.length === 0 ? (
-                  <div className="py-6 text-center text-muted">
-                    <CalendarIcon size={28} className="mx-auto opacity-30 text-emerald-600 mb-1" />
-                    <p className="text-xs text-muted">No leave applications submitted for {selectedChild?.name || 'this child'}.</p>
-                    <div className="mt-2">
-                      <Button variant="primary" size="sm" onClick={() => navigate('/leaves?apply=true')} icon={<Plus size={14} />}>
-                        Apply for Leave
-                      </Button>
+                <Card className="!p-4 min-h-[160px]">
+                  {leavesLoading ? (
+                    <div className="space-y-2.5">
+                      {[1, 2].map((i) => <div key={i} className="h-14 bg-slate-100 dark:bg-dark-hover rounded-xl animate-pulse" />)}
                     </div>
-                  </div>
-                ) : (
-                  <div className="space-y-2.5">
-                    {recentLeaves.map((l) => (
-                      <div key={l._id} className="p-2.5 bg-slate-50 dark:bg-[#15191C] border border-border dark:border-white/10 rounded-xl flex items-center justify-between">
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-deep capitalize">{l.type} Leave</span>
-                            <Badge size="sm" color={l.status === 'approved' ? 'success' : l.status === 'rejected' ? 'danger' : 'warning'}>
-                              {l.status}
-                            </Badge>
-                          </div>
-                          <p className="text-[11px] text-muted flex items-center gap-1">
-                            <Clock size={11} /> {formatDate(l.startDate)} – {formatDate(l.endDate)}
-                          </p>
-                        </div>
-                        <Button variant="ghost" size="sm" onClick={() => navigate('/leaves')} className="text-xs">
-                          Details
+                  ) : recentLeaves.length === 0 ? (
+                    <div className="py-6 text-center text-muted">
+                      <CalendarIcon size={28} className="mx-auto opacity-30 text-emerald-600 mb-1" />
+                      <p className="text-xs text-muted">No leave applications submitted for {selectedChild?.name || 'this child'}.</p>
+                      <div className="mt-2">
+                        <Button variant="primary" size="sm" onClick={() => navigate('/leaves?apply=true')} icon={<Plus size={14} />}>
+                          Apply for Leave
                         </Button>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </Card>
-            </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-2.5">
+                      {recentLeaves.map((l) => (
+                        <div key={l._id} className="p-2.5 bg-slate-50 dark:bg-[#15191C] border border-border dark:border-white/10 rounded-xl flex items-center justify-between">
+                          <div className="space-y-0.5">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-deep capitalize">{l.type} Leave</span>
+                              <Badge size="sm" color={l.status === 'approved' ? 'success' : l.status === 'rejected' ? 'danger' : 'warning'}>
+                                {l.status}
+                              </Badge>
+                            </div>
+                            <p className="text-[11px] text-muted flex items-center gap-1">
+                              <Clock size={11} /> {formatDate(l.startDate)} – {formatDate(l.endDate)}
+                            </p>
+                          </div>
+                          <Button variant="ghost" size="sm" onClick={() => navigate('/leaves')} className="text-xs">
+                            Details
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </Card>
+              </div>
+            )}
 
           </div>
         </>
-      )}
+      );
+    })()}
 
     </div>
   );

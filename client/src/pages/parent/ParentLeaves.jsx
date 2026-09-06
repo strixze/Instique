@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import {
   Calendar, Clock, User, CheckCircle2, XCircle, AlertCircle, Plus,
   Filter, FileText, ChevronDown, RefreshCw, X, ShieldAlert,
-  Paperclip, ExternalLink, ArrowRight, Ban, Check, Users, Sparkles
+  Paperclip, ExternalLink, ArrowRight, Ban, Check, Users, Sparkles, EyeOff
 } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 import Card from '../../components/ui/Card';
@@ -15,6 +15,7 @@ import Input from '../../components/ui/Input';
 import Select from '../../components/ui/Select';
 import { parentApi } from '../../api/parent.api';
 import { leaveApi } from '../../api/leave.api';
+import { settingApi } from '../../api/setting.api';
 
 const statusColors = {
   pending: 'warning',
@@ -95,22 +96,34 @@ export default function ParentLeaves() {
   // Details Modal State
   const [selectedLeave, setSelectedLeave] = useState(null);
   const [cancellingId, setCancellingId] = useState(null);
+  const [isModuleDisabled, setIsModuleDisabled] = useState(false);
 
-  // 1. Fetch authenticated parent's linked children
+  // 1. Fetch authenticated parent's linked children & Visibility settings
   const fetchChildren = useCallback(async () => {
     setChildrenLoading(true);
     try {
-      const res = await parentApi.getMyChildren();
-      const kids = res.data || [];
-      setChildren(kids);
-      if (kids.length > 0) {
-        setSelectedChildId((prev) => {
-          const exists = kids.some((k) => (k.id || k._id) === prev);
-          const defaultId = kids[0].id || kids[0]._id;
-          return exists ? prev : defaultId;
-        });
-      } else {
-        setSelectedChildId('');
+      const [kidsRes, settingsRes] = await Promise.allSettled([
+        parentApi.getMyChildren(),
+        settingApi.getPublic()
+      ]);
+      if (settingsRes.status === 'fulfilled') {
+        const sData = settingsRes.value?.data?.data || settingsRes.value?.data;
+        if (sData?.visibility?.parent?.leaves === false || sData?.features?.leaves === false) {
+          setIsModuleDisabled(true);
+        }
+      }
+      if (kidsRes.status === 'fulfilled') {
+        const kids = kidsRes.value?.data || [];
+        setChildren(kids);
+        if (kids.length > 0) {
+          setSelectedChildId((prev) => {
+            const exists = kids.some((k) => (k.id || k._id) === prev);
+            const defaultId = kids[0].id || kids[0]._id;
+            return exists ? prev : defaultId;
+          });
+        } else {
+          setSelectedChildId('');
+        }
       }
     } catch (err) {
       toast.error(err?.message || 'Failed to load children');
@@ -249,6 +262,25 @@ export default function ParentLeaves() {
   const pendingCount = leaves.filter((l) => l.status === 'pending').length;
   const approvedCount = leaves.filter((l) => l.status === 'approved').length;
   const rejectedCount = leaves.filter((l) => l.status === 'rejected').length;
+
+  if (!childrenLoading && isModuleDisabled) {
+    return (
+      <div className="max-w-xl mx-auto my-16 text-center p-8 bg-white dark:bg-dark-surface border border-border dark:border-dark-border rounded-2xl shadow-xs space-y-4">
+        <div className="w-14 h-14 mx-auto rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center">
+          <EyeOff size={28} />
+        </div>
+        <h2 className="text-lg font-bold text-deep dark:text-dark-text">Leave Portal Restricted</h2>
+        <p className="text-xs text-muted max-w-md mx-auto">
+          Viewing and applying for student leaves is currently disabled for parents by your school administration.
+        </p>
+        <div className="pt-2">
+          <Button onClick={() => window.location.href = '/dashboard'} variant="primary" size="sm">
+            Return to Dashboard
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 pb-12">

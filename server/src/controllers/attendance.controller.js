@@ -1,5 +1,7 @@
 import asyncHandler from '../utils/asyncHandler.js';
 import ApiResponse from '../utils/ApiResponse.js';
+import ApiError from '../utils/ApiError.js';
+import Setting from '../models/Setting.js';
 import * as attendanceService from '../services/attendance.service.js';
 import { 
   verifyParentAccessToStudent, 
@@ -17,7 +19,7 @@ export const markAttendance = asyncHandler(async (req, res) => {
       await verifyTeacherSubjectAccess(req.user, req.schoolId, req.body.schoolClass, req.body.subject);
     }
   }
-  const attendance = await attendanceService.markAttendance(req.schoolId, req.body, req.user._id);
+  const attendance = await attendanceService.markAttendance(req.schoolId, req.body, req.user._id, req.user.role);
   res.status(201).json(new ApiResponse(201, attendance, 'Attendance marked'));
 });
 
@@ -28,7 +30,7 @@ export const markAllPresent = asyncHandler(async (req, res) => {
       await verifyTeacherSubjectAccess(req.user, req.schoolId, req.body.schoolClass, req.body.subject);
     }
   }
-  const attendance = await attendanceService.markAllPresent(req.schoolId, req.body, req.user._id);
+  const attendance = await attendanceService.markAllPresent(req.schoolId, req.body, req.user._id, req.user.role);
   res.status(201).json(new ApiResponse(201, attendance, 'Attendance marked'));
 });
 
@@ -51,6 +53,12 @@ export const getStudentAttendance = asyncHandler(async (req, res) => {
   // Enforce access restrictions
   await verifyParentAccessToStudent(req.user, req.schoolId, req.params.studentId);
   await verifyTeacherStudentAccess(req.user, req.schoolId, req.params.studentId);
+  if (req.user.role === 'parent') {
+    const setting = await Setting.findOne({ schoolId: req.schoolId }).select('visibility');
+    if (setting?.visibility?.parent?.attendance === false) {
+      throw new ApiError(403, 'Student attendance viewing is disabled for parents by school administration');
+    }
+  }
   const result = await attendanceService.getStudentAttendance(req.schoolId, req.params.studentId, req.query);
   res.status(200).json(new ApiResponse(200, result, 'Attendance history and analytics fetched'));
 });

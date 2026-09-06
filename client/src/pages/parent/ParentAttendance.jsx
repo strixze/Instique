@@ -19,12 +19,14 @@ import {
   BarChart3,
   CalendarDays,
   FileSpreadsheet,
+  EyeOff,
 } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
 import { parentApi } from '../../api/parent.api';
 import { attendanceApi } from '../../api/attendance.api';
+import { settingApi } from '../../api/setting.api';
 
 const statusConfig = {
   present: {
@@ -76,6 +78,7 @@ export default function ParentAttendance() {
   const [selectedChildId, setSelectedChildId] = useState('');
   const [attendanceData, setAttendanceData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isModuleDisabled, setIsModuleDisabled] = useState(false);
 
   // Calendar View State
   const [currentCalendarDate, setCurrentCalendarDate] = useState(new Date());
@@ -84,7 +87,7 @@ export default function ParentAttendance() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchDate, setSearchDate] = useState('');
 
-  // 1. Fetch Parent's Linked Children
+  // 1. Fetch Parent's Linked Children & Visibility Settings
   useEffect(() => {
     loadChildren();
   }, []);
@@ -92,11 +95,22 @@ export default function ParentAttendance() {
   const loadChildren = async () => {
     setLoading(true);
     try {
-      const res = await parentApi.getMyChildren();
-      const kids = res.data || [];
-      setChildren(kids);
-      if (kids.length > 0) {
-        setSelectedChildId(kids[0].id || kids[0]._id);
+      const [kidsRes, settingsRes] = await Promise.allSettled([
+        parentApi.getMyChildren(),
+        settingApi.getPublic()
+      ]);
+      if (settingsRes.status === 'fulfilled') {
+        const sData = settingsRes.value?.data?.data || settingsRes.value?.data;
+        if (sData?.visibility?.parent?.attendance === false || sData?.features?.attendance === false) {
+          setIsModuleDisabled(true);
+        }
+      }
+      if (kidsRes.status === 'fulfilled') {
+        const kids = kidsRes.value?.data || [];
+        setChildren(kids);
+        if (kids.length > 0) {
+          setSelectedChildId(kids[0].id || kids[0]._id);
+        }
       }
     } catch (e) {
       toast.error(e?.message || 'Failed to load children profiles');
@@ -187,6 +201,25 @@ export default function ParentAttendance() {
   const isHealthy = rate >= 85;
   const isWarning = rate >= 75 && rate < 85;
   const isCritical = rate < 75;
+
+  if (!loading && isModuleDisabled) {
+    return (
+      <div className="max-w-xl mx-auto my-16 text-center p-8 bg-white dark:bg-dark-surface border border-border dark:border-dark-border rounded-2xl shadow-xs space-y-4">
+        <div className="w-14 h-14 mx-auto rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center">
+          <EyeOff size={28} />
+        </div>
+        <h2 className="text-lg font-bold text-deep dark:text-dark-text">Attendance Portal Disabled</h2>
+        <p className="text-xs text-muted max-w-md mx-auto">
+          Viewing student attendance records is currently disabled for parents by your school administration.
+        </p>
+        <div className="pt-2">
+          <Button onClick={() => window.location.href = '/dashboard'} variant="primary" size="sm">
+            Return to Dashboard
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 w-full pb-16 print:p-0 print-timetable">

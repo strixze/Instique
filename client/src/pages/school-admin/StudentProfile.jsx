@@ -301,12 +301,12 @@ export default function StudentProfile() {
 
   const tabs = [
     { key: 'overview', label: 'Overview', icon: User },
-    { key: 'academics', label: 'Academics', icon: GraduationCap },
-    { key: 'attendance', label: 'Attendance', icon: Calendar },
-    { key: 'fees', label: 'Fees', icon: CreditCard },
-    { key: 'homework', label: 'Homework', icon: BookOpen },
-    { key: 'recognition', label: 'Recognition', icon: Award },
-    { key: 'documents', label: 'Documents', icon: FileText, count: documents?.length },
+    ...(academics ? [{ key: 'academics', label: 'Academics', icon: GraduationCap }] : []),
+    ...(attendance ? [{ key: 'attendance', label: 'Attendance', icon: Calendar }] : []),
+    ...(fees ? [{ key: 'fees', label: 'Fees', icon: CreditCard }] : []),
+    ...(homework ? [{ key: 'homework', label: 'Homework', icon: BookOpen }] : []),
+    ...(recognition ? [{ key: 'recognition', label: 'Recognition', icon: Award }] : []),
+    ...(documents ? [{ key: 'documents', label: 'Documents', icon: FileText, count: documents?.length }] : []),
     { key: 'activity', label: 'Activity', icon: Clock },
   ];
 
@@ -378,12 +378,14 @@ export default function StudentProfile() {
 
               {activeMenuOpen && (
                 <div className="absolute right-0 top-10 w-52 bg-white dark:bg-dark-elevated border border-border dark:border-dark-border rounded-xl shadow-dropdown z-40 py-1 text-left animate-scale-in">
-                  <button
-                    onClick={() => { setActiveTab('documents'); setActiveMenuOpen(false); }}
-                    className="w-full px-3 py-2 text-xs text-secondary dark:text-dark-text-secondary hover:bg-surface dark:hover:bg-dark-hover flex items-center gap-2 font-medium"
-                  >
-                    <FileText size={13} /> View Documents
-                  </button>
+                  {documents && (
+                    <button
+                      onClick={() => { setActiveTab('documents'); setActiveMenuOpen(false); }}
+                      className="w-full px-3 py-2 text-xs text-secondary dark:text-dark-text-secondary hover:bg-surface dark:hover:bg-dark-hover flex items-center gap-2 font-medium"
+                    >
+                      <FileText size={13} /> View Documents
+                    </button>
+                  )}
 
                   {parents && parents.length > 0 && (
                     <button
@@ -412,68 +414,78 @@ export default function StudentProfile() {
       {/* ──────────────────────── 2. QUICK OVERVIEW (KPIS) ──────────────────────── */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         {/* Attendance */}
-        <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3.5 shadow-2xs">
-          <div className="flex items-center justify-between text-muted dark:text-dark-text-muted mb-1">
-            <span className="text-[11px] font-semibold uppercase tracking-wider">Attendance</span>
-            <Calendar size={14} className="text-forest dark:text-emerald-400" />
+        {attendance && (
+          <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3.5 shadow-2xs">
+            <div className="flex items-center justify-between text-muted dark:text-dark-text-muted mb-1">
+              <span className="text-[11px] font-semibold uppercase tracking-wider">Attendance</span>
+              <Calendar size={14} className="text-forest dark:text-emerald-400" />
+            </div>
+            <p className="text-xl font-bold text-deep dark:text-dark-text">
+              {kpis.attendancePercentage !== null ? `${kpis.attendancePercentage}%` : 'No data'}
+            </p>
+            <span className="text-[10px] text-muted dark:text-dark-text-muted">Total Marked: {attendance.totalDays} days</span>
           </div>
-          <p className="text-xl font-bold text-deep dark:text-dark-text">
-            {kpis.attendancePercentage !== null ? `${kpis.attendancePercentage}%` : 'No data'}
-          </p>
-          <span className="text-[10px] text-muted dark:text-dark-text-muted">Total Marked: {attendance.totalDays} days</span>
-        </div>
+        )}
 
         {/* Academic Avg */}
-        <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3.5 shadow-2xs">
-          <div className="flex items-center justify-between text-muted dark:text-dark-text-muted mb-1">
-            <span className="text-[11px] font-semibold uppercase tracking-wider">Academic Avg</span>
-            <GraduationCap size={14} className="text-blue-500" />
+        {academics && (
+          <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3.5 shadow-2xs">
+            <div className="flex items-center justify-between text-muted dark:text-dark-text-muted mb-1">
+              <span className="text-[11px] font-semibold uppercase tracking-wider">Academic Avg</span>
+              <GraduationCap size={14} className="text-blue-500" />
+            </div>
+            <p className="text-xl font-bold text-deep dark:text-dark-text">
+              {kpis.academicAverage !== null ? `${kpis.academicAverage}%` : 'No data'}
+            </p>
+            <span className="text-[10px] text-muted dark:text-dark-text-muted">Pass Rate: {academics.passPercentage !== null ? `${academics.passPercentage}%` : 'N/A'}</span>
           </div>
-          <p className="text-xl font-bold text-deep dark:text-dark-text">
-            {kpis.academicAverage !== null ? `${kpis.academicAverage}%` : 'No data'}
-          </p>
-          <span className="text-[10px] text-muted dark:text-dark-text-muted">Pass Rate: {academics.passPercentage !== null ? `${academics.passPercentage}%` : 'N/A'}</span>
-        </div>
+        )}
 
         {/* Fees Pending */}
-        <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3.5 shadow-2xs">
-          <div className="flex items-center justify-between text-muted dark:text-dark-text-muted mb-1">
-            <span className="text-[11px] font-semibold uppercase tracking-wider">Fees Pending</span>
-            <CreditCard size={14} className="text-amber-500" />
+        {fees && (
+          <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3.5 shadow-2xs">
+            <div className="flex items-center justify-between text-muted dark:text-dark-text-muted mb-1">
+              <span className="text-[11px] font-semibold uppercase tracking-wider">Fees Pending</span>
+              <CreditCard size={14} className="text-amber-500" />
+            </div>
+            <p className="text-xl font-bold text-deep dark:text-dark-text">
+              {kpis.pendingFees !== null ? `₹${kpis.pendingFees.toLocaleString('en-IN')}` : 'No data'}
+            </p>
+            <span className="text-[10px] text-muted dark:text-dark-text-muted">Total Paid: ₹{(fees.paidAmount || 0).toLocaleString('en-IN')}</span>
           </div>
-          <p className="text-xl font-bold text-deep dark:text-dark-text">
-            {kpis.pendingFees !== null ? `₹${kpis.pendingFees.toLocaleString('en-IN')}` : 'No data'}
-          </p>
-          <span className="text-[10px] text-muted dark:text-dark-text-muted">Total Paid: ₹{(fees.paidAmount || 0).toLocaleString('en-IN')}</span>
-        </div>
+        )}
 
         {/* Homework */}
-        <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3.5 shadow-2xs">
-          <div className="flex items-center justify-between text-muted dark:text-dark-text-muted mb-1">
-            <span className="text-[11px] font-semibold uppercase tracking-wider">Homework</span>
-            <BookOpen size={14} className="text-violet-500" />
+        {homework && (
+          <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3.5 shadow-2xs">
+            <div className="flex items-center justify-between text-muted dark:text-dark-text-muted mb-1">
+              <span className="text-[11px] font-semibold uppercase tracking-wider">Homework</span>
+              <BookOpen size={14} className="text-violet-500" />
+            </div>
+            <p className="text-xl font-bold text-deep dark:text-dark-text">
+              {kpis.homeworkCompletionPct !== null ? `${kpis.homeworkCompletionPct}%` : 'No data'}
+            </p>
+            <span className="text-[10px] text-muted dark:text-dark-text-muted">Submitted: {homework.completed} / {homework.totalAssigned}</span>
           </div>
-          <p className="text-xl font-bold text-deep dark:text-dark-text">
-            {kpis.homeworkCompletionPct !== null ? `${kpis.homeworkCompletionPct}%` : 'No data'}
-          </p>
-          <span className="text-[10px] text-muted dark:text-dark-text-muted">Submitted: {homework.completed} / {homework.totalAssigned}</span>
-        </div>
+        )}
 
         {/* Recognition */}
-        <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3.5 shadow-2xs col-span-2 sm:col-span-1">
-          <div className="flex items-center justify-between text-muted dark:text-dark-text-muted mb-1">
-            <span className="text-[11px] font-semibold uppercase tracking-wider">Recognition</span>
-            <Award size={14} className="text-yellow-500" />
+        {recognition && (
+          <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3.5 shadow-2xs col-span-2 sm:col-span-1">
+            <div className="flex items-center justify-between text-muted dark:text-dark-text-muted mb-1">
+              <span className="text-[11px] font-semibold uppercase tracking-wider">Recognition</span>
+              <Award size={14} className="text-yellow-500" />
+            </div>
+            <p className="text-xl font-bold text-deep dark:text-dark-text">
+              {kpis.recognitionPoints !== null ? `${kpis.recognitionPoints} pts` : 'No data'}
+            </p>
+            <span className="text-[10px] text-muted dark:text-dark-text-muted">Badges: {recognition.badgesCount || 0}</span>
           </div>
-          <p className="text-xl font-bold text-deep dark:text-dark-text">
-            {kpis.recognitionPoints !== null ? `${kpis.recognitionPoints} pts` : 'No data'}
-          </p>
-          <span className="text-[10px] text-muted dark:text-dark-text-muted">Badges: {recognition.badgesCount || 0}</span>
-        </div>
+        )}
       </div>
 
       {/* ──────────────────────── 3. ATTENDANCE WARNING ALERT ──────────────────────── */}
-      {attendance.isBelowThreshold && (
+      {attendance?.isBelowThreshold && (
         <div className="p-3.5 bg-amber-50/90 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl flex items-start gap-3 text-xs text-amber-800 dark:text-amber-300">
           <AlertTriangle size={18} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
           <div>
@@ -636,7 +648,7 @@ export default function StudentProfile() {
       )}
 
       {/* ACADEMICS TAB */}
-      {activeTab === 'academics' && (
+      {activeTab === 'academics' && academics && (
         <div className="space-y-4">
           {/* Summary Row */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -739,7 +751,7 @@ export default function StudentProfile() {
       )}
 
       {/* ATTENDANCE TAB */}
-      {activeTab === 'attendance' && (
+      {activeTab === 'attendance' && attendance && (
         <div className="space-y-4">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-2xs">
@@ -789,7 +801,7 @@ export default function StudentProfile() {
       )}
 
       {/* FEES TAB */}
-      {activeTab === 'fees' && (
+      {activeTab === 'fees' && fees && (
         <div className="space-y-4">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-2xs">
@@ -857,7 +869,7 @@ export default function StudentProfile() {
       )}
 
       {/* HOMEWORK TAB */}
-      {activeTab === 'homework' && (
+      {activeTab === 'homework' && homework && (
         <div className="space-y-4">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-2xs">
@@ -931,7 +943,7 @@ export default function StudentProfile() {
       )}
 
       {/* RECOGNITION TAB */}
-      {activeTab === 'recognition' && (
+      {activeTab === 'recognition' && recognition && (
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-2xs">
@@ -967,7 +979,7 @@ export default function StudentProfile() {
       )}
 
       {/* DOCUMENTS TAB */}
-      {activeTab === 'documents' && (
+      {activeTab === 'documents' && documents && (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="text-xs font-bold text-deep dark:text-dark-text uppercase tracking-wider">Associated Student Documents</h3>

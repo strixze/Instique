@@ -774,7 +774,41 @@ export const getStudentProfile = async (id, schoolId, user) => {
     });
   });
 
-  activityItems.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+  // Access & Visibility enforcement
+  const parentVis = settingsDoc?.visibility?.parent || {};
+  const teacherPolicy = settingsDoc?.visibility?.teacherPolicy || {};
+
+  const isParent = user?.role === 'parent';
+  const isTeacher = user?.role === 'teacher';
+
+  const showAttendance = isParent ? parentVis.attendance !== false : true;
+  const showAcademics = isParent ? parentVis.marks !== false : true;
+  const showHomework = isParent ? parentVis.homework !== false : true;
+  const showRecognition = isParent ? parentVis.recognition !== false : true;
+  const showDocuments = isParent ? parentVis.documents !== false : true;
+  const showFees = isParent
+    ? parentVis.fees !== false
+    : isTeacher
+      ? teacherPolicy.canViewFeeInfo === true
+      : true;
+  const showTeacherInfo = isParent ? parentVis.teacherInfo !== false : true;
+
+  // Redact teacher names if teacherInfo is hidden for parents
+  if (!showTeacherInfo) {
+    homeworkList.forEach(hw => { hw.teacher = 'Teacher'; });
+    recognitionHistory.forEach(r => { r.awardedBy = 'Teacher'; });
+  }
+
+  // Filter activity items according to visibility
+  let filteredActivityItems = activityItems.filter(item => {
+    if (item.type === 'fee_payment' && !showFees) return false;
+    if (item.type === 'recognition' && !showRecognition) return false;
+    if (item.type === 'attendance' && !showAttendance) return false;
+    if (item.type === 'exam' && !showAcademics) return false;
+    return true;
+  });
+
+  filteredActivityItems.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
   return {
     student: {
@@ -795,21 +829,21 @@ export const getStudentProfile = async (id, schoolId, user) => {
     },
     parents: parentDetails,
     kpis: {
-      attendancePercentage,
-      academicAverage,
-      pendingFees: hasFeeData ? totalPendingFees : null,
-      homeworkCompletionPct,
-      recognitionPoints: totalRecognitionPoints,
+      attendancePercentage: showAttendance ? attendancePercentage : null,
+      academicAverage: showAcademics ? academicAverage : null,
+      pendingFees: showFees ? (hasFeeData ? totalPendingFees : null) : null,
+      homeworkCompletionPct: showHomework ? homeworkCompletionPct : null,
+      recognitionPoints: showRecognition ? totalRecognitionPoints : null,
     },
-    academics: {
+    academics: showAcademics ? {
       academicAverage,
       passPercentage: publishedMarks.length > 0 ? Math.round((passCount / publishedMarks.length) * 100) : null,
       subjectPerformance,
       bestSubject,
       needingAttentionSubject,
       exams: examList
-    },
-    attendance: {
+    } : null,
+    attendance: showAttendance ? {
       overallPercentage: attendancePercentage,
       totalDays: attendanceTotalDays,
       presentCount: attendancePresentCount,
@@ -820,8 +854,8 @@ export const getStudentProfile = async (id, schoolId, user) => {
       isBelowThreshold: attendancePercentage !== null && attendancePercentage < attendanceThreshold,
       monthlyTrend: monthlyAttendanceTrend,
       subjectAttendance
-    },
-    fees: {
+    } : null,
+    fees: showFees ? {
       hasData: hasFeeData,
       totalAssigned: totalAssignedFees,
       paidAmount: totalPaidFees,
@@ -839,22 +873,22 @@ export const getStudentProfile = async (id, schoolId, user) => {
         status: t.status,
         paymentMethod: t.paymentMethod
       }))
-    },
-    homework: {
+    } : null,
+    homework: showHomework ? {
       totalAssigned: homeworkAssignedCount,
       completed: homeworkCompletedCount,
       pending: homeworkPendingCount,
       overdue: homeworkOverdueCount,
       completionPercentage: homeworkCompletionPct,
       list: homeworkList
-    },
-    recognition: {
+    } : null,
+    recognition: showRecognition ? {
       points: totalRecognitionPoints,
       badgesCount: badgeList.length,
       badges: badgeList,
       history: recognitionHistory
-    },
-    documents: documentList,
-    activityTimeline: activityItems.slice(0, 30)
+    } : null,
+    documents: showDocuments ? documentList : null,
+    activityTimeline: filteredActivityItems.slice(0, 30)
   };
 };

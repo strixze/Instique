@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { Calendar, Download, BookOpen, User, Users, Coffee } from 'lucide-react';
+import { Calendar, Download, BookOpen, User, Users, Coffee, EyeOff } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
 import Select from '../../components/ui/Select';
@@ -8,6 +8,7 @@ import { useUserStore } from '../../store/userStore';
 import { parentApi } from '../../api/parent.api';
 import { studentApi } from '../../api/student.api';
 import { timetableApi } from '../../api/timetable.api';
+import { settingApi } from '../../api/setting.api';
 import { getSubjectStyle, DEFAULT_PERIOD_TIMES } from '../../utils/timetableTheme';
 import { generateUniversalTimetablePdf } from '../../utils/timetablePdf';
 
@@ -28,6 +29,7 @@ export default function ParentTimetable() {
   const [timetable, setTimetable] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isModuleDisabled, setIsModuleDisabled] = useState(false);
 
   useEffect(() => {
     loadParentProfile();
@@ -36,11 +38,22 @@ export default function ParentTimetable() {
   const loadParentProfile = async () => {
     setLoading(true);
     try {
-      const res = await parentApi.getMyChildren();
-      const kids = res.data || [];
-      setChildren(kids);
-      if (kids.length > 0) {
-        setSelectedChildId(kids[0].id || kids[0]._id);
+      const [kidsRes, settingsRes] = await Promise.allSettled([
+        parentApi.getMyChildren(),
+        settingApi.getPublic()
+      ]);
+      if (settingsRes.status === 'fulfilled') {
+        const sData = settingsRes.value?.data?.data || settingsRes.value?.data;
+        if (sData?.visibility?.parent?.timetable === false || sData?.features?.timetable === false) {
+          setIsModuleDisabled(true);
+        }
+      }
+      if (kidsRes.status === 'fulfilled') {
+        const kids = kidsRes.value?.data || [];
+        setChildren(kids);
+        if (kids.length > 0) {
+          setSelectedChildId(kids[0].id || kids[0]._id);
+        }
       }
     } catch (e) {
       toast.error(e?.message || 'Failed to load children profiles');
@@ -103,6 +116,25 @@ export default function ParentTimetable() {
 
   const maxPeriods = timetable?.totalPeriodsPerDay || 8;
   const workingDays = timetable?.configSnapshot?.workingDays || [1, 2, 3, 4, 5];
+
+  if (!loading && isModuleDisabled) {
+    return (
+      <div className="max-w-xl mx-auto my-16 text-center p-8 bg-white dark:bg-dark-surface border border-border dark:border-dark-border rounded-2xl shadow-xs space-y-4">
+        <div className="w-14 h-14 mx-auto rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center">
+          <EyeOff size={28} />
+        </div>
+        <h2 className="text-lg font-bold text-deep dark:text-dark-text">Timetable Portal Disabled</h2>
+        <p className="text-xs text-muted max-w-md mx-auto">
+          Viewing student class timetables is currently disabled for parents by your school administrator.
+        </p>
+        <div className="pt-2">
+          <Button onClick={() => window.location.href = '/dashboard'} variant="primary" size="sm">
+            Return to Dashboard
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 w-full pb-12 print:p-0 print-timetable">

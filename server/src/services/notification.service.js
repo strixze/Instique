@@ -1,7 +1,31 @@
 import Notification from '../models/Notification.js';
+import Setting from '../models/Setting.js';
 import { paginate } from '../utils/pagination.js';
 
+/**
+ * Check whether a notification for an event is enabled for the target role
+ */
+export const isNotificationAllowed = async (schoolId, eventKey, role) => {
+  if (!schoolId || !eventKey || !role) return true;
+  try {
+    const setting = await Setting.findOne({ schoolId }).select('notifications');
+    if (!setting?.notifications?.rules) return true;
+    const rule = setting.notifications.rules[eventKey];
+    if (!rule) return true;
+    return rule[role] !== false;
+  } catch {
+    return true;
+  }
+};
+
 export const createNotification = async (schoolId, data) => {
+  if (schoolId && data.eventKey && data.recipientRole) {
+    const allowed = await isNotificationAllowed(schoolId, data.eventKey, data.recipientRole);
+    if (!allowed) {
+      return null; // Suppressed by school notification settings
+    }
+  }
+
   const notification = await Notification.create({ ...data, schoolId });
 
   try {
