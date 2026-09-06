@@ -49,6 +49,7 @@ import SyllabusManagement from '../pages/school-admin/SyllabusManagement';
 import SyllabusDetail from '../pages/school-admin/SyllabusDetail';
 import SectionSyllabusTrackView from '../pages/teacher/SectionSyllabusTrackView';
 import ParentSyllabusView from '../pages/parent/ParentSyllabusView';
+import ParentLeaves from '../pages/parent/ParentLeaves';
 
 function RoleDashboard() {
   const user = useUserStore((s) => s.user);
@@ -87,6 +88,7 @@ function UnifiedAttendance() {
 
 function UnifiedLeaves() {
   const user = useUserStore((s) => s.user);
+  if (user?.role === 'parent') return <ParentLeaves />;
   if (user?.role === 'teacher') return <TeacherLeaves />;
   return <Leaves />;
 }
@@ -152,7 +154,7 @@ export default function AppRouter() {
       <Route path="/notices" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/notices']}><Notices /></ModulePage>} />
       <Route path="/events" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/events']}><Events /></ModulePage>} />
       <Route path="/parent-meetings" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/parent-meetings']}><UnifiedParentMeetings /></ModulePage>} />
-      <Route path="/leaves" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/leaves']}><Leaves /></ModulePage>} />
+      <Route path="/leaves" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/leaves']}><UnifiedLeaves /></ModulePage>} />
       <Route path="/complaints" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/complaints']}><Complaints /></ModulePage>} />
 
       {/* Common Route Aliases */}

@@ -28528,3 +28528,1645 @@ Stack Trace: Error: Refresh token required
 Details: []
 ================================================================================
 
+
+================================================================================
+Timestamp: 2026-09-06T07:22:35.023Z
+Method: GET
+URL: /api/v1/auth/profile
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T07:22:35.036Z
+Method: GET
+URL: /api/v1/auth/profile
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T07:22:35.406Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Refresh token required
+Stack Trace: Error: Refresh token required
+    at Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:101:11)
+    at file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:36
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T07:22:35.409Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Refresh token required
+Stack Trace: Error: Refresh token required
+    at Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:101:11)
+    at file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:36
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T07:26:52.128Z
+Method: GET
+URL: /api/v1/auth/profile
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T07:26:52.133Z
+Method: GET
+URL: /api/v1/auth/profile
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T07:26:52.200Z
+Method: GET
+URL: /api/v1/parents/my-children
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\projects\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T07:26:52.206Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Invalid refresh token
+Stack Trace: Error: Invalid refresh token
+    at Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:113:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T07:26:52.210Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Invalid refresh token
+Stack Trace: Error: Invalid refresh token
+    at Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:113:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T07:26:52.215Z
+Method: GET
+URL: /api/v1/notifications/unread-count
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\projects\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T07:26:52.218Z
+Method: GET
+URL: /api/v1/parents/my-children
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\projects\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T07:26:52.231Z
+Method: GET
+URL: /api/v1/notifications/unread-count
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\projects\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T07:26:52.272Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Invalid refresh token
+Stack Trace: Error: Invalid refresh token
+    at Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:113:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T07:26:52.312Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Invalid refresh token
+Stack Trace: Error: Invalid refresh token
+    at Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:113:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T07:26:52.317Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Invalid refresh token
+Stack Trace: Error: Invalid refresh token
+    at Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:113:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T07:26:52.325Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Invalid refresh token
+Stack Trace: Error: Invalid refresh token
+    at Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:113:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T07:26:52.532Z
+Method: GET
+URL: /api/v1/auth/profile
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T07:26:52.537Z
+Method: GET
+URL: /api/v1/auth/profile
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T07:26:52.612Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Invalid refresh token
+Stack Trace: Error: Invalid refresh token
+    at Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:113:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T07:26:52.621Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Invalid refresh token
+Stack Trace: Error: Invalid refresh token
+    at Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:113:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T07:36:04.923Z
+Method: POST
+URL: /api/v1/students/6a9d17bff564a77bb69e40de/parent/reset-password
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {}
+Body: {"parentId":"6a9d17bff564a77bb69e40dc"}
+Error Name: Error
+Error Message: Parent account has not been activated or created yet
+Stack Trace: Error: Parent account has not been activated or created yet
+    at Module.sendParentPasswordReset (file:///D:/projects/Instique/server/src/services/student.service.js:243:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/projects/Instique/server/src/controllers/student.controller.js:57:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T07:36:10.863Z
+Method: POST
+URL: /api/v1/students/6a9d17bff564a77bb69e40de/parent/reset-password
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {}
+Body: {"parentId":"6a9d17bff564a77bb69e40dc"}
+Error Name: Error
+Error Message: Parent account has not been activated or created yet
+Stack Trace: Error: Parent account has not been activated or created yet
+    at Module.sendParentPasswordReset (file:///D:/projects/Instique/server/src/services/student.service.js:243:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/projects/Instique/server/src/controllers/student.controller.js:57:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T07:42:23.065Z
+Method: GET
+URL: /api/v1/academic/academic-years?page=1&limit=10&sort=-createdAt
+User ID: Unauthenticated
+Query: {"page":"1","limit":"10","sort":"-createdAt"}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\projects\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T07:42:23.069Z
+Method: GET
+URL: /api/v1/academic/academic-years?page=1&limit=10&sort=-createdAt
+User ID: Unauthenticated
+Query: {"page":"1","limit":"10","sort":"-createdAt"}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\projects\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T07:54:30.935Z
+Method: GET
+URL: /api/v1/auth/profile
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T07:54:30.939Z
+Method: GET
+URL: /api/v1/auth/profile
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T07:54:30.987Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Invalid refresh token
+Stack Trace: Error: Invalid refresh token
+    at Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:115:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T07:54:30.991Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Invalid refresh token
+Stack Trace: Error: Invalid refresh token
+    at Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:115:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T07:57:36.170Z
+Method: GET
+URL: /api/v1/notifications/unread-count
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\projects\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T08:11:59.999Z
+Method: GET
+URL: /api/v1/notifications/unread-count
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\projects\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T08:12:32.154Z
+Method: GET
+URL: /api/v1/auth/profile
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T08:12:32.157Z
+Method: GET
+URL: /api/v1/auth/profile
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T08:12:32.267Z
+Method: GET
+URL: /api/v1/notifications/unread-count
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\projects\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T08:12:32.275Z
+Method: GET
+URL: /api/v1/dashboards/school-admin?attendancePeriod=week&classAttendancePeriod=week&feePeriod=month
+User ID: Unauthenticated
+Query: {"attendancePeriod":"week","classAttendancePeriod":"week","feePeriod":"month"}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\projects\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T08:12:32.279Z
+Method: GET
+URL: /api/v1/notifications/unread-count
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\projects\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T08:12:32.281Z
+Method: GET
+URL: /api/v1/dashboards/school-admin?attendancePeriod=week&classAttendancePeriod=week&feePeriod=month
+User ID: Unauthenticated
+Query: {"attendancePeriod":"week","classAttendancePeriod":"week","feePeriod":"month"}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\projects\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T08:12:32.318Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Invalid refresh token
+Stack Trace: Error: Invalid refresh token
+    at Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:115:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T08:12:32.322Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Invalid refresh token
+Stack Trace: Error: Invalid refresh token
+    at Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:115:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T08:12:32.413Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Invalid refresh token
+Stack Trace: Error: Invalid refresh token
+    at Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:115:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T08:12:32.425Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Invalid refresh token
+Stack Trace: Error: Invalid refresh token
+    at Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:115:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T08:12:32.431Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Invalid refresh token
+Stack Trace: Error: Invalid refresh token
+    at Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:115:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T08:12:32.434Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Invalid refresh token
+Stack Trace: Error: Invalid refresh token
+    at Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:115:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T08:12:32.507Z
+Method: GET
+URL: /api/v1/auth/profile
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T08:12:32.514Z
+Method: GET
+URL: /api/v1/auth/profile
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T08:12:32.569Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Invalid refresh token
+Stack Trace: Error: Invalid refresh token
+    at Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:115:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T08:12:32.620Z
+Method: POST
+URL: /api/v1/auth/refresh
+User ID: Unauthenticated
+Query: {}
+Body: {}
+Error Name: Error
+Error Message: Invalid refresh token
+Stack Trace: Error: Invalid refresh token
+    at Module.refreshUserToken (file:///D:/projects/Instique/server/src/services/auth.service.js:115:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:58:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T08:12:47.987Z
+Method: GET
+URL: /api/v1/notifications/unread-count
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\projects\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T08:12:55.323Z
+Method: POST
+URL: /api/v1/auth/login
+User ID: Unauthenticated
+Query: {}
+Body: {"email":"chaitanyakhandekar95@gmail.com","password":"Parent1@123"}
+Error Name: Error
+Error Message: Invalid email or password
+Stack Trace: Error: Invalid email or password
+    at Module.loginUser (file:///D:/projects/Instique/server/src/services/auth.service.js:69:11)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:36:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T08:13:07.466Z
+Method: POST
+URL: /api/v1/auth/login
+User ID: Unauthenticated
+Query: {}
+Body: {"email":"chaitanyakhandekar95@gmail.com","password":"Parent1@123"}
+Error Name: Error
+Error Message: Invalid email or password
+Stack Trace: Error: Invalid email or password
+    at Module.loginUser (file:///D:/projects/Instique/server/src/services/auth.service.js:69:11)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:36:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T08:17:34.153Z
+Method: POST
+URL: /api/v1/auth/login
+User ID: Unauthenticated
+Query: {}
+Body: {"email":"atishthorat8730@gmail.com","password":"Parent@123"}
+Error Name: Error
+Error Message: Invalid email or password
+Stack Trace: Error: Invalid email or password
+    at Module.loginUser (file:///D:/projects/Instique/server/src/services/auth.service.js:69:11)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:36:18
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T08:27:59.994Z
+Method: GET
+URL: /api/v1/notifications/unread-count
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\projects\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T08:33:59.986Z
+Method: GET
+URL: /api/v1/notifications/unread-count
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\projects\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T08:35:43.922Z
+Method: GET
+URL: /api/v1/roles?page=1&limit=10
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {"page":"1","limit":"10"}
+Body: 
+Error Name: TypeError
+Error Message: roleService.getRoles is not a function
+Stack Trace: TypeError: roleService.getRoles is not a function
+    at file:///D:/projects/Instique/server/src/controllers/role.controller.js:11:36
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///D:/projects/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at tenantMiddleware (file:///D:/projects/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T08:35:44.072Z
+Method: GET
+URL: /api/v1/roles?page=1&limit=10
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {"page":"1","limit":"10"}
+Body: 
+Error Name: TypeError
+Error Message: roleService.getRoles is not a function
+Stack Trace: TypeError: roleService.getRoles is not a function
+    at file:///D:/projects/Instique/server/src/controllers/role.controller.js:11:36
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///D:/projects/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at tenantMiddleware (file:///D:/projects/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T08:35:59.989Z
+Method: GET
+URL: /api/v1/notifications/unread-count
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\projects\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T08:36:32.098Z
+Method: GET
+URL: /api/v1/roles?page=1&limit=10
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {"page":"1","limit":"10"}
+Body: 
+Error Name: TypeError
+Error Message: roleService.getRoles is not a function
+Stack Trace: TypeError: roleService.getRoles is not a function
+    at file:///D:/projects/Instique/server/src/controllers/role.controller.js:11:36
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///D:/projects/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at tenantMiddleware (file:///D:/projects/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T08:36:32.164Z
+Method: GET
+URL: /api/v1/roles?page=1&limit=10
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {"page":"1","limit":"10"}
+Body: 
+Error Name: TypeError
+Error Message: roleService.getRoles is not a function
+Stack Trace: TypeError: roleService.getRoles is not a function
+    at file:///D:/projects/Instique/server/src/controllers/role.controller.js:11:36
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///D:/projects/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at tenantMiddleware (file:///D:/projects/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T08:38:00.423Z
+Method: GET
+URL: /api/v1/roles?page=1&limit=10
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {"page":"1","limit":"10"}
+Body: 
+Error Name: TypeError
+Error Message: roleService.getRoles is not a function
+Stack Trace: TypeError: roleService.getRoles is not a function
+    at file:///D:/projects/Instique/server/src/controllers/role.controller.js:11:36
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///D:/projects/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at tenantMiddleware (file:///D:/projects/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T08:38:00.937Z
+Method: GET
+URL: /api/v1/roles?page=1&limit=10
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {"page":"1","limit":"10"}
+Body: 
+Error Name: TypeError
+Error Message: roleService.getRoles is not a function
+Stack Trace: TypeError: roleService.getRoles is not a function
+    at file:///D:/projects/Instique/server/src/controllers/role.controller.js:11:36
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at file:///D:/projects/Instique/server/src/middlewares/rbac.middleware.js:11:5
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at next (D:\projects\Instique\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (D:\projects\Instique\server\node_modules\router\lib\route.js:117:3)
+    at handle (D:\projects\Instique\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at D:\projects\Instique\server\node_modules\router\index.js:295:15
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at tenantMiddleware (file:///D:/projects/Instique/server/src/middlewares/tenant.middleware.js:18:3)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T08:43:16.516Z
+Method: GET
+URL: /api/v1/settings
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\projects\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T08:43:16.521Z
+Method: GET
+URL: /api/v1/settings
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\projects\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T08:49:59.989Z
+Method: GET
+URL: /api/v1/notifications/unread-count
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\projects\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T08:51:59.992Z
+Method: GET
+URL: /api/v1/notifications/unread-count
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\projects\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T08:58:28.334Z
+Method: GET
+URL: /api/v1/notifications/unread-count
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\projects\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+
+
+================================================================================
+Timestamp: 2026-09-06T09:05:59.982Z
+Method: GET
+URL: /api/v1/notifications/unread-count
+User ID: Unauthenticated
+Query: {}
+Body: 
+Error Name: Error
+Error Message: Authentication required
+Stack Trace: Error: Authentication required
+    at file:///D:/projects/Instique/server/src/middlewares/auth.middleware.js:13:11
+    at file:///D:/projects/Instique/server/src/utils/asyncHandler.js:2:19
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at Function.handle (D:\projects\Instique\server\node_modules\router\index.js:186:3)
+    at router (D:\projects\Instique\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (D:\projects\Instique\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\projects\Instique\server\node_modules\router\index.js:342:13)
+    at D:\projects\Instique\server\node_modules\router\index.js:297:9
+    at processParams (D:\projects\Instique\server\node_modules\router\index.js:582:12)
+    at next (D:\projects\Instique\server\node_modules\router\index.js:291:5)
+    at SendStream.error (D:\projects\Instique\server\node_modules\serve-static\index.js:120:7)
+    at SendStream.emit (node:events:518:28)
+Details: []
+================================================================================
+

@@ -584,7 +584,7 @@ export const confirmAdmission = async (id, schoolId, userId) => {
         ]);
 
         const schoolName = school?.name || 'Instique School';
-        const parentName = parentUser.name || `${parent.firstName} ${parent.lastName}`.trim();
+        const parentName = `${parent.firstName} ${parent.lastName}`.trim() || parentUser.name || 'Parent';
         const studentName = `${student.firstName} ${student.lastName}`.trim();
         const className = `${schoolClass?.name || 'Class'} ${section?.name ? `- Section ${section.name}` : ''}`.trim();
         const activationUrl = `${env.CLIENT_URL}/activate-account?token=${rawActivationToken}`;
@@ -716,7 +716,7 @@ export const resendAdmissionActivationEmail = async (id, schoolId, userId, ip, u
   });
 
   const school = await School.findById(schoolId);
-  const parentName = user.name || `${parent.firstName} ${parent.lastName}`.trim();
+  const parentName = `${parent.firstName} ${parent.lastName}`.trim() || user.name || 'Parent';
   const studentName = `${student.firstName} ${student.lastName}`.trim();
   const className = `${admission.assignedClass?.name || 'Class'} ${admission.assignedSection?.name ? `- Section ${admission.assignedSection.name}` : ''}`.trim();
   const activationUrl = `${env.CLIENT_URL}/activate-account?token=${rawToken}`;

@@ -29,7 +29,7 @@ export const approveLeave = asyncHandler(async (req, res) => {
     req.body.assignments,
     req.user._id
   );
-  res.status(200).json(new ApiResponse(200, result, 'Leave approved and substitute teachers assigned successfully'));
+  res.status(200).json(new ApiResponse(200, result, 'Leave approved successfully'));
 });
 
 export const rejectLeave = asyncHandler(async (req, res) => {

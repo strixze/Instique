@@ -1,5 +1,6 @@
 import Attendance from '../models/Attendance.js';
 import Student from '../models/Student.js';
+import Leave from '../models/Leave.js';
 import ApiError from '../utils/ApiError.js';
 import { paginate } from '../utils/pagination.js';
 
@@ -46,14 +47,36 @@ export const markAllPresent = async (schoolId, data, userId) => {
     status: 'active',
   });
 
-  const studentStatuses = students.map((s) => ({
-    student: s._id,
-    status: data.absentStudentIds?.includes(s._id.toString()) ? 'absent' : 'present',
-  }));
+  const targetDate = new Date(data.date);
+  const approvedLeaves = await Leave.find({
+    schoolId,
+    status: 'approved',
+    student: { $in: students.map((s) => s._id) },
+    startDate: { $lte: targetDate },
+    endDate: { $gte: targetDate },
+  }).select('student');
+
+  const onLeaveSet = new Set(approvedLeaves.map((l) => l.student?.toString()).filter(Boolean));
+
+  const studentStatuses = students.map((s) => {
+    const sId = s._id.toString();
+    let status = 'present';
+    if (onLeaveSet.has(sId)) {
+      status = 'leave';
+    } else if (data.absentStudentIds?.includes(sId)) {
+      status = 'absent';
+    }
+    return {
+      student: s._id,
+      status,
+    };
+  });
 
   const summary = { present: 0, absent: 0, late: 0, leave: 0, total: studentStatuses.length };
   for (const s of studentStatuses) {
-    summary[s.status]++;
+    if (summary[s.status] !== undefined) {
+      summary[s.status]++;
+    }
   }
 
   // Upsert: update if attendance already exists for this date/class/section
@@ -87,6 +110,48 @@ export const markAllPresent = async (schoolId, data, userId) => {
   });
 
   return attendance;
+};
+
+export const applyApprovedLeaveToAttendance = async (schoolId, studentId, classId, sectionId, startDate, endDate, markedBy) => {
+  const start = new Date(startDate);
+  start.setHours(0, 0, 0, 0);
+  const end = new Date(endDate);
+  end.setHours(23, 59, 59, 999);
+
+  const query = {
+    schoolId,
+    date: { $gte: start, $lte: end },
+  };
+  if (classId) query.schoolClass = classId;
+  if (sectionId) query.section = sectionId;
+
+  const attendanceRecords = await Attendance.find(query);
+
+  for (const record of attendanceRecords) {
+    let modified = false;
+    const studentEntry = record.students.find((s) => s.student?.toString() === studentId.toString());
+    if (studentEntry) {
+      if (studentEntry.status !== 'leave') {
+        studentEntry.status = 'leave';
+        modified = true;
+      }
+    } else {
+      record.students.push({ student: studentId, status: 'leave' });
+      modified = true;
+    }
+
+    if (modified) {
+      const summary = { present: 0, absent: 0, late: 0, leave: 0, holiday: 0, total: record.students.length };
+      for (const s of record.students) {
+        if (summary[s.status] !== undefined) {
+          summary[s.status]++;
+        }
+      }
+      record.summary = summary;
+      if (markedBy) record.markedBy = markedBy;
+      await record.save();
+    }
+  }
 };
 
 export const getAttendance = async (schoolId, options) => {

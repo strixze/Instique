@@ -382,11 +382,13 @@ export const sendTeacherPasswordReset = async (teacherId, schoolId, adminUser, i
   });
 
   const school = await School.findById(schoolId).select('name');
-  const teacherName = user.name || `${teacher.firstName} ${teacher.lastName}`.trim();
+  const teacherName = `${teacher.firstName} ${teacher.lastName}`.trim() || user.name || 'Teacher';
   const resetUrl = `${env.CLIENT_URL}/reset-password?token=${rawToken}`;
 
   const emailHtml = getPasswordResetEmailTemplate({
     userName: teacherName,
+    teacherName,
+    schoolName: school?.name,
     resetUrl,
     expiryMinutes: 60,
   });

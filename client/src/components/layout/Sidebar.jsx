@@ -161,6 +161,7 @@ const navSections = {
       title: 'Services',
       items: [
         { to: '/events', icon: Calendar, label: 'Events' },
+        { to: '/leaves', icon: Calendar, label: 'Leave Requests' },
         { to: '/parent-meetings', icon: Users, label: 'Parent Meetings' },
         { to: '/fees', icon: DollarSign, label: 'Fees' },
         { to: '/notices', icon: Bell, label: 'Notices' },

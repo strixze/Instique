@@ -10,6 +10,7 @@ export default function Select({
   id,
   required,
   onChange,
+  children,
   ...props
 }) {
   const selectId = id || (label ? label.toLowerCase().replace(/\s+/g, '-') : undefined);
@@ -37,12 +38,23 @@ export default function Select({
         } ${className}`}
         {...props}
       >
-        {placeholder && <option value="">{placeholder}</option>}
-        {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
+        {placeholder && (
+          <option value="" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
+            {placeholder}
           </option>
-        ))}
+        )}
+        {options && options.length > 0
+          ? options.map((opt) => (
+              <option
+                key={opt.value}
+                value={opt.value}
+                disabled={opt.disabled}
+                className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
+              >
+                {opt.label}
+              </option>
+            ))
+          : children}
       </select>
       {error ? (
         <p className="text-xs text-danger mt-0.5">{error}</p>

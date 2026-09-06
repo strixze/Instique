@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useUserStore } from '../../store/userStore';
 import { parentApi } from '../../api/parent.api';
 import { parentMeetingApi } from '../../api/parentMeeting.api';
+import { leaveApi } from '../../api/leave.api';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
@@ -11,7 +12,7 @@ import {
   Users, GraduationCap, Calendar as CalendarIcon, Clock, ClipboardList,
   BookOpen, DollarSign, Trophy, Bell, AlertCircle, CheckCircle2, ChevronDown,
   ArrowRight, Eye, Check, Minus, X, Award, Sparkles, RefreshCw,
-  FileText, School, MapPin, AlertTriangle, User
+  FileText, School, MapPin, AlertTriangle, User, Plus
 } from 'lucide-react';
 
 const RSVP_BADGE = { PENDING: 'gray', GOING: 'success', MAYBE: 'warning', NOT_GOING: 'danger' };
@@ -58,6 +59,10 @@ export default function ParentDashboard() {
   const [dashboardLoading, setDashboardLoading] = useState(false);
   const [dashboardError, setDashboardError] = useState(null);
   const [rsvpSavingId, setRsvpSavingId] = useState(null);
+
+  // Student Leaves State
+  const [recentLeaves, setRecentLeaves] = useState([]);
+  const [leavesLoading, setLeavesLoading] = useState(false);
 
 
   // 1. Fetch authenticated parent's linked children
@@ -115,6 +120,19 @@ export default function ParentDashboard() {
       fetchChildDashboard(selectedChildId);
     }
   }, [selectedChildId, fetchChildDashboard]);
+
+  // Fetch recent leaves for selected child
+  useEffect(() => {
+    if (!selectedChildId) {
+      setRecentLeaves([]);
+      return;
+    }
+    setLeavesLoading(true);
+    leaveApi.getAll({ studentId: selectedChildId, limit: 3 })
+      .then((res) => setRecentLeaves(res.data || []))
+      .catch(() => setRecentLeaves([]))
+      .finally(() => setLeavesLoading(false));
+  }, [selectedChildId]);
 
   // Handle RSVP for Parent Meeting
   const handleRsvp = async (meetingId, status) => {
@@ -854,6 +872,73 @@ export default function ParentDashboard() {
                           <p className="text-[10px] text-muted">By {r.awardedBy} • {formatDate(r.createdAt)}</p>
                         </div>
                         <span className="text-sm font-extrabold text-purple-700 dark:text-purple-400">+{r.points}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </Card>
+            </div>
+
+            {/* Leave Applications */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h2 className="text-base font-bold text-deep flex items-center gap-2">
+                  <CalendarIcon size={18} className="text-emerald-600 dark:text-emerald-400" /> Leave Applications
+                </h2>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => navigate('/leaves?apply=true')}
+                    className="text-xs"
+                    icon={<Plus size={14} />}
+                  >
+                    Apply for Leave
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigate('/leaves')}
+                    className="text-xs text-emerald-600 hover:text-emerald-700 font-semibold"
+                  >
+                    View All <ArrowRight size={12} className="ml-1 inline" />
+                  </Button>
+                </div>
+              </div>
+
+              <Card className="!p-4 min-h-[160px]">
+                {leavesLoading ? (
+                  <div className="space-y-2.5">
+                    {[1, 2].map((i) => <div key={i} className="h-14 bg-slate-100 dark:bg-dark-hover rounded-xl animate-pulse" />)}
+                  </div>
+                ) : recentLeaves.length === 0 ? (
+                  <div className="py-6 text-center text-muted">
+                    <CalendarIcon size={28} className="mx-auto opacity-30 text-emerald-600 mb-1" />
+                    <p className="text-xs text-muted">No leave applications submitted for {selectedChild?.name || 'this child'}.</p>
+                    <div className="mt-2">
+                      <Button variant="primary" size="sm" onClick={() => navigate('/leaves?apply=true')} icon={<Plus size={14} />}>
+                        Apply for Leave
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-2.5">
+                    {recentLeaves.map((l) => (
+                      <div key={l._id} className="p-2.5 bg-slate-50 dark:bg-[#15191C] border border-border dark:border-white/10 rounded-xl flex items-center justify-between">
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-deep capitalize">{l.type} Leave</span>
+                            <Badge size="sm" color={l.status === 'approved' ? 'success' : l.status === 'rejected' ? 'danger' : 'warning'}>
+                              {l.status}
+                            </Badge>
+                          </div>
+                          <p className="text-[11px] text-muted flex items-center gap-1">
+                            <Clock size={11} /> {formatDate(l.startDate)} – {formatDate(l.endDate)}
+                          </p>
+                        </div>
+                        <Button variant="ghost" size="sm" onClick={() => navigate('/leaves')} className="text-xs">
+                          Details
+                        </Button>
                       </div>
                     ))}
                   </div>

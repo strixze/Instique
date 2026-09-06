@@ -108,7 +108,7 @@ export const resendParentActivationEmail = async (parentId, schoolId, adminUserI
   const student = parent.students?.[0];
   const studentName = student ? `${student.firstName} ${student.lastName}`.trim() : 'Student';
   const className = student?.currentClass ? `${student.currentClass.name} ${student.currentSection?.name ? `- Section ${student.currentSection.name}` : ''}`.trim() : 'General';
-  const parentName = user.name || `${parent.firstName} ${parent.lastName}`.trim();
+  const parentName = `${parent.firstName} ${parent.lastName}`.trim() || user.name || 'Parent';
   const activationUrl = `${env.CLIENT_URL}/activate-account?token=${rawToken}`;
 
   const emailHtml = getParentActivationEmailTemplate({

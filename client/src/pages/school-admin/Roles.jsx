@@ -17,7 +17,9 @@ import {
   FileText,
   AlertCircle,
   CheckCheck,
-  XCircle
+  XCircle,
+  Edit3,
+  Lock,
 } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 import DataTable from '../../components/ui/DataTable';
@@ -56,6 +58,7 @@ export default function Roles() {
   const [reload, setReload] = useState(0);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [editingRole, setEditingRole] = useState(null);
   const [form, setForm] = useState({ name: '', description: '', permissions: emptyPermissions() });
 
   useEffect(() => {
@@ -123,29 +126,60 @@ export default function Roles() {
   };
 
   const resetAndClose = () => {
+    setEditingRole(null);
     setForm({ name: '', description: '', permissions: emptyPermissions() });
     setOpen(false);
   };
 
-  const handleCreate = async () => {
+  const handleOpenEdit = (role) => {
+    setEditingRole(role);
+    const basePermissions = emptyPermissions();
+    if (role.permissions) {
+      const permsObj = role.permissions instanceof Map
+        ? Object.fromEntries(role.permissions)
+        : role.permissions;
+      Object.keys(permsObj).forEach((mod) => {
+        if (Array.isArray(permsObj[mod])) {
+          basePermissions[mod] = [...permsObj[mod]];
+        }
+      });
+    }
+    setForm({
+      name: role.name || '',
+      description: role.description || '',
+      permissions: basePermissions,
+    });
+    setOpen(true);
+  };
+
+  const handleSave = async () => {
     if (!form.name.trim()) {
       toast.error('Role name is required');
       return;
     }
     setSaving(true);
     try {
-      await roleApi.create({
-        name: form.name.trim(),
-        description: form.description?.trim() || undefined,
-        permissions: form.permissions,
-      });
-      toast.success('Role created successfully');
+      if (editingRole) {
+        await roleApi.update(editingRole._id, {
+          name: form.name.trim(),
+          description: form.description?.trim() || '',
+          permissions: form.permissions,
+        });
+        toast.success('Role updated successfully');
+      } else {
+        await roleApi.create({
+          name: form.name.trim(),
+          description: form.description?.trim() || undefined,
+          permissions: form.permissions,
+        });
+        toast.success('Role created successfully');
+        setPage(1);
+      }
       resetAndClose();
-      setPage(1);
       setLoading(true);
       setReload((r) => r + 1);
     } catch (e) {
-      toast.error(e?.message || 'Failed to create role');
+      toast.error(e?.message || (editingRole ? 'Failed to update role' : 'Failed to create role'));
     } finally {
       setSaving(false);
     }
@@ -191,12 +225,26 @@ export default function Roles() {
       label: 'Role',
       sortable: true,
       render: (r) => (
-        <div className="flex items-center gap-2.5">
-          <div className="p-1.5 rounded-md bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400">
+        <div className="flex items-center gap-3">
+          <div
+            className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
+              r.isSystem
+                ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20'
+                : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+            }`}
+          >
             <ShieldCheck size={16} />
           </div>
-          <span className="font-semibold text-deep dark:text-dark-text">{r.name}</span>
-          {r.isSystem && <Badge color="info">System</Badge>}
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-sm text-deep dark:text-dark-text tracking-tight">
+              {r.name}
+            </span>
+            {r.isSystem ? (
+              <Badge color="info">System</Badge>
+            ) : (
+              <Badge color="success">Custom</Badge>
+            )}
+          </div>
         </div>
       ),
     },
@@ -204,7 +252,7 @@ export default function Roles() {
       key: 'description',
       label: 'Description',
       render: (r) => (
-        <span className="text-secondary dark:text-dark-text-secondary text-xs">
+        <span className="text-secondary dark:text-dark-text-secondary text-xs leading-relaxed max-w-sm block line-clamp-2">
           {r.description || '—'}
         </span>
       ),
@@ -212,41 +260,65 @@ export default function Roles() {
     {
       key: 'permissions',
       label: 'Permissions',
-      render: (r) => (
-        <div className="flex items-center gap-1.5">
-          <span className="font-medium text-deep dark:text-dark-text">
-            {countPermissions(r.permissions)}
-          </span>
-          <span className="text-xs text-muted dark:text-dark-text-muted">
-            / {totalPossiblePermissions}
-          </span>
-        </div>
-      ),
+      render: (r) => {
+        const count = countPermissions(r.permissions);
+        const pct = Math.round((count / totalPossiblePermissions) * 100);
+        return (
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-xs px-2.5 py-1 rounded-lg bg-surface dark:bg-dark-elevated border border-border dark:border-dark-border text-deep dark:text-dark-text">
+              <span className="text-forest dark:text-emerald-400 font-extrabold">{count}</span>
+              <span className="text-muted dark:text-dark-text-muted"> / {totalPossiblePermissions}</span>
+            </span>
+            <span className="text-[11px] font-semibold text-muted dark:text-dark-text-muted">
+              ({pct}%)
+            </span>
+          </div>
+        );
+      },
     },
     {
       key: 'assignedUsers',
       label: 'Users',
-      render: (r) => (
-        <span className="text-secondary dark:text-dark-text-secondary font-medium">
-          {Array.isArray(r.assignedUsers) ? r.assignedUsers.length : '—'}
-        </span>
-      ),
+      render: (r) => {
+        const count = Array.isArray(r.assignedUsers) ? r.assignedUsers.length : 0;
+        return (
+          <div className="flex items-center gap-1.5">
+            <Users size={14} className="text-muted dark:text-dark-text-muted" />
+            <span className="font-semibold text-xs text-deep dark:text-dark-text">
+              {count} {count === 1 ? 'user' : 'users'}
+            </span>
+          </div>
+        );
+      },
     },
     {
       key: 'actions',
-      label: '',
-      render: (r) =>
-        !r.isSystem ? (
+      label: 'Actions',
+      align: 'right',
+      render: (r) => (
+        <div className="flex items-center justify-end gap-2">
           <button
-            onClick={() => handleDelete(r)}
-            className="p-2 text-muted dark:text-dark-text-muted hover:text-danger dark:hover:text-danger rounded-lg hover:bg-danger-light dark:hover:bg-danger/10 transition-colors"
-            title="Delete role"
+            type="button"
+            onClick={() => handleOpenEdit(r)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/40 cursor-pointer"
+            title="Edit Role & Permissions"
           >
-            <Trash2 size={16} />
+            <Edit3 size={13} className="stroke-[2.5]" />
+            <span>Edit</span>
           </button>
-        ) : (
-          <span className="text-xs text-muted dark:text-dark-text-muted italic pr-2">Protected</span>
-        ),
+
+          {!r.isSystem && (
+            <button
+              type="button"
+              onClick={() => handleDelete(r)}
+              className="inline-flex items-center p-1.5 rounded-lg text-xs font-semibold text-rose-500 hover:text-white hover:bg-rose-600 active:bg-rose-700 border border-rose-500/30 transition-all cursor-pointer"
+              title="Delete Role"
+            >
+              <Trash2 size={14} />
+            </button>
+          )}
+        </div>
+      ),
     },
   ];
 
@@ -256,12 +328,57 @@ export default function Roles() {
         title="Custom Roles & Permissions"
         description="Define custom access levels and granular module permissions for your team"
         action={
-          <Button onClick={() => setOpen(true)}>
+          <Button onClick={() => { setEditingRole(null); setForm({ name: '', description: '', permissions: emptyPermissions() }); setOpen(true); }}>
             <Plus size={16} className="mr-2" />
             Create Role
           </Button>
         }
       />
+
+      {/* Summary KPI Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3.5 shadow-2xs flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+            <ShieldCheck size={18} />
+          </div>
+          <div>
+            <p className="text-[11px] text-muted dark:text-dark-text-muted font-medium uppercase">Total Roles</p>
+            <p className="text-lg font-bold text-deep dark:text-dark-text">{meta?.total ?? data.length}</p>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3.5 shadow-2xs flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-500">
+            <Lock size={18} />
+          </div>
+          <div>
+            <p className="text-[11px] text-muted dark:text-dark-text-muted font-medium uppercase">System Roles</p>
+            <p className="text-lg font-bold text-deep dark:text-dark-text">{data.filter((r) => r.isSystem).length}</p>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3.5 shadow-2xs flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-500">
+            <Award size={18} />
+          </div>
+          <div>
+            <p className="text-[11px] text-muted dark:text-dark-text-muted font-medium uppercase">Custom Roles</p>
+            <p className="text-lg font-bold text-deep dark:text-dark-text">{data.filter((r) => !r.isSystem).length}</p>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3.5 shadow-2xs flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-500">
+            <Users size={18} />
+          </div>
+          <div>
+            <p className="text-[11px] text-muted dark:text-dark-text-muted font-medium uppercase">Assigned Staff</p>
+            <p className="text-lg font-bold text-deep dark:text-dark-text">
+              {data.reduce((acc, r) => acc + (Array.isArray(r.assignedUsers) ? r.assignedUsers.length : 0), 0)}
+            </p>
+          </div>
+        </div>
+      </div>
 
       <DataTable
         columns={columns}
@@ -283,20 +400,28 @@ export default function Roles() {
       <Modal
         isOpen={open}
         onClose={resetAndClose}
-        title="Create Custom Role"
-        description="Configure role identity and module-level action permissions"
+        title={editingRole ? (editingRole.isSystem ? `Configure ${editingRole.name} Permissions` : `Edit Role: ${editingRole.name}`) : 'Create Custom Role'}
+        description={editingRole ? 'Modify role metadata and adjust granular module permissions' : 'Configure role identity and module-level action permissions'}
         size="lg"
       >
         <div className="space-y-6">
           {/* Role Basic Meta Form */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input
-              label="Role name"
-              required
-              value={form.name}
-              onChange={(e) => setField('name', e.target.value)}
-              placeholder="e.g. Accountant, Event Coordinator"
-            />
+            <div>
+              <Input
+                label="Role name"
+                required
+                disabled={editingRole?.isSystem}
+                value={form.name}
+                onChange={(e) => setField('name', e.target.value)}
+                placeholder="e.g. Accountant, Event Coordinator"
+              />
+              {editingRole?.isSystem && (
+                <span className="text-[11px] text-muted dark:text-dark-text-muted italic block mt-1">
+                  System role name is fixed; permissions and description can be modified.
+                </span>
+              )}
+            </div>
             <Input
               label="Description"
               value={form.description}
@@ -419,8 +544,8 @@ export default function Roles() {
             <Button variant="ghost" onClick={resetAndClose}>
               Cancel
             </Button>
-            <Button onClick={handleCreate} loading={saving}>
-              Create Role
+            <Button onClick={handleSave} loading={saving}>
+              {editingRole ? 'Save Changes' : 'Create Role'}
             </Button>
           </div>
         </div>

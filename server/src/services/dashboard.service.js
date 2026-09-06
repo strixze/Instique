@@ -163,7 +163,8 @@ export const getSchoolAdminDashboard = async (schoolId, query = {}) => {
     totalFeeStructuresAgg,
     lowAttendanceAgg,
     pendingApplications,
-    pendingLeaves,
+    pendingTeacherLeaves,
+    pendingStudentLeaves,
     timetableConflictsCount,
   ] = await Promise.all([
     // Active students
@@ -232,8 +233,18 @@ export const getSchoolAdminDashboard = async (schoolId, query = {}) => {
       schoolId,
       workflowStatus: { $in: ['submitted', 'document_upload', 'verification', 'under_review', 'payment_pending'] },
     }),
-    // Pending leave requests
-    Leave.countDocuments({ schoolId, status: 'pending' }),
+    // Pending teacher leave requests
+    Leave.countDocuments({
+      schoolId,
+      status: 'pending',
+      $or: [{ requesterModel: 'Teacher' }, { student: null }],
+    }),
+    // Pending student leave requests
+    Leave.countDocuments({
+      schoolId,
+      status: 'pending',
+      $or: [{ requesterModel: 'Student' }, { student: { $exists: true, $ne: null } }],
+    }),
     // Timetable conflicts
     Timetable.countDocuments({ schoolId, 'generationLog.severity': 'error' }),
   ]);
@@ -614,7 +625,9 @@ export const getSchoolAdminDashboard = async (schoolId, query = {}) => {
       pendingApplications,
       pendingFeesAmount: pendingSession,
       pendingFeesStudentCount: pendingStudentsCount,
-      pendingLeaves,
+      pendingLeaves: pendingTeacherLeaves + pendingStudentLeaves,
+      pendingTeacherLeaves,
+      pendingStudentLeaves,
       timetableConflicts: timetableConflictsCount,
     },
     attendanceOverview: {
@@ -1019,7 +1032,7 @@ export const getTeacherDashboard = async (user, schoolId, query = {}) => {
   };
 
   // 12. Leaves
-  const [leaves, pendingLeaves, upcomingLeave] = await Promise.all([
+  const [leaves, pendingLeaves, upcomingLeave, pendingClassLeaves, pendingClassLeavesCount] = await Promise.all([
     Leave.find({
       schoolId,
       requester: user._id,
@@ -1038,6 +1051,22 @@ export const getTeacherDashboard = async (user, schoolId, query = {}) => {
       status: 'approved',
       startDate: { $gte: startOfToday },
     }).sort({ startDate: 1 }),
+    Leave.find({
+      schoolId,
+      approverTeacher: teacher._id,
+      status: 'pending',
+      $or: [{ requesterModel: { $in: ['Student', 'Parent'] } }, { student: { $exists: true, $ne: null } }],
+    })
+      .populate('student', 'firstName lastName admissionNo rollNumber currentClass currentSection')
+      .populate('parent', 'firstName lastName phone email')
+      .sort({ createdAt: -1 })
+      .limit(5),
+    Leave.countDocuments({
+      schoolId,
+      approverTeacher: teacher._id,
+      status: 'pending',
+      $or: [{ requesterModel: { $in: ['Student', 'Parent'] } }, { student: { $exists: true, $ne: null } }],
+    }),
   ]);
 
   // 13. Notices & Events & Meetings & Notifications & Activity
@@ -1103,6 +1132,7 @@ export const getTeacherDashboard = async (user, schoolId, query = {}) => {
     upcomingExams: upcomingExams.length,
     marksPending: pendingMarksCount,
     pendingLeaves,
+    studentLeavesPending: pendingClassLeavesCount,
     weeklyPeriods: totalWeeklyPeriods,
   };
 
@@ -1139,6 +1169,10 @@ export const getTeacherDashboard = async (user, schoolId, query = {}) => {
       recent: leaves,
       pendingCount: pendingLeaves,
       upcoming: upcomingLeave,
+    },
+    classLeaves: {
+      pending: pendingClassLeaves,
+      pendingCount: pendingClassLeavesCount,
     },
     notices,
     events,

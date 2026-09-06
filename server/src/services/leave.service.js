@@ -5,9 +5,15 @@ import Substitution from '../models/Substitution.js';
 import Timetable from '../models/Timetable.js';
 import TimetableConfig from '../models/TimetableConfig.js';
 import Teacher from '../models/Teacher.js';
+import Student from '../models/Student.js';
+import Parent from '../models/Parent.js';
+import SchoolClass from '../models/SchoolClass.js';
 import ApiError from '../utils/ApiError.js';
 import { paginate } from '../utils/pagination.js';
 import { createNotification, sendBulkNotification } from './notification.service.js';
+import { createAuditLog } from './audit.service.js';
+import { applyApprovedLeaveToAttendance } from './attendance.service.js';
+import { getParentForUser } from './parent.service.js';
 import {
   timesOverlap,
   timeToMinutes,
@@ -15,6 +21,51 @@ import {
   getEligibleTeachersForLectureSlot,
   cancelSubstitution,
 } from './substitution.service.js';
+
+/**
+ * Determine the assigned class teacher for a student
+ */
+export const determineClassTeacher = async (schoolId, student) => {
+  if (!student || !student.currentClass) return null;
+
+  const classId = student.currentClass?._id || student.currentClass;
+  const sectionId = student.currentSection?._id || student.currentSection;
+
+  // 1. If student has a section, look for teacher assigned as class teacher of that specific section
+  if (sectionId) {
+    const sectionTeacher = await Teacher.findOne({
+      schoolId,
+      status: 'active',
+      isClassTeacher: true,
+      classTeacherOf: classId,
+      classTeacherSection: sectionId,
+    });
+    if (sectionTeacher) return sectionTeacher;
+  }
+
+  // 2. Look for teacher assigned to the class with no specific section constraint
+  const classTeacher = await Teacher.findOne({
+    schoolId,
+    status: 'active',
+    isClassTeacher: true,
+    classTeacherOf: classId,
+    $or: [{ classTeacherSection: null }, { classTeacherSection: { $exists: false } }],
+  });
+  if (classTeacher) return classTeacher;
+
+  // 3. Fallback: Check SchoolClass model's classTeacher reference
+  const schoolClass = await SchoolClass.findOne({ _id: classId, schoolId });
+  if (schoolClass?.classTeacher) {
+    const teacherFromClass = await Teacher.findOne({
+      _id: schoolClass.classTeacher,
+      schoolId,
+      status: 'active',
+    });
+    if (teacherFromClass) return teacherFromClass;
+  }
+
+  return null;
+};
 
 /**
  * Find teacher model matching the requester user
@@ -181,6 +232,132 @@ export const createLeave = async (schoolId, data, userId) => {
     throw new ApiError(400, 'Start date cannot be after end date');
   }
 
+  const user = await User.findById(userId);
+  if (!user) throw new ApiError(404, 'User not found');
+
+  // --- STUDENT LEAVE (SUBMITTED BY PARENT) ---
+  if (user.role === 'parent' || data.studentId) {
+    if (!data.studentId) {
+      throw new ApiError(400, 'Child (studentId) is required to apply for student leave');
+    }
+
+    const parent = await getParentForUser(user, schoolId);
+    const isChildOfParent = parent.students?.some((id) => id.toString() === data.studentId.toString());
+    if (!isChildOfParent) {
+      throw new ApiError(403, 'You are not authorized to submit leave for this student');
+    }
+
+    const student = await Student.findOne({
+      _id: data.studentId,
+      schoolId,
+      status: { $in: ['active', 'promoted'] },
+    }).populate('currentClass').populate('currentSection');
+
+    if (!student) {
+      throw new ApiError(404, 'Student not found in your school');
+    }
+
+    // Check for overlapping pending or approved leave requests for this student
+    const overlap = await Leave.findOne({
+      schoolId,
+      student: student._id,
+      status: { $in: ['pending', 'approved'] },
+      $or: [
+        { startDate: { $lte: endDate }, endDate: { $gte: startDate } },
+      ],
+    });
+
+    if (overlap) {
+      throw new ApiError(409, 'An overlapping leave request already exists for this student.');
+    }
+
+    // Determine student's class teacher
+    const classTeacher = await determineClassTeacher(schoolId, student);
+    if (!classTeacher) {
+      // Notify school administrators about unassigned class teacher
+      const adminQuery = User.find({ schoolId, role: 'school_admin' });
+      const schoolAdmins = typeof adminQuery?.select === 'function'
+        ? await adminQuery.select('_id')
+        : await adminQuery;
+      if (schoolAdmins && schoolAdmins.length > 0) {
+        await sendBulkNotification(
+          schoolId,
+          schoolAdmins.map((a) => a._id),
+          'Unassigned Class Teacher Alert',
+          `A leave request for student ${student.firstName} ${student.lastName} could not be submitted because no class teacher is assigned to their class.`,
+          'leave_update'
+        );
+      }
+      throw new ApiError(400, 'Leave cannot be submitted because a class teacher has not been assigned. Please contact the school administrator.');
+    }
+
+    const leaveType = data.type || data.leaveType || 'sick';
+
+    const leave = await Leave.create({
+      schoolId,
+      requester: userId,
+      requesterModel: 'Student',
+      student: student._id,
+      parent: parent._id,
+      approverTeacher: classTeacher._id,
+      type: leaveType,
+      startDate,
+      endDate,
+      isPartialDay: Boolean(data.isPartialDay),
+      startTime: data.startTime || undefined,
+      endTime: data.endTime || undefined,
+      reason: data.reason,
+      document: data.document || undefined,
+      status: 'pending', // Always force pending
+      auditTrail: [{
+        actor: userId,
+        action: 'STUDENT_LEAVE_REQUESTED',
+        notes: `Applied for ${leaveType} leave for ${student.firstName} ${student.lastName} (${startDate.toISOString().split('T')[0]} to ${endDate.toISOString().split('T')[0]})`,
+      }],
+    });
+
+    // Notify assigned class teacher
+    const teacherUser = await User.findOne({
+      schoolId,
+      role: 'teacher',
+      $or: [
+        { profileId: classTeacher._id },
+        ...(classTeacher.contact?.email ? [{ email: classTeacher.contact.email.toLowerCase().trim() }] : []),
+      ],
+    });
+
+    if (teacherUser) {
+      await createNotification(schoolId, {
+        recipient: teacherUser._id,
+        type: 'leave_update',
+        title: 'New Student Leave Request',
+        message: `${parent.firstName || user.name} has submitted a ${leave.type} leave request for ${student.firstName} ${student.lastName} (${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}).`,
+        data: { leaveId: leave._id, studentId: student._id },
+      });
+    }
+
+    // Create Audit Log
+    await createAuditLog({
+      schoolId,
+      actor: userId,
+      action: 'STUDENT_LEAVE_REQUESTED',
+      entity: 'Leave',
+      entityId: leave._id,
+      after: {
+        studentId: student._id,
+        parentId: parent._id,
+        approverTeacherId: classTeacher._id,
+        type: leaveType,
+        startDate,
+        endDate,
+        reason: data.reason,
+      },
+    });
+
+    return leave;
+  }
+
+  // --- TEACHER / USER LEAVE ---
   // Check for overlapping pending or approved leave requests for this user
   const overlap = await Leave.findOne({
     schoolId,
@@ -194,9 +371,6 @@ export const createLeave = async (schoolId, data, userId) => {
   if (overlap) {
     throw new ApiError(409, 'Leave request overlaps with an existing pending or approved leave');
   }
-
-  const user = await User.findById(userId);
-  if (!user) throw new ApiError(404, 'User not found');
 
   const requesterModel = user.role === 'teacher' ? 'Teacher' : 'Student';
 
@@ -212,6 +386,7 @@ export const createLeave = async (schoolId, data, userId) => {
     startTime: data.startTime || undefined,
     endTime: data.endTime || undefined,
     reason: data.reason,
+    status: 'pending',
     auditTrail: [{
       actor: userId,
       action: 'Leave Requested',
@@ -239,17 +414,124 @@ export const createLeave = async (schoolId, data, userId) => {
  * Approve leave and assign selected substitute teachers in an atomic transaction
  */
 export const approveLeaveWithAssignments = async (leaveId, schoolId, assignments = [], userId) => {
+  const user = await User.findById(userId);
+  if (!user) throw new ApiError(401, 'Authentication required');
+
+  const leave = await Leave.findOne({ _id: leaveId, schoolId });
+  if (!leave) {
+    throw new ApiError(404, 'Leave request not found');
+  }
+
+  if (leave.status !== 'pending') {
+    throw new ApiError(409, `Leave request is no longer pending (current status: ${leave.status}).`);
+  }
+
+  if (userId.toString() === leave.requester.toString()) {
+    throw new ApiError(403, 'You cannot approve your own leave request.');
+  }
+
+  // --- STUDENT LEAVE APPROVAL WORKFLOW ---
+  if (leave.student || leave.requesterModel === 'Student') {
+    if (user.role === 'teacher') {
+      const teacher = await findTeacherForUser(schoolId, user);
+      if (!teacher) {
+        throw new ApiError(403, 'Teacher profile not found for user');
+      }
+
+      const isDirectApprover = leave.approverTeacher && leave.approverTeacher.toString() === teacher._id.toString();
+      let isClassTeacher = isDirectApprover;
+
+      if (!isClassTeacher) {
+        const student = await Student.findOne({ _id: leave.student, schoolId });
+        const currentClassTeacher = student ? await determineClassTeacher(schoolId, student) : null;
+        if (currentClassTeacher && currentClassTeacher._id.toString() === teacher._id.toString()) {
+          isClassTeacher = true;
+        }
+      }
+
+      if (!isClassTeacher) {
+        throw new ApiError(403, 'You are not authorized to approve leave for this student. Only the assigned class teacher can review this request.');
+      }
+    } else if (user.role !== 'school_admin' && user.role !== 'super_admin') {
+      throw new ApiError(403, 'Unauthorized to approve leave requests');
+    }
+
+    const approvedAt = new Date();
+    // Atomic update
+    const updatedLeave = await Leave.findOneAndUpdate(
+      { _id: leaveId, schoolId, status: 'pending' },
+      {
+        $set: {
+          status: 'approved',
+          approvedBy: userId,
+          approvedAt,
+        },
+        $push: {
+          auditTrail: {
+            actor: userId,
+            action: 'STUDENT_LEAVE_APPROVED',
+            notes: `Approved by ${user.name} (${user.role})`,
+          },
+        },
+      },
+      { new: true }
+    ).populate('student', 'firstName lastName currentClass currentSection');
+
+    if (!updatedLeave) {
+      throw new ApiError(409, 'Leave request is no longer pending or has already been processed.');
+    }
+
+    // Attendance integration
+    if (updatedLeave.student) {
+      await applyApprovedLeaveToAttendance(
+        schoolId,
+        updatedLeave.student._id,
+        updatedLeave.student.currentClass,
+        updatedLeave.student.currentSection,
+        updatedLeave.startDate,
+        updatedLeave.endDate,
+        userId
+      );
+    }
+
+    // Real-time notification to Parent
+    const studentName = updatedLeave.student
+      ? `${updatedLeave.student.firstName} ${updatedLeave.student.lastName}`
+      : 'your child';
+    await createNotification(schoolId, {
+      recipient: updatedLeave.requester,
+      type: 'leave_update',
+      title: 'Student Leave Approved',
+      message: `Leave request for ${studentName} (${new Date(updatedLeave.startDate).toLocaleDateString()} - ${new Date(updatedLeave.endDate).toLocaleDateString()}) has been approved.`,
+      data: { leaveId: updatedLeave._id, studentId: updatedLeave.student?._id, status: 'approved' },
+    });
+
+    // Create Audit Log
+    await createAuditLog({
+      schoolId,
+      actor: userId,
+      action: 'STUDENT_LEAVE_APPROVED',
+      entity: 'Leave',
+      entityId: updatedLeave._id,
+      before: { status: 'pending' },
+      after: { status: 'approved', approvedBy: userId, approvedAt },
+    });
+
+    return { leave: updatedLeave };
+  }
+
+  // --- TEACHER LEAVE APPROVAL WORKFLOW ---
+  if (user.role !== 'school_admin' && user.role !== 'super_admin') {
+    throw new ApiError(403, 'Only school administrators can approve teacher leave requests.');
+  }
+
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    const leave = await Leave.findOne({ _id: leaveId, schoolId, status: 'pending' }).session(session);
-    if (!leave) {
+    const leaveDoc = await Leave.findOne({ _id: leaveId, schoolId, status: 'pending' }).session(session);
+    if (!leaveDoc) {
       throw new ApiError(404, 'Leave request not found or is no longer pending.');
-    }
-
-    if (userId.toString() === leave.requester.toString()) {
-      throw new ApiError(403, 'You cannot approve your own leave request.');
     }
 
     // 1. Recalculate affected lectures
@@ -370,7 +652,7 @@ export const approveLeaveWithAssignments = async (leaveId, schoolId, assignments
       // Create Substitution Record
       const newSub = await Substitution.create([{
         schoolId,
-        leaveId: leave._id,
+        leaveId: leaveDoc._id,
         timetableId,
         date: dateNorm,
         day,
@@ -403,18 +685,19 @@ export const approveLeaveWithAssignments = async (leaveId, schoolId, assignments
     }
 
     // 3. Mark Leave as Approved
-    leave.status = 'approved';
-    leave.approvedBy = userId;
-    leave.substitutionsCount = affectedLectures.length;
-    leave.substitutionsAssignedCount = createdSubstitutions.length;
+    leaveDoc.status = 'approved';
+    leaveDoc.approvedBy = userId;
+    leaveDoc.approvedAt = new Date();
+    leaveDoc.substitutionsCount = affectedLectures.length;
+    leaveDoc.substitutionsAssignedCount = createdSubstitutions.length;
 
-    leave.auditTrail.push({
+    leaveDoc.auditTrail.push({
       actor: userId,
       action: 'Leave APPROVED',
       notes: `Approved with ${createdSubstitutions.length} substitute assignment(s).`,
     });
 
-    await leave.save({ session });
+    await leaveDoc.save({ session });
 
     await session.commitTransaction();
     session.endSession();
@@ -431,21 +714,31 @@ export const approveLeaveWithAssignments = async (leaveId, schoolId, assignments
         type: 'leave_update',
         title: 'Substitution Assigned',
         message: `You have been assigned as a substitute teacher on ${formattedDate} at ${item.startTime} – ${item.endTime}.`,
-        data: { substitutionId: item.subId, leaveId: leave._id },
+        data: { substitutionId: item.subId, leaveId: leaveDoc._id },
       });
     }
 
     // Notify requester teacher
     await createNotification(schoolId, {
-      recipient: leave.requester,
+      recipient: leaveDoc.requester,
       type: 'leave_update',
       title: 'Leave Request Approved',
-      message: `Your leave request for ${new Date(leave.startDate).toLocaleDateString()} to ${new Date(leave.endDate).toLocaleDateString()} has been approved (${createdSubstitutions.length} substitutions arranged).`,
-      data: { leaveId: leave._id, status: 'approved' },
+      message: `Your leave request for ${new Date(leaveDoc.startDate).toLocaleDateString()} to ${new Date(leaveDoc.endDate).toLocaleDateString()} has been approved (${createdSubstitutions.length} substitutions arranged).`,
+      data: { leaveId: leaveDoc._id, status: 'approved' },
+    });
+
+    await createAuditLog({
+      schoolId,
+      actor: userId,
+      action: 'TEACHER_LEAVE_APPROVED',
+      entity: 'Leave',
+      entityId: leaveDoc._id,
+      before: { status: 'pending' },
+      after: { status: 'approved', approvedBy: userId, approvedAt: leaveDoc.approvedAt },
     });
 
     return {
-      leave,
+      leave: leaveDoc,
       substitutions: createdSubstitutions,
     };
   } catch (err) {
@@ -463,15 +756,105 @@ export const rejectLeave = async (leaveId, schoolId, rejectionReason, userId) =>
     throw new ApiError(400, 'Rejection reason is required.');
   }
 
-  const leave = await Leave.findOne({ _id: leaveId, schoolId, status: 'pending' });
-  if (!leave) throw new ApiError(404, 'Leave request not found or is no longer pending.');
+  const leave = await Leave.findOne({ _id: leaveId, schoolId });
+  if (!leave) throw new ApiError(404, 'Leave request not found');
+  if (leave.status !== 'pending') {
+    throw new ApiError(409, `Leave request is no longer pending (current status: ${leave.status}).`);
+  }
+
+  const user = await User.findById(userId);
+  if (!user) throw new ApiError(401, 'User not found');
 
   if (userId.toString() === leave.requester.toString()) {
     throw new ApiError(403, 'You cannot reject your own leave request.');
   }
 
+  // --- STUDENT LEAVE REJECTION WORKFLOW ---
+  if (leave.student || leave.requesterModel === 'Student') {
+    if (user.role === 'teacher') {
+      const teacher = await findTeacherForUser(schoolId, user);
+      if (!teacher) {
+        throw new ApiError(403, 'Teacher profile not found for user');
+      }
+
+      const isDirectApprover = leave.approverTeacher && leave.approverTeacher.toString() === teacher._id.toString();
+      let isClassTeacher = isDirectApprover;
+
+      if (!isClassTeacher) {
+        const student = await Student.findOne({ _id: leave.student, schoolId });
+        const currentClassTeacher = student ? await determineClassTeacher(schoolId, student) : null;
+        if (currentClassTeacher && currentClassTeacher._id.toString() === teacher._id.toString()) {
+          isClassTeacher = true;
+        }
+      }
+
+      if (!isClassTeacher) {
+        throw new ApiError(403, 'You are not authorized to reject leave for this student. Only the assigned class teacher can review this request.');
+      }
+    } else if (user.role !== 'school_admin' && user.role !== 'super_admin') {
+      throw new ApiError(403, 'Unauthorized to reject leave requests');
+    }
+
+    const rejectedAt = new Date();
+    const updatedLeave = await Leave.findOneAndUpdate(
+      { _id: leaveId, schoolId, status: 'pending' },
+      {
+        $set: {
+          status: 'rejected',
+          rejectedBy: userId,
+          rejectedAt,
+          rejectionReason: rejectionReason.trim(),
+        },
+        $push: {
+          auditTrail: {
+            actor: userId,
+            action: 'STUDENT_LEAVE_REJECTED',
+            notes: `Rejected by ${user.name} (${user.role}). Reason: ${rejectionReason.trim()}`,
+          },
+        },
+      },
+      { new: true }
+    ).populate('student', 'firstName lastName');
+
+    if (!updatedLeave) {
+      throw new ApiError(409, 'Leave request is no longer pending or has already been processed.');
+    }
+
+    // Notify Parent
+    const studentName = updatedLeave.student
+      ? `${updatedLeave.student.firstName} ${updatedLeave.student.lastName}`
+      : 'your child';
+    await createNotification(schoolId, {
+      recipient: updatedLeave.requester,
+      type: 'leave_update',
+      title: 'Student Leave Rejected',
+      message: `Leave request for ${studentName} was rejected. Reason: ${rejectionReason.trim()}`,
+      data: { leaveId: updatedLeave._id, studentId: updatedLeave.student?._id, status: 'rejected', rejectionReason: rejectionReason.trim() },
+    });
+
+    // Create Audit Log
+    await createAuditLog({
+      schoolId,
+      actor: userId,
+      action: 'STUDENT_LEAVE_REJECTED',
+      entity: 'Leave',
+      entityId: updatedLeave._id,
+      before: { status: 'pending' },
+      after: { status: 'rejected', rejectedBy: userId, rejectedAt, rejectionReason: rejectionReason.trim() },
+    });
+
+    return updatedLeave;
+  }
+
+  // --- TEACHER LEAVE REJECTION WORKFLOW ---
+  if (user.role !== 'school_admin' && user.role !== 'super_admin') {
+    throw new ApiError(403, 'Only school administrators can reject teacher leave requests.');
+  }
+
   leave.status = 'rejected';
   leave.approvedBy = userId;
+  leave.rejectedBy = userId;
+  leave.rejectedAt = new Date();
   leave.rejectionReason = rejectionReason.trim();
 
   leave.auditTrail.push({
@@ -491,17 +874,72 @@ export const rejectLeave = async (leaveId, schoolId, rejectionReason, userId) =>
     data: { leaveId: leave._id, status: 'rejected', rejectionReason: rejectionReason.trim() },
   });
 
+  await createAuditLog({
+    schoolId,
+    actor: userId,
+    action: 'TEACHER_LEAVE_REJECTED',
+    entity: 'Leave',
+    entityId: leave._id,
+    before: { status: 'pending' },
+    after: { status: 'rejected', rejectedBy: userId, rejectionReason: rejectionReason.trim() },
+  });
+
   return leave;
 };
 
 /**
  * Get paginated leaves
  */
-export const getLeaves = async (schoolId, options, user) => {
+export const getLeaves = async (schoolId, options = {}, user) => {
   const query = { schoolId };
-  if (user && (user.role === 'parent' || user.role === 'student')) {
+
+  if (user?.role === 'parent') {
+    const parent = await getParentForUser(user, schoolId);
+    if (options.studentId) {
+      const isLinked = parent.students?.some((s) => s.toString() === options.studentId.toString());
+      if (!isLinked) {
+        throw new ApiError(403, 'You are not authorized to view leaves for this student');
+      }
+      query.student = options.studentId;
+    } else {
+      query.$or = [
+        { requester: user._id },
+        { student: { $in: parent.students || [] } },
+      ];
+    }
+  } else if (user?.role === 'teacher') {
+    const teacher = await findTeacherForUser(schoolId, user);
+    if (options.view === 'class' || options.scope === 'class' || options.role === 'student') {
+      // Return student leaves for which this teacher is the assigned approver
+      query.approverTeacher = teacher?._id;
+      query.$or = [{ requesterModel: { $in: ['Student', 'Parent'] } }, { student: { $exists: true, $ne: null } }];
+    } else if (options.view === 'all') {
+      query.$or = [
+        { requester: user._id },
+        ...(teacher ? [{ approverTeacher: teacher._id }] : []),
+      ];
+    } else {
+      // Default for teacher is their own leaves
+      query.requester = user._id;
+    }
+  } else if (user?.role === 'student') {
     query.requester = user._id;
+  } else {
+    // school_admin or super_admin
+    if (options.requesterModel && options.requesterModel !== 'all') {
+      query.requesterModel = options.requesterModel;
+    }
+    if (options.studentId) {
+      query.student = options.studentId;
+    }
+    if (options.role === 'student' || options.target === 'student') {
+      query.$or = [{ requesterModel: 'Student' }, { student: { $exists: true, $ne: null } }];
+    } else if (options.role === 'teacher' || options.target === 'teacher') {
+      query.student = null;
+      query.$or = [{ requesterModel: 'Teacher' }, { student: null }];
+    }
   }
+
   if (options.status && options.status !== 'all') {
     query.status = options.status;
   }
@@ -514,8 +952,19 @@ export const getLeaves = async (schoolId, options, user) => {
     sort: options.sort || '-createdAt',
     populate: [
       { path: 'requester', select: 'name email role' },
-      { path: 'approvedBy', select: 'name' },
+      { path: 'approvedBy', select: 'name role' },
+      { path: 'rejectedBy', select: 'name role' },
       { path: 'substituteTeacher', select: 'firstName lastName' },
+      {
+        path: 'student',
+        select: 'firstName lastName admissionNo rollNo currentClass currentSection avatar',
+        populate: [
+          { path: 'currentClass', select: 'name' },
+          { path: 'currentSection', select: 'name' },
+        ],
+      },
+      { path: 'parent', select: 'firstName lastName contact' },
+      { path: 'approverTeacher', select: 'firstName lastName employeeId department' },
     ],
   });
 };
@@ -526,7 +975,18 @@ export const getLeaves = async (schoolId, options, user) => {
 export const getLeaveById = async (id, schoolId) => {
   const leave = await Leave.findOne({ _id: id, schoolId })
     .populate('requester', 'name email role')
-    .populate('approvedBy', 'name')
+    .populate('approvedBy', 'name role')
+    .populate('rejectedBy', 'name role')
+    .populate({
+      path: 'student',
+      select: 'firstName lastName admissionNo rollNo currentClass currentSection avatar',
+      populate: [
+        { path: 'currentClass', select: 'name' },
+        { path: 'currentSection', select: 'name' },
+      ],
+    })
+    .populate('parent', 'firstName lastName contact')
+    .populate('approverTeacher', 'firstName lastName employeeId department')
     .populate('auditTrail.actor', 'name role');
 
   if (!leave) throw new ApiError(404, 'Leave request not found');
@@ -552,8 +1012,16 @@ export const cancelLeave = async (id, schoolId, userId, notes) => {
   if (!leave) throw new ApiError(404, 'Leave request not found');
 
   const user = await User.findById(userId);
-  const isOwner = leave.requester.toString() === userId.toString();
-  const isAdmin = user && user.role === 'school_admin';
+  let isOwner = leave.requester.toString() === userId.toString();
+
+  if (!isOwner && user?.role === 'parent' && leave.student) {
+    const parent = await getParentForUser(user, schoolId);
+    if (parent.students?.some((s) => s.toString() === leave.student.toString())) {
+      isOwner = true;
+    }
+  }
+
+  const isAdmin = user && (user.role === 'school_admin' || user.role === 'super_admin');
 
   if (!isOwner && !isAdmin) {
     throw new ApiError(403, 'Unauthorized to cancel this leave request');
@@ -563,23 +1031,41 @@ export const cancelLeave = async (id, schoolId, userId, notes) => {
     throw new ApiError(400, 'Leave request is already cancelled');
   }
 
+  if (leave.status !== 'pending') {
+    throw new ApiError(400, `Cannot cancel a leave request in '${leave.status}' status`);
+  }
+
   leave.status = 'cancelled';
   leave.auditTrail.push({
     actor: userId,
-    action: 'Leave CANCELLED',
+    action: leave.student ? 'STUDENT_LEAVE_CANCELLED' : 'Leave CANCELLED',
     notes: notes || 'Cancelled by user',
   });
 
   await leave.save();
 
-  const substitutions = await Substitution.find({ schoolId, leaveId: id });
-  for (const sub of substitutions) {
-    await cancelSubstitution({
+  if (leave.student) {
+    await createAuditLog({
       schoolId,
-      substitutionId: sub._id,
-      userId,
-      reason: 'Associated leave request was cancelled',
+      actor: userId,
+      action: 'STUDENT_LEAVE_CANCELLED',
+      entity: 'Leave',
+      entityId: leave._id,
+      before: { status: 'pending' },
+      after: { status: 'cancelled' },
     });
+  }
+
+  if (leave.requesterModel === 'Teacher') {
+    const substitutions = await Substitution.find({ schoolId, leaveId: id });
+    for (const sub of substitutions) {
+      await cancelSubstitution({
+        schoolId,
+        substitutionId: sub._id,
+        userId,
+        reason: 'Associated leave request was cancelled',
+      });
+    }
   }
 
   return leave;
@@ -588,16 +1074,36 @@ export const cancelLeave = async (id, schoolId, userId, notes) => {
 /**
  * Get current user's leaves
  */
-export const getMyLeaves = async (userId, options) => {
-  const query = { requester: userId };
+export const getMyLeaves = async (userId, options = {}) => {
+  const user = await User.findById(userId);
+  const query = {};
+
+  if (user?.role === 'parent') {
+    const parent = await getParentForUser(user, user.schoolId);
+    query.$or = [{ requester: userId }, { student: { $in: parent.students || [] } }];
+  } else {
+    query.requester = userId;
+  }
+
   if (options.status && options.status !== 'all') query.status = options.status;
 
   return paginate(Leave, query, {
     ...options,
     sort: '-createdAt',
     populate: [
-      { path: 'approvedBy', select: 'name' },
+      { path: 'requester', select: 'name email role' },
+      { path: 'approvedBy', select: 'name role' },
+      { path: 'rejectedBy', select: 'name role' },
       { path: 'substituteTeacher', select: 'firstName lastName' },
+      {
+        path: 'student',
+        select: 'firstName lastName admissionNo rollNo currentClass currentSection avatar',
+        populate: [
+          { path: 'currentClass', select: 'name' },
+          { path: 'currentSection', select: 'name' },
+        ],
+      },
+      { path: 'approverTeacher', select: 'firstName lastName employeeId department' },
     ],
   });
 };

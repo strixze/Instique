@@ -230,7 +230,8 @@ export const sendParentPasswordReset = async (studentId, schoolId, parentId, adm
   }
 
   // 3. Find target parent User account
-  const parentUser = await User.findOne({
+  const parentFullName = `${targetParent.firstName} ${targetParent.lastName}`.trim() || 'Parent';
+  let parentUser = await User.findOne({
     schoolId,
     role: 'parent',
     $or: [
@@ -240,11 +241,49 @@ export const sendParentPasswordReset = async (studentId, schoolId, parentId, adm
   });
 
   if (!parentUser) {
-    throw new ApiError(400, 'Parent account has not been activated or created yet');
-  }
-
-  if (parentUser.status === 'pending_activation') {
-    throw new ApiError(400, 'Parent account is pending activation. Please resend the activation email instead.');
+    // If not found with schoolId and role: 'parent', check if a user exists with this email
+    const existingUser = await User.findOne({ email: parentEmail });
+    if (existingUser) {
+      parentUser = existingUser;
+      parentUser.role = 'parent';
+      parentUser.schoolId = schoolId;
+      parentUser.profileId = targetParent._id;
+      parentUser.profileModel = 'Parent';
+      parentUser.name = parentFullName;
+      parentUser.isActive = true;
+      parentUser.status = 'active';
+      await parentUser.save();
+    } else {
+      // Auto-create active parent user account so reset link can be sent and used
+      parentUser = await User.create({
+        schoolId,
+        email: parentEmail,
+        password: crypto.randomBytes(24).toString('hex'),
+        role: 'parent',
+        profileId: targetParent._id,
+        profileModel: 'Parent',
+        name: parentFullName,
+        phone: targetParent.contact?.phone,
+        status: 'active',
+        isActive: true,
+        emailVerified: true,
+      });
+    }
+  } else {
+    // Ensure parentUser has updated name and profile link if missing
+    let needsUpdate = false;
+    if (parentUser.name !== parentFullName) {
+      parentUser.name = parentFullName;
+      needsUpdate = true;
+    }
+    if (!parentUser.profileId || parentUser.profileId.toString() !== targetParent._id.toString()) {
+      parentUser.profileId = targetParent._id;
+      parentUser.profileModel = 'Parent';
+      needsUpdate = true;
+    }
+    if (needsUpdate) {
+      await parentUser.save();
+    }
   }
 
   if (parentUser.status === 'suspended' || parentUser.status === 'inactive' || !parentUser.isActive) {
@@ -274,10 +313,12 @@ export const sendParentPasswordReset = async (studentId, schoolId, parentId, adm
   const resetUrl = `${env.CLIENT_URL}/reset-password?token=${rawToken}`;
   const school = await School.findById(schoolId).select('name');
   const schoolName = school?.name || 'Your School';
-  const parentName = `${targetParent.firstName} ${targetParent.lastName}`.trim() || parentUser.name;
+  const parentName = `${targetParent.firstName} ${targetParent.lastName}`.trim() || parentUser.name || 'Parent';
 
   const emailHtml = getPasswordResetEmailTemplate({
+    parentName,
     userName: parentName,
+    schoolName,
     resetUrl,
     expiryMinutes: 60,
   });

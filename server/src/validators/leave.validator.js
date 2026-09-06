@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 export const createLeaveSchema = z.object({
+  studentId: z.string().optional(),
   type: z.enum(['sick', 'casual', 'personal', 'emergency', 'earned', 'vacation', 'other']).optional(),
   leaveType: z.enum(['sick', 'casual', 'personal', 'emergency', 'earned', 'vacation', 'other']).optional(),
   startDate: z.string().min(1, 'Start date is required'),
@@ -9,6 +10,10 @@ export const createLeaveSchema = z.object({
   startTime: z.string().optional(),
   endTime: z.string().optional(),
   reason: z.string().min(2, 'Reason must be at least 2 characters'),
+  document: z.object({
+    name: z.string().optional(),
+    url: z.string().optional(),
+  }).optional(),
 });
 
 export const approveLeaveSchema = z.object({
