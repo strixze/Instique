@@ -10,6 +10,7 @@ import {
 import { studentApi } from '../../api/student.api';
 import { teacherApi } from '../../api/teacher.api';
 import { academicApi } from '../../api/academic.api';
+import { eventApi } from '../../api/event.api';
 import UserAvatar from './UserAvatar';
 import { useUserStore } from '../../store/userStore';
 import { canAccessRoute } from '../../utils/rbac';
@@ -54,14 +55,10 @@ export default function SpotlightSearch({ isOpen, onClose }) {
   const [students, setStudents] = useState([]);
   const [teachers, setTeachers] = useState([]);
   const [classes, setClasses] = useState([]);
+  const [events, setEvents] = useState([]);
 
   const inputRef = useRef(null);
   const listRef = useRef(null);
-
-  // Detect OS for shortcut text
-  const isMac = useMemo(() => {
-    return typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
-  }, []);
 
   // Filter pages allowed for current user role
   const allowedPages = useMemo(() => {
@@ -86,9 +83,11 @@ export default function SpotlightSearch({ isOpen, onClose }) {
   useEffect(() => {
     const q = query.trim();
     if (!q || isParent || isStudent) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStudents([]);
       setTeachers([]);
       setClasses([]);
+      setEvents([]);
       setLoading(false);
       return;
     }
@@ -96,10 +95,11 @@ export default function SpotlightSearch({ isOpen, onClose }) {
     setLoading(true);
     const timer = setTimeout(async () => {
       try {
-        const [studRes, teachRes, classRes] = await Promise.allSettled([
+        const [studRes, teachRes, classRes, eventRes] = await Promise.allSettled([
           studentApi.getAll({ search: q, limit: 5 }),
           teacherApi.getAll({ search: q, limit: 5 }),
           academicApi.getClasses({ search: q, limit: 5 }),
+          eventApi.getAll({ search: q, limit: 5 }),
         ]);
 
         if (studRes.status === 'fulfilled') {
@@ -121,6 +121,13 @@ export default function SpotlightSearch({ isOpen, onClose }) {
           setClasses(Array.isArray(list) ? list.slice(0, 4) : []);
         } else {
           setClasses([]);
+        }
+
+        if (eventRes.status === 'fulfilled') {
+          const list = eventRes.value?.data?.data || eventRes.value?.data || [];
+          setEvents(Array.isArray(list) ? list.slice(0, 4) : []);
+        } else {
+          setEvents([]);
         }
       } catch {
         // Silently handle error without crashing
@@ -191,7 +198,7 @@ export default function SpotlightSearch({ isOpen, onClose }) {
           subtitle: `Grade ${s.schoolClass?.name || s.className || ''} ${s.section?.name || s.sectionName || ''} • Roll No. ${s.rollNo || s.admissionNo || '—'}`,
           avatar: s.avatar || s.avtar,
           gender: s.gender,
-          route: `/students?search=${encodeURIComponent(s.firstName || '')}`,
+          route: `/students/${s._id || s.id}`,
           badge: 'Student',
           badgeStyle: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
         })),
@@ -208,10 +215,35 @@ export default function SpotlightSearch({ isOpen, onClose }) {
           subtitle: t.department || t.qualification || 'Faculty Member',
           avatar: t.avatar || t.avtar,
           gender: t.gender,
-          route: `/teachers?search=${encodeURIComponent(t.firstName || '')}`,
+          route: `/teachers/${t._id || t.id}`,
           badge: 'Teacher',
           badgeStyle: 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20',
         })),
+      });
+    }
+
+    if (events.length > 0) {
+      groups.push({
+        category: 'EVENTS',
+        items: events.map((ev) => {
+          const rawType = ev.type || 'event';
+          const typeLabel = rawType.replace(/_/g, ' ');
+          const formattedDate = ev.startDate
+            ? new Date(ev.startDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+            : '';
+          const subtitle = [formattedDate, ev.location].filter(Boolean).join(' • ') || 'School Event';
+
+          return {
+            type: 'event',
+            id: `ev-${ev._id || ev.id}`,
+            title: ev.title || 'Event',
+            subtitle,
+            icon: CalendarDays,
+            route: `/events?search=${encodeURIComponent(ev.title || '')}`,
+            badge: typeLabel.charAt(0).toUpperCase() + typeLabel.slice(1),
+            badgeStyle: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
+          };
+        }),
       });
     }
 
@@ -248,7 +280,7 @@ export default function SpotlightSearch({ isOpen, onClose }) {
     }
 
     return groups;
-  }, [isParent, isStudent, students, teachers, classes, matchingPages]);
+  }, [isParent, students, teachers, events, classes, matchingPages]);
 
   // Flattened array for index selection
   const flatItems = useMemo(() => {
@@ -257,12 +289,14 @@ export default function SpotlightSearch({ isOpen, onClose }) {
 
   // Reset selected index when items change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelectedIndex(0);
   }, [flatItems.length, query]);
 
   // Focus input when opened and freeze background scroll
   useEffect(() => {
     if (isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setQuery('');
       setSelectedIndex(0);
       document.body.style.overflow = 'hidden';
@@ -338,7 +372,7 @@ export default function SpotlightSearch({ isOpen, onClose }) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={isParent ? "Search attendance, homework, fees, notices..." : "Search students, teachers, classes, pages..."}
+            placeholder={isParent ? "Search attendance, homework, fees, notices..." : "Search students, teachers, events, classes..."}
             className="w-full bg-transparent text-sm sm:text-base font-medium text-deep dark:text-slate-100 placeholder-muted dark:placeholder-slate-500 focus:outline-none"
           />
 
@@ -365,7 +399,7 @@ export default function SpotlightSearch({ isOpen, onClose }) {
               <Search size={28} className="text-muted/50 dark:text-slate-600 mb-2" />
               <p className="text-sm font-semibold text-deep dark:text-slate-200">No results found</p>
               <p className="text-xs text-secondary dark:text-slate-400 mt-1 max-w-sm">
-                No matching students, teachers, classes, or pages found for &quot;{query}&quot;.
+                No matching students, teachers, events, classes, or pages found for &quot;{query}&quot;.
               </p>
             </div>
           ) : (

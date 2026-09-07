@@ -1,17 +1,15 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import {
-  CheckCheck, BarChart3, Users, Send, RefreshCw, Calendar, Search, Filter, RotateCcw,
-  ChevronLeft, ChevronRight, ChevronUp, ChevronDown, ChevronsUpDown, MoreVertical
+  CheckCheck, BarChart3, Users, Send, RefreshCw, Filter, Search,
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import Input from '../../components/ui/Input';
 import Select from '../../components/ui/Select';
-import Badge from '../../components/ui/Badge';
 import { attendanceApi } from '../../api/attendance.api';
 import { academicApi } from '../../api/academic.api';
-import { studentApi } from '../../api/student.api';
 import UserAvatar from '../../components/ui/UserAvatar';
 
 const STATUS_OPTIONS = [
@@ -138,6 +136,7 @@ export default function Attendance() {
 
   useEffect(() => {
     if (markClass && markSection && markDate) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       loadStudents();
     }
   }, [markClass, markSection, markDate, loadStudents]);
@@ -259,22 +258,22 @@ export default function Attendance() {
       {activeTab === 'mark' ? (
         <div className="space-y-4 animate-scale-in">
           {/* Class / Section / Date selector Toolbar */}
-          <div className="bg-white border border-border rounded-xl p-4 shadow-2xs flex flex-wrap items-center gap-3">
+          <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-2xs flex flex-wrap items-center gap-3">
             <div className="w-40">
-              <span className="font-semibold text-secondary text-xs block mb-1">Date</span>
+              <span className="font-semibold text-secondary dark:text-dark-text-secondary text-xs block mb-1">Date</span>
               <input
                 type="date"
                 value={markDate}
                 onChange={(e) => setMarkDate(e.target.value)}
-                className="w-full px-2.5 py-1.5 bg-white border border-border rounded-lg text-xs text-deep focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest"
+                className="w-full px-2.5 py-1.5 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-lg text-xs text-deep dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-forest/20 dark:focus:ring-emerald-500/20 focus:border-forest dark:focus:border-emerald-500"
               />
             </div>
             <div className="w-44">
-              <span className="font-semibold text-secondary text-xs block mb-1">Class</span>
+              <span className="font-semibold text-secondary dark:text-dark-text-secondary text-xs block mb-1">Class</span>
               <select
                 value={markClass}
                 onChange={(e) => { setMarkClass(e.target.value); setMarkSection(''); setStudentList([]); }}
-                className="w-full px-2.5 py-1.5 bg-white border border-border rounded-lg text-xs text-deep focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest"
+                className="w-full px-2.5 py-1.5 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-lg text-xs text-deep dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-forest/20 dark:focus:ring-emerald-500/20 focus:border-forest dark:focus:border-emerald-500"
               >
                 <option value="">Select class...</option>
                 {classes.map((c) => (
@@ -283,11 +282,11 @@ export default function Attendance() {
               </select>
             </div>
             <div className="w-44">
-              <span className="font-semibold text-secondary text-xs block mb-1">Section</span>
+              <span className="font-semibold text-secondary dark:text-dark-text-secondary text-xs block mb-1">Section</span>
               <select
                 value={markSection}
                 onChange={(e) => { setMarkSection(e.target.value); setStudentList([]); }}
-                className="w-full px-2.5 py-1.5 bg-white border border-border rounded-lg text-xs text-deep focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest"
+                className="w-full px-2.5 py-1.5 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-lg text-xs text-deep dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-forest/20 dark:focus:ring-emerald-500/20 focus:border-forest dark:focus:border-emerald-500"
               >
                 <option value="">Select section...</option>
                 {filteredSections.map((s) => (
@@ -304,32 +303,42 @@ export default function Attendance() {
 
           {/* Student Grid Container */}
           {loadingStudents ? (
-            <div className="flex items-center justify-center py-16 text-xs text-muted bg-white border border-border rounded-xl">
+            <div className="flex items-center justify-center py-16 text-xs text-muted dark:text-dark-text-muted bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl">
               <RefreshCw size={18} className="animate-spin mr-2" /> Loading student roster...
             </div>
           ) : studentList.length > 0 ? (
-            <div className="bg-white border border-border rounded-xl overflow-hidden shadow-2xs">
+            <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl overflow-hidden shadow-2xs">
               {/* Summary Header */}
-              <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-b border-border bg-surface/60">
-                <div className="flex items-center gap-4 text-xs">
-                  <span className="text-secondary font-medium">Total: <strong className="text-deep">{studentList.length}</strong></span>
-                  <span className="text-emerald-700 font-medium">Present: <strong>{summaryPresent}</strong></span>
-                  <span className="text-rose-700 font-medium">Absent: <strong>{summaryAbsent}</strong></span>
-                  <span className="text-amber-700 font-medium">Late: <strong>{summaryLate}</strong></span>
-                  <span className="text-blue-700 font-medium">Leave: <strong>{summaryLeave}</strong></span>
+              <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-b border-border dark:border-dark-border bg-surface/60 dark:bg-dark-elevated/60">
+                <div className="flex items-center gap-4 text-xs font-medium">
+                  <span className="text-secondary dark:text-dark-text-secondary">
+                    Total: <strong className="text-deep dark:text-dark-text font-bold">{studentList.length}</strong>
+                  </span>
+                  <span className="text-emerald-700 dark:text-emerald-400">
+                    Present: <strong className="text-emerald-800 dark:text-emerald-300 font-bold">{summaryPresent}</strong>
+                  </span>
+                  <span className="text-rose-700 dark:text-rose-400">
+                    Absent: <strong className="text-rose-800 dark:text-rose-300 font-bold">{summaryAbsent}</strong>
+                  </span>
+                  <span className="text-amber-700 dark:text-amber-400">
+                    Late: <strong className="text-amber-800 dark:text-amber-300 font-bold">{summaryLate}</strong>
+                  </span>
+                  <span className="text-blue-700 dark:text-blue-400">
+                    Leave: <strong className="text-blue-800 dark:text-blue-300 font-bold">{summaryLeave}</strong>
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   {existingRecord && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-amber-50 text-amber-700 border border-amber-200">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20">
                       Editing existing record
                     </span>
                   )}
-                  <div className="flex items-center gap-1 bg-white border border-border rounded-lg p-0.5">
+                  <div className="flex items-center gap-1 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-lg p-0.5">
                     {STATUS_OPTIONS.map((opt) => (
                       <button
                         key={opt.key}
                         onClick={() => markAllAs(opt.key)}
-                        className={`px-2 py-1 rounded text-[10px] font-bold transition-colors hover:bg-surface text-secondary`}
+                        className="px-2 py-1 rounded text-[10px] font-bold transition-colors hover:bg-surface dark:hover:bg-dark-hover text-secondary dark:text-dark-text-secondary hover:text-deep dark:hover:text-dark-text"
                       >
                         All {opt.label}
                       </button>
@@ -339,23 +348,23 @@ export default function Attendance() {
               </div>
 
               {/* Student Rows Table */}
-              <div className="max-h-[500px] overflow-y-auto">
-                <table className="w-full text-left border-collapse text-xs">
-                  <thead className="sticky top-0 bg-surface/90 backdrop-blur-sm border-b border-border">
-                    <tr className="text-secondary uppercase font-semibold">
-                      <th className="px-4 py-2.5 w-10">#</th>
-                      <th className="px-4 py-2.5">Student Name</th>
-                      <th className="px-4 py-2.5 w-36">Admission No</th>
-                      <th className="px-4 py-2.5 text-center w-60">Attendance Status</th>
+              <div className="max-h-[500px] overflow-y-auto scrollbar-thin">
+                <table className="w-full text-left border-separate border-spacing-0 text-xs">
+                  <thead className="sticky top-0 z-20">
+                    <tr className="text-secondary dark:text-dark-text-secondary uppercase font-semibold">
+                      <th className="sticky top-0 z-20 bg-surface dark:bg-dark-elevated px-4 py-2.5 w-10 border-b border-border dark:border-dark-border">#</th>
+                      <th className="sticky top-0 z-20 bg-surface dark:bg-dark-elevated px-4 py-2.5 border-b border-border dark:border-dark-border">Student Name</th>
+                      <th className="sticky top-0 z-20 bg-surface dark:bg-dark-elevated px-4 py-2.5 w-36 border-b border-border dark:border-dark-border">Admission No</th>
+                      <th className="sticky top-0 z-20 bg-surface dark:bg-dark-elevated px-4 py-2.5 text-center w-60 border-b border-border dark:border-dark-border">Attendance Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border/60">
+                  <tbody className="bg-white dark:bg-dark-card">
                     {studentList.map((student, idx) => {
                       const currentStatus = studentStatuses[student._id] || 'present';
                       return (
-                        <tr key={student._id} className="hover:bg-surface/30 transition-colors">
-                          <td className="px-4 py-2.5 text-muted font-mono">{idx + 1}</td>
-                          <td className="px-4 py-2.5">
+                        <tr key={student._id} className="hover:bg-surface/30 dark:hover:bg-dark-hover/40 transition-colors">
+                          <td className="px-4 py-2.5 text-muted dark:text-dark-text-muted font-mono border-b border-border/40 dark:border-dark-border/40">{idx + 1}</td>
+                          <td className="px-4 py-2.5 border-b border-border/40 dark:border-dark-border/40">
                             <div className="flex items-center gap-2.5">
                               <UserAvatar
                                 type="student"
@@ -364,13 +373,13 @@ export default function Attendance() {
                                 admissionNo={student.admissionNo}
                                 name={`${student.firstName} ${student.lastName}`}
                                 size="sm"
-                                className="shrink-0 ring-1 ring-border/50"
+                                className="shrink-0 ring-1 ring-border/50 dark:ring-dark-border"
                               />
-                              <span className="font-bold text-deep">{student.firstName} {student.lastName}</span>
+                              <span className="font-bold text-deep dark:text-dark-text">{student.firstName} {student.lastName}</span>
                             </div>
                           </td>
-                          <td className="px-4 py-2.5 text-muted font-mono">{student.admissionNo || student.rollNo || '—'}</td>
-                          <td className="px-4 py-2.5">
+                          <td className="px-4 py-2.5 text-muted dark:text-dark-text-muted font-mono border-b border-border/40 dark:border-dark-border/40">{student.admissionNo || student.rollNo || '—'}</td>
+                          <td className="px-4 py-2.5 border-b border-border/40 dark:border-dark-border/40">
                             <div className="flex items-center justify-center gap-1.5">
                               {STATUS_OPTIONS.map((opt) => (
                                 <button
@@ -379,7 +388,7 @@ export default function Attendance() {
                                   className={`w-8 h-8 rounded-lg text-xs font-bold transition-all border ${
                                     currentStatus === opt.key
                                       ? `${opt.color} border-transparent shadow-2xs scale-105`
-                                      : 'bg-white text-secondary border-border hover:border-forest/40'
+                                      : 'bg-white dark:bg-dark-card text-secondary dark:text-dark-text-secondary border-border dark:border-dark-border hover:border-forest/40 dark:hover:border-emerald-500/40 hover:bg-surface dark:hover:bg-dark-hover'
                                   }`}
                                 >
                                   {opt.label}
@@ -395,8 +404,8 @@ export default function Attendance() {
               </div>
 
               {/* Submit footer */}
-              <div className="px-4 py-3 border-t border-border bg-surface/30 flex items-center justify-between">
-                <p className="text-xs text-muted">
+              <div className="px-4 py-3 border-t border-border dark:border-dark-border bg-surface/30 dark:bg-dark-elevated/40 flex items-center justify-between">
+                <p className="text-xs text-muted dark:text-dark-text-muted">
                   {existingRecord
                     ? `Last recorded on ${new Date(existingRecord.updatedAt || existingRecord.createdAt).toLocaleString()}`
                     : 'No attendance saved for this date yet'}
@@ -407,15 +416,15 @@ export default function Attendance() {
               </div>
             </div>
           ) : markClass && markSection ? (
-            <div className="flex flex-col items-center justify-center py-12 text-muted bg-white border border-border rounded-xl">
-              <Users size={36} className="text-muted mb-2" />
-              <p className="font-semibold text-secondary text-sm">No students found</p>
+            <div className="flex flex-col items-center justify-center py-12 text-muted dark:text-dark-text-muted bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl">
+              <Users size={36} className="text-muted dark:text-dark-text-muted mb-2" />
+              <p className="font-semibold text-secondary dark:text-dark-text-secondary text-sm">No students found</p>
               <p className="text-xs mt-0.5">No active students enrolled in this class and section.</p>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-12 text-muted bg-white border border-border rounded-xl">
-              <CheckCheck size={36} className="text-muted mb-2" />
-              <p className="font-semibold text-secondary text-sm">Select class & section to begin</p>
+            <div className="flex flex-col items-center justify-center py-12 text-muted dark:text-dark-text-muted bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl">
+              <CheckCheck size={36} className="text-muted dark:text-dark-text-muted mb-2" />
+              <p className="font-semibold text-secondary dark:text-dark-text-secondary text-sm">Select class & section to begin</p>
               <p className="text-xs mt-0.5">Pick a date, class, and section above to load the student roster.</p>
             </div>
           )}
@@ -423,26 +432,39 @@ export default function Attendance() {
       ) : (
         /* History Tab (Admissions pattern) */
         <div className="space-y-4 animate-scale-in">
-          <div className="bg-white border border-border rounded-xl p-3.5 shadow-2xs flex flex-wrap items-center gap-3">
+          <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3.5 shadow-2xs flex flex-wrap items-center gap-3">
             <div className="w-40">
-              <span className="font-semibold text-secondary text-xs block mb-1">Date</span>
+              <span className="font-semibold text-secondary dark:text-dark-text-secondary text-xs block mb-1">Date</span>
               <input
                 type="date"
                 value={date}
                 onChange={(e) => { setLoading(true); setDate(e.target.value); }}
-                className="w-full px-2.5 py-1.5 bg-white border border-border rounded-lg text-xs text-deep focus:outline-none focus:ring-2 focus:ring-forest/20"
+                className="w-full px-2.5 py-1.5 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-lg text-xs text-deep dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-forest/20 dark:focus:ring-emerald-500/20"
               />
             </div>
             <div className="w-44">
-              <span className="font-semibold text-secondary text-xs block mb-1">Class</span>
+              <span className="font-semibold text-secondary dark:text-dark-text-secondary text-xs block mb-1">Class</span>
               <select
                 value={classFilter}
                 onChange={(e) => { setLoading(true); setClassFilter(e.target.value); }}
-                className="w-full px-2.5 py-1.5 bg-white border border-border rounded-lg text-xs text-deep focus:outline-none focus:ring-2 focus:ring-forest/20"
+                className="w-full px-2.5 py-1.5 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-lg text-xs text-deep dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-forest/20 dark:focus:ring-emerald-500/20"
               >
                 <option value="">All Classes</option>
                 {classes.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}
               </select>
+            </div>
+            <div className="w-44">
+              <span className="font-semibold text-secondary dark:text-dark-text-secondary text-xs block mb-1">Search</span>
+              <div className="relative">
+                <Search size={13} className="absolute left-2.5 top-2.5 text-muted dark:text-dark-text-muted pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder="Search logs..."
+                  value={search}
+                  onChange={(e) => { setLoading(true); setPage(1); setSearch(e.target.value); }}
+                  className="w-full pl-7 pr-2.5 py-1.5 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-lg text-xs text-deep dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-forest/20 dark:focus:ring-emerald-500/20"
+                />
+              </div>
             </div>
             <div className="pt-5">
               <Button onClick={() => { setLoading(true); setPage(1); setFilterActive((v) => !v); }} className="text-xs gap-1.5">
@@ -451,11 +473,11 @@ export default function Attendance() {
             </div>
           </div>
 
-          <div className="bg-white border border-border rounded-xl overflow-hidden shadow-2xs">
+          <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl overflow-hidden shadow-2xs">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="border-b border-border bg-surface/70 text-secondary uppercase font-semibold">
+                  <tr className="border-b border-border dark:border-dark-border bg-surface/70 dark:bg-dark-elevated text-secondary dark:text-dark-text-secondary uppercase font-semibold">
                     <th className="px-3.5 py-2.5">DATE</th>
                     <th className="px-3.5 py-2.5">CLASS</th>
                     <th className="px-3.5 py-2.5">SECTION</th>
@@ -464,26 +486,26 @@ export default function Attendance() {
                     <th className="px-3.5 py-2.5">ABSENT</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border/60 bg-white">
+                <tbody className="divide-y divide-border/60 dark:divide-dark-border bg-white dark:bg-dark-card">
                   {loading ? (
                     [1, 2, 3, 4].map((i) => (
-                      <tr key={i}><td colSpan={6} className="px-3.5 py-3"><div className="h-5 bg-surface rounded animate-pulse w-full" /></td></tr>
+                      <tr key={i}><td colSpan={6} className="px-3.5 py-3"><div className="h-5 bg-surface dark:bg-dark-elevated rounded animate-pulse w-full" /></td></tr>
                     ))
                   ) : data.length === 0 ? (
-                    <tr><td colSpan={6} className="px-4 py-8 text-center text-muted">No attendance logs found.</td></tr>
+                    <tr><td colSpan={6} className="px-4 py-8 text-center text-muted dark:text-dark-text-muted">No attendance logs found.</td></tr>
                   ) : (
                     data.map((row) => (
-                      <tr key={row._id} className="hover:bg-surface/30">
-                        <td className="px-3.5 py-2.5 font-bold text-deep">{new Date(row.date).toLocaleDateString()}</td>
-                        <td className="px-3.5 py-2.5 text-secondary">{row.schoolClass?.name || classMap[row.schoolClass] || '—'}</td>
-                        <td className="px-3.5 py-2.5 text-secondary">{row.section?.name || sectionMap[row.section] || '—'}</td>
+                      <tr key={row._id} className="hover:bg-surface/30 dark:hover:bg-dark-hover/40 transition-colors">
+                        <td className="px-3.5 py-2.5 font-bold text-deep dark:text-dark-text">{new Date(row.date).toLocaleDateString()}</td>
+                        <td className="px-3.5 py-2.5 text-secondary dark:text-dark-text-secondary">{row.schoolClass?.name || classMap[row.schoolClass] || '—'}</td>
+                        <td className="px-3.5 py-2.5 text-secondary dark:text-dark-text-secondary">{row.section?.name || sectionMap[row.section] || '—'}</td>
                         <td className="px-3.5 py-2.5">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-slate-50 text-slate-600 border border-slate-200 capitalize">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-slate-50 dark:bg-dark-elevated text-slate-600 dark:text-dark-text-secondary border border-slate-200 dark:border-dark-border capitalize">
                             {row.source || 'manual'}
                           </span>
                         </td>
-                        <td className="px-3.5 py-2.5 font-semibold text-deep">{row.summary?.present ?? 0} / {row.summary?.total ?? 0}</td>
-                        <td className="px-3.5 py-2.5 font-semibold text-rose-600">{row.summary?.absent ?? 0}</td>
+                        <td className="px-3.5 py-2.5 font-semibold text-deep dark:text-dark-text">{row.summary?.present ?? 0} / {row.summary?.total ?? 0}</td>
+                        <td className="px-3.5 py-2.5 font-semibold text-rose-600 dark:text-rose-400">{row.summary?.absent ?? 0}</td>
                       </tr>
                     ))
                   )}
@@ -492,8 +514,8 @@ export default function Attendance() {
             </div>
 
             {meta && (
-              <div className="flex items-center justify-between px-3.5 py-2.5 border-t border-border bg-surface/30">
-                <span className="text-xs text-muted">Showing {((meta.page - 1) * meta.limit) + (meta.total > 0 ? 1 : 0)} to {Math.min(meta.page * meta.limit, meta.total)} of {meta.total} entries</span>
+              <div className="flex items-center justify-between px-3.5 py-2.5 border-t border-border dark:border-dark-border bg-surface/30 dark:bg-dark-elevated/40">
+                <span className="text-xs text-muted dark:text-dark-text-muted">Showing {((meta.page - 1) * meta.limit) + (meta.total > 0 ? 1 : 0)} to {Math.min(meta.page * meta.limit, meta.total)} of {meta.total} entries</span>
                 <div className="flex items-center gap-1.5">
                   <Button variant="outline" size="sm" disabled={loading || !meta.hasPrevPage} onClick={() => setPage(meta.page - 1)} className="p-1 px-2 text-xs"><ChevronLeft size={14} /></Button>
                   <Button variant="outline" size="sm" disabled={loading || !meta.hasNextPage} onClick={() => setPage(meta.page + 1)} className="p-1 px-2 text-xs"><ChevronRight size={14} /></Button>
@@ -523,9 +545,9 @@ export default function Attendance() {
           {report && (
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-2">
               {reportStats.map((s) => (
-                <div key={s.label} className="p-3 bg-surface/60 border border-border rounded-xl text-center">
-                  <p className="text-xl font-bold text-deep">{s.value}</p>
-                  <p className="text-xs text-muted mt-0.5">{s.label}</p>
+                <div key={s.label} className="p-3 bg-surface/60 dark:bg-dark-elevated border border-border dark:border-dark-border rounded-xl text-center">
+                  <p className="text-xl font-bold text-deep dark:text-dark-text">{s.value}</p>
+                  <p className="text-xs text-muted dark:text-dark-text-muted mt-0.5">{s.label}</p>
                 </div>
               ))}
             </div>
