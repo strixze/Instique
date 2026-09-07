@@ -46,7 +46,9 @@ export default function Topbar({ setMobileOpen }) {
       try {
         const res = await notificationApi.getUnreadCount();
         setUnreadCount(res.data?.count || 0);
-      } catch {}
+      } catch {
+        // ignore
+      }
     };
     fetchCount();
     const interval = setInterval(fetchCount, 30000);
@@ -97,11 +99,11 @@ export default function Topbar({ setMobileOpen }) {
           type="button"
           onClick={() => { setSpotlightOpen(true); uiSound.modal(); }}
           className="relative flex items-center justify-between w-52 sm:w-60 lg:w-64 px-3 py-1.5 bg-slate-50 dark:bg-[#101315] hover:bg-slate-100 dark:hover:bg-[#181D20] border border-border/80 dark:border-[#262A2E] rounded-lg text-xs text-secondary dark:text-slate-400 cursor-pointer transition-all group focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
-          title="Search students, teachers, classes, pages... (Cmd/Ctrl + K)"
+          title="Search students, teachers, events, pages... (Cmd/Ctrl + K)"
         >
           <div className="flex items-center gap-2 truncate">
             <Search size={13} className="text-muted dark:text-slate-400 group-hover:text-forest dark:group-hover:text-emerald-400 transition-colors shrink-0" />
-            <span className="truncate">{user?.role === 'parent' ? 'Search options...' : 'Search students, classes...'}</span>
+            <span className="truncate">{user?.role === 'parent' ? 'Search options...' : 'Search students, events...'}</span>
           </div>
           <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.5 text-[10px] font-bold text-muted dark:text-slate-400 bg-white dark:bg-white/5 border border-border/80 dark:border-white/10 rounded shadow-2xs shrink-0 select-none">
             {isMac ? '⌘ K' : 'Ctrl K'}

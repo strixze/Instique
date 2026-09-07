@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import {
@@ -128,10 +129,20 @@ export default function Events() {
   const [reload, setReload] = useState(0);
 
   // Filters
-  const [search, setSearch] = useState('');
+  const [searchParams] = useSearchParams();
+  const [search, setSearch] = useState(() => searchParams.get('search') || '');
   const [typeFilter, setTypeFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [timeframeFilter, setTimeframeFilter] = useState('all');
+
+  useEffect(() => {
+    const q = searchParams.get('search');
+    if (q !== null && q !== undefined) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSearch(q);
+      setPage(1);
+    }
+  }, [searchParams]);
 
   // Academic classes for target selection
   const [classesList, setClassesList] = useState([]);

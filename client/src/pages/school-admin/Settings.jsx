@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import toast from 'react-hot-toast';
 import {
   Building2,
@@ -102,6 +102,11 @@ export default function Settings() {
   const [saving, setSaving] = useState(false);
   const [initialSettings, setInitialSettings] = useState(null);
   const [settings, setSettings] = useState(null);
+  const contentRef = useRef(null);
+
+  useEffect(() => {
+    contentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [activeTab]);
 
   useEffect(() => {
     let active = true;
@@ -310,9 +315,9 @@ export default function Settings() {
   const activeTabMeta = TABS.find((t) => t.id === activeTab) || TABS[0];
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-4 lg:gap-5 lg:h-[calc(100vh-6.75rem)] lg:max-h-[calc(100vh-6.75rem)] lg:overflow-hidden">
       {/* Top Header with Sticky Action Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white dark:bg-dark-surface p-4 sm:p-5 rounded-2xl border border-border dark:border-dark-border shadow-xs">
+      <div className="shrink-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white dark:bg-dark-surface p-4 sm:p-5 rounded-2xl border border-border dark:border-dark-border shadow-xs">
         <div>
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-xl bg-forest-soft dark:bg-emerald-500/10 text-forest dark:text-emerald-400">
@@ -347,9 +352,9 @@ export default function Settings() {
       </div>
 
       {/* Main Two-Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start lg:items-stretch lg:flex-1 lg:min-h-0 lg:overflow-hidden">
         {/* Left Column: Navigation Sidebar */}
-        <div className="lg:col-span-4 xl:col-span-3 space-y-2">
+        <div className="lg:col-span-4 xl:col-span-3 space-y-2 lg:space-y-0 lg:h-full lg:min-h-0 lg:flex lg:flex-col">
           {/* Mobile Tab Carousel / Scroller */}
           <div className="flex lg:hidden overflow-x-auto gap-2 pb-2 scrollbar-none">
             {TABS.map((tab) => {
@@ -373,36 +378,39 @@ export default function Settings() {
           </div>
 
           {/* Desktop Navigation List */}
-          <div className="hidden lg:block bg-white dark:bg-dark-surface border border-border dark:border-dark-border rounded-2xl p-2.5 space-y-1 shadow-xs">
-            <div className="px-3 py-2 text-[10px] font-bold text-muted uppercase tracking-wider">
+          <div className="hidden lg:flex lg:flex-col lg:h-full bg-white dark:bg-dark-surface border border-border dark:border-dark-border rounded-2xl p-2.5 shadow-xs overflow-hidden">
+            <div className="px-3 py-2 text-[10px] font-bold text-muted dark:text-dark-text-muted uppercase tracking-wider shrink-0">
               Configuration Sections
             </div>
-            {TABS.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`w-full flex items-start gap-3 px-3 py-2.5 rounded-xl text-left transition-all ${
-                    isActive
-                      ? 'bg-forest-soft dark:bg-emerald-500/10 text-forest dark:text-emerald-400 font-semibold'
-                      : 'text-secondary dark:text-dark-text-secondary hover:bg-slate-50 dark:hover:bg-dark-hover hover:text-deep dark:hover:text-dark-text'
-                  }`}
-                >
-                  <Icon size={18} className={`shrink-0 mt-0.5 ${isActive ? 'text-forest dark:text-emerald-400' : 'text-muted'}`} />
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold leading-snug">{tab.label}</p>
-                    <p className="text-[11px] text-muted dark:text-dark-text-muted line-clamp-1 mt-0.5">{tab.desc}</p>
-                  </div>
-                </button>
-              );
-            })}
+            <div className="flex-1 overflow-y-auto scrollbar-thin space-y-1 pr-1">
+              {TABS.map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`w-full flex items-start gap-3 px-3 py-2.5 rounded-xl text-left transition-all ${
+                      isActive
+                        ? 'bg-forest-soft dark:bg-emerald-500/10 text-forest dark:text-emerald-400 font-semibold'
+                        : 'text-secondary dark:text-dark-text-secondary hover:bg-slate-50 dark:hover:bg-dark-hover hover:text-deep dark:hover:text-dark-text'
+                    }`}
+                  >
+                    <Icon size={18} className={`shrink-0 mt-0.5 ${isActive ? 'text-forest dark:text-emerald-400' : 'text-muted'}`} />
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold leading-snug">{tab.label}</p>
+                      <p className="text-[11px] text-muted dark:text-dark-text-muted line-clamp-1 mt-0.5">{tab.desc}</p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
-        {/* Right Column: Active Tab Content Area */}
-        <div className="lg:col-span-8 xl:col-span-9 space-y-6">
+        {/* Right Column: Active Tab Content Area (Only Selected Section Scrolls) */}
+        <div className="lg:col-span-8 xl:col-span-9 lg:h-full lg:min-h-0 lg:flex lg:flex-col">
+          <div ref={contentRef} className="flex-1 overflow-y-auto scrollbar-thin pr-2 pb-16 space-y-6">
           {/* Active Tab Banner */}
           <div className="bg-white dark:bg-dark-surface border border-border dark:border-dark-border rounded-2xl p-5 shadow-xs">
             <div className="flex items-center gap-3">
@@ -1680,5 +1688,6 @@ export default function Settings() {
         </div>
       </div>
     </div>
+  </div>
   );
 }
