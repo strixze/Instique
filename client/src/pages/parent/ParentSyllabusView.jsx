@@ -12,14 +12,21 @@ export default function ParentSyllabusView() {
 
   // Fetch parent's children
   useEffect(() => {
-    parentApi.getChildren()
-      .then((res) => {
-        const list = res.data || [];
-        setChildren(list);
-        if (list.length > 0) setSelectedChildId(list[0]._id);
-      })
-      .catch(() => {})
-      .finally(() => setLoadingChildren(false));
+    const fetchKids = parentApi.getMyChildren || parentApi.getChildren;
+    if (typeof fetchKids === 'function') {
+      fetchKids()
+        .then((res) => {
+          const list = Array.isArray(res.data) ? res.data : (res.data?.children || []);
+          setChildren(list);
+          if (list.length > 0) {
+            setSelectedChildId(list[0]._id || list[0].id || '');
+          }
+        })
+        .catch(() => {})
+        .finally(() => setLoadingChildren(false));
+    } else {
+      setLoadingChildren(false);
+    }
   }, []);
 
   // Fetch child's section syllabus tracks
@@ -27,12 +34,12 @@ export default function ParentSyllabusView() {
     queryKey: ['parent-syllabus-tracks', selectedChildId],
     queryFn: async () => {
       const res = await syllabusApi.getParentChildSyllabus(selectedChildId);
-      return res.data || [];
+      return Array.isArray(res.data) ? res.data : (res.data?.tracks || res.data?.data || []);
     },
     enabled: !!selectedChildId,
   });
 
-  const selectedChild = children.find((c) => c._id === selectedChildId);
+  const selectedChild = children.find((c) => (c._id || c.id) === selectedChildId);
 
   return (
     <div className="space-y-4 w-full pb-10">
@@ -58,11 +65,14 @@ export default function ParentSyllabusView() {
                 onChange={(e) => setSelectedChildId(e.target.value)}
                 className="px-3 py-1.5 bg-white dark:bg-dark-elevated border border-border rounded-lg text-xs font-bold text-deep"
               >
-                {children.map((c) => (
-                  <option key={c._id} value={c._id}>
-                    {c.firstName} {c.lastName} ({c.currentClass?.name || 'Class'})
-                  </option>
-                ))}
+                {children.map((c) => {
+                  const cid = c._id || c.id;
+                  return (
+                    <option key={cid} value={cid}>
+                      {c.firstName} {c.lastName} ({c.currentClass?.name || 'Class'})
+                    </option>
+                  );
+                })}
               </select>
             </div>
           )}
