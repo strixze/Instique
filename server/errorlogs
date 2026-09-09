@@ -32259,3 +32259,19 @@ Stack Trace: Error: Insufficient permissions
 Details: []
 ================================================================================
 
+
+================================================================================
+Timestamp: 2026-09-09T12:42:22.683Z
+Method: POST
+URL: /api/v1/auth/login
+User ID: Unauthenticated
+Query: {}
+Body: {"email":"schooladmin@springfield.edu","password":"[REDACTED]"}
+Error Name: Error
+Error Message: Invalid email or password
+Stack Trace: Error: Invalid email or password
+    at Module.loginUser (file:///D:/projects/Instique/server/src/services/auth.service.js:69:11)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:38:18
+Details: []
+================================================================================
+

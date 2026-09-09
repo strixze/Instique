@@ -4,6 +4,7 @@ export const timetableApi = {
   getAll: (params) => api.get('/timetables', { params }),
   getById: (id) => api.get(`/timetables/${id}`),
   getByClassSection: (classId, sectionId) => api.get(`/timetables/by-class/${classId}/section/${sectionId}`),
+  create: (data) => api.post('/timetables', data),
   generate: (data) => api.post('/timetables/generate', data),
   generateBulk: (data) => api.post('/timetables/generate-bulk', data),
   regeneratePartial: (id) => api.post(`/timetables/${id}/regenerate-partial`),

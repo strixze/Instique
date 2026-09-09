@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import {
@@ -66,6 +67,21 @@ export default function Timetable() {
   const [years, setYears] = useState([]);
   const [teachers, setTeachers] = useState([]);
   const [subjects, setSubjects] = useState([]);
+
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Manual Timetable Modal
+  const [openManualModal, setOpenManualModal] = useState(false);
+  const [creatingManual, setCreatingManual] = useState(false);
+  const [manualForm, setManualForm] = useState({
+    academicYear: '',
+    schoolClass: '',
+    section: '',
+    status: 'draft',
+    totalPeriodsPerDay: 8,
+    lunchBreakAfter: 4,
+    prepopulateSchedule: true,
+  });
 
   // Generate / Config Modal
   const [openGen, setOpenGen] = useState(false);
@@ -203,12 +219,35 @@ export default function Timetable() {
   };
 
   useEffect(() => {
-    academicApi.getClasses({ limit: 100 }).then((res) => setClasses(res.data)).catch(() => {});
-    academicApi.getSections({ limit: 100 }).then((res) => setSections(res.data)).catch(() => {});
-    academicApi.getAcademicYears({ limit: 100 }).then((res) => setYears(res.data)).catch(() => {});
-    teacherApi.getAll({ limit: 100 }).then((res) => setTeachers(res.data)).catch(() => {});
-    academicApi.getSubjects({ limit: 100 }).then((res) => setSubjects(res.data)).catch(() => {});
+    academicApi.getClasses({ limit: 100 }).then((res) => setClasses(res.data || [])).catch(() => {});
+    academicApi.getSections({ limit: 100 }).then((res) => setSections(res.data || [])).catch(() => {});
+    academicApi.getAcademicYears({ limit: 100 }).then((res) => {
+      const list = res.data || [];
+      setYears(list);
+      const current = list.find((y) => y.isCurrent) || list[0];
+      if (current) {
+        setManualForm((prev) => ({ ...prev, academicYear: prev.academicYear || current._id }));
+        setForm((prev) => ({ ...prev, academicYear: prev.academicYear || current._id }));
+      }
+    }).catch(() => {});
+    teacherApi.getAll({ limit: 100 }).then((res) => setTeachers(res.data || [])).catch(() => {});
+    academicApi.getSubjects({ limit: 100 }).then((res) => setSubjects(res.data || [])).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (searchParams.get('action') === 'create-manual') {
+      const currentYear = years.find((y) => y.isCurrent)?._id || years[0]?._id || '';
+      if (currentYear) {
+        setManualForm((prev) => ({ ...prev, academicYear: prev.academicYear || currentYear }));
+      }
+      setOpenManualModal(true);
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete('action');
+        return next;
+      }, { replace: true });
+    }
+  }, [searchParams, years]);
 
   useEffect(() => {
     let active = true;
@@ -297,6 +336,77 @@ export default function Timetable() {
       const idx = historyIndex + 1;
       setHistoryIndex(idx);
       setGridPeriods(JSON.parse(JSON.stringify(history[idx])));
+    }
+  };
+
+  // Available sections for the selected class in manual form
+  const availableSections = sections.filter((s) => {
+    if (!manualForm.schoolClass) return false;
+    const sClassId = s.schoolClass?._id || s.schoolClass;
+    return sClassId === manualForm.schoolClass;
+  });
+
+  const handleManualClassChange = (e) => {
+    const classId = e.target.value;
+    setManualForm((f) => ({
+      ...f,
+      schoolClass: classId,
+      section: '',
+    }));
+  };
+
+  const handleCreateManualTimetable = async () => {
+    if (!manualForm.schoolClass || !manualForm.section || !manualForm.academicYear) {
+      toast.error('Please select academic year, class, and section');
+      return;
+    }
+
+    setCreatingManual(true);
+    try {
+      let initialPeriods = [];
+
+      if (manualForm.prepopulateSchedule) {
+        const daysList = DAYS.filter((d) => d.value !== 0);
+        const totalPeriods = parseInt(manualForm.totalPeriodsPerDay) || 8;
+        const lunchAfter = parseInt(manualForm.lunchBreakAfter) || 4;
+
+        daysList.forEach((dayObj) => {
+          for (let pNo = 1; pNo <= totalPeriods; pNo++) {
+            if (pNo === lunchAfter) {
+              initialPeriods.push({
+                day: dayObj.value,
+                periodNo: pNo,
+                isLunch: true,
+                isBreak: true,
+                label: 'Lunch Break',
+              });
+            }
+          }
+        });
+      }
+
+      const payload = {
+        schoolClass: manualForm.schoolClass,
+        section: manualForm.section,
+        academicYear: manualForm.academicYear,
+        status: manualForm.status || 'draft',
+        totalPeriodsPerDay: parseInt(manualForm.totalPeriodsPerDay) || 8,
+        lunchBreakAfter: parseInt(manualForm.lunchBreakAfter) || 4,
+        periods: initialPeriods,
+      };
+
+      const res = await timetableApi.create(payload);
+      toast.success('Manual timetable created successfully');
+      setOpenManualModal(false);
+      triggerReload();
+
+      if (res.data) {
+        openEditor(res.data);
+      }
+    } catch (e) {
+      toast.error(e?.message || 'Failed to create manual timetable');
+    } finally {
+      setCreatingManual(false);
     }
   };
 
@@ -527,6 +637,16 @@ export default function Timetable() {
     setEditCell(null);
   };
 
+  const handleClearSlot = () => {
+    if (!editCell) return;
+    const { day, periodNo } = editCell;
+    const newPeriods = gridPeriods.filter((p) => !(p.day === day && p.periodNo === periodNo));
+    setGridPeriods(newPeriods);
+    pushToHistory(newPeriods);
+    setEditCell(null);
+    toast.success(`Cleared slot for P${periodNo}`);
+  };
+
   // Drag and Drop swap
   const handleDragStart = (e, day, periodNo) => {
     setDraggedPeriod({ day, periodNo });
@@ -720,67 +840,94 @@ export default function Timetable() {
       {/* ── Page Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 pb-1">
         <div>
-          <h1 className="text-xl font-bold text-deep tracking-tight">Timetable Management</h1>
-          <p className="text-secondary text-xs mt-1 max-w-xl leading-relaxed">
+          <h1 className="text-xl font-bold text-deep dark:text-white tracking-tight">Timetable Management</h1>
+          <p className="text-secondary dark:text-slate-400 text-xs mt-1 max-w-xl leading-relaxed">
             Auto-generate, inspect, and optimize school class schedules with conflict prevention.
           </p>
         </div>
 
         {/* Primary and Secondary Actions */}
-        <div className="flex items-center gap-2.5 relative">
+        <div className="flex flex-wrap items-center gap-2 relative">
           {/* Secondary Action: Analytics */}
-          <Button
-            variant="outline"
-            size="sm"
+          <button
+            type="button"
             onClick={handleLoadReports}
-            className="gap-1.5 text-xs text-secondary hover:text-deep"
+            className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium border border-border dark:border-white/10 bg-white dark:bg-[#101315] text-secondary dark:text-slate-300 hover:bg-surface dark:hover:bg-[#161B1E] hover:text-deep dark:hover:text-white transition-all shadow-2xs"
           >
-            <BarChart3 size={14} /> Analytics
-          </Button>
+            <BarChart3 size={14} className="text-muted dark:text-slate-400" />
+            <span>Analytics</span>
+          </button>
 
-          {/* Primary Action: Generate Timetable Dropdown */}
+          {/* Action: Manual Timetable */}
+          <button
+            type="button"
+            onClick={() => {
+              const defaultYear = years.find((y) => y.isCurrent)?._id || years[0]?._id || '';
+              setManualForm((f) => ({ ...f, academicYear: f.academicYear || defaultYear }));
+              setOpenManualModal(true);
+            }}
+            className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold border border-emerald-300/80 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 hover:bg-emerald-100/90 dark:hover:bg-emerald-500/20 transition-all shadow-2xs"
+          >
+            <Plus size={14} className="text-emerald-600 dark:text-emerald-400" />
+            <span>Manual Timetable</span>
+          </button>
+
+          {/* Action: Auto-Generate Dropdown */}
           <div className="relative" ref={generateDropdownRef}>
-            <Button
-              size="sm"
+            <button
+              type="button"
               onClick={() => setGenerateDropdownOpen(!generateDropdownOpen)}
-              className="gap-1.5 text-xs bg-forest text-white shadow-2xs"
+              className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold border border-border dark:border-white/10 bg-white dark:bg-[#101315] text-deep dark:text-slate-200 hover:bg-surface dark:hover:bg-[#161B1E] hover:border-slate-300 dark:hover:border-white/20 transition-all shadow-2xs"
             >
-              <Plus size={15} /> Generate Timetable{' '}
+              <RefreshCw size={13} className="text-forest dark:text-emerald-400" />
+              <span>Auto-Generate</span>
               <ChevronDown
                 size={13}
-                className={`transition-transform duration-150 opacity-80 ${generateDropdownOpen ? 'rotate-180' : ''}`}
+                className={`transition-transform duration-150 text-muted dark:text-slate-400 opacity-80 ${generateDropdownOpen ? 'rotate-180' : ''}`}
               />
-            </Button>
+            </button>
 
             {generateDropdownOpen && (
-              <div className="absolute right-0 top-full mt-1.5 w-56 bg-white border border-border rounded-xl shadow-dropdown z-50 py-1 text-left animate-scale-in">
+              <div className="absolute right-0 top-full mt-1.5 w-56 bg-white dark:bg-[#101315] border border-border dark:border-white/10 rounded-xl shadow-dropdown dark:shadow-2xl z-50 py-1.5 text-left animate-scale-in">
+                <button
+                  onClick={() => {
+                    setGenerateDropdownOpen(false);
+                    const defaultYear = years.find((y) => y.isCurrent)?._id || years[0]?._id || '';
+                    setManualForm((f) => ({ ...f, academicYear: f.academicYear || defaultYear }));
+                    setOpenManualModal(true);
+                  }}
+                  className="w-full px-3.5 py-2 text-xs text-deep dark:text-slate-200 hover:bg-surface dark:hover:bg-white/[0.06] flex items-center gap-2 font-medium transition-colors"
+                >
+                  <Plus size={13} className="text-emerald-600 dark:text-emerald-400" /> Create Manual Timetable
+                </button>
+                <div className="border-t border-border/70 dark:border-white/10 my-1"></div>
                 <button
                   onClick={() => { setGenerateDropdownOpen(false); setOpenGen(true); }}
-                  className="w-full px-3.5 py-2 text-xs text-deep hover:bg-surface flex items-center gap-2 font-medium"
+                  className="w-full px-3.5 py-2 text-xs text-deep dark:text-slate-200 hover:bg-surface dark:hover:bg-white/[0.06] flex items-center gap-2 font-medium transition-colors"
                 >
-                  <Plus size={13} className="text-forest" /> Generate for Class
+                  <RefreshCw size={13} className="text-forest dark:text-emerald-400" /> Generate for Class
                 </button>
                 <button
                   onClick={() => {
                     setGenerateDropdownOpen(false);
-                    const defaultYear = years.find(y => y.isCurrent)?._id || years[0]?._id || '';
-                    setForm(f => ({ ...f, academicYear: defaultYear }));
+                    const defaultYear = years.find((y) => y.isCurrent)?._id || years[0]?._id || '';
+                    setForm((f) => ({ ...f, academicYear: defaultYear }));
                     setOpenGen(true);
                   }}
-                  className="w-full px-3.5 py-2 text-xs text-deep hover:bg-surface flex items-center gap-2 font-medium"
+                  className="w-full px-3.5 py-2 text-xs text-deep dark:text-slate-200 hover:bg-surface dark:hover:bg-white/[0.06] flex items-center gap-2 font-medium transition-colors"
                 >
-                  <RefreshCw size={13} className="text-forest" /> Bulk Generation (All Classes)
+                  <RefreshCw size={13} className="text-forest dark:text-emerald-400" /> Bulk Generation (All Classes)
                 </button>
-                <div className="border-t border-border/70 my-1"></div>
+                <div className="border-t border-border/70 dark:border-white/10 my-1"></div>
                 <button
                   onClick={() => { setGenerateDropdownOpen(false); setOpenPublishModal(true); }}
-                  className="w-full px-3.5 py-2 text-xs text-secondary hover:bg-surface flex items-center gap-2"
+                  className="w-full px-3.5 py-2 text-xs text-secondary dark:text-slate-400 hover:bg-surface dark:hover:bg-white/[0.06] flex items-center gap-2 transition-colors"
                 >
-                  <Lock size={13} className="text-muted" /> Bulk Publish by Scope
+                  <Lock size={13} className="text-muted dark:text-slate-500" /> Bulk Publish by Scope
                 </button>
                 <button
                   onClick={() => { setGenerateDropdownOpen(false); setOpenDeleteModal(true); }}
-                  className="w-full px-3.5 py-2 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2"
+                  className="w-full px-3.5 py-2 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center gap-2 transition-colors"
                 >
                   <Trash2 size={13} /> Bulk Delete by Scope
                 </button>
@@ -804,6 +951,11 @@ export default function Timetable() {
                   <span className="px-2.5 py-0.5 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">Published</span>
                 ) : (
                   <span className="px-2.5 py-0.5 rounded-md text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">Draft</span>
+                )}
+                {activeTimetable.isAutoGenerated ? (
+                  <span className="px-2.5 py-0.5 rounded-md text-xs font-medium bg-purple-50 text-purple-700 border border-purple-200">Auto-Generated</span>
+                ) : (
+                  <span className="px-2.5 py-0.5 rounded-md text-xs font-medium bg-sky-50 text-sky-700 border border-sky-200">Manual</span>
                 )}
               </div>
               <p className="text-xs text-muted mt-0.5">Academic Session: {activeTimetable.academicYear?.name || yearMap[activeTimetable.academicYear] || '—'}</p>
@@ -1056,6 +1208,7 @@ export default function Timetable() {
                     <th className="px-3.5 py-2.5 text-xs font-semibold text-secondary uppercase tracking-wider">SECTION</th>
                     <th className="px-3.5 py-2.5 text-xs font-semibold text-secondary uppercase tracking-wider">SESSION</th>
                     <th className="px-3.5 py-2.5 text-xs font-semibold text-secondary uppercase tracking-wider">PERIODS OFFERED</th>
+                    <th className="px-3.5 py-2.5 text-xs font-semibold text-secondary uppercase tracking-wider">TYPE</th>
                     <th className="px-3.5 py-2.5 text-xs font-semibold text-secondary uppercase tracking-wider">STATUS</th>
                     <th className="px-3.5 py-2.5 text-xs font-semibold text-secondary uppercase tracking-wider text-right">ACTIONS</th>
                   </tr>
@@ -1063,10 +1216,10 @@ export default function Timetable() {
                 <tbody className="divide-y divide-border/60 bg-white">
                   {loading ? (
                     [1, 2, 3, 4, 5].map((i) => (
-                      <tr key={i}><td colSpan={7} className="px-3.5 py-3"><div className="h-5 bg-surface rounded animate-pulse w-full" /></td></tr>
+                      <tr key={i}><td colSpan={8} className="px-3.5 py-3"><div className="h-5 bg-surface rounded animate-pulse w-full" /></td></tr>
                     ))
                   ) : timetables.length === 0 ? (
-                    <tr><td colSpan={7} className="px-4 py-12 text-center text-xs text-muted">No timetables found matching the selected criteria.</td></tr>
+                    <tr><td colSpan={8} className="px-4 py-12 text-center text-xs text-muted">No timetables found matching the selected criteria.</td></tr>
                   ) : (
                     timetables.map((row) => {
                       const isRowSelected = selectedIds.includes(row._id);
@@ -1096,6 +1249,13 @@ export default function Timetable() {
                           </td>
                           <td className="px-3.5 py-2.5 text-xs font-semibold text-deep">
                             {Array.isArray(row.periods) ? row.periods.length : 0} slots
+                          </td>
+                          <td className="px-3.5 py-2.5">
+                            {row.isAutoGenerated ? (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-purple-50 text-purple-700 border border-purple-200">Auto</span>
+                            ) : (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-sky-50 text-sky-700 border border-sky-200">Manual</span>
+                            )}
                           </td>
                           <td className="px-3.5 py-2.5">
                             {row.status === 'published' ? (
@@ -1182,12 +1342,114 @@ export default function Timetable() {
               value={cellForm.room}
               onChange={(e) => setCellForm((f) => ({ ...f, room: e.target.value }))}
             />
-            <div className="flex justify-end gap-3 pt-4 border-t border-border">
-              <Button variant="ghost" onClick={() => setEditCell(null)}>Cancel</Button>
-              <Button onClick={handleCellSave}>Apply Edit</Button>
+            <div className="flex items-center justify-between pt-4 border-t border-border">
+              <Button
+                variant="outline"
+                size="sm"
+                type="button"
+                onClick={handleClearSlot}
+                className="text-xs text-rose-600 border-rose-200 hover:bg-rose-50"
+              >
+                <Trash2 size={13} className="mr-1 text-rose-500" /> Clear Slot
+              </Button>
+              <div className="flex gap-2">
+                <Button variant="ghost" onClick={() => setEditCell(null)}>Cancel</Button>
+                <Button onClick={handleCellSave}>Apply Edit</Button>
+              </div>
             </div>
           </div>
         )}
+      </Modal>
+
+      {/* Manual Timetable Creation Modal */}
+      <Modal isOpen={openManualModal} onClose={() => setOpenManualModal(false)} title="Add Manual Timetable" size="md">
+        <div className="space-y-4">
+          <p className="text-xs text-secondary dark:text-slate-400 leading-relaxed">
+            Create a custom timetable for a specific class section from scratch. You can manually assign subjects, teachers, and rooms with real-time conflict checking.
+          </p>
+
+          <Select
+            label="Academic Year *"
+            options={years.map((y) => ({ value: y._id, label: y.name }))}
+            value={manualForm.academicYear}
+            onChange={(e) => setManualForm((f) => ({ ...f, academicYear: e.target.value }))}
+            placeholder="Select Academic Year"
+          />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Select
+              label="Class *"
+              options={classes.map((c) => ({ value: c._id, label: c.name }))}
+              value={manualForm.schoolClass}
+              onChange={handleManualClassChange}
+              placeholder="Select Class"
+            />
+
+            <Select
+              label="Section *"
+              options={availableSections.map((s) => ({ value: s._id, label: s.name }))}
+              value={manualForm.section}
+              onChange={(e) => setManualForm((f) => ({ ...f, section: e.target.value }))}
+              placeholder={manualForm.schoolClass ? "Select Section" : "Select Class first"}
+              disabled={!manualForm.schoolClass}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Input
+              type="number"
+              label="Periods Per Day"
+              min={1}
+              max={15}
+              value={manualForm.totalPeriodsPerDay}
+              onChange={(e) => setManualForm((f) => ({ ...f, totalPeriodsPerDay: Math.max(1, parseInt(e.target.value) || 1) }))}
+            />
+
+            <Input
+              type="number"
+              label="Lunch Break After Period"
+              min={1}
+              max={manualForm.totalPeriodsPerDay}
+              value={manualForm.lunchBreakAfter}
+              onChange={(e) => setManualForm((f) => ({ ...f, lunchBreakAfter: Math.max(1, parseInt(e.target.value) || 1) }))}
+            />
+          </div>
+
+          <Select
+            label="Initial Status"
+            options={[
+              { value: 'draft', label: 'Draft (Default)' },
+              { value: 'published', label: 'Published' },
+            ]}
+            value={manualForm.status}
+            onChange={(e) => setManualForm((f) => ({ ...f, status: e.target.value }))}
+          />
+
+          <div className="flex items-center gap-2 p-3 bg-surface/40 dark:bg-white/[0.04] border border-border/80 dark:border-white/10 rounded-xl text-xs">
+            <input
+              type="checkbox"
+              id="prepopulateBreaks"
+              checked={manualForm.prepopulateSchedule}
+              onChange={(e) => setManualForm((f) => ({ ...f, prepopulateSchedule: e.target.checked }))}
+              className="w-4 h-4 accent-forest rounded cursor-pointer"
+            />
+            <label htmlFor="prepopulateBreaks" className="cursor-pointer text-deep dark:text-slate-200 font-medium">
+              Pre-configure lunch break slots in the grid (Period {manualForm.lunchBreakAfter})
+            </label>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-border dark:border-white/10">
+            <Button variant="ghost" onClick={() => setOpenManualModal(false)} className="dark:text-slate-400 dark:hover:text-white">Cancel</Button>
+            <Button
+              onClick={handleCreateManualTimetable}
+              loading={creatingManual}
+              disabled={!manualForm.schoolClass || !manualForm.section || !manualForm.academicYear}
+              className="bg-forest hover:bg-forest/90 text-white dark:bg-emerald-500 dark:hover:bg-emerald-600 dark:text-slate-950 shadow-2xs font-semibold"
+            >
+              Create Timetable
+            </Button>
+          </div>
+        </div>
       </Modal>
 
       {/* Generate Timetable Configuration Modal */}

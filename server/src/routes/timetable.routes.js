@@ -25,6 +25,7 @@ import {
   exportToPdf,
   exportToExcel,
   findSubstitutes,
+  createManualTimetable,
 } from '../controllers/timetable.controller.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
 import { requireRole } from '../middlewares/rbac.middleware.js';
@@ -32,6 +33,7 @@ import tenantMiddleware from '../middlewares/tenant.middleware.js';
 import validate from '../middlewares/validate.middleware.js';
 import {
   generateTimetableSchema,
+  createTimetableSchema,
   updateTimetableSchema,
   manualEditSchema,
   swapPeriodsSchema,
@@ -70,6 +72,7 @@ router.delete('/bulk/school', requireRole('school_admin'), validate(deleteSchool
 router.delete('/bulk/class/:classId', requireRole('school_admin'), validate(deleteClassTimetablesSchema, 'query'), deleteClassTimetables);
 
 // Standard list and lookups
+router.post('/', requireRole('school_admin'), validate(createTimetableSchema), createManualTimetable);
 router.get('/', requireRole('school_admin', 'teacher'), getTimetables);
 router.get('/by-class/:classId/section/:sectionId', requireRole('school_admin', 'teacher', 'student', 'parent'), getTimetableByClassSection);
 router.get('/:id', requireRole('school_admin', 'teacher', 'student', 'parent'), getTimetableById);
