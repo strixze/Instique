@@ -12,6 +12,11 @@ export const generateBulkTimetables = asyncHandler(async (req, res) => {
   res.status(201).json(new ApiResponse(201, results, 'Bulk timetables generation completed'));
 });
 
+export const createManualTimetable = asyncHandler(async (req, res) => {
+  const result = await timetableService.createManualTimetable(req.schoolId, req.body);
+  res.status(201).json(new ApiResponse(201, result, 'Timetable created successfully'));
+});
+
 export const getTimetables = asyncHandler(async (req, res) => {
   const result = await timetableService.getTimetables(req.schoolId, req.query);
   res.status(200).json(new ApiResponse(200, result.data, 'Timetables fetched', result.meta));
