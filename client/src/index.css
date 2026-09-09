@@ -99,6 +99,11 @@ html.theme-transition *::after {
   to { transform: translateX(0); }
 }
 
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
 @keyframes fade-in {
   from { opacity: 0; transform: translateY(2px); }
   to { opacity: 1; transform: translateY(0); }
@@ -111,7 +116,9 @@ html.theme-transition *::after {
 
 .animate-scale-in { animation: scale-in 0.12s ease-out; }
 .animate-slide-right { animation: slide-right 0.18s ease-out; }
+.animate-slide-up { animation: slide-up 0.2s ease-out; }
 .animate-fade-in { animation: fade-in 0.15s ease-out; }
+.safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
 .animate-shimmer {
   background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
   background-size: 200% 100%;

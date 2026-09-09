@@ -358,14 +358,14 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
         {renderSidebarContent(false)}
       </aside>
 
-      {/* Mobile Sidebar Overlay */}
+      {/* Mobile Sidebar Overlay (Bottom Sheet) */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div
             className="fixed inset-0 bg-slate-950/40 dark:bg-black/60 backdrop-blur-xs"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="fixed left-0 top-0 bottom-0 w-[230px] bg-white dark:bg-dark-surface border-r border-border dark:border-dark-border z-50 animate-slide-right shadow-modal">
+          <aside className="fixed left-0 right-0 bottom-0 max-h-[80vh] bg-white dark:bg-dark-surface border-t border-border dark:border-dark-border rounded-t-2xl z-50 animate-slide-up shadow-modal">
             {renderSidebarContent(true)}
           </aside>
         </div>

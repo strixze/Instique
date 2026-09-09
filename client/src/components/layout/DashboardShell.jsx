@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
+import MobileBottomNav from './MobileBottomNav';
 
 export default function DashboardShell({ children }) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -14,11 +15,14 @@ export default function DashboardShell({ children }) {
       <div className="flex-1 flex flex-col overflow-hidden min-w-0 w-full">
         <Topbar setMobileOpen={setMobileOpen} />
         <main className="flex-1 overflow-y-auto scrollbar-thin w-full">
-          <div className="p-4 sm:p-5 lg:p-6 w-full">
+          <div className="p-4 sm:p-5 lg:p-6 pb-24 lg:pb-6 w-full">
             {children}
           </div>
         </main>
       </div>
+
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav setMobileOpen={setMobileOpen} />
     </div>
   );
 }
