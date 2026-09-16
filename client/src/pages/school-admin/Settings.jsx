@@ -23,6 +23,8 @@ import {
   AlertCircle,
   Info,
   ShieldCheck,
+  ChevronRight,
+  ChevronLeft,
 } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
@@ -33,6 +35,7 @@ import Switch from '../../components/ui/Switch';
 import Badge from '../../components/ui/Badge';
 import SoundSettings from '../../components/ui/SoundSettings';
 import { settingApi } from '../../api/setting.api';
+import { uiSound } from '../../utils/soundManager';
 
 const TABS = [
   { id: 'general', label: 'School Info', icon: Building2, desc: 'School profile, address, timezone & currency' },
@@ -49,6 +52,25 @@ const TABS = [
   { id: 'branding', label: 'Branding & Theme', icon: Palette, desc: 'School logo, colors & report card / receipt headers' },
   { id: 'features', label: 'Features & Modules', icon: Layers, desc: 'Enable or disable functional modules across Instique' },
   { id: 'sound', label: 'Sound & UI Effects', icon: Volume2, desc: 'Sound effects and audio feedback preferences' },
+];
+
+const SETTING_GROUPS = [
+  {
+    title: 'School Profile',
+    tabIds: ['general', 'branding'],
+  },
+  {
+    title: 'Academics & Operations',
+    tabIds: ['timings', 'academic', 'attendance', 'leave', 'fees'],
+  },
+  {
+    title: 'Communication & Access',
+    tabIds: ['notifications', 'visibility', 'communication', 'recognition', 'documents'],
+  },
+  {
+    title: 'System & Preferences',
+    tabIds: ['features', 'sound'],
+  },
 ];
 
 const DAYS_OF_WEEK = [
@@ -98,6 +120,7 @@ const MODULE_DEFINITIONS = [
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState('general');
+  const [mobileTabSelected, setMobileTabSelected] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [initialSettings, setInitialSettings] = useState(null);
@@ -354,30 +377,48 @@ export default function Settings() {
       {/* Main Two-Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start lg:items-stretch lg:flex-1 lg:min-h-0 lg:overflow-hidden">
         {/* Left Column: Navigation Sidebar */}
-        <div className="lg:col-span-4 xl:col-span-3 space-y-2 lg:space-y-0 lg:h-full lg:min-h-0 lg:flex lg:flex-col">
-          {/* Mobile Tab Carousel / Scroller */}
-          <div className="flex lg:hidden overflow-x-auto gap-2 pb-2 scrollbar-none">
-            {TABS.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
+        <div className={`lg:col-span-4 xl:col-span-3 space-y-4 lg:space-y-0 lg:h-full lg:min-h-0 lg:flex lg:flex-col ${mobileTabSelected ? 'hidden lg:flex' : 'block'}`}>
+          {/* Mobile Grouped Native Settings Menu (< 1024px) */}
+          <div className="lg:hidden space-y-4">
+            {SETTING_GROUPS.map((group) => {
+              const groupTabs = group.tabIds.map((id) => TABS.find((t) => t.id === id)).filter(Boolean);
               return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
-                    isActive
-                      ? 'bg-forest text-white shadow-xs'
-                      : 'bg-white dark:bg-dark-surface text-secondary dark:text-dark-text-secondary border border-border dark:border-dark-border hover:bg-surface'
-                  }`}
-                >
-                  <Icon size={14} />
-                  <span>{tab.label}</span>
-                </button>
+                <div key={group.title} className="bg-white dark:bg-dark-surface border border-border dark:border-dark-border rounded-2xl overflow-hidden shadow-xs">
+                  <div className="px-4 py-2 bg-surface/60 dark:bg-dark-elevated/60 border-b border-border dark:border-dark-border text-[11px] font-bold text-muted dark:text-dark-text-muted uppercase tracking-wider">
+                    {group.title}
+                  </div>
+                  <div className="divide-y divide-border/60 dark:divide-dark-border">
+                    {groupTabs.map((tab) => {
+                      const Icon = tab.icon;
+                      return (
+                        <button
+                          key={tab.id}
+                          type="button"
+                          onClick={() => {
+                            uiSound.tap?.();
+                            setActiveTab(tab.id);
+                            setMobileTabSelected(tab.id);
+                          }}
+                          className="w-full flex items-center gap-3 p-3.5 hover:bg-surface/50 dark:hover:bg-dark-hover transition-colors text-left"
+                        >
+                          <div className="w-8 h-8 rounded-xl bg-forest/10 dark:bg-emerald-500/15 text-forest dark:text-emerald-400 flex items-center justify-center shrink-0">
+                            <Icon size={16} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-xs text-deep dark:text-dark-text truncate">{tab.label}</p>
+                            <p className="text-[11px] text-muted dark:text-dark-text-muted truncate mt-0.5">{tab.desc}</p>
+                          </div>
+                          <ChevronRight size={16} className="text-muted/60 shrink-0" />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               );
             })}
           </div>
 
-          {/* Desktop Navigation List */}
+          {/* Desktop Navigation List (>= 1024px) */}
           <div className="hidden lg:flex lg:flex-col lg:h-full bg-white dark:bg-dark-surface border border-border dark:border-dark-border rounded-2xl p-2.5 shadow-xs overflow-hidden">
             <div className="px-3 py-2 text-[10px] font-bold text-muted dark:text-dark-text-muted uppercase tracking-wider shrink-0">
               Configuration Sections
@@ -408,8 +449,19 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* Right Column: Active Tab Content Area (Only Selected Section Scrolls) */}
-        <div className="lg:col-span-8 xl:col-span-9 lg:h-full lg:min-h-0 lg:flex lg:flex-col">
+        {/* Right Column: Active Tab Content Area */}
+        <div className={`lg:col-span-8 xl:col-span-9 lg:h-full lg:min-h-0 lg:flex lg:flex-col ${mobileTabSelected ? 'block' : 'hidden lg:flex'}`}>
+          {/* Mobile Back Button (< 1024px) */}
+          <div className="lg:hidden flex items-center justify-between pb-3">
+            <button
+              type="button"
+              onClick={() => { uiSound.navigation?.(); setMobileTabSelected(null); }}
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-forest dark:text-emerald-400 hover:underline p-1 -ml-1"
+            >
+              <ChevronLeft size={16} /> All Settings
+            </button>
+            <span className="text-xs font-bold text-deep dark:text-dark-text">{activeTabMeta.label}</span>
+          </div>
           <div ref={contentRef} className="flex-1 overflow-y-auto scrollbar-thin pr-2 pb-16 space-y-6">
           {/* Active Tab Banner */}
           <div className="bg-white dark:bg-dark-surface border border-border dark:border-dark-border rounded-2xl p-5 shadow-xs">

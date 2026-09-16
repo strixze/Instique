@@ -1,8 +1,8 @@
-import { Bell, Calendar, Clock, Menu, Search, Volume2, VolumeX } from 'lucide-react';
+import { Bell, BookOpen, Calendar, Clock, Menu, Search, Volume2, VolumeX, ChevronLeft } from 'lucide-react';
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useUserStore } from '../../store/userStore';
 import { notificationApi } from '../../api/notification.api';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import UserAvatar from '../ui/UserAvatar';
 import ThemeToggle from '../ui/ThemeToggle';
 import SpotlightSearch from '../ui/SpotlightSearch';
@@ -10,15 +10,53 @@ import SoundSettings from '../ui/SoundSettings';
 import { useUISound } from '../../services/sound';
 import { uiSound } from '../../utils/soundManager';
 
+const ROUTE_TITLES = {
+  '/dashboard': 'Dashboard',
+  '/students': 'Students',
+  '/teachers': 'Teachers',
+  '/academic': 'Classes',
+  '/syllabus': 'Syllabus',
+  '/timetable': 'Timetable',
+  '/timetable-config': 'Timetable Config',
+  '/attendance': 'Attendance',
+  '/homework': 'Homework',
+  '/exams': 'Exams',
+  '/marks-entry': 'Marks Entry',
+  '/leaderboard': 'Leaderboard',
+  '/admissions': 'Admissions',
+  '/fees': 'Fees',
+  '/leaves': 'Leaves',
+  '/notices': 'Notices',
+  '/events': 'Events',
+  '/complaints': 'Complaints',
+  '/parent-meetings': 'Parent Meetings',
+  '/reports': 'Reports',
+  '/roles': 'Roles & Permissions',
+  '/settings': 'Settings',
+  '/schools': 'Schools',
+  '/subscriptions': 'Subscriptions',
+  '/audit-logs': 'Audit Logs',
+};
+
 export default function Topbar({ setMobileOpen }) {
   const user = useUserStore((s) => s.user);
   const navigate = useNavigate();
+  const location = useLocation();
   const { enabled, volume } = useUISound();
   const [unreadCount, setUnreadCount] = useState(0);
   const [spotlightOpen, setSpotlightOpen] = useState(false);
   const [soundMenuOpen, setSoundMenuOpen] = useState(false);
   const [now, setNow] = useState(new Date());
   const soundMenuRef = useRef(null);
+
+  const isRootDashboard = location.pathname === '/dashboard' || location.pathname === '/';
+  const pageTitle = useMemo(() => {
+    if (ROUTE_TITLES[location.pathname]) return ROUTE_TITLES[location.pathname];
+    if (location.pathname.startsWith('/students/')) return 'Student Profile';
+    if (location.pathname.startsWith('/teachers/')) return 'Teacher Profile';
+    if (location.pathname.startsWith('/syllabus/')) return 'Syllabus Details';
+    return 'Instique';
+  }, [location.pathname]);
 
   const isMac = useMemo(() => {
     return typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
@@ -80,25 +118,42 @@ export default function Topbar({ setMobileOpen }) {
   }, []);
 
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between h-14 px-4 lg:px-5 bg-white dark:bg-dark-surface border-b border-border dark:border-dark-border">
-      {/* Mobile Toggle */}
-      <div className="flex items-center gap-3">
-        <button
-          className="lg:hidden p-1.5 text-secondary dark:text-dark-text-secondary hover:text-deep dark:hover:text-dark-text rounded-lg hover:bg-surface dark:hover:bg-dark-hover transition-colors"
-          onClick={() => { setMobileOpen?.(true); uiSound.tap(); }}
-          title="Open menu"
-        >
-          <Menu size={18} />
-        </button>
+    <header className="sticky top-0 z-30 flex items-center justify-between h-14 px-3 sm:px-4 lg:px-5 bg-white dark:bg-dark-surface border-b border-border dark:border-dark-border">
+      {/* Left: Mobile brand on root, Back + title on inner pages */}
+      <div className="flex items-center gap-2">
+        {/* Mobile Root Header: Brand */}
+        {isRootDashboard ? (
+          <div className="flex items-center gap-2 md:hidden">
+            <div className="w-7 h-7 rounded-lg bg-primary dark:bg-emerald-500 flex items-center justify-center text-white shrink-0">
+              <BookOpen size={14} strokeWidth={2.2} />
+            </div>
+            <span className="text-sm font-bold text-deep dark:text-dark-text tracking-tight">Instique</span>
+          </div>
+        ) : (
+          /* Mobile Inner Header: Back button + Title */
+          <div className="flex items-center gap-1.5 md:hidden">
+            <button
+              type="button"
+              onClick={() => { uiSound.navigation?.(); navigate(-1); }}
+              className="p-1 -ml-1 text-secondary dark:text-dark-text-secondary hover:text-deep dark:hover:text-dark-text rounded-lg transition-colors"
+              aria-label="Go back"
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <span className="text-sm font-bold text-deep dark:text-dark-text tracking-tight truncate max-w-[170px]">
+              {pageTitle}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Right Side Actions */}
       <div className="flex items-center gap-2 sm:gap-3 ml-auto">
-        {/* Global Spotlight Search Trigger */}
+        {/* Global Spotlight Search Trigger — hidden on mobile */}
         <button
           type="button"
           onClick={() => { setSpotlightOpen(true); uiSound.modal(); }}
-          className="relative flex items-center justify-between w-52 sm:w-60 lg:w-64 px-3 py-1.5 bg-slate-50 dark:bg-[#101315] hover:bg-slate-100 dark:hover:bg-[#181D20] border border-border/80 dark:border-[#262A2E] rounded-lg text-xs text-secondary dark:text-slate-400 cursor-pointer transition-all group focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+          className="hidden md:relative md:flex items-center justify-between w-52 sm:w-60 lg:w-64 px-3 py-1.5 bg-slate-50 dark:bg-[#101315] hover:bg-slate-100 dark:hover:bg-[#181D20] border border-border/80 dark:border-[#262A2E] rounded-lg text-xs text-secondary dark:text-slate-400 cursor-pointer transition-all group focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
           title="Search students, teachers, events, pages... (Cmd/Ctrl + K)"
         >
           <div className="flex items-center gap-2 truncate">
@@ -110,8 +165,19 @@ export default function Topbar({ setMobileOpen }) {
           </kbd>
         </button>
 
-        {/* Date & Time Pill */}
-        <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-50 dark:bg-dark-card border border-border dark:border-dark-border rounded-lg text-xs font-medium text-secondary dark:text-dark-text-secondary">
+        {/* Mobile Search icon — visible only on mobile */}
+        <button
+          type="button"
+          onClick={() => { setSpotlightOpen(true); uiSound.modal(); }}
+          className="md:hidden p-1.5 text-secondary dark:text-dark-text-secondary hover:text-deep dark:hover:text-dark-text rounded-lg hover:bg-surface dark:hover:bg-dark-hover transition-colors"
+          title="Search"
+          aria-label="Search"
+        >
+          <Search size={17} strokeWidth={1.8} />
+        </button>
+
+        {/* Date & Time Pill — hidden on mobile */}
+        <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-50 dark:bg-dark-card border border-border dark:border-dark-border rounded-lg text-xs font-medium text-secondary dark:text-dark-text-secondary">
           <Calendar size={12} className="text-muted dark:text-dark-text-muted" />
           <span>{todayFormatted}</span>
           <span className="text-border dark:text-dark-border-strong">|</span>
@@ -119,8 +185,8 @@ export default function Topbar({ setMobileOpen }) {
           <span className="font-mono text-deep dark:text-dark-text font-semibold">{timeFormatted}</span>
         </div>
 
-        {/* UI Sound Controls */}
-        <div className="relative" ref={soundMenuRef}>
+        {/* UI Sound Controls — hidden on mobile */}
+        <div className="relative hidden md:block" ref={soundMenuRef}>
           <button
             type="button"
             className="p-1.5 text-secondary dark:text-dark-text-secondary hover:text-deep dark:hover:text-dark-text rounded-lg hover:bg-surface dark:hover:bg-dark-hover transition-colors flex items-center justify-center"
@@ -141,10 +207,12 @@ export default function Topbar({ setMobileOpen }) {
           )}
         </div>
 
-        {/* Theme Toggle */}
-        <ThemeToggle />
+        {/* Theme Toggle — hidden on mobile */}
+        <div className="hidden md:block">
+          <ThemeToggle />
+        </div>
 
-        {/* Notification Bell */}
+        {/* Notification Bell — always visible */}
         <button
           className="relative p-1.5 text-secondary dark:text-dark-text-secondary hover:text-deep dark:hover:text-dark-text rounded-lg hover:bg-surface dark:hover:bg-dark-hover transition-colors"
           onClick={() => navigate('/notices')}
@@ -158,13 +226,13 @@ export default function Topbar({ setMobileOpen }) {
           )}
         </button>
 
-        {/* Divider */}
-        <div className="w-px h-5 bg-border dark:bg-dark-border hidden sm:block" />
+        {/* Divider — hidden on mobile */}
+        <div className="w-px h-5 bg-border dark:bg-dark-border hidden md:block" />
 
         {/* User Profile Chip */}
         <button
           onClick={() => navigate('/settings')}
-          className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-lg hover:bg-surface dark:hover:bg-dark-hover cursor-pointer transition-colors"
+          className="flex items-center gap-2 pl-1 pr-1 md:pr-2 py-1 rounded-lg hover:bg-surface dark:hover:bg-dark-hover cursor-pointer transition-colors"
           title="Profile & settings"
         >
           <UserAvatar

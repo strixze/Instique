@@ -14,6 +14,7 @@ import Badge from '../../components/ui/Badge';
 import Modal from '../../components/ui/Modal';
 import Input from '../../components/ui/Input';
 import UserAvatar from '../../components/ui/UserAvatar';
+import Pagination from '../../components/ui/Pagination';
 import { leaveApi } from '../../api/leave.api';
 import { substitutionApi } from '../../api/substitution.api';
 
@@ -605,7 +606,89 @@ export default function Leaves() {
             </div>
           </div>
 
-          <div className="overflow-x-auto">
+          {/* ── Mobile Action Cards View (< 768px) ── */}
+          <div className="md:hidden divide-y divide-border/60 dark:divide-dark-border bg-white dark:bg-dark-card">
+            {loading ? (
+              [1, 2, 3].map((i) => (
+                <div key={i} className="p-4 space-y-2 animate-pulse">
+                  <div className="h-4 bg-surface dark:bg-dark-hover rounded w-1/2" />
+                  <div className="h-3 bg-surface dark:bg-dark-hover rounded w-3/4" />
+                </div>
+              ))
+            ) : filteredLeaves.length === 0 ? (
+              <div className="px-4 py-16 text-center text-xs text-muted dark:text-dark-text-muted">
+                No teacher leave requests found for this filter.
+              </div>
+            ) : (
+              filteredLeaves.map((row) => (
+                <div key={row._id} className="p-4 space-y-3 hover:bg-surface/30 dark:hover:bg-dark-hover/30 transition-colors">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-full bg-forest/10 dark:bg-emerald-500/20 text-forest dark:text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0">
+                        {row.requester?.name ? row.requester.name.charAt(0).toUpperCase() : 'T'}
+                      </div>
+                      <div>
+                        <p className="font-bold text-xs text-deep dark:text-dark-text">{row.requester?.name || '—'}</p>
+                        <p className="text-[11px] text-muted dark:text-dark-text-muted">{row.requester?.email || 'Teacher'}</p>
+                      </div>
+                    </div>
+                    <Badge color={statusColors[row.status] || 'gray'}>
+                      {row.status}
+                    </Badge>
+                  </div>
+
+                  <div className="text-xs space-y-1.5 pt-1">
+                    <div className="flex items-center gap-2 text-deep dark:text-dark-text font-medium">
+                      <Calendar size={13} className="text-muted shrink-0" />
+                      <span>{new Date(row.startDate).toLocaleDateString()} – {new Date(row.endDate).toLocaleDateString()}</span>
+                      <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-surface dark:bg-dark-elevated text-deep dark:text-dark-text border border-border dark:border-dark-border capitalize ml-auto">
+                        {leaveTypeLabels[row.type] || row.type}
+                      </span>
+                    </div>
+                    {row.reason && (
+                      <p className="text-[11px] text-muted dark:text-dark-text-muted line-clamp-2 pl-5">
+                        "{row.reason}"
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Touch-Friendly Action Buttons */}
+                  <div className="flex items-center gap-2 pt-2 border-t border-border/50 dark:border-dark-border/50">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleOpenDetails(row._id)}
+                      className="flex-1 text-xs justify-center min-h-[40px]"
+                    >
+                      <Eye size={13} className="mr-1" /> View
+                    </Button>
+                    {row.status === 'pending' && (
+                      <>
+                        <Button
+                          size="sm"
+                          onClick={() => handleStartApproval(row)}
+                          className="flex-1 text-xs justify-center bg-emerald-600 hover:bg-emerald-700 text-white min-h-[40px] shadow-xs"
+                        >
+                          <Check size={13} className="mr-1" /> Approve
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => { setRejectOpenLeave(row); setRejectionReason(''); }}
+                          className="text-xs px-3 text-rose-500 border-rose-500/30 hover:bg-rose-500/10 min-h-[40px]"
+                        >
+                          Reject
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* ── Desktop Table (>= 768px) ── */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm border-collapse">
               <thead>
                 <tr className="bg-surface/80 dark:bg-dark-elevated border-b border-border dark:border-dark-border">
@@ -708,30 +791,15 @@ export default function Leaves() {
             </table>
           </div>
 
-          {leavesMeta && leavesMeta.totalPages > 1 && (
-            <div className="p-3 border-t border-border dark:border-dark-border flex items-center justify-between text-xs text-muted dark:text-dark-text-muted">
-              <span>Showing page {leavesMeta.page} of {leavesMeta.totalPages} ({leavesMeta.total} total)</span>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={!leavesMeta.hasPrevPage || loading}
-                  onClick={() => setPage((p) => p - 1)}
-                  className="px-2 py-1 text-xs"
-                >
-                  <ChevronLeft size={14} />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={!leavesMeta.hasNextPage || loading}
-                  onClick={() => setPage((p) => p + 1)}
-                  className="px-2 py-1 text-xs"
-                >
-                  <ChevronRight size={14} />
-                </Button>
-              </div>
-            </div>
+          {leavesMeta && (
+            <Pagination
+              page={leavesMeta.page}
+              totalPages={leavesMeta.totalPages}
+              total={leavesMeta.total}
+              limit={leavesMeta.limit}
+              onPageChange={setPage}
+              loading={loading}
+            />
           )}
         </Card>
       )}
@@ -753,13 +821,13 @@ export default function Leaves() {
               />
             </div>
 
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <Filter size={14} className="text-muted dark:text-dark-text-muted" />
+            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none flex-nowrap pb-1 sm:pb-0 shrink-0">
+              <Filter size={14} className="text-muted dark:text-dark-text-muted shrink-0" />
               {['all', 'sick', 'casual', 'emergency', 'other'].map((t) => (
                 <button
                   key={t}
                   onClick={() => { setFilterType(t); setPage(1); }}
-                  className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
+                  className={`px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
                     filterType === t
                       ? 'bg-sage dark:bg-emerald-500/20 text-forest dark:text-emerald-400 font-bold'
                       : 'text-muted dark:text-dark-text-muted hover:bg-surface dark:hover:bg-dark-hover'
@@ -771,7 +839,129 @@ export default function Leaves() {
             </div>
           </div>
 
-          <div className="overflow-x-auto">
+          {/* ── Mobile List Cards (< 768px) ── */}
+          <div className="md:hidden divide-y divide-border/40 dark:divide-dark-border">
+            {loading ? (
+              <div className="p-8 text-center text-sm text-muted dark:text-dark-text-muted">
+                Loading student leave requests...
+              </div>
+            ) : filteredLeaves.length === 0 ? (
+              <div className="p-8 text-center text-sm text-muted dark:text-dark-text-muted">
+                No student leave requests found for this filter.
+              </div>
+            ) : (
+              filteredLeaves.map((row) => (
+                <div key={row._id} className="p-4 space-y-3 bg-white dark:bg-dark-card hover:bg-surface/30 dark:hover:bg-dark-hover/30 transition-colors">
+                  {/* Top Row: Student, Class/Parent & Status */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-sm shrink-0">
+                        {row.student?.firstName ? row.student.firstName.charAt(0).toUpperCase() : 'S'}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-deep dark:text-dark-text text-sm">
+                          {row.student ? `${row.student.firstName} ${row.student.lastName}` : (row.requester?.name || '—')}
+                        </p>
+                        <p className="text-xs text-muted dark:text-dark-text-muted">
+                          {row.student?.currentClass?.name ? `Class ${row.student.currentClass.name}${row.student.currentSection?.name ? ` - ${row.student.currentSection.name}` : ''}` : 'No Class'}
+                          {row.student?.admissionNo ? ` · Adm: ${row.student.admissionNo}` : ''}
+                        </p>
+                        {row.parent && (
+                          <p className="text-[11px] text-muted dark:text-dark-text-muted mt-0.5">
+                            Parent: {row.parent.firstName} {row.parent.lastName}
+                            {row.parent.contact?.phone ? ` (${row.parent.contact.phone})` : ''}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      <Badge color={statusColors[row.status] || 'gray'}>
+                        {row.status}
+                      </Badge>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-surface dark:bg-dark-elevated text-deep dark:text-dark-text border border-border dark:border-dark-border capitalize">
+                        {leaveTypeLabels[row.type] || row.type}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Dates & Reason */}
+                  <div className="bg-surface/50 dark:bg-dark-elevated/50 p-2.5 rounded-lg border border-border/40 dark:border-dark-border/40 text-xs space-y-1">
+                    <div className="flex items-center justify-between text-muted dark:text-dark-text-muted">
+                      <span>Duration:</span>
+                      <span className="font-semibold text-deep dark:text-dark-text">
+                        {new Date(row.startDate).toLocaleDateString()} – {new Date(row.endDate).toLocaleDateString()}
+                      </span>
+                    </div>
+                    {row.isPartialDay && (
+                      <div className="text-[10px] text-blue-500 dark:text-blue-400 font-semibold">
+                        Partial Day ({row.startTime} - {row.endTime})
+                      </div>
+                    )}
+                    {row.approverTeacher && (
+                      <div className="flex items-center justify-between text-muted dark:text-dark-text-muted text-[11px] pt-1 border-t border-border/30 dark:border-dark-border/30">
+                        <span>Class Teacher:</span>
+                        <span className="font-medium text-deep dark:text-dark-text">
+                          {row.approverTeacher.firstName} {row.approverTeacher.lastName}
+                        </span>
+                      </div>
+                    )}
+                    {row.reason && (
+                      <p className="text-muted dark:text-dark-text-muted text-[11px] pt-1 line-clamp-2">
+                        <span className="font-medium text-deep dark:text-dark-text">Reason: </span>
+                        {row.reason}
+                      </p>
+                    )}
+                    {row.document?.url && (
+                      <div className="pt-1">
+                        <a
+                          href={row.document.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1 text-[11px] text-forest dark:text-emerald-400 font-semibold hover:underline"
+                        >
+                          <Paperclip size={11} /> View Attachment
+                        </a>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex items-center gap-2 pt-2 border-t border-border/50 dark:border-dark-border/50">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleOpenDetails(row._id)}
+                      className="flex-1 text-xs justify-center min-h-[40px]"
+                    >
+                      <Eye size={13} className="mr-1" /> View
+                    </Button>
+                    {row.status === 'pending' && (
+                      <>
+                        <Button
+                          size="sm"
+                          onClick={() => handleDirectApproveStudent(row)}
+                          className="flex-1 text-xs justify-center bg-emerald-600 hover:bg-emerald-700 text-white min-h-[40px] shadow-xs"
+                        >
+                          <Check size={13} className="mr-1" /> Approve
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => { setRejectOpenLeave(row); setRejectionReason(''); }}
+                          className="text-xs px-3 text-rose-500 border-rose-500/30 hover:bg-rose-500/10 min-h-[40px]"
+                        >
+                          Reject
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* ── Desktop Table (>= 768px) ── */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm border-collapse">
               <thead>
                 <tr className="bg-surface/80 dark:bg-dark-elevated border-b border-border dark:border-dark-border">
@@ -926,30 +1116,15 @@ export default function Leaves() {
             </table>
           </div>
 
-          {leavesMeta && leavesMeta.totalPages > 1 && (
-            <div className="p-3 border-t border-border dark:border-dark-border flex items-center justify-between text-xs text-muted dark:text-dark-text-muted">
-              <span>Showing page {leavesMeta.page} of {leavesMeta.totalPages} ({leavesMeta.total} total)</span>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={!leavesMeta.hasPrevPage || loading}
-                  onClick={() => setPage((p) => p - 1)}
-                  className="px-2 py-1 text-xs"
-                >
-                  <ChevronLeft size={14} />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={!leavesMeta.hasNextPage || loading}
-                  onClick={() => setPage((p) => p + 1)}
-                  className="px-2 py-1 text-xs"
-                >
-                  <ChevronRight size={14} />
-                </Button>
-              </div>
-            </div>
+          {leavesMeta && (
+            <Pagination
+              page={leavesMeta.page}
+              totalPages={leavesMeta.totalPages}
+              total={leavesMeta.total}
+              limit={leavesMeta.limit}
+              onPageChange={setPage}
+              loading={loading}
+            />
           )}
         </Card>
       )}
@@ -963,13 +1138,13 @@ export default function Leaves() {
             <h3 className="text-sm font-bold text-deep dark:text-dark-text">
               Active & Historical Substitution Records
             </h3>
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <Filter size={14} className="text-muted dark:text-dark-text-muted" />
+            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none flex-nowrap pb-1 sm:pb-0 shrink-0">
+              <Filter size={14} className="text-muted dark:text-dark-text-muted shrink-0" />
               {['all', 'assigned', 'completed', 'cancelled'].map((st) => (
                 <button
                   key={st}
                   onClick={() => { setSubsStatusFilter(st); setSubsPage(1); }}
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                  className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
                     subsStatusFilter === st
                       ? 'bg-sage dark:bg-emerald-500/20 text-forest dark:text-emerald-400 font-bold'
                       : 'text-muted dark:text-dark-text-muted hover:bg-surface dark:hover:bg-dark-hover'
@@ -981,7 +1156,67 @@ export default function Leaves() {
             </div>
           </div>
 
-          <div className="overflow-x-auto">
+          {/* ── Mobile List Cards (< 768px) ── */}
+          <div className="md:hidden divide-y divide-border/40 dark:divide-dark-border">
+            {subsLoading ? (
+              <div className="p-8 text-center text-sm text-muted dark:text-dark-text-muted">
+                Loading substitutions...
+              </div>
+            ) : substitutions.length === 0 ? (
+              <div className="p-8 text-center text-sm text-muted dark:text-dark-text-muted">
+                No substitution records found for this filter.
+              </div>
+            ) : (
+              substitutions.map((sub) => (
+                <div key={sub._id} className="p-4 space-y-2.5 bg-white dark:bg-dark-card hover:bg-surface/30 dark:hover:bg-dark-hover/30 transition-colors">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="font-bold text-deep dark:text-dark-text text-sm">
+                        {new Date(sub.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                      </p>
+                      <p className="text-xs font-semibold text-forest dark:text-emerald-400">
+                        Period {sub.periodNo} ({sub.startTime} – {sub.endTime})
+                      </p>
+                    </div>
+                    <Badge color={statusColors[sub.status] || 'gray'}>{sub.status}</Badge>
+                  </div>
+
+                  <div className="bg-surface/50 dark:bg-dark-elevated/50 p-2.5 rounded-lg border border-border/40 dark:border-dark-border/40 text-xs space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted dark:text-dark-text-muted">Class & Subject:</span>
+                      <span className="font-semibold text-deep dark:text-dark-text">
+                        Class {sub.schoolClass?.name || '—'} - {sub.section?.name || '—'} ({sub.subject?.name || 'Subject'})
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted dark:text-dark-text-muted">Original Teacher:</span>
+                      <span className="text-deep dark:text-dark-text">
+                        {sub.originalTeacher ? `${sub.originalTeacher.firstName} ${sub.originalTeacher.lastName}` : '—'}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between pt-1 border-t border-border/30 dark:border-dark-border/30">
+                      <span className="text-muted dark:text-dark-text-muted">Substitute:</span>
+                      <span className="font-bold text-deep dark:text-dark-text">
+                        {sub.substituteTeacher ? (
+                          <span className="text-emerald-500 flex items-center gap-1">
+                            <CheckCircle size={13} />
+                            {sub.substituteTeacher.firstName} {sub.substituteTeacher.lastName}
+                          </span>
+                        ) : (
+                          <span className="text-amber-500 font-semibold flex items-center gap-1">
+                            <AlertCircle size={13} /> Unassigned
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* ── Desktop Table (>= 768px) ── */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm border-collapse">
               <thead>
                 <tr className="bg-surface/80 dark:bg-dark-elevated border-b border-border dark:border-dark-border">
@@ -1046,30 +1281,15 @@ export default function Leaves() {
             </table>
           </div>
 
-          {subsMeta && subsMeta.totalPages > 1 && (
-            <div className="p-3 border-t border-border dark:border-dark-border flex items-center justify-between text-xs text-muted dark:text-dark-text-muted">
-              <span>Showing page {subsMeta.page} of {subsMeta.totalPages} ({subsMeta.total} total)</span>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={!subsMeta.hasPrevPage || subsLoading}
-                  onClick={() => setSubsPage((p) => p - 1)}
-                  className="px-2 py-1 text-xs"
-                >
-                  <ChevronLeft size={14} />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={!subsMeta.hasNextPage || subsLoading}
-                  onClick={() => setSubsPage((p) => p + 1)}
-                  className="px-2 py-1 text-xs"
-                >
-                  <ChevronRight size={14} />
-                </Button>
-              </div>
-            </div>
+          {subsMeta && (
+            <Pagination
+              page={subsMeta.page}
+              totalPages={subsMeta.totalPages}
+              total={subsMeta.total}
+              limit={subsMeta.limit}
+              onPageChange={setSubsPage}
+              loading={subsLoading}
+            />
           )}
         </Card>
       )}

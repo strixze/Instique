@@ -52,7 +52,7 @@ export default function Modal({
       <div
         className={`relative w-full ${
           sizes[size] || sizes.md
-        } bg-white dark:bg-dark-elevated border border-border dark:border-dark-border rounded-2xl shadow-modal my-8 animate-scale-in z-10 flex flex-col max-h-[88vh]`}
+        } max-md:max-w-none max-md:fixed max-md:bottom-0 max-md:left-0 max-md:right-0 max-md:rounded-b-none max-md:rounded-t-2xl max-md:my-0 bg-white dark:bg-dark-elevated border border-border dark:border-dark-border rounded-2xl shadow-modal my-8 animate-scale-in z-10 flex flex-col max-h-[88vh] max-md:max-h-[92vh]`}
       >
         {/* Header */}
         <div className="flex items-start justify-between px-6 py-4 border-b border-border/80 dark:border-dark-border shrink-0">

@@ -1,6 +1,7 @@
 import { ChevronUp, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Button from './Button';
+import Pagination from './Pagination';
 import { uiSound } from '../../utils/soundManager';
 
 export default function DataTable({
@@ -13,6 +14,7 @@ export default function DataTable({
   onSearch,
   searchPlaceholder = 'Search records...',
   emptyMessage = 'No records found',
+  renderMobileCard,
   className = '',
 }) {
   const [sortField, setSortField] = useState('');
@@ -48,6 +50,10 @@ export default function DataTable({
     );
   };
 
+  const primaryCol = columns[0];
+  const actionCol = columns.find((c) => c.key === 'actions' || c.key === 'action') || (columns.length > 1 && columns[columns.length - 1].align === 'right' ? columns[columns.length - 1] : null);
+  const secondaryCols = columns.filter((c) => c !== primaryCol && c !== actionCol);
+
   return (
     <div className={`bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl overflow-hidden shadow-2xs ${className}`}>
       {onSearch && (
@@ -64,7 +70,58 @@ export default function DataTable({
         </div>
       )}
 
-      <div className="overflow-x-auto">
+      {/* ── Mobile Card View (< 768px) ── */}
+      <div className="md:hidden divide-y divide-border/60 dark:divide-dark-border bg-white dark:bg-dark-card">
+        {loading ? (
+          [1, 2, 3].map((i) => (
+            <div key={i} className="p-3.5 space-y-2 animate-pulse">
+              <div className="h-4 bg-slate-100 dark:bg-dark-hover rounded w-2/3" />
+              <div className="h-3 bg-slate-100 dark:bg-dark-hover rounded w-1/2" />
+            </div>
+          ))
+        ) : data?.length === 0 ? (
+          <div className="px-4 py-12 text-center text-xs text-muted dark:text-dark-text-muted">
+            {emptyMessage}
+          </div>
+        ) : (
+          data?.map((row, i) => {
+            if (renderMobileCard) {
+              return <div key={row._id || i}>{renderMobileCard(row, i)}</div>;
+            }
+            return (
+              <div key={row._id || i} className="p-3.5 space-y-2 hover:bg-slate-50/40 dark:hover:bg-dark-hover/40 transition-colors">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="font-bold text-xs text-deep dark:text-dark-text flex-1 min-w-0">
+                    {primaryCol?.render ? primaryCol.render(row) : row[primaryCol?.key] ?? '—'}
+                  </div>
+                  {actionCol && (
+                    <div className="shrink-0 -mt-0.5">
+                      {actionCol.render ? actionCol.render(row) : null}
+                    </div>
+                  )}
+                </div>
+                {secondaryCols.length > 0 && (
+                  <div className="grid grid-cols-2 gap-2 pt-1.5 border-t border-border/40 dark:border-dark-border/40 text-xs">
+                    {secondaryCols.map((col) => (
+                      <div key={col.key} className="min-w-0">
+                        <span className="text-muted dark:text-dark-text-muted block text-[10px] uppercase font-semibold tracking-wider">
+                          {col.label}
+                        </span>
+                        <div className="text-secondary dark:text-dark-text-secondary font-medium mt-0.5 text-xs truncate">
+                          {col.render ? col.render(row) : row[col.key] ?? '—'}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* ── Desktop Table View (>= 768px) ── */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-left border-collapse text-xs">
           <thead>
             <tr className="border-b border-border dark:border-dark-border bg-slate-50/80 dark:bg-dark-elevated">
@@ -123,36 +180,15 @@ export default function DataTable({
         </table>
       </div>
 
-      {meta && meta.totalPages > 1 && (
-        <div className="flex items-center justify-between px-4 py-3 border-t border-border dark:border-dark-border bg-slate-50/40 dark:bg-dark-elevated text-xs">
-          <span className="text-muted dark:text-dark-text-muted">
-            Showing {((meta.page - 1) * meta.limit) + (meta.total > 0 ? 1 : 0)} to{' '}
-            {Math.min(meta.page * meta.limit, meta.total)} of {meta.total} entries
-          </span>
-          <div className="flex items-center gap-1.5">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={loading || !meta.hasPrevPage}
-              onClick={() => onPageChange(meta.page - 1)}
-              className="p-1 px-2 text-xs"
-            >
-              <ChevronLeft size={14} />
-            </Button>
-            <span className="font-medium text-secondary dark:text-dark-text-secondary px-1">
-              Page {meta.page} of {meta.totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={loading || !meta.hasNextPage}
-              onClick={() => onPageChange(meta.page + 1)}
-              className="p-1 px-2 text-xs"
-            >
-              <ChevronRight size={14} />
-            </Button>
-          </div>
-        </div>
+      {meta && (
+        <Pagination
+          page={meta.page}
+          totalPages={meta.totalPages}
+          total={meta.total}
+          limit={meta.limit}
+          onPageChange={onPageChange}
+          loading={loading}
+        />
       )}
     </div>
   );
