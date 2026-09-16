@@ -1,8 +1,8 @@
-import { Bell, BookOpen, Calendar, Clock, Menu, Search, Volume2, VolumeX, ChevronLeft } from 'lucide-react';
+import { Bell, BookOpen, Calendar, Clock, Menu, Search, Volume2, VolumeX } from 'lucide-react';
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useUserStore } from '../../store/userStore';
 import { notificationApi } from '../../api/notification.api';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import UserAvatar from '../ui/UserAvatar';
 import ThemeToggle from '../ui/ThemeToggle';
 import SpotlightSearch from '../ui/SpotlightSearch';
@@ -10,53 +10,15 @@ import SoundSettings from '../ui/SoundSettings';
 import { useUISound } from '../../services/sound';
 import { uiSound } from '../../utils/soundManager';
 
-const ROUTE_TITLES = {
-  '/dashboard': 'Dashboard',
-  '/students': 'Students',
-  '/teachers': 'Teachers',
-  '/academic': 'Classes',
-  '/syllabus': 'Syllabus',
-  '/timetable': 'Timetable',
-  '/timetable-config': 'Timetable Config',
-  '/attendance': 'Attendance',
-  '/homework': 'Homework',
-  '/exams': 'Exams',
-  '/marks-entry': 'Marks Entry',
-  '/leaderboard': 'Leaderboard',
-  '/admissions': 'Admissions',
-  '/fees': 'Fees',
-  '/leaves': 'Leaves',
-  '/notices': 'Notices',
-  '/events': 'Events',
-  '/complaints': 'Complaints',
-  '/parent-meetings': 'Parent Meetings',
-  '/reports': 'Reports',
-  '/roles': 'Roles & Permissions',
-  '/settings': 'Settings',
-  '/schools': 'Schools',
-  '/subscriptions': 'Subscriptions',
-  '/audit-logs': 'Audit Logs',
-};
-
 export default function Topbar({ setMobileOpen }) {
   const user = useUserStore((s) => s.user);
   const navigate = useNavigate();
-  const location = useLocation();
   const { enabled, volume } = useUISound();
   const [unreadCount, setUnreadCount] = useState(0);
   const [spotlightOpen, setSpotlightOpen] = useState(false);
   const [soundMenuOpen, setSoundMenuOpen] = useState(false);
   const [now, setNow] = useState(new Date());
   const soundMenuRef = useRef(null);
-
-  const isRootDashboard = location.pathname === '/dashboard' || location.pathname === '/';
-  const pageTitle = useMemo(() => {
-    if (ROUTE_TITLES[location.pathname]) return ROUTE_TITLES[location.pathname];
-    if (location.pathname.startsWith('/students/')) return 'Student Profile';
-    if (location.pathname.startsWith('/teachers/')) return 'Teacher Profile';
-    if (location.pathname.startsWith('/syllabus/')) return 'Syllabus Details';
-    return 'Instique';
-  }, [location.pathname]);
 
   const isMac = useMemo(() => {
     return typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
@@ -119,32 +81,19 @@ export default function Topbar({ setMobileOpen }) {
 
   return (
     <header className="sticky top-0 z-30 flex items-center justify-between h-14 px-3 sm:px-4 lg:px-5 bg-white dark:bg-dark-surface border-b border-border dark:border-dark-border">
-      {/* Left: Mobile brand on root, Back + title on inner pages */}
+      {/* Left: Instique brand on mobile (consistent across all sections) */}
       <div className="flex items-center gap-2">
-        {/* Mobile Root Header: Brand */}
-        {isRootDashboard ? (
-          <div className="flex items-center gap-2 md:hidden">
-            <div className="w-7 h-7 rounded-lg bg-primary dark:bg-emerald-500 flex items-center justify-center text-white shrink-0">
-              <BookOpen size={14} strokeWidth={2.2} />
-            </div>
-            <span className="text-sm font-bold text-deep dark:text-dark-text tracking-tight">Instique</span>
+        <button
+          type="button"
+          onClick={() => { uiSound.tap?.(); navigate('/dashboard'); }}
+          className="flex items-center gap-2 md:hidden cursor-pointer select-none text-left"
+          aria-label="Instique Home"
+        >
+          <div className="w-7 h-7 rounded-lg bg-primary dark:bg-emerald-500 flex items-center justify-center text-white shrink-0">
+            <BookOpen size={14} strokeWidth={2.2} />
           </div>
-        ) : (
-          /* Mobile Inner Header: Back button + Title */
-          <div className="flex items-center gap-1.5 md:hidden">
-            <button
-              type="button"
-              onClick={() => { uiSound.navigation?.(); navigate(-1); }}
-              className="p-1 -ml-1 text-secondary dark:text-dark-text-secondary hover:text-deep dark:hover:text-dark-text rounded-lg transition-colors"
-              aria-label="Go back"
-            >
-              <ChevronLeft size={20} />
-            </button>
-            <span className="text-sm font-bold text-deep dark:text-dark-text tracking-tight truncate max-w-[170px]">
-              {pageTitle}
-            </span>
-          </div>
-        )}
+          <span className="text-sm font-bold text-deep dark:text-dark-text tracking-tight">Instique</span>
+        </button>
       </div>
 
       {/* Right Side Actions */}
@@ -207,8 +156,8 @@ export default function Topbar({ setMobileOpen }) {
           )}
         </div>
 
-        {/* Theme Toggle — hidden on mobile */}
-        <div className="hidden md:block">
+        {/* Theme Toggle — visible on all devices */}
+        <div className="flex items-center shrink-0">
           <ThemeToggle />
         </div>
 

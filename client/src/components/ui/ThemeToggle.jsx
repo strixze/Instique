@@ -27,7 +27,7 @@ export default function ThemeToggle() {
       tabIndex={0}
       onClick={handleToggle}
       onKeyDown={handleKeyDown}
-      className="group relative flex items-center justify-between h-8 px-2 rounded-full border border-slate-200/80 dark:border-[#262A2E] bg-slate-100/90 dark:bg-[#101315] hover:bg-slate-200/70 dark:hover:bg-[#181D20] active:bg-slate-200 dark:active:bg-[#15191C] active:scale-[0.98] transition-all duration-200 ease-in-out cursor-pointer select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[#34D399]/60"
+      className="group relative flex items-center justify-between shrink-0 h-8 px-2 rounded-full border border-slate-200/80 dark:border-[#262A2E] bg-slate-100/90 dark:bg-[#101315] hover:bg-slate-200/70 dark:hover:bg-[#181D20] active:bg-slate-200 dark:active:bg-[#15191C] active:scale-[0.98] transition-all duration-200 ease-in-out cursor-pointer select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[#34D399]/60"
     >
       {/* Sun Icon (Left) */}
       <span
