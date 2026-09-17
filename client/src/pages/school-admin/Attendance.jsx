@@ -11,6 +11,7 @@ import Select from '../../components/ui/Select';
 import { attendanceApi } from '../../api/attendance.api';
 import { academicApi } from '../../api/academic.api';
 import UserAvatar from '../../components/ui/UserAvatar';
+import Pagination from '../../components/ui/Pagination';
 
 const STATUS_OPTIONS = [
   { key: 'present', label: 'P', color: 'bg-emerald-600 text-white', hoverColor: 'hover:bg-emerald-700' },
@@ -309,31 +310,31 @@ export default function Attendance() {
           ) : studentList.length > 0 ? (
             <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl overflow-hidden shadow-2xs">
               {/* Summary Header */}
-              <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-b border-border dark:border-dark-border bg-surface/60 dark:bg-dark-elevated/60">
-                <div className="flex items-center gap-4 text-xs font-medium">
-                  <span className="text-secondary dark:text-dark-text-secondary">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 px-4 py-3 border-b border-border dark:border-dark-border bg-surface/60 dark:bg-dark-elevated/60">
+                <div className="flex items-center gap-3 text-xs font-medium overflow-x-auto scrollbar-none pb-0.5">
+                  <span className="text-secondary dark:text-dark-text-secondary shrink-0">
                     Total: <strong className="text-deep dark:text-dark-text font-bold">{studentList.length}</strong>
                   </span>
-                  <span className="text-emerald-700 dark:text-emerald-400">
+                  <span className="text-emerald-700 dark:text-emerald-400 shrink-0">
                     Present: <strong className="text-emerald-800 dark:text-emerald-300 font-bold">{summaryPresent}</strong>
                   </span>
-                  <span className="text-rose-700 dark:text-rose-400">
+                  <span className="text-rose-700 dark:text-rose-400 shrink-0">
                     Absent: <strong className="text-rose-800 dark:text-rose-300 font-bold">{summaryAbsent}</strong>
                   </span>
-                  <span className="text-amber-700 dark:text-amber-400">
+                  <span className="text-amber-700 dark:text-amber-400 shrink-0">
                     Late: <strong className="text-amber-800 dark:text-amber-300 font-bold">{summaryLate}</strong>
                   </span>
-                  <span className="text-blue-700 dark:text-blue-400">
+                  <span className="text-blue-700 dark:text-blue-400 shrink-0">
                     Leave: <strong className="text-blue-800 dark:text-blue-300 font-bold">{summaryLeave}</strong>
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0">
                   {existingRecord && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20">
-                      Editing existing record
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20">
+                      Editing
                     </span>
                   )}
-                  <div className="flex items-center gap-1 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-lg p-0.5">
+                  <div className="flex items-center gap-1 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-lg p-0.5 shrink-0">
                     {STATUS_OPTIONS.map((opt) => (
                       <button
                         key={opt.key}
@@ -347,8 +348,60 @@ export default function Attendance() {
                 </div>
               </div>
 
-              {/* Student Rows Table */}
-              <div className="max-h-[500px] overflow-y-auto scrollbar-thin">
+              {/* Mobile Student Roster (< 768px) */}
+              <div className="md:hidden divide-y divide-border/50 dark:divide-dark-border max-h-[60vh] overflow-y-auto">
+                {studentList.map((student, idx) => {
+                  const currentStatus = studentStatuses[student._id] || 'present';
+                  return (
+                    <div key={student._id} className="p-3 space-y-2 hover:bg-surface/30 dark:hover:bg-dark-hover/30 transition-colors">
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-[10px] font-mono text-muted dark:text-dark-text-muted w-5 shrink-0">{idx + 1}</span>
+                        <UserAvatar
+                          type="student"
+                          gender={student.gender}
+                          id={student._id}
+                          admissionNo={student.admissionNo}
+                          name={`${student.firstName} ${student.lastName}`}
+                          size="sm"
+                          className="shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-xs text-deep dark:text-dark-text truncate">
+                            {student.firstName} {student.lastName}
+                          </p>
+                          <p className="text-[10px] font-mono text-muted dark:text-dark-text-muted mt-0.5">
+                            {student.admissionNo || student.rollNo || 'No ID'}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Touch-Friendly Status Segmented Selector */}
+                      <div className="grid grid-cols-4 gap-1.5 pt-0.5">
+                        {STATUS_OPTIONS.map((opt) => {
+                          const isSelected = currentStatus === opt.key;
+                          return (
+                            <button
+                              key={opt.key}
+                              type="button"
+                              onClick={() => setStudentStatus(student._id, opt.key)}
+                              className={`py-1.5 px-1 rounded-lg text-xs font-bold transition-all text-center border min-h-[36px] flex items-center justify-center ${
+                                isSelected
+                                  ? `${opt.color} border-transparent shadow-2xs font-extrabold`
+                                  : 'bg-white dark:bg-dark-elevated text-secondary dark:text-dark-text-secondary border-border dark:border-dark-border hover:bg-surface'
+                              }`}
+                            >
+                              {opt.label === 'P' ? 'Present' : opt.label === 'A' ? 'Absent' : opt.label === 'L' ? 'Late' : 'Leave'}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Desktop Student Rows Table (>= 768px) */}
+              <div className="hidden md:block max-h-[500px] overflow-y-auto scrollbar-thin">
                 <table className="w-full text-left border-separate border-spacing-0 text-xs">
                   <thead className="sticky top-0 z-20">
                     <tr className="text-secondary dark:text-dark-text-secondary uppercase font-semibold">
@@ -403,15 +456,15 @@ export default function Attendance() {
                 </table>
               </div>
 
-              {/* Submit footer */}
-              <div className="px-4 py-3 border-t border-border dark:border-dark-border bg-surface/30 dark:bg-dark-elevated/40 flex items-center justify-between">
-                <p className="text-xs text-muted dark:text-dark-text-muted">
+              {/* Submit footer - sticky on mobile */}
+              <div className="px-4 py-3 border-t border-border dark:border-dark-border bg-surface/90 dark:bg-dark-elevated/90 backdrop-blur-xs flex items-center justify-between sticky bottom-16 md:static z-20">
+                <p className="text-xs text-muted dark:text-dark-text-muted truncate max-w-[180px] sm:max-w-none">
                   {existingRecord
-                    ? `Last recorded on ${new Date(existingRecord.updatedAt || existingRecord.createdAt).toLocaleString()}`
-                    : 'No attendance saved for this date yet'}
+                    ? `Recorded: ${new Date(existingRecord.updatedAt || existingRecord.createdAt).toLocaleDateString()}`
+                    : 'Not saved yet'}
                 </p>
-                <Button onClick={handleSubmitAttendance} loading={submitting} className="text-xs gap-1.5">
-                  <Send size={13} /> {existingRecord ? 'Update Attendance' : 'Submit Attendance'}
+                <Button onClick={handleSubmitAttendance} loading={submitting} className="text-xs gap-1.5 shrink-0 shadow-sm">
+                  <Send size={13} /> {existingRecord ? 'Update Attendance' : 'Save Attendance'}
                 </Button>
               </div>
             </div>
@@ -514,13 +567,14 @@ export default function Attendance() {
             </div>
 
             {meta && (
-              <div className="flex items-center justify-between px-3.5 py-2.5 border-t border-border dark:border-dark-border bg-surface/30 dark:bg-dark-elevated/40">
-                <span className="text-xs text-muted dark:text-dark-text-muted">Showing {((meta.page - 1) * meta.limit) + (meta.total > 0 ? 1 : 0)} to {Math.min(meta.page * meta.limit, meta.total)} of {meta.total} entries</span>
-                <div className="flex items-center gap-1.5">
-                  <Button variant="outline" size="sm" disabled={loading || !meta.hasPrevPage} onClick={() => setPage(meta.page - 1)} className="p-1 px-2 text-xs"><ChevronLeft size={14} /></Button>
-                  <Button variant="outline" size="sm" disabled={loading || !meta.hasNextPage} onClick={() => setPage(meta.page + 1)} className="p-1 px-2 text-xs"><ChevronRight size={14} /></Button>
-                </div>
-              </div>
+              <Pagination
+                page={meta.page}
+                totalPages={meta.totalPages}
+                total={meta.total}
+                limit={meta.limit}
+                onPageChange={setPage}
+                loading={loading}
+              />
             )}
           </div>
         </div>

@@ -18,6 +18,7 @@ import { academicApi } from '../../api/academic.api';
 import { feeApi } from '../../api/fee.api';
 import BulkImportModal from '../../components/ui/BulkImportModal';
 import UserAvatar from '../../components/ui/UserAvatar';
+import Pagination from '../../components/ui/Pagination';
 
 /* ──────────────────────── Constants ──────────────────────── */
 
@@ -455,16 +456,16 @@ export default function Students() {
           </div>
         </div>
 
-        <div className="pt-2 border-t border-border/70 dark:border-dark-border flex flex-wrap items-center gap-1.5 text-xs">
-          <span className="font-semibold text-muted dark:text-dark-text-muted text-[11px] uppercase tracking-wide mr-1">Status:</span>
-          <div className="flex flex-wrap gap-1">
+        <div className="pt-2 border-t border-border/70 dark:border-dark-border flex items-center gap-1.5 text-xs overflow-x-auto scrollbar-none">
+          <span className="font-semibold text-muted dark:text-dark-text-muted text-[11px] uppercase tracking-wide mr-1 shrink-0">Status:</span>
+          <div className="flex items-center gap-1 shrink-0">
             {STATUS_PILLS.map((pill) => {
               const isActive = statusFilter === pill.value;
               return (
                 <button
                   key={pill.value}
                   onClick={() => { setStatusFilter(pill.value); setPage(1); }}
-                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${isActive
+                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-all whitespace-nowrap shrink-0 ${isActive
                     ? 'bg-forest dark:bg-emerald-500 text-white dark:text-gray-900 shadow-2xs'
                     : 'text-secondary dark:text-dark-text-secondary hover:bg-surface dark:hover:bg-dark-hover hover:text-deep dark:hover:text-dark-text'
                     }`}
@@ -477,9 +478,87 @@ export default function Students() {
         </div>
       </div>
 
-      {/* Data Table */}
+      {/* Data Table / Mobile List */}
       <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl overflow-hidden shadow-2xs">
-        <div className="overflow-x-auto">
+        {/* ── Mobile List Representation (< 768px) ── */}
+        <div className="md:hidden divide-y divide-border/60 dark:divide-dark-border">
+          {loading ? (
+            [1, 2, 3, 4].map((i) => (
+              <div key={i} className="p-3.5 space-y-2 animate-pulse">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-surface dark:bg-dark-hover shrink-0" />
+                  <div className="space-y-1.5 flex-1">
+                    <div className="h-3.5 bg-surface dark:bg-dark-hover rounded w-1/2" />
+                    <div className="h-3 bg-surface dark:bg-dark-hover rounded w-1/3" />
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : data.length === 0 ? (
+            <div className="px-4 py-12 text-center text-xs text-muted dark:text-dark-text-muted">
+              No students found matching the selected criteria.
+            </div>
+          ) : (
+            data.map((row) => {
+              const parents = row.parents || [];
+              const primaryParent = parents.find((p) => p.isPrimary) || parents[0];
+              const classNameSection = `${classMap[row.currentClass?._id || row.currentClass] || '—'} ${sectionMap[row.currentSection?._id || row.currentSection] ? `(${sectionMap[row.currentSection?._id || row.currentSection]})` : ''}`;
+
+              return (
+                <div
+                  key={row._id}
+                  onClick={() => navigate(`/students/${row._id}`)}
+                  className="flex items-center gap-3 p-3.5 hover:bg-surface/50 dark:hover:bg-dark-hover/50 transition-colors cursor-pointer active:bg-surface/70"
+                >
+                  <UserAvatar
+                    type="student"
+                    gender={row.gender}
+                    id={row._id}
+                    admissionNo={row.admissionNo}
+                    name={`${row.firstName} ${row.lastName}`}
+                    size="md"
+                    className="shrink-0 ring-1 ring-border/50 dark:ring-dark-border"
+                  />
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-1.5">
+                      <p className="font-bold text-sm text-deep dark:text-dark-text truncate">
+                        {row.firstName} {row.lastName}
+                      </p>
+                      <ChevronRight size={16} className="text-muted/60 shrink-0" />
+                    </div>
+
+                    <p className="text-xs font-mono text-muted dark:text-dark-text-muted mt-0.5">
+                      {row.admissionNo || 'No ID'}
+                    </p>
+
+                    <p className="text-xs text-secondary dark:text-dark-text-secondary mt-0.5 font-medium">
+                      {classNameSection}
+                    </p>
+
+                    {primaryParent && (
+                      <p className="text-[11px] text-muted dark:text-dark-text-muted truncate mt-0.5">
+                        Parent: <span className="text-secondary dark:text-dark-text-secondary">{primaryParent.firstName} {primaryParent.lastName}</span>
+                      </p>
+                    )}
+
+                    <div className="mt-1.5 flex items-center gap-2">
+                      {renderStatusBadge(row.status)}
+                      {row.contact?.phone && (
+                        <span className="text-[10px] text-muted dark:text-dark-text-muted">
+                          {row.contact.phone}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* ── Desktop Table (>= 768px) ── */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-border dark:border-dark-border bg-slate-50/80 dark:bg-dark-elevated">
@@ -605,29 +684,14 @@ export default function Students() {
         </div>
 
         {meta && (
-          <div className="flex items-center justify-between px-3.5 py-2.5 border-t border-border bg-surface/30">
-            <span className="text-xs text-muted">
-              Showing {((meta.page - 1) * meta.limit) + (meta.total > 0 ? 1 : 0)} to {Math.min(meta.page * meta.limit, meta.total)} of {meta.total} entries
-            </span>
-            <div className="flex items-center gap-1.5">
-              <Button variant="outline" size="sm" disabled={loading || !meta.hasPrevPage} onClick={() => setPage(meta.page - 1)} className="p-1 px-2 text-xs">
-                <ChevronLeft size={14} />
-              </Button>
-              {Array.from({ length: meta.totalPages || 1 }, (_, idx) => idx + 1).map((pageNum) => (
-                <button
-                  key={pageNum}
-                  onClick={() => setPage(pageNum)}
-                  className={`w-7 h-7 rounded-md text-xs font-semibold transition-all ${meta.page === pageNum ? 'bg-forest text-white' : 'bg-white border border-border text-secondary hover:bg-surface'
-                    }`}
-                >
-                  {pageNum}
-                </button>
-              ))}
-              <Button variant="outline" size="sm" disabled={loading || !meta.hasNextPage} onClick={() => setPage(meta.page + 1)} className="p-1 px-2 text-xs">
-                <ChevronRight size={14} />
-              </Button>
-            </div>
-          </div>
+          <Pagination
+            page={meta.page}
+            totalPages={meta.totalPages}
+            total={meta.total}
+            limit={meta.limit}
+            onPageChange={setPage}
+            loading={loading}
+          />
         )}
       </div>
 

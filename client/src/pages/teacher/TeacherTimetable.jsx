@@ -8,6 +8,7 @@ import { useUserStore } from '../../store/userStore';
 import { timetableApi } from '../../api/timetable.api';
 import { getSubjectStyle, DEFAULT_PERIOD_TIMES } from '../../utils/timetableTheme';
 import { generateUniversalTimetablePdf } from '../../utils/timetablePdf';
+import MobileTimetableSchedule from '../../components/timetable/MobileTimetableSchedule';
 
 const DAYS = [
   { value: 1, label: 'Monday' },
@@ -133,7 +134,12 @@ export default function TeacherTimetable() {
           <p className="text-xs text-muted dark:text-slate-400 mt-1">You are not assigned to any timetable periods currently.</p>
         </div>
       ) : (
-        <div className="bg-white dark:bg-[#101315] border border-border dark:border-white/10 rounded-2xl p-5 shadow-2xl overflow-x-auto print:overflow-visible print:border-none print:shadow-none print:p-0 space-y-4 print:space-y-1">
+        <>
+          {/* Mobile Vertical Day-by-Day Schedule (< 768px) */}
+          <MobileTimetableSchedule schedule={schedule} maxPeriods={maxPeriods} role="teacher" />
+
+          {/* Desktop Table Grid (>= 768px) */}
+          <div className="hidden md:block bg-white dark:bg-[#101315] border border-border dark:border-white/10 rounded-2xl p-5 shadow-2xl overflow-x-auto print:overflow-visible print:border-none print:shadow-none print:p-0 space-y-4 print:space-y-1">
           <table className="w-full text-sm border-collapse min-w-[720px] print:min-w-full">
             <thead>
               <tr className="border-b border-border/60 dark:border-white/10 bg-surface/70 dark:bg-[#101315] text-secondary dark:text-slate-400 uppercase tracking-wider text-xs print:bg-indigo-50/80 print:text-indigo-950 print:border-indigo-200">
@@ -221,6 +227,7 @@ export default function TeacherTimetable() {
             <span className="font-bold text-forest dark:text-emerald-400">Note:</span> Timetable is subject to change. Please check regularly for updates.
           </div>
         </div>
+      </>
       )}
     </div>
   );

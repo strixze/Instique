@@ -13,6 +13,7 @@ import Modal from '../../components/ui/Modal';
 import Select from '../../components/ui/Select';
 import Input from '../../components/ui/Input';
 import Badge from '../../components/ui/Badge';
+import Pagination from '../../components/ui/Pagination';
 import { timetableApi } from '../../api/timetable.api';
 import { academicApi } from '../../api/academic.api';
 import { teacherApi } from '../../api/teacher.api';
@@ -1298,21 +1299,14 @@ export default function Timetable() {
             </div>
 
             {meta && (
-              <div className="flex items-center justify-between px-3.5 py-2.5 border-t border-border bg-surface/30">
-                <span className="text-xs text-muted">
-                  Showing {((meta.page - 1) * meta.limit) + (meta.total > 0 ? 1 : 0)} to {Math.min(meta.page * meta.limit, meta.total)} of {meta.total} entries
-                </span>
-                <div className="flex items-center gap-1.5">
-                  <Button variant="outline" size="sm" disabled={loading || !meta.hasPrevPage} onClick={() => setPage(meta.page - 1)} className="p-1 px-2 text-xs"><ChevronLeft size={14} /></Button>
-                  {Array.from({ length: meta.totalPages || 1 }, (_, idx) => idx + 1).map((pageNum) => (
-                    <button key={pageNum} onClick={() => setPage(pageNum)}
-                      className={`w-7 h-7 rounded-md text-xs font-semibold transition-all ${meta.page === pageNum ? 'bg-forest text-white' : 'bg-white border border-border text-secondary hover:bg-surface'}`}>
-                      {pageNum}
-                    </button>
-                  ))}
-                  <Button variant="outline" size="sm" disabled={loading || !meta.hasNextPage} onClick={() => setPage(meta.page + 1)} className="p-1 px-2 text-xs"><ChevronRight size={14} /></Button>
-                </div>
-              </div>
+              <Pagination
+                page={meta.page}
+                totalPages={meta.totalPages}
+                total={meta.total}
+                limit={meta.limit}
+                onPageChange={setPage}
+                loading={loading}
+              />
             )}
           </div>
         </div>

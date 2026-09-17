@@ -304,6 +304,379 @@ html.theme-transition *::after {
   border-color: rgba(99, 102, 241, 0.25) !important;
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   MOBILE RESPONSIVE DESIGN
+   All rules scoped behind media queries — desktop is untouched.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Global Safety ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* ── Tablet: ≤ 1024px ── */
+@media (max-width: 1024px) {
+  /* Reduce large paddings */
+  .p-6 { padding: 1.125rem; }
+  .px-6 { padding-left: 1.125rem; padding-right: 1.125rem; }
+
+  /* Large stat values scale down slightly */
+  .text-3xl { font-size: 1.625rem; }
+}
+
+/* ── Mobile: ≤ 767px ── */
+@media (max-width: 767px) {
+  /* ── Root Overflow Prevention ── */
+  html, body, #root {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  /* ── Mobile Bottom Nav safe-area ── */
+  .mobile-bottom-nav {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* ── Page Content Padding ── */
+  main > div {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    padding-bottom: 7.5rem !important;
+  }
+
+  /* ── Typography Scale ── */
+  h1, .text-2xl { font-size: 1.25rem !important; line-height: 1.6rem; }
+  .text-xl { font-size: 1.125rem !important; }
+  .text-3xl { font-size: 1.375rem !important; }
+
+  /* ── Grid Overrides ──
+     Convert multi-col grids to mobile-appropriate layouts */
+
+  /* 4-col → 2-col (KPI / stat cards) */
+  .grid.xl\:grid-cols-4,
+  .grid.lg\:grid-cols-4,
+  .grid.sm\:grid-cols-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.625rem !important;
+  }
+
+  /* 3-col → 1-col (dashboard sections) */
+  .grid.lg\:grid-cols-3 {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  /* 6-col → 2-col (teacher quick stats) */
+  .grid.lg\:grid-cols-6 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.625rem !important;
+  }
+
+  /* 2-col large → 1-col (side-by-side panels) */
+  .grid.lg\:grid-cols-2,
+  .grid.md\:grid-cols-2 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Keep existing sm:grid-cols-2 working for small stat cards */
+  .grid.sm\:grid-cols-2:not(.xl\:grid-cols-4):not(.lg\:grid-cols-4):not(.sm\:grid-cols-4) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* 3-col forms → 1-col */
+  .grid.sm\:grid-cols-3,
+  .grid.md\:grid-cols-3 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* ── KPI / Stat Card Compact ── */
+  .grid .bg-white.rounded-2xl.p-5,
+  .grid .dark\:bg-dark-card.rounded-2xl.p-5 {
+    padding: 0.875rem !important;
+    border-radius: 0.75rem !important;
+  }
+
+  .grid .bg-white.rounded-2xl.p-5 .text-3xl,
+  .grid .dark\:bg-dark-card.rounded-2xl.p-5 .text-3xl {
+    font-size: 1.25rem !important;
+  }
+
+  .grid .bg-white.rounded-2xl.p-5 .w-10.h-10,
+  .grid .dark\:bg-dark-card.rounded-2xl.p-5 .w-10.h-10 {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  /* Hide long label badges on stat cards to save space */
+  .grid .bg-white.rounded-2xl.p-5 .rounded-full.text-\[10px\].uppercase {
+    font-size: 9px !important;
+    padding: 0.125rem 0.375rem !important;
+  }
+
+  /* ── Card Padding Reduction ── */
+  .rounded-xl.p-4,
+  .rounded-xl.p-5,
+  .rounded-2xl.p-5,
+  .rounded-2xl.p-6 {
+    padding: 0.875rem;
+  }
+
+
+  /* ── Tables ── */
+  table {
+    font-size: 0.75rem;
+  }
+
+  /* Table wrapper — force horizontal scroll */
+  .overflow-x-auto {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Ensure table doesn't shrink below readable width */
+  .overflow-x-auto table {
+    min-width: 600px;
+  }
+
+  /* Table cells — reduce padding */
+  th, td {
+    padding: 0.5rem 0.625rem !important;
+  }
+
+  /* ── Forms ── */
+  /* Force single column layout */
+  .grid.grid-cols-2:not(.gap-1):not(.gap-1\.5) {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Full-width inputs */
+  input, select, textarea {
+    max-width: 100% !important;
+    min-height: 2.75rem;
+    font-size: 0.875rem !important;
+  }
+
+  /* ── Filter Toolbar ── */
+  /* Make filter controls horizontally scrollable */
+  .flex.flex-wrap.items-center.gap-2\.5,
+  .flex.flex-wrap.items-center.gap-3 {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-bottom: 0.25rem;
+  }
+
+  .flex.flex-wrap.items-center.gap-2\.5::-webkit-scrollbar,
+  .flex.flex-wrap.items-center.gap-3::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Search field — full width */
+  .relative.flex-1.min-w-\[240px\] {
+    min-width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* ── Buttons ── */
+  /* Touch-friendly button sizes */
+  button, [role="button"] {
+    min-height: 2.25rem;
+  }
+
+  /* Make primary action buttons full-width in forms */
+  form button[type="submit"],
+  .flex.justify-end button:only-child {
+    width: 100%;
+  }
+
+  /* ── Spacing ── */
+  .space-y-5 > :not([hidden]) ~ :not([hidden]) {
+    --tw-space-y-reverse: 0;
+    margin-top: calc(1rem * calc(1 - var(--tw-space-y-reverse)));
+    margin-bottom: calc(1rem * var(--tw-space-y-reverse));
+  }
+
+  .space-y-6 > :not([hidden]) ~ :not([hidden]) {
+    --tw-space-y-reverse: 0;
+    margin-top: calc(1rem * calc(1 - var(--tw-space-y-reverse)));
+    margin-bottom: calc(1rem * var(--tw-space-y-reverse));
+  }
+
+  .gap-5, .gap-6 {
+    gap: 1rem !important;
+  }
+
+  /* ── Modal → Bottom Sheet ── */
+  .fixed.inset-0.z-50.flex.items-center {
+    align-items: flex-end !important;
+  }
+
+  /* ── Text Overflow Safety ── */
+  p, td, th {
+    overflow-wrap: break-word;
+  }
+
+  /* Long names in table cells */
+  .truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+
+  /* ── Images & Media ── */
+  img, svg, video, canvas {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* ── Charts ── */
+  .recharts-responsive-container {
+    min-height: 180px !important;
+    max-height: 220px !important;
+  }
+
+  /* ── Tabs ── */
+  /* Horizontal scrollable tabs */
+  .flex.gap-1 button,
+  .flex.gap-2 button {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* ── Dashboard Greeting ── */
+  .text-xl.sm\:text-2xl {
+    font-size: 1.25rem !important;
+  }
+
+  /* ── Needs Attention / Action Items ── */
+  .rounded-xl.hover\:bg-slate-50 {
+    padding: 0.625rem !important;
+  }
+
+  /* ── Page Header ── */
+  .flex.flex-col.sm\:flex-row.sm\:items-start.sm\:justify-between {
+    flex-direction: column !important;
+    gap: 0.75rem;
+  }
+
+  .flex.flex-col.sm\:flex-row.sm\:items-start.sm\:justify-between .shrink-0.flex.items-center.gap-2 {
+    width: 100%;
+  }
+
+  .flex.flex-col.sm\:flex-row.sm\:items-start.sm\:justify-between .shrink-0.flex.items-center.gap-2 button {
+    flex: 1;
+  }
+
+  /* ── Dropdown / Popover positioning ── */
+  .absolute.right-0.mt-2 {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 1rem 1rem 0 0 !important;
+    z-index: 60 !important;
+  }
+
+  /* ── Badge Compact ── */
+  .rounded-full.text-\[10px\] {
+    font-size: 9px !important;
+    padding: 0.125rem 0.375rem !important;
+  }
+
+  /* ── Profile / Detail Pages ── */
+  /* Tabs should scroll horizontally */
+  .flex.border-b {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .flex.border-b::-webkit-scrollbar {
+    display: none;
+  }
+
+  .flex.border-b button,
+  .flex.border-b a {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* ── Attendance Student Row ── */
+  /* Make rows comfortable to tap */
+  .divide-y > div,
+  .divide-y > tr {
+    min-height: 2.75rem;
+  }
+
+  /* ── Leave / Homework Cards ── */
+  .rounded-xl.border.bg-white + .rounded-xl.border.bg-white,
+  .rounded-2xl.border.bg-white + .rounded-2xl.border.bg-white {
+    margin-top: 0.5rem;
+  }
+}
+
+/* ── Small Mobile: ≤ 390px ── */
+@media (max-width: 390px) {
+  /* Even more compact stat cards */
+  .grid.xl\:grid-cols-4,
+  .grid.lg\:grid-cols-4,
+  .grid.sm\:grid-cols-4 {
+    gap: 0.5rem !important;
+  }
+
+  .grid .bg-white.rounded-2xl.p-5 .text-3xl,
+  .grid .dark\:bg-dark-card.rounded-2xl.p-5 .text-3xl {
+    font-size: 1.125rem !important;
+  }
+
+  /* Smaller page padding */
+  main > div {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  /* Typography — smallest scale */
+  h1, .text-2xl { font-size: 1.125rem !important; }
+  .text-xl { font-size: 1rem !important; }
+  .text-3xl { font-size: 1.25rem !important; }
+
+  /* Even more compact buttons */
+  .flex.items-center.gap-2 button {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    font-size: 0.6875rem;
+  }
+
+  /* Bottom nav labels smaller */
+  .mobile-bottom-nav .text-\[10px\] {
+    font-size: 9px !important;
+  }
+}
+
+/* ── Dark Mode: Mobile Bottom Nav ── */
+.dark .mobile-bottom-nav {
+  background-color: #101315 !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* ── Animations for mobile ── */
+@media (max-width: 767px) {
+  @keyframes slide-up {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  .animate-scale-in {
+    animation: slide-up 0.2s ease-out;
+  }
+}
+
 /* Print Styles - Placed at end of file to override all light/dark utility styles */
 @media print {
   @page {
