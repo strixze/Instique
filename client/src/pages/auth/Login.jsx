@@ -67,8 +67,9 @@ export default function Login() {
 
           <Button type="submit" loading={loading} className="w-full">Sign in</Button>
 
-          <div className="text-xs text-muted dark:text-dark-text-muted text-center">
-            Demo: admin1@gmail.com / 12345678
+          <div className="text-xs text-muted dark:text-dark-text-muted text-center space-y-0.5">
+            <div>Demo Admin: <span className="font-mono text-deep dark:text-dark-text">schooladmin@springfield.edu</span> / <span className="font-mono">password123</span></div>
+            <div>Security Guard: <span className="font-mono text-forest dark:text-emerald-400 font-bold">guard@springfield.edu</span> / <span className="font-mono">password123</span></div>
           </div>
           <div className="text-sm text-muted dark:text-dark-text-muted text-center">
             Don't have an account? <Link to="/register" className="text-forest dark:text-emerald-400 hover:underline">Sign up</Link>

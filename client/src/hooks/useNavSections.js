@@ -164,6 +164,15 @@ export const navSections = {
       ],
     },
   ],
+  security_guard: [
+    {
+      title: 'Gate Security',
+      items: [
+        { to: '/dashboard', icon: LayoutDashboard, label: 'Gate Dashboard' },
+        { to: '/gate-activity', icon: Shield, label: 'Gate Activity' },
+      ],
+    },
+  ],
 };
 
 export function useNavSections() {

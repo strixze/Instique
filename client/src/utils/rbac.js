@@ -8,11 +8,13 @@ export const ROLES = {
   TEACHER: 'teacher',
   PARENT: 'parent',
   STUDENT: 'student',
+  SECURITY_GUARD: 'security_guard',
 };
 
 // Route Permission Matrix: Maps route paths to allowed role arrays
 export const ROUTE_PERMISSIONS = {
-  '/dashboard': [ROLES.SUPER_ADMIN, ROLES.SCHOOL_ADMIN, ROLES.TEACHER, ROLES.PARENT, ROLES.STUDENT],
+  '/dashboard': [ROLES.SUPER_ADMIN, ROLES.SCHOOL_ADMIN, ROLES.TEACHER, ROLES.PARENT, ROLES.STUDENT, ROLES.SECURITY_GUARD],
+  '/gate-activity': [ROLES.SECURITY_GUARD, ROLES.SCHOOL_ADMIN, ROLES.SUPER_ADMIN],
   '/students': [ROLES.SCHOOL_ADMIN, ROLES.SUPER_ADMIN],
   '/teachers': [ROLES.SCHOOL_ADMIN, ROLES.SUPER_ADMIN],
   '/admissions': [ROLES.SCHOOL_ADMIN, ROLES.SUPER_ADMIN],

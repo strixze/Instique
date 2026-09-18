@@ -34092,3 +34092,21 @@ Stack Trace: Error: Insufficient permissions
 Details: []
 ================================================================================
 
+
+================================================================================
+Timestamp: 2026-09-18T18:53:10.334Z
+Method: POST
+URL: /api/v1/auth/logout
+User ID: 6a88025c50fc67b25b06e7bf
+Query: {}
+Body: {"refreshToken":"[REDACTED]"}
+Error Name: VersionError
+Error Message: No matching document found for id "6a88025c50fc67b25b06e7bf" version 181 modifiedPaths "refreshToken, sessions"
+Stack Trace: VersionError: No matching document found for id "6a88025c50fc67b25b06e7bf" version 181 modifiedPaths "refreshToken, sessions"
+    at generateVersionError (D:\projects\Instique\server\node_modules\mongoose\lib\model.js:537:10)
+    at model.save (D:\projects\Instique\server\node_modules\mongoose\lib\model.js:595:28)
+    at Module.logoutUser (file:///D:/projects/Instique/server/src/services/auth.service.js:131:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/projects/Instique/server/src/controllers/auth.controller.js:75:5
+================================================================================
+
