@@ -10,6 +10,7 @@ import {
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
+import MobileSummaryCards from '../../components/ui/MobileSummaryCards';
 import { dashboardApi } from '../../api/dashboard.api';
 import { leaveApi } from '../../api/leave.api';
 import { useUserStore } from '../../store/userStore';
@@ -103,7 +104,8 @@ export default function TeacherDashboard() {
         </div>
 
         {/* KPI skeleton */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <MobileSummaryCards loading={true} />
+        <div className="hidden md:grid md:grid-cols-3 lg:grid-cols-6 gap-4">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className="h-28 bg-white border border-border rounded-2xl p-4 animate-pulse space-y-2">
               <div className="h-4 bg-slate-100 rounded w-2/3"></div>
@@ -144,6 +146,43 @@ export default function TeacherDashboard() {
     );
   }
 
+  const mobileMetrics = [
+    {
+      label: "Today's Classes",
+      value: summary.todaysClasses ?? 0,
+      sub: 'periods',
+      icon: Calendar,
+      iconColor: 'text-blue-600 dark:text-blue-400',
+      iconBg: 'bg-blue-50 dark:bg-blue-500/10',
+    },
+    {
+      label: 'Students Taught',
+      value: summary.studentsTaught ?? 0,
+      sub: 'enrolled',
+      icon: GraduationCap,
+      iconColor: 'text-emerald-600 dark:text-emerald-400',
+      iconBg: 'bg-emerald-50 dark:bg-emerald-500/10',
+    },
+    {
+      label: 'Attendance',
+      value: summary.attendancePending ?? 0,
+      sub: summary.attendancePending > 0 ? 'Pending' : 'All clear',
+      icon: ClipboardList,
+      iconColor: summary.attendancePending > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400',
+      iconBg: summary.attendancePending > 0 ? 'bg-amber-50 dark:bg-amber-500/10' : 'bg-emerald-50 dark:bg-emerald-500/10',
+      onClick: () => navigate('/attendance'),
+    },
+    {
+      label: summary.marksPending > 0 ? 'Marks Due' : 'Active Homework',
+      value: summary.marksPending > 0 ? summary.marksPending : (summary.homeworkPending ?? 0),
+      sub: summary.marksPending > 0 ? 'tasks pending' : 'assigned',
+      icon: summary.marksPending > 0 ? FileEdit : BookOpen,
+      iconColor: summary.marksPending > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-indigo-600 dark:text-indigo-400',
+      iconBg: summary.marksPending > 0 ? 'bg-rose-50 dark:bg-rose-500/10' : 'bg-indigo-50 dark:bg-indigo-500/10',
+      onClick: summary.marksPending > 0 ? () => navigate('/marks-entry') : () => navigate('/homework'),
+    },
+  ];
+
   return (
     <div className="space-y-6 pb-12">
       {/* ── 1. Teacher Header & Quick Actions Banner ── */}
@@ -152,8 +191,8 @@ export default function TeacherDashboard() {
         <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute bottom-0 right-1/4 -mb-8 w-48 h-48 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
 
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5 lg:gap-6">
+          <div className="space-y-2 min-w-0 lg:flex-1">
             <div className="flex flex-wrap items-center gap-2">
               {teacher?.employeeId && (
                 <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-white/10 text-slate-300 border border-white/10">
@@ -172,7 +211,7 @@ export default function TeacherDashboard() {
               )}
             </div>
 
-            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-white">
               {greeting}, {teacher?.name || user?.name || 'Teacher'}! 👋
             </h1>
 
@@ -191,26 +230,26 @@ export default function TeacherDashboard() {
             </p>
           </div>
 
-          {/* Quick Action Buttons */}
-          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+          {/* Quick Action Buttons — fluid 2×2 grid on lg+ */}
+          <div className="flex flex-wrap items-center gap-2 lg:grid lg:grid-cols-2 min-[1400px]:grid-cols-4 lg:gap-2 shrink-0 lg:w-auto lg:min-w-[280px] min-[1400px]:min-w-0">
             <Button
               size="sm"
               onClick={() => navigate('/attendance')}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white font-medium shadow-lg shadow-emerald-600/30 border-0"
+              className="bg-emerald-600 hover:bg-emerald-500 text-white font-medium shadow-lg shadow-emerald-600/30 border-0 lg:w-full"
             >
               <ClipboardList size={15} className="mr-1.5" /> Mark Attendance
             </Button>
             <Button
               size="sm"
               onClick={() => navigate('/homework')}
-              className="bg-blue-600 hover:bg-blue-500 text-white font-medium shadow-lg shadow-blue-600/30 border-0"
+              className="bg-blue-600 hover:bg-blue-500 text-white font-medium shadow-lg shadow-blue-600/30 border-0 lg:w-full"
             >
               <Plus size={15} className="mr-1.5" /> New Homework
             </Button>
             <Button
               size="sm"
               onClick={() => navigate('/marks-entry')}
-              className="bg-purple-600 hover:bg-purple-500 text-white font-medium shadow-lg shadow-purple-600/30 border-0"
+              className="bg-purple-600 hover:bg-purple-500 text-white font-medium shadow-lg shadow-purple-600/30 border-0 lg:w-full"
             >
               <FileEdit size={15} className="mr-1.5" /> Enter Marks
             </Button>
@@ -218,7 +257,7 @@ export default function TeacherDashboard() {
               size="sm"
               variant="outline"
               onClick={() => navigate('/leaves')}
-              className="bg-white/10 hover:bg-white/20 text-white border-white/20"
+              className="bg-white/10 hover:bg-white/20 text-white border-white/20 lg:w-full"
             >
               Apply Leave
             </Button>
@@ -253,7 +292,11 @@ export default function TeacherDashboard() {
       )}
 
       {/* ── 2. Top Summary KPI Stats ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
+      {/* Mobile 2x2 Summary Cards Grid (< 768px) */}
+      <MobileSummaryCards metrics={mobileMetrics} loading={loading} />
+
+      {/* Desktop/Tablet KPI Grid (>= 768px) */}
+      <div className="hidden md:grid md:grid-cols-3 lg:grid-cols-6 gap-3.5">
         {/* Today's Classes */}
         <Card className="!p-4 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">

@@ -46,6 +46,7 @@ import EmptyState from '../../components/ui/EmptyState';
 import DataTable from '../../components/ui/DataTable';
 import Pagination from '../../components/ui/Pagination';
 import UserAvatar from '../../components/ui/UserAvatar';
+import MobileSummaryCards from '../../components/ui/MobileSummaryCards';
 import { useUserStore } from '../../store/userStore';
 import { eventApi } from '../../api/event.api';
 import { academicApi } from '../../api/academic.api';
@@ -784,8 +785,43 @@ export default function Events() {
         }
       />
 
-      {/* Metric Cards Bar */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Mobile Summary Cards (mobile only) */}
+      <MobileSummaryCards
+        metrics={[
+          {
+            label: 'Total Events',
+            value: stats.total,
+            icon: CalendarIcon,
+            iconColor: 'text-forest dark:text-emerald-400',
+            iconBg: 'bg-forest/10 dark:bg-dark-accent-soft',
+          },
+          {
+            label: 'Upcoming',
+            value: stats.upcoming,
+            icon: Sparkles,
+            iconColor: 'text-forest dark:text-emerald-400',
+            iconBg: 'bg-forest/10 dark:bg-dark-accent-soft',
+          },
+          {
+            label: 'Completed',
+            value: stats.completed,
+            icon: Check,
+            iconColor: 'text-secondary dark:text-dark-text-secondary',
+            iconBg: 'bg-slate-100 dark:bg-slate-800',
+          },
+          {
+            label: 'Gallery Photos',
+            value: stats.totalPhotos,
+            icon: Camera,
+            iconColor: 'text-purple-600 dark:text-purple-400',
+            iconBg: 'bg-purple-50 dark:bg-purple-500/10',
+          },
+        ]}
+        loading={loading}
+      />
+
+      {/* Metric Cards Bar (desktop/tablet) */}
+      <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white border border-border rounded-2xl p-4 shadow-xs flex items-center justify-between">
           <div>
             <p className="text-xs font-semibold text-muted uppercase tracking-wider">Total Events</p>

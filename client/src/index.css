@@ -361,20 +361,21 @@ html.theme-transition *::after {
   }
 
   /* 3-col → 1-col (dashboard sections) */
-  .grid.lg\:grid-cols-3 {
+  .grid.lg\:grid-cols-3:not(.mobile-keep-grid) {
     grid-template-columns: 1fr !important;
     gap: 1rem !important;
   }
 
   /* 6-col → 2-col (teacher quick stats) */
-  .grid.lg\:grid-cols-6 {
+  .grid.lg\:grid-cols-6,
+  .grid.sm\:grid-cols-6 {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 0.625rem !important;
   }
 
   /* 2-col large → 1-col (side-by-side panels) */
-  .grid.lg\:grid-cols-2,
-  .grid.md\:grid-cols-2 {
+  .grid.lg\:grid-cols-2:not(.mobile-keep-grid),
+  .grid.md\:grid-cols-2:not(.mobile-keep-grid) {
     grid-template-columns: 1fr !important;
   }
 
@@ -383,9 +384,9 @@ html.theme-transition *::after {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  /* 3-col forms → 1-col */
-  .grid.sm\:grid-cols-3,
-  .grid.md\:grid-cols-3 {
+  /* 3-col forms → 1-col (exempt grids marked mobile-keep-grid) */
+  .grid.sm\:grid-cols-3:not(.mobile-keep-grid),
+  .grid.md\:grid-cols-3:not(.mobile-keep-grid) {
     grid-template-columns: 1fr !important;
   }
 
@@ -444,8 +445,8 @@ html.theme-transition *::after {
   }
 
   /* ── Forms ── */
-  /* Force single column layout */
-  .grid.grid-cols-2:not(.gap-1):not(.gap-1\.5) {
+  /* Force single column layout (exclude mobile-only grids like MobileSummaryCards) */
+  .grid.grid-cols-2:not(.gap-1):not(.gap-1\.5):not(.md\:hidden):not(.mobile-keep-grid) {
     grid-template-columns: 1fr !important;
   }
 
@@ -469,8 +470,16 @@ html.theme-transition *::after {
   }
 
   .flex.flex-wrap.items-center.gap-2\.5::-webkit-scrollbar,
-  .flex.flex-wrap.items-center.gap-3::-webkit-scrollbar {
+  .flex.flex-wrap.items-center.gap-3::-webkit-scrollbar,
+  .no-scrollbar::-webkit-scrollbar,
+  .scrollbar-none::-webkit-scrollbar {
     display: none;
+  }
+
+  .no-scrollbar,
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 
   /* Search field — full width */

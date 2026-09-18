@@ -18,6 +18,7 @@ import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import EmptyState from '../../components/ui/EmptyState';
 import Skeleton from '../../components/ui/Skeleton';
+import MobileSummaryCards from '../../components/ui/MobileSummaryCards';
 import { analyticsApi } from '../../api/analytics.api';
 import { academicApi } from '../../api/academic.api';
 
@@ -341,7 +342,47 @@ export default function Reports() {
 
       {/* ── 3. Executive Overview KPI Grid (6 Cards) ── */}
       {(activeSectionTab === 'all' || activeSectionTab === 'overview') && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3.5 w-full">
+        <>
+          {/* Mobile Summary Cards (mobile only) */}
+          <MobileSummaryCards
+            metrics={[
+              {
+                label: 'Total Students',
+                value: (kpis.totalStudents?.value ?? 0).toLocaleString('en-IN'),
+                icon: Users,
+                iconColor: 'text-forest dark:text-emerald-400',
+                iconBg: 'bg-forest-soft dark:bg-dark-accent-soft',
+                secondaryText: kpis.totalStudents?.change !== null && kpis.totalStudents?.change !== undefined ? `${kpis.totalStudents?.change >= 0 ? '+' : ''}${kpis.totalStudents?.change}% vs prev` : undefined,
+              },
+              {
+                label: 'Attendance Rate',
+                value: kpis.attendanceRate?.value ?? '—',
+                icon: ClipboardCheck,
+                iconColor: 'text-blue-600 dark:text-blue-400',
+                iconBg: 'bg-blue-50 dark:bg-blue-500/10',
+                secondaryText: kpis.attendanceRate?.change ? `${kpis.attendanceRate.change} vs prev` : undefined,
+              },
+              {
+                label: 'Fees Collected',
+                value: formatINR(kpis.feesCollected?.value),
+                icon: DollarSign,
+                iconColor: 'text-emerald-600 dark:text-emerald-400',
+                iconBg: 'bg-emerald-50 dark:bg-emerald-500/10',
+                secondaryText: kpis.feesCollected?.change ? `${kpis.feesCollected.change} vs prev` : undefined,
+              },
+              {
+                label: 'Total Teachers',
+                value: kpis.totalTeachers?.value ?? 0,
+                icon: GraduationCap,
+                iconColor: 'text-purple-600 dark:text-purple-400',
+                iconBg: 'bg-purple-50 dark:bg-purple-500/10',
+                secondaryText: kpis.totalTeachers?.change !== null && kpis.totalTeachers?.change !== undefined ? `${kpis.totalTeachers?.change >= 0 ? '+' : ''}${kpis.totalTeachers?.change}% vs prev` : undefined,
+              },
+            ]}
+            loading={loading}
+          />
+
+          <div className="hidden md:grid md:grid-cols-3 xl:grid-cols-6 gap-3.5 w-full">
           {/* Total Students */}
           <div className="bg-white border border-border rounded-2xl p-4 shadow-2xs flex flex-col justify-between">
             <div className="flex items-center justify-between">
@@ -480,6 +521,7 @@ export default function Reports() {
             </div>
           </div>
         </div>
+        </>
       )}
 
       {/* ── 4. Actionable Insights & Attention Panel ── */}

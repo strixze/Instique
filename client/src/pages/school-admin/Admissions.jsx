@@ -19,6 +19,7 @@ import { academicApi } from '../../api/academic.api';
 import { feeApi } from '../../api/fee.api';
 import UserAvatar from '../../components/ui/UserAvatar';
 import Pagination from '../../components/ui/Pagination';
+import MobileSummaryCards from '../../components/ui/MobileSummaryCards';
 
 /* ──────────────────────── Constants ──────────────────────── */
 
@@ -763,8 +764,47 @@ export default function Admissions() {
         </div>
       </div>
 
-      {/* ── Row 1: Top 6 Summary KPI Cards ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+      {/* ── Mobile Summary Cards (2x2 grid, mobile only) ── */}
+      <MobileSummaryCards
+        metrics={[
+          {
+            label: 'Total Applications',
+            value: stats.total,
+            icon: Users,
+            iconColor: 'text-forest dark:text-emerald-400',
+            iconBg: 'bg-forest-soft dark:bg-dark-accent-soft',
+            secondaryText: 'This Session',
+          },
+          {
+            label: 'Under Review',
+            value: stats.underReview,
+            icon: Sparkles,
+            iconColor: 'text-amber-600 dark:text-amber-400',
+            iconBg: 'bg-amber-50 dark:bg-amber-500/10',
+            secondaryText: getPercentage(stats.underReview),
+          },
+          {
+            label: 'Approved',
+            value: stats.approved,
+            icon: CheckCheck,
+            iconColor: 'text-emerald-600 dark:text-emerald-400',
+            iconBg: 'bg-emerald-50 dark:bg-emerald-500/10',
+            secondaryText: getPercentage(stats.approved),
+          },
+          {
+            label: 'Enrolled',
+            value: stats.enrolled,
+            icon: UserPlus,
+            iconColor: 'text-teal-600 dark:text-teal-400',
+            iconBg: 'bg-teal-50 dark:bg-teal-500/10',
+            secondaryText: getPercentage(stats.enrolled),
+          },
+        ]}
+        loading={loading}
+      />
+
+      {/* ── Row 1: Top 6 Summary KPI Cards (desktop/tablet) ── */}
+      <div className="hidden md:grid md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
         {/* Total Applications */}
         <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3.5 shadow-2xs hover:shadow-card dark:hover:border-dark-border-strong transition-shadow">
           <div className="w-8 h-8 rounded-full bg-forest-soft dark:bg-dark-accent-soft text-forest dark:text-emerald-400 flex items-center justify-center mb-2">
@@ -954,8 +994,154 @@ export default function Admissions() {
       </div>
 
       {/* ── Row 3: High-Density Data Table ── */}
-      <div className="bg-white border border-border rounded-xl overflow-hidden shadow-2xs">
-        <div className="overflow-x-auto">
+      <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl overflow-hidden shadow-2xs">
+        {/* ── Mobile List Cards View (< 768px) ── */}
+        <div className="md:hidden divide-y divide-border/60 dark:divide-dark-border bg-white dark:bg-dark-card">
+          {loading ? (
+            [1, 2, 3, 4].map((i) => (
+              <div key={i} className="p-3.5 space-y-2 animate-pulse">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-surface dark:bg-dark-hover shrink-0" />
+                  <div className="space-y-1.5 flex-1">
+                    <div className="h-3.5 bg-surface dark:bg-dark-hover rounded w-1/2" />
+                    <div className="h-3 bg-surface dark:bg-dark-hover rounded w-1/3" />
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : data.length === 0 ? (
+            <div className="px-4 py-12 text-center text-xs text-muted dark:text-dark-text-muted">
+              No admission applications found matching the selected criteria.
+            </div>
+          ) : (
+            data.map((row) => {
+              const guardianName = row.father?.name
+                ? `${row.father.name} (Father)`
+                : row.mother?.name
+                ? `${row.mother.name} (Mother)`
+                : row.guardian?.name
+                ? `${row.guardian.name} (Guardian)`
+                : '';
+              const appliedDate = row.createdAt
+                ? new Date(row.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+                : '—';
+              const relativeTime = formatRelativeTime(row.createdAt);
+
+              return (
+                <div
+                  key={row._id}
+                  onClick={() => openDetail(row)}
+                  className="p-3.5 space-y-2.5 hover:bg-surface/50 dark:hover:bg-dark-hover/40 transition-colors cursor-pointer active:bg-surface/70"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                      <UserAvatar
+                        type="student"
+                        gender={row.gender}
+                        id={row._id}
+                        admissionNo={row.applicationNo}
+                        name={row.applicantName}
+                        size="md"
+                        className="shrink-0 ring-1 ring-border/50 dark:ring-dark-border"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <p className="font-bold text-xs text-deep dark:text-dark-text truncate">
+                          {row.applicantName}
+                        </p>
+                        <p className="text-[11px] font-mono text-muted dark:text-dark-text-muted mt-0.5">
+                          {row.applicationNo}
+                        </p>
+                        {guardianName && (
+                          <p className="text-[11px] text-muted dark:text-dark-text-muted truncate mt-0.5">
+                            {guardianName}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="shrink-0">
+                      {renderStatusBadge(row.workflowStatus)}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs text-secondary dark:text-dark-text-secondary pt-1 border-t border-border/40 dark:border-dark-border/40">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-surface dark:bg-dark-elevated text-deep dark:text-dark-text border border-border/70 dark:border-dark-border">
+                        Class {row.applyingForClass?.name || classMap[row.applyingForClass] || '—'}
+                      </span>
+                      <span className="text-[11px] text-muted dark:text-dark-text-muted">
+                        {appliedDate}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={() => openDetail(row)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-forest dark:text-emerald-400 bg-forest/10 dark:bg-emerald-500/10 border border-forest/20 dark:border-emerald-500/20 rounded-lg transition-colors"
+                        title="View Details"
+                      >
+                        <Eye size={12} /> View
+                      </button>
+
+                      {row.workflowStatus !== 'student_created' && (
+                        <div className="relative">
+                          <button
+                            onClick={() => setActiveMenuId(activeMenuId === row._id ? null : row._id)}
+                            className="p-1 text-muted dark:text-dark-text-muted hover:text-deep dark:hover:text-dark-text hover:bg-surface dark:hover:bg-dark-hover border border-border dark:border-dark-border rounded-lg transition-colors"
+                            title="More actions"
+                          >
+                            <MoreVertical size={13} />
+                          </button>
+
+                          {activeMenuId === row._id && (
+                            <div
+                              ref={menuRef}
+                              className="absolute right-0 bottom-full mb-1 w-44 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl shadow-dropdown z-50 py-1 text-left animate-scale-in"
+                            >
+                              <button
+                                onClick={() => {
+                                  setActiveMenuId(null);
+                                  setSelectedAdmission(row);
+                                  setAllocateForm({ assignedClassId: row.applyingForClass?._id || '', assignedSectionId: '' });
+                                  setActionModal('allocate');
+                                }}
+                                className="w-full px-3 py-1.5 text-xs text-deep dark:text-dark-text hover:bg-surface dark:hover:bg-dark-hover flex items-center gap-2"
+                              >
+                                <Building2 size={13} className="text-muted dark:text-dark-text-muted" /> Allocate Class
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setActiveMenuId(null);
+                                  setSelectedAdmission(row);
+                                  setActionModal('fee');
+                                }}
+                                className="w-full px-3 py-1.5 text-xs text-deep dark:text-dark-text hover:bg-surface dark:hover:bg-dark-hover flex items-center gap-2"
+                              >
+                                <CreditCard size={13} className="text-muted dark:text-dark-text-muted" /> Assign Fee
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setActiveMenuId(null);
+                                  setSelectedAdmission(row);
+                                  setActionModal('payment');
+                                }}
+                                className="w-full px-3 py-1.5 text-xs text-deep dark:text-dark-text hover:bg-surface dark:hover:bg-dark-hover flex items-center gap-2"
+                              >
+                                <Receipt size={13} className="text-muted dark:text-dark-text-muted" /> Record Payment
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* ── Desktop Table View (>= 768px) ── */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-border bg-surface/70">

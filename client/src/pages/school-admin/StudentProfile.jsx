@@ -235,9 +235,14 @@ export default function StudentProfile() {
             <div className="h-9 w-28 bg-surface dark:bg-dark-hover rounded-lg" />
           </div>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-2.5 mobile-keep-grid">
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="h-24 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4" />
+            <div
+              key={i}
+              className={`h-24 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3.5 shadow-2xs ${
+                i === 5 ? 'col-span-2 lg:col-span-1' : ''
+              }`}
+            />
           ))}
         </div>
         <div className="h-10 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl" />
@@ -358,7 +363,7 @@ export default function StudentProfile() {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-2 self-end md:self-auto shrink-0 relative">
+          <div className="flex items-center gap-2 self-end md:self-auto shrink-0 relative flex-wrap sm:flex-nowrap justify-end">
             {currentUser?.role === 'school_admin' || currentUser?.role === 'super_admin' ? (
               <Button size="sm" onClick={handleOpenEdit} className="gap-1.5">
                 <Edit3 size={14} /> Edit Student
@@ -412,74 +417,78 @@ export default function StudentProfile() {
       </div>
 
       {/* ──────────────────────── 2. QUICK OVERVIEW (KPIS) ──────────────────────── */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-2.5 mobile-keep-grid">
         {/* Attendance */}
         {attendance && (
-          <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3.5 shadow-2xs">
+          <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3 xs:p-3.5 shadow-2xs">
             <div className="flex items-center justify-between text-muted dark:text-dark-text-muted mb-1">
-              <span className="text-[11px] font-semibold uppercase tracking-wider">Attendance</span>
-              <Calendar size={14} className="text-forest dark:text-emerald-400" />
+              <span className="text-[11px] font-semibold uppercase tracking-wider truncate">Attendance</span>
+              <Calendar size={14} className="text-forest dark:text-emerald-400 shrink-0" />
             </div>
             <p className="text-xl font-bold text-deep dark:text-dark-text">
               {kpis.attendancePercentage !== null ? `${kpis.attendancePercentage}%` : 'No data'}
             </p>
-            <span className="text-[10px] text-muted dark:text-dark-text-muted">Total Marked: {attendance.totalDays} days</span>
+            <span className="text-[10px] text-muted dark:text-dark-text-muted truncate block">Total Marked: {attendance.totalDays} days</span>
           </div>
         )}
 
         {/* Academic Avg */}
         {academics && (
-          <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3.5 shadow-2xs">
+          <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3 xs:p-3.5 shadow-2xs">
             <div className="flex items-center justify-between text-muted dark:text-dark-text-muted mb-1">
-              <span className="text-[11px] font-semibold uppercase tracking-wider">Academic Avg</span>
-              <GraduationCap size={14} className="text-blue-500" />
+              <span className="text-[11px] font-semibold uppercase tracking-wider truncate">Academic Avg</span>
+              <GraduationCap size={14} className="text-blue-500 shrink-0" />
             </div>
             <p className="text-xl font-bold text-deep dark:text-dark-text">
               {kpis.academicAverage !== null ? `${kpis.academicAverage}%` : 'No data'}
             </p>
-            <span className="text-[10px] text-muted dark:text-dark-text-muted">Pass Rate: {academics.passPercentage !== null ? `${academics.passPercentage}%` : 'N/A'}</span>
+            <span className="text-[10px] text-muted dark:text-dark-text-muted truncate block">Pass Rate: {academics.passPercentage !== null ? `${academics.passPercentage}%` : 'N/A'}</span>
           </div>
         )}
 
         {/* Fees Pending */}
         {fees && (
-          <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3.5 shadow-2xs">
+          <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3 xs:p-3.5 shadow-2xs">
             <div className="flex items-center justify-between text-muted dark:text-dark-text-muted mb-1">
-              <span className="text-[11px] font-semibold uppercase tracking-wider">Fees Pending</span>
-              <CreditCard size={14} className="text-amber-500" />
+              <span className="text-[11px] font-semibold uppercase tracking-wider truncate">Fees Pending</span>
+              <CreditCard size={14} className="text-amber-500 shrink-0" />
             </div>
             <p className="text-xl font-bold text-deep dark:text-dark-text">
               {kpis.pendingFees !== null ? `₹${kpis.pendingFees.toLocaleString('en-IN')}` : 'No data'}
             </p>
-            <span className="text-[10px] text-muted dark:text-dark-text-muted">Total Paid: ₹{(fees.paidAmount || 0).toLocaleString('en-IN')}</span>
+            <span className="text-[10px] text-muted dark:text-dark-text-muted truncate block">Total Paid: ₹{(fees.paidAmount || 0).toLocaleString('en-IN')}</span>
           </div>
         )}
 
         {/* Homework */}
         {homework && (
-          <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3.5 shadow-2xs">
+          <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3 xs:p-3.5 shadow-2xs">
             <div className="flex items-center justify-between text-muted dark:text-dark-text-muted mb-1">
-              <span className="text-[11px] font-semibold uppercase tracking-wider">Homework</span>
-              <BookOpen size={14} className="text-violet-500" />
+              <span className="text-[11px] font-semibold uppercase tracking-wider truncate">Homework</span>
+              <BookOpen size={14} className="text-violet-500 shrink-0" />
             </div>
             <p className="text-xl font-bold text-deep dark:text-dark-text">
               {kpis.homeworkCompletionPct !== null ? `${kpis.homeworkCompletionPct}%` : 'No data'}
             </p>
-            <span className="text-[10px] text-muted dark:text-dark-text-muted">Submitted: {homework.completed} / {homework.totalAssigned}</span>
+            <span className="text-[10px] text-muted dark:text-dark-text-muted truncate block">Submitted: {homework.completed} / {homework.totalAssigned}</span>
           </div>
         )}
 
         {/* Recognition */}
         {recognition && (
-          <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3.5 shadow-2xs col-span-2 sm:col-span-1">
+          <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3 xs:p-3.5 shadow-2xs col-span-2 lg:col-span-1">
             <div className="flex items-center justify-between text-muted dark:text-dark-text-muted mb-1">
-              <span className="text-[11px] font-semibold uppercase tracking-wider">Recognition</span>
-              <Award size={14} className="text-yellow-500" />
+              <span className="text-[11px] font-semibold uppercase tracking-wider truncate">Recognition</span>
+              <Award size={14} className="text-yellow-500 shrink-0" />
             </div>
-            <p className="text-xl font-bold text-deep dark:text-dark-text">
-              {kpis.recognitionPoints !== null ? `${kpis.recognitionPoints} pts` : 'No data'}
-            </p>
-            <span className="text-[10px] text-muted dark:text-dark-text-muted">Badges: {recognition.badgesCount || 0}</span>
+            <div className="flex items-baseline justify-between">
+              <p className="text-xl font-bold text-deep dark:text-dark-text">
+                {kpis.recognitionPoints !== null ? `${kpis.recognitionPoints} pts` : 'No data'}
+              </p>
+              <span className="text-[11px] text-muted dark:text-dark-text-muted font-medium">
+                Badges: {recognition.badgesCount || 0}
+              </span>
+            </div>
           </div>
         )}
       </div>
@@ -498,8 +507,8 @@ export default function StudentProfile() {
       )}
 
       {/* ──────────────────────── 4. TAB NAVIGATION ──────────────────────── */}
-      <div className="border-b border-border dark:border-dark-border overflow-x-auto no-scrollbar">
-        <nav className="flex space-x-6 min-w-max">
+      <div className="border-b border-border dark:border-dark-border overflow-x-auto no-scrollbar scrollbar-none">
+        <nav className="flex space-x-1 sm:space-x-4 md:space-x-6 min-w-max px-0.5">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.key;
@@ -507,16 +516,16 @@ export default function StudentProfile() {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`py-3 px-1 border-b-2 font-semibold text-xs transition-colors flex items-center gap-1.5 cursor-pointer ${
+                className={`py-2.5 sm:py-3 px-1.5 sm:px-1 border-b-2 font-semibold text-[11px] sm:text-xs transition-colors flex items-center gap-1 sm:gap-1.5 cursor-pointer whitespace-nowrap ${
                   isActive
                     ? 'border-forest dark:border-emerald-500 text-forest dark:text-emerald-400'
                     : 'border-transparent text-secondary dark:text-dark-text-secondary hover:text-deep dark:hover:text-dark-text'
                 }`}
               >
-                <Icon size={14} />
+                <Icon size={13} className="sm:w-3.5 sm:h-3.5" />
                 <span>{tab.label}</span>
                 {tab.count !== undefined && (
-                  <span className="ml-1 px-1.5 py-0.2 rounded-full text-[10px] bg-surface dark:bg-dark-hover text-muted dark:text-dark-text-muted font-mono">
+                  <span className="ml-0.5 px-1 py-0.5 rounded-full text-[9px] sm:text-[10px] bg-surface dark:bg-dark-hover text-muted dark:text-dark-text-muted font-mono leading-none">
                     {tab.count}
                   </span>
                 )}
@@ -536,7 +545,7 @@ export default function StudentProfile() {
             <h3 className="text-xs font-bold text-deep dark:text-dark-text uppercase tracking-wider flex items-center gap-1.5 pb-2 border-b border-border/60 dark:border-dark-border">
               <User size={14} className="text-forest dark:text-emerald-400" /> Personal Information
             </h3>
-            <div className="grid grid-cols-2 gap-3 text-xs">
+            <div className="grid grid-cols-2 gap-3 text-xs mobile-keep-grid">
               <div>
                 <span className="text-muted dark:text-dark-text-muted block text-[11px]">Full Name</span>
                 <span className="font-semibold text-deep dark:text-dark-text">{student.firstName} {student.lastName}</span>
@@ -573,7 +582,7 @@ export default function StudentProfile() {
             <h3 className="text-xs font-bold text-deep dark:text-dark-text uppercase tracking-wider flex items-center gap-1.5 pb-2 border-b border-border/60 dark:border-dark-border">
               <GraduationCap size={14} className="text-forest dark:text-emerald-400" /> Academic Information
             </h3>
-            <div className="grid grid-cols-2 gap-3 text-xs">
+            <div className="grid grid-cols-2 gap-3 text-xs mobile-keep-grid">
               <div>
                 <span className="text-muted dark:text-dark-text-muted block text-[11px]">Academic Session</span>
                 <span className="font-semibold text-deep dark:text-dark-text">{student.academicYear?.name || '2026-2027'}</span>
@@ -651,7 +660,7 @@ export default function StudentProfile() {
       {activeTab === 'academics' && academics && (
         <div className="space-y-4">
           {/* Summary Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
             <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-2xs">
               <span className="text-[11px] font-semibold text-muted dark:text-dark-text-muted uppercase">Overall Average</span>
               <p className="text-2xl font-bold text-deep dark:text-dark-text mt-1">
@@ -699,12 +708,39 @@ export default function StudentProfile() {
             )}
           </div>
 
-          {/* Examinations Table */}
+          {/* Examinations — Mobile Cards + Desktop Table */}
           <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl overflow-hidden shadow-2xs">
             <div className="p-3.5 border-b border-border dark:border-dark-border bg-slate-50/50 dark:bg-dark-elevated">
               <h3 className="text-xs font-bold text-deep dark:text-dark-text uppercase tracking-wider">Recent Examinations</h3>
             </div>
-            <div className="overflow-x-auto">
+
+            {/* Mobile Card List */}
+            <div className="md:hidden divide-y divide-border/60 dark:divide-dark-border">
+              {academics.exams && academics.exams.length > 0 ? (
+                academics.exams.map((ex) => (
+                  <div key={ex.id} className="p-3.5 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-xs text-deep dark:text-dark-text">{ex.name}</span>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 capitalize">
+                        {ex.status}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[11px] mobile-keep-grid">
+                      <div><span className="text-muted dark:text-dark-text-muted">Date: </span><span className="text-deep dark:text-dark-text font-medium">{ex.date ? new Date(ex.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}</span></div>
+                      <div><span className="text-muted dark:text-dark-text-muted">Subjects: </span><span className="text-deep dark:text-dark-text font-medium">{ex.subjectsCount}</span></div>
+                      <div><span className="text-muted dark:text-dark-text-muted">Marks: </span><span className="font-mono text-deep dark:text-dark-text font-medium">{ex.totalObtained}/{ex.totalMax}</span></div>
+                      <div><span className="text-muted dark:text-dark-text-muted">Percentage: </span><span className="text-deep dark:text-dark-text font-bold">{ex.percentage}%</span></div>
+                      <div><span className="text-muted dark:text-dark-text-muted">Grade: </span><span className="text-forest dark:text-emerald-400 font-bold">{ex.grade}</span></div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="px-4 py-8 text-center text-xs text-muted dark:text-dark-text-muted">No published exam results yet.</div>
+              )}
+            </div>
+
+            {/* Desktop Table */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="border-b border-border dark:border-dark-border text-secondary dark:text-dark-text-secondary bg-surface/50 dark:bg-dark-hover">
@@ -753,7 +789,7 @@ export default function StudentProfile() {
       {/* ATTENDANCE TAB */}
       {activeTab === 'attendance' && attendance && (
         <div className="space-y-4">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mobile-keep-grid">
             <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-2xs">
               <span className="text-[11px] font-semibold text-muted dark:text-dark-text-muted uppercase">Overall Attendance</span>
               <p className="text-2xl font-bold text-deep dark:text-dark-text mt-1">{attendance.overallPercentage !== null ? `${attendance.overallPercentage}%` : 'No data'}</p>
@@ -803,7 +839,7 @@ export default function StudentProfile() {
       {/* FEES TAB */}
       {activeTab === 'fees' && fees && (
         <div className="space-y-4">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mobile-keep-grid">
             <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-2xs">
               <span className="text-[11px] font-semibold text-muted dark:text-dark-text-muted uppercase">Total Assigned</span>
               <p className="text-2xl font-bold text-deep dark:text-dark-text mt-1">₹{fees.totalAssigned.toLocaleString('en-IN')}</p>
@@ -822,11 +858,36 @@ export default function StudentProfile() {
             </div>
           </div>
 
+          {/* Payment History — Mobile Cards + Desktop Table */}
           <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl overflow-hidden shadow-2xs">
             <div className="p-3.5 border-b border-border dark:border-dark-border bg-slate-50/50 dark:bg-dark-elevated">
               <h3 className="text-xs font-bold text-deep dark:text-dark-text uppercase tracking-wider">Payment History</h3>
             </div>
-            <div className="overflow-x-auto">
+
+            {/* Mobile Card List */}
+            <div className="md:hidden divide-y divide-border/60 dark:divide-dark-border">
+              {fees.transactions && fees.transactions.length > 0 ? (
+                fees.transactions.map((tx) => (
+                  <div key={tx.id} className="p-3.5 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono font-bold text-xs text-deep dark:text-dark-text">{tx.receiptNo}</span>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 capitalize">{tx.status}</span>
+                    </div>
+                    <p className="text-[11px] text-deep dark:text-dark-text font-medium">{tx.structureName}</p>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] mobile-keep-grid">
+                      <div><span className="text-muted dark:text-dark-text-muted">Amount: </span><span className="font-mono text-deep dark:text-dark-text">₹{tx.amount?.toLocaleString('en-IN')}</span></div>
+                      <div><span className="text-muted dark:text-dark-text-muted">Paid: </span><span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">₹{tx.paidAmount?.toLocaleString('en-IN')}</span></div>
+                      <div><span className="text-muted dark:text-dark-text-muted">Method: </span><span className="text-deep dark:text-dark-text capitalize">{tx.paymentMethod || 'Online'}</span></div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="px-4 py-8 text-center text-xs text-muted dark:text-dark-text-muted">No fee records available.</div>
+              )}
+            </div>
+
+            {/* Desktop Table */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="border-b border-border dark:border-dark-border text-secondary dark:text-dark-text-secondary bg-surface/50 dark:bg-dark-hover">
@@ -871,7 +932,7 @@ export default function StudentProfile() {
       {/* HOMEWORK TAB */}
       {activeTab === 'homework' && homework && (
         <div className="space-y-4">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mobile-keep-grid">
             <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-2xs">
               <span className="text-[11px] font-semibold text-muted dark:text-dark-text-muted uppercase">Assigned</span>
               <p className="text-2xl font-bold text-deep dark:text-dark-text mt-1">{homework.totalAssigned}</p>
@@ -890,11 +951,41 @@ export default function StudentProfile() {
             </div>
           </div>
 
+          {/* Homework — Mobile Cards + Desktop Table */}
           <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl overflow-hidden shadow-2xs">
             <div className="p-3.5 border-b border-border dark:border-dark-border bg-slate-50/50 dark:bg-dark-elevated">
               <h3 className="text-xs font-bold text-deep dark:text-dark-text uppercase tracking-wider">Recent Homework Assignments</h3>
             </div>
-            <div className="overflow-x-auto">
+
+            {/* Mobile Card List */}
+            <div className="md:hidden divide-y divide-border/60 dark:divide-dark-border">
+              {homework.list && homework.list.length > 0 ? (
+                homework.list.map((hw) => (
+                  <div key={hw.id} className="p-3.5 space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-xs text-deep dark:text-dark-text">{hw.subject}</span>
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-semibold capitalize ${
+                        hw.status === 'completed'
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-400 dark:border-emerald-500/20'
+                          : hw.status === 'overdue'
+                          ? 'bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-500/15 dark:text-rose-400 dark:border-rose-500/20'
+                          : 'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/15 dark:text-amber-400 dark:border-amber-500/20'
+                      }`}>{hw.status}</span>
+                    </div>
+                    <p className="text-[11px] text-deep dark:text-dark-text">{hw.title}</p>
+                    <div className="flex items-center gap-3 text-[11px] text-muted dark:text-dark-text-muted">
+                      <span>Teacher: <span className="text-secondary dark:text-dark-text-secondary">{hw.teacher}</span></span>
+                      <span>Due: <span className="text-secondary dark:text-dark-text-secondary">{hw.dueDate ? new Date(hw.dueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : 'N/A'}</span></span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="px-4 py-8 text-center text-xs text-muted dark:text-dark-text-muted">No homework records available.</div>
+              )}
+            </div>
+
+            {/* Desktop Table */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="border-b border-border dark:border-dark-border text-secondary dark:text-dark-text-secondary bg-surface/50 dark:bg-dark-hover">
@@ -945,7 +1036,7 @@ export default function StudentProfile() {
       {/* RECOGNITION TAB */}
       {activeTab === 'recognition' && recognition && (
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2.5 mobile-keep-grid">
             <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-2xs">
               <span className="text-[11px] font-semibold text-muted dark:text-dark-text-muted uppercase">Total Points</span>
               <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400 mt-1">{recognition.points} pts</p>
@@ -960,7 +1051,7 @@ export default function StudentProfile() {
           <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-2xs space-y-3">
             <h3 className="text-xs font-bold text-deep dark:text-dark-text uppercase tracking-wider">Earned Badges</h3>
             {recognition.badges && recognition.badges.length > 0 ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 mobile-keep-grid">
                 {recognition.badges.map((b) => (
                   <div key={b.id} className="p-3 bg-surface/50 dark:bg-dark-elevated rounded-xl border border-border/60 dark:border-dark-border text-center space-y-1">
                     <div className="w-10 h-10 mx-auto rounded-full bg-yellow-50 dark:bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 flex items-center justify-center text-lg">
@@ -990,59 +1081,95 @@ export default function StudentProfile() {
             )}
           </div>
 
+          {/* Documents — Mobile Cards + Desktop Table */}
           <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl overflow-hidden shadow-2xs">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className="border-b border-border dark:border-dark-border text-secondary dark:text-dark-text-secondary bg-surface/50 dark:bg-dark-hover">
-                  <th className="px-3.5 py-2.5 font-semibold">Document Name</th>
-                  <th className="px-3.5 py-2.5 font-semibold">Type</th>
-                  <th className="px-3.5 py-2.5 font-semibold">Uploaded Date</th>
-                  <th className="px-3.5 py-2.5 font-semibold">Verification Status</th>
-                  <th className="px-3.5 py-2.5 font-semibold text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/60 dark:divide-dark-border">
-                {documents && documents.length > 0 ? (
-                  documents.map((doc) => (
-                    <tr key={doc.id} className="hover:bg-surface/50 dark:hover:bg-dark-hover">
-                      <td className="px-3.5 py-2.5 font-bold text-deep dark:text-dark-text flex items-center gap-2">
-                        <FileText size={14} className="text-forest dark:text-emerald-400 shrink-0" />
-                        <span>{doc.name}</span>
-                      </td>
-                      <td className="px-3.5 py-2.5 text-secondary dark:text-dark-text-secondary capitalize">{doc.type}</td>
-                      <td className="px-3.5 py-2.5 text-secondary dark:text-dark-text-secondary">
+            {/* Mobile Card List */}
+            <div className="md:hidden divide-y divide-border/60 dark:divide-dark-border">
+              {documents && documents.length > 0 ? (
+                documents.map((doc) => (
+                  <div key={doc.id} className="p-3.5 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <FileText size={14} className="text-forest dark:text-emerald-400 shrink-0" />
+                      <span className="font-bold text-xs text-deep dark:text-dark-text flex-1 truncate">{doc.name}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-muted dark:text-dark-text-muted capitalize">{doc.type}</span>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">{doc.verificationStatus}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-muted dark:text-dark-text-muted">
                         {doc.uploadedAt ? new Date(doc.uploadedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}
-                      </td>
-                      <td className="px-3.5 py-2.5">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
-                          {doc.verificationStatus}
-                        </span>
-                      </td>
-                      <td className="px-3.5 py-2.5 text-right">
-                        {doc.url ? (
-                          <a
-                            href={doc.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-forest dark:text-emerald-400 font-semibold hover:underline"
-                          >
-                            <Download size={13} /> Download
-                          </a>
-                        ) : (
-                          <span className="text-muted">N/A</span>
-                        )}
+                      </span>
+                      {doc.url ? (
+                        <a href={doc.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-forest dark:text-emerald-400 font-semibold hover:underline">
+                          <Download size={12} /> Download
+                        </a>
+                      ) : (
+                        <span className="text-muted">N/A</span>
+                      )}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="px-4 py-8 text-center text-xs text-muted dark:text-dark-text-muted">No documents uploaded yet.</div>
+              )}
+            </div>
+
+            {/* Desktop Table */}
+            <div className="hidden md:block">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="border-b border-border dark:border-dark-border text-secondary dark:text-dark-text-secondary bg-surface/50 dark:bg-dark-hover">
+                    <th className="px-3.5 py-2.5 font-semibold">Document Name</th>
+                    <th className="px-3.5 py-2.5 font-semibold">Type</th>
+                    <th className="px-3.5 py-2.5 font-semibold">Uploaded Date</th>
+                    <th className="px-3.5 py-2.5 font-semibold">Verification Status</th>
+                    <th className="px-3.5 py-2.5 font-semibold text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/60 dark:divide-dark-border">
+                  {documents && documents.length > 0 ? (
+                    documents.map((doc) => (
+                      <tr key={doc.id} className="hover:bg-surface/50 dark:hover:bg-dark-hover">
+                        <td className="px-3.5 py-2.5 font-bold text-deep dark:text-dark-text flex items-center gap-2">
+                          <FileText size={14} className="text-forest dark:text-emerald-400 shrink-0" />
+                          <span>{doc.name}</span>
+                        </td>
+                        <td className="px-3.5 py-2.5 text-secondary dark:text-dark-text-secondary capitalize">{doc.type}</td>
+                        <td className="px-3.5 py-2.5 text-secondary dark:text-dark-text-secondary">
+                          {doc.uploadedAt ? new Date(doc.uploadedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}
+                        </td>
+                        <td className="px-3.5 py-2.5">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
+                            {doc.verificationStatus}
+                          </span>
+                        </td>
+                        <td className="px-3.5 py-2.5 text-right">
+                          {doc.url ? (
+                            <a
+                              href={doc.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-forest dark:text-emerald-400 font-semibold hover:underline"
+                            >
+                              <Download size={13} /> Download
+                            </a>
+                          ) : (
+                            <span className="text-muted">N/A</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={5} className="px-4 py-8 text-center text-xs text-muted dark:text-dark-text-muted">
+                        No documents uploaded yet.
                       </td>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={5} className="px-4 py-8 text-center text-xs text-muted dark:text-dark-text-muted">
-                      No documents uploaded yet.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}

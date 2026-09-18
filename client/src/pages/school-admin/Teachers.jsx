@@ -17,6 +17,7 @@ import { academicApi } from '../../api/academic.api';
 import BulkImportModal from '../../components/ui/BulkImportModal';
 import UserAvatar from '../../components/ui/UserAvatar';
 import Pagination from '../../components/ui/Pagination';
+import MobileSummaryCards from '../../components/ui/MobileSummaryCards';
 
 /* ──────────────────────── Constants ──────────────────────── */
 
@@ -132,6 +133,37 @@ export default function Teachers() {
     }
   });
   const subjectCount = allTeacherSubjects.size;
+
+  const mobileMetrics = [
+    {
+      label: 'Total Teachers',
+      value: totalCount,
+      icon: GraduationCap,
+      iconColor: 'text-forest dark:text-emerald-400',
+      iconBg: 'bg-forest-soft dark:bg-dark-accent-soft',
+    },
+    {
+      label: 'Active',
+      value: activeCount,
+      icon: Users,
+      iconColor: 'text-emerald-600 dark:text-emerald-400',
+      iconBg: 'bg-emerald-50 dark:bg-emerald-500/10',
+    },
+    {
+      label: 'Departments',
+      value: depts,
+      icon: Building2,
+      iconColor: 'text-blue-600 dark:text-blue-400',
+      iconBg: 'bg-blue-50 dark:bg-blue-500/10',
+    },
+    {
+      label: 'Subjects Covered',
+      value: subjectCount,
+      icon: BookOpen,
+      iconColor: 'text-amber-600 dark:text-amber-400',
+      iconBg: 'bg-amber-50 dark:bg-amber-500/10',
+    },
+  ];
 
   const subjectMap = {};
   allSubjects.forEach((s) => { subjectMap[s._id] = s.name; });
@@ -339,8 +371,11 @@ export default function Teachers() {
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      {/* Mobile Summary Cards (2x2 grid, mobile only) */}
+      <MobileSummaryCards metrics={mobileMetrics} loading={loading} />
+
+      {/* Desktop/Tablet KPI Cards */}
+      <div className="hidden md:grid md:grid-cols-4 gap-3">
         <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-2xs">
           <div className="w-7 h-7 rounded-lg bg-forest-soft dark:bg-dark-accent-soft text-forest dark:text-emerald-400 flex items-center justify-center mb-2"><GraduationCap size={15} strokeWidth={1.8} /></div>
           <p className="text-[11px] font-semibold text-muted dark:text-dark-text-muted uppercase tracking-wide">Total Teachers</p>
@@ -483,29 +518,29 @@ export default function Teachers() {
 
         {/* ── Desktop Table (>= 768px) ── */}
         <div className="hidden md:block overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-left border-collapse table-fixed lg:table-auto">
             <thead>
               <tr className="border-b border-border dark:border-dark-border bg-surface/70 dark:bg-dark-elevated">
-                <th onClick={() => handleSort('employeeId')} className="px-3.5 py-2.5 text-xs font-semibold text-secondary dark:text-dark-text-secondary uppercase tracking-wider cursor-pointer hover:text-deep dark:hover:text-dark-text select-none">
+                <th onClick={() => handleSort('employeeId')} className="px-2 lg:px-3.5 py-2.5 text-xs font-semibold text-secondary dark:text-dark-text-secondary uppercase tracking-wider cursor-pointer hover:text-deep dark:hover:text-dark-text select-none w-[100px] lg:w-auto">
                   <div className="flex items-center gap-1"><span>EMPLOYEE ID</span><SortIcon field="employeeId" /></div>
                 </th>
-                <th onClick={() => handleSort('firstName')} className="px-3.5 py-2.5 text-xs font-semibold text-secondary dark:text-dark-text-secondary uppercase tracking-wider cursor-pointer hover:text-deep dark:hover:text-dark-text select-none">
+                <th onClick={() => handleSort('firstName')} className="px-2 lg:px-3.5 py-2.5 text-xs font-semibold text-secondary dark:text-dark-text-secondary uppercase tracking-wider cursor-pointer hover:text-deep dark:hover:text-dark-text select-none">
                   <div className="flex items-center gap-1"><span>TEACHER</span><SortIcon field="firstName" /></div>
                 </th>
-                <th className="px-3.5 py-2.5 text-xs font-semibold text-secondary dark:text-dark-text-secondary uppercase tracking-wider">DEPARTMENT</th>
-                <th className="px-3.5 py-2.5 text-xs font-semibold text-secondary dark:text-dark-text-secondary uppercase tracking-wider">SUBJECTS</th>
-                <th className="px-3.5 py-2.5 text-xs font-semibold text-secondary dark:text-dark-text-secondary uppercase tracking-wider">ACCOUNT</th>
-                <th className="px-3.5 py-2.5 text-xs font-semibold text-secondary dark:text-dark-text-secondary uppercase tracking-wider">STATUS</th>
-                <th className="px-3.5 py-2.5 text-xs font-semibold text-secondary dark:text-dark-text-secondary uppercase tracking-wider text-right">ACTIONS</th>
+                <th className="hidden lg:table-cell px-3.5 py-2.5 text-xs font-semibold text-secondary dark:text-dark-text-secondary uppercase tracking-wider">DEPARTMENT</th>
+                <th className="px-2 lg:px-3.5 py-2.5 text-xs font-semibold text-secondary dark:text-dark-text-secondary uppercase tracking-wider">SUBJECTS</th>
+                <th className="hidden lg:table-cell px-3.5 py-2.5 text-xs font-semibold text-secondary dark:text-dark-text-secondary uppercase tracking-wider">ACCOUNT</th>
+                <th className="px-2 lg:px-3.5 py-2.5 text-xs font-semibold text-secondary dark:text-dark-text-secondary uppercase tracking-wider w-[80px] lg:w-auto">STATUS</th>
+                <th className="px-2 lg:px-3.5 py-2.5 text-xs font-semibold text-secondary dark:text-dark-text-secondary uppercase tracking-wider text-right w-[70px] lg:w-auto">ACTIONS</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/60 dark:divide-dark-border bg-white dark:bg-dark-card">
               {loading ? (
                 [1, 2, 3, 4, 5].map((i) => (
-                  <tr key={i}><td colSpan={7} className="px-3.5 py-3"><div className="h-5 bg-surface dark:bg-dark-hover rounded animate-pulse w-full" /></td></tr>
+                  <tr key={i}><td colSpan={10} className="px-3.5 py-3"><div className="h-5 bg-surface dark:bg-dark-hover rounded animate-pulse w-full" /></td></tr>
                 ))
               ) : data.length === 0 ? (
-                <tr><td colSpan={7} className="px-4 py-12 text-center text-xs text-muted dark:text-dark-text-muted">No teachers found matching the selected criteria.</td></tr>
+                <tr><td colSpan={10} className="px-4 py-12 text-center text-xs text-muted dark:text-dark-text-muted">No teachers found matching the selected criteria.</td></tr>
               ) : (
                 data.map((row) => {
                   const subjectNames = Array.isArray(row.subjects) ? row.subjects.map(s => typeof s === 'string' ? (subjectMap[s] || s) : (s.name || subjectMap[s._id] || '—')) : [];
@@ -517,8 +552,8 @@ export default function Teachers() {
                       onClick={() => navigate(`/teachers/${row._id}`)}
                       className="hover:bg-surface/50 dark:hover:bg-dark-hover transition-colors cursor-pointer"
                     >
-                      <td className="px-3.5 py-2.5 font-bold text-xs text-deep dark:text-dark-text font-mono">{row.employeeId || '—'}</td>
-                      <td className="px-3.5 py-2.5">
+                      <td className="px-2 lg:px-3.5 py-2.5 font-bold text-xs text-deep dark:text-dark-text font-mono truncate">{row.employeeId || '—'}</td>
+                      <td className="px-2 lg:px-3.5 py-2.5">
                         <div className="flex items-center gap-2.5">
                           <UserAvatar
                             type="teacher"
@@ -529,36 +564,37 @@ export default function Teachers() {
                             size="sm"
                             className="shrink-0 ring-1 ring-border/50 dark:ring-dark-border"
                           />
-                          <div>
+                          <div className="min-w-0">
                             <p className="font-bold text-xs text-deep dark:text-dark-text leading-tight hover:text-forest dark:hover:text-emerald-400 transition-colors">
                               {row.firstName} {row.lastName}
                             </p>
                             {row.contact?.email && <p className="text-[11px] text-muted dark:text-dark-text-muted leading-tight mt-0.5">{row.contact.email}</p>}
+                            {row.department && <p className="lg:hidden text-[11px] text-secondary dark:text-dark-text-secondary leading-tight mt-0.5">{row.department}</p>}
                           </div>
                         </div>
                       </td>
-                      <td className="px-3.5 py-2.5 text-xs text-secondary dark:text-dark-text-secondary font-medium">{row.department || '—'}</td>
-                      <td className="px-3.5 py-2.5 text-xs">
+                      <td className="hidden lg:table-cell px-3.5 py-2.5 text-xs text-secondary dark:text-dark-text-secondary font-medium">{row.department || '—'}</td>
+                      <td className="px-2 lg:px-3.5 py-2.5 text-xs">
                         {subjectNames.length === 0 ? (
                           <span className="text-muted dark:text-dark-text-muted">—</span>
                         ) : (
-                          <div className="flex flex-wrap gap-1 max-w-xs">
-                            {subjectNames.slice(0, 3).map((name, sIdx) => (
-                              <span key={sIdx} className="px-2 py-0.5 rounded text-[11px] font-medium bg-blue-50 dark:bg-blue-500/15 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20">
+                          <div className="flex flex-wrap gap-1 max-w-[140px] lg:max-w-xs">
+                            {subjectNames.slice(0, 2).map((name, sIdx) => (
+                              <span key={sIdx} className="px-2 py-0.5 rounded text-[11px] font-medium bg-blue-50 dark:bg-blue-500/15 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 truncate max-w-[100px] lg:max-w-none">
                                 {name}
                               </span>
                             ))}
-                            {subjectNames.length > 3 && (
+                            {subjectNames.length > 2 && (
                               <span className="px-1.5 py-0.5 rounded text-[11px] font-medium bg-slate-100 dark:bg-dark-hover text-slate-600 dark:text-dark-text-secondary">
-                                +{subjectNames.length - 3}
+                                +{subjectNames.length - 2}
                               </span>
                             )}
                           </div>
                         )}
                       </td>
-                      <td className="px-3.5 py-2.5">{renderAccountStatusBadge(accountStatus)}</td>
-                      <td className="px-3.5 py-2.5">{renderStatusBadge(row.status)}</td>
-                      <td className="px-3.5 py-2.5 text-right relative" onClick={(e) => e.stopPropagation()}>
+                      <td className="hidden lg:table-cell px-3.5 py-2.5">{renderAccountStatusBadge(accountStatus)}</td>
+                      <td className="px-2 lg:px-3.5 py-2.5">{renderStatusBadge(row.status)}</td>
+                      <td className="px-2 lg:px-3.5 py-2.5 text-right relative" onClick={(e) => e.stopPropagation()}>
                         <div className="inline-flex items-center gap-1">
                           <button
                             onClick={() => navigate(`/teachers/${row._id}`)}

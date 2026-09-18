@@ -14,6 +14,7 @@ import Select from '../../components/ui/Select';
 import Input from '../../components/ui/Input';
 import Badge from '../../components/ui/Badge';
 import Pagination from '../../components/ui/Pagination';
+import MobileSummaryCards from '../../components/ui/MobileSummaryCards';
 import { timetableApi } from '../../api/timetable.api';
 import { academicApi } from '../../api/academic.api';
 import { teacherApi } from '../../api/teacher.api';
@@ -315,6 +316,37 @@ export default function Timetable() {
   const totalCount = meta?.total || timetables.length;
   const publishedCount = timetables.filter(t => t.status === 'published').length;
   const draftCount = timetables.filter(t => t.status !== 'published').length;
+
+  const mobileMetrics = [
+    {
+      label: 'Total Timetables',
+      value: totalCount,
+      icon: Calendar,
+      iconColor: 'text-forest dark:text-emerald-400',
+      iconBg: 'bg-forest-soft dark:bg-dark-accent-soft',
+    },
+    {
+      label: 'Published',
+      value: publishedCount,
+      icon: CheckCircle2,
+      iconColor: 'text-emerald-600 dark:text-emerald-400',
+      iconBg: 'bg-emerald-50 dark:bg-emerald-500/10',
+    },
+    {
+      label: 'Drafts',
+      value: draftCount,
+      icon: Layers3,
+      iconColor: 'text-amber-600 dark:text-amber-400',
+      iconBg: 'bg-amber-50 dark:bg-amber-500/10',
+    },
+    {
+      label: 'Conflicts',
+      value: conflicts.length,
+      icon: AlertTriangle,
+      iconColor: 'text-rose-600 dark:text-rose-400',
+      iconBg: 'bg-rose-50 dark:bg-rose-500/10',
+    },
+  ];
 
   // History tracking
   const pushToHistory = (periods) => {
@@ -1051,8 +1083,11 @@ export default function Timetable() {
       ) : (
         /* List View */
         <div className="space-y-4 animate-scale-in">
-          {/* KPI Summary Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {/* Mobile Summary Cards (2x2 grid, mobile only) */}
+          <MobileSummaryCards metrics={mobileMetrics} loading={loading} />
+
+          {/* Desktop/Tablet KPI Summary Cards */}
+          <div className="hidden md:grid md:grid-cols-4 gap-3">
             <div className="bg-white border border-border rounded-xl p-3.5 shadow-2xs">
               <div className="w-7 h-7 rounded-full bg-forest-soft text-forest flex items-center justify-center mb-1.5">
                 <Calendar size={15} />
@@ -1189,8 +1224,113 @@ export default function Timetable() {
           )}
 
           {/* High Density Table */}
-          <div className="bg-white border border-border rounded-xl overflow-hidden shadow-2xs">
-            <div className="overflow-x-auto">
+          <div className="bg-white dark:bg-[#101315] border border-border dark:border-white/10 rounded-xl overflow-hidden shadow-2xs">
+            {/* ── Mobile List Cards View (< 768px) ── */}
+            <div className="md:hidden divide-y divide-border/60 dark:divide-white/10 bg-white dark:bg-[#101315]">
+              {loading ? (
+                [1, 2, 3, 4].map((i) => (
+                  <div key={i} className="p-3.5 space-y-2 animate-pulse">
+                    <div className="h-4 bg-surface dark:bg-white/[0.06] rounded w-2/3" />
+                    <div className="h-3 bg-surface dark:bg-white/[0.06] rounded w-1/2" />
+                  </div>
+                ))
+              ) : timetables.length === 0 ? (
+                <div className="px-4 py-12 text-center text-xs text-muted dark:text-slate-400">
+                  No timetables found matching the selected criteria.
+                </div>
+              ) : (
+                timetables.map((row) => {
+                  const isRowSelected = selectedIds.includes(row._id);
+                  return (
+                    <div
+                      key={row._id}
+                      className={`p-3.5 space-y-2.5 transition-colors ${
+                        isRowSelected ? 'bg-forest-soft/30 dark:bg-emerald-500/10' : 'hover:bg-surface/50 dark:hover:bg-white/[0.04]'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                          <input
+                            type="checkbox"
+                            checked={isRowSelected}
+                            onChange={() => toggleSelectRow(row._id)}
+                            className="w-4 h-4 accent-forest rounded cursor-pointer shrink-0 mt-0.5"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <p className="font-bold text-xs text-deep dark:text-slate-100 truncate">
+                              {row.schoolClass?.name || classMap[row.schoolClass] || '—'}
+                              <span className="font-normal text-secondary dark:text-slate-400 ml-1">
+                                (Section {row.section?.name || sectionMap[row.section] || '—'})
+                              </span>
+                            </p>
+                            <p className="text-[11px] text-muted dark:text-slate-400 mt-0.5">
+                              Session: {row.academicYear?.name || yearMap[row.academicYear] || '—'}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="shrink-0 flex items-center gap-1.5">
+                          {row.isAutoGenerated ? (
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-purple-50 text-purple-700 dark:bg-purple-500/10 dark:text-purple-400 border border-purple-200 dark:border-purple-500/20">
+                              Auto
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-sky-50 text-sky-700 dark:bg-sky-500/10 dark:text-sky-400 border border-sky-200 dark:border-sky-500/20">
+                              Manual
+                            </span>
+                          )}
+                          {row.status === 'published' ? (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
+                              Published
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20">
+                              Draft
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs text-secondary dark:text-slate-400 pt-1 border-t border-border/40 dark:border-white/10">
+                        <span className="text-[11px] font-semibold text-deep dark:text-slate-200">
+                          {Array.isArray(row.periods) ? row.periods.length : 0} period slots
+                        </span>
+
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            onClick={() => openEditor(row)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-forest dark:text-emerald-400 bg-forest/10 dark:bg-emerald-500/10 border border-forest/20 dark:border-emerald-500/20 rounded-lg transition-colors"
+                            title="Inspect & Edit"
+                          >
+                            <Eye size={12} /> Inspect
+                          </button>
+                          <button
+                            onClick={() => handlePublish(row)}
+                            className={`p-1 rounded-lg border transition-colors ${
+                              row.status === 'published'
+                                ? 'text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 border-amber-200 dark:border-amber-500/30'
+                                : 'text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/30'
+                            }`}
+                            title={row.status === 'published' ? 'Unpublish' : 'Publish'}
+                          >
+                            {row.status === 'published' ? <Lock size={12} /> : <Unlock size={12} />}
+                          </button>
+                          <button
+                            onClick={() => handleDelete(row)}
+                            className="p-1 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 rounded-lg transition-colors"
+                            title="Delete"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* ── Desktop Table View (>= 768px) ── */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-border bg-surface/70">

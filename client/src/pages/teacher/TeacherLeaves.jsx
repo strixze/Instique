@@ -12,6 +12,7 @@ import Badge from '../../components/ui/Badge';
 import Modal from '../../components/ui/Modal';
 import Input from '../../components/ui/Input';
 import Select from '../../components/ui/Select';
+import MobileSummaryCards from '../../components/ui/MobileSummaryCards';
 import { leaveApi } from '../../api/leave.api';
 import { substitutionApi } from '../../api/substitution.api';
 
@@ -249,6 +250,42 @@ export default function TeacherLeaves() {
   const approvedCount = leaves.filter((l) => l.status === 'approved').length;
   const rejectedCount = leaves.filter((l) => l.status === 'rejected').length;
 
+  const mobileMetrics = [
+    {
+      label: 'My Pending',
+      value: pendingCount,
+      icon: AlertCircle,
+      iconColor: 'text-amber-500 dark:text-amber-400',
+      iconBg: 'bg-amber-500/10 dark:bg-amber-500/15',
+      onClick: () => { setActiveTab('leaves'); setFilterStatus('pending'); },
+    },
+    {
+      label: 'My Approved',
+      value: approvedCount,
+      icon: CheckCircle,
+      iconColor: 'text-emerald-500 dark:text-emerald-400',
+      iconBg: 'bg-emerald-500/10 dark:bg-emerald-500/15',
+      onClick: () => { setActiveTab('leaves'); setFilterStatus('approved'); },
+    },
+    {
+      label: 'Assigned Subs',
+      value: substitutions.length,
+      icon: ClipboardList,
+      iconColor: 'text-blue-500 dark:text-blue-400',
+      iconBg: 'bg-blue-500/10 dark:bg-blue-500/15',
+      onClick: () => setActiveTab('substitutions'),
+    },
+    {
+      label: classPendingCount > 0 ? 'Class Requests' : 'My Rejected',
+      value: classPendingCount > 0 ? classPendingCount : rejectedCount,
+      sub: classPendingCount > 0 ? 'pending' : undefined,
+      icon: classPendingCount > 0 ? GraduationCap : XCircle,
+      iconColor: classPendingCount > 0 ? 'text-forest dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400',
+      iconBg: classPendingCount > 0 ? 'bg-forest-soft dark:bg-forest/10' : 'bg-rose-500/10 dark:bg-rose-500/15',
+      onClick: classPendingCount > 0 ? () => setActiveTab('class-leaves') : () => { setActiveTab('leaves'); setFilterStatus('rejected'); },
+    },
+  ];
+
   return (
     <div className="space-y-6 pb-12">
       <PageHeader
@@ -261,8 +298,14 @@ export default function TeacherLeaves() {
         }
       />
 
-      {/* Summary KPI Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+      {/* ── Mobile Summary Cards (2x2 grid, mobile only) ── */}
+      <MobileSummaryCards
+        metrics={mobileMetrics}
+        loading={leavesLoading || subsLoading}
+      />
+
+      {/* ── Desktop/Tablet Summary KPI Cards (>= 768px) ── */}
+      <div className="hidden md:grid md:grid-cols-5 gap-3">
         <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-card flex items-center gap-3">
           <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-500">
             <AlertCircle size={20} />
@@ -325,10 +368,10 @@ export default function TeacherLeaves() {
       </div>
 
       {/* Main Tabs Navigation */}
-      <div className="flex border-b border-border dark:border-dark-border">
+      <div className="flex border-b border-border dark:border-dark-border overflow-x-auto scrollbar-none flex-nowrap">
         <button
           onClick={() => setActiveTab('leaves')}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all ${
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 whitespace-nowrap shrink-0 transition-all ${
             activeTab === 'leaves'
               ? 'border-forest text-forest dark:border-emerald-400 dark:text-emerald-400'
               : 'border-transparent text-muted dark:text-dark-text-muted hover:text-deep dark:hover:text-dark-text'
@@ -338,7 +381,7 @@ export default function TeacherLeaves() {
         </button>
         <button
           onClick={() => setActiveTab('substitutions')}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all ${
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 whitespace-nowrap shrink-0 transition-all ${
             activeTab === 'substitutions'
               ? 'border-forest text-forest dark:border-emerald-400 dark:text-emerald-400'
               : 'border-transparent text-muted dark:text-dark-text-muted hover:text-deep dark:hover:text-dark-text'
@@ -348,7 +391,7 @@ export default function TeacherLeaves() {
         </button>
         <button
           onClick={() => setActiveTab('class-leaves')}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all ${
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 whitespace-nowrap shrink-0 transition-all ${
             activeTab === 'class-leaves'
               ? 'border-forest text-forest dark:border-emerald-400 dark:text-emerald-400'
               : 'border-transparent text-muted dark:text-dark-text-muted hover:text-deep dark:hover:text-dark-text'

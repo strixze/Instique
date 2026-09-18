@@ -102,7 +102,7 @@ export default function Topbar({ setMobileOpen }) {
         <button
           type="button"
           onClick={() => { setSpotlightOpen(true); uiSound.modal(); }}
-          className="hidden md:relative md:flex items-center justify-between w-52 sm:w-60 lg:w-64 px-3 py-1.5 bg-slate-50 dark:bg-[#101315] hover:bg-slate-100 dark:hover:bg-[#181D20] border border-border/80 dark:border-[#262A2E] rounded-lg text-xs text-secondary dark:text-slate-400 cursor-pointer transition-all group focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+          className="hidden lg:relative lg:flex items-center justify-between w-52 sm:w-60 lg:w-64 px-3 py-1.5 bg-slate-50 dark:bg-[#101315] hover:bg-slate-100 dark:hover:bg-[#181D20] border border-border/80 dark:border-[#262A2E] rounded-lg text-xs text-secondary dark:text-slate-400 cursor-pointer transition-all group focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
           title="Search students, teachers, events, pages... (Cmd/Ctrl + K)"
         >
           <div className="flex items-center gap-2 truncate">
@@ -118,7 +118,7 @@ export default function Topbar({ setMobileOpen }) {
         <button
           type="button"
           onClick={() => { setSpotlightOpen(true); uiSound.modal(); }}
-          className="md:hidden p-1.5 text-secondary dark:text-dark-text-secondary hover:text-deep dark:hover:text-dark-text rounded-lg hover:bg-surface dark:hover:bg-dark-hover transition-colors"
+          className="lg:hidden p-1.5 text-secondary dark:text-dark-text-secondary hover:text-deep dark:hover:text-dark-text rounded-lg hover:bg-surface dark:hover:bg-dark-hover transition-colors"
           title="Search"
           aria-label="Search"
         >
@@ -176,7 +176,7 @@ export default function Topbar({ setMobileOpen }) {
         </button>
 
         {/* Divider — hidden on mobile */}
-        <div className="w-px h-5 bg-border dark:bg-dark-border hidden md:block" />
+        <div className="w-px h-5 bg-border dark:bg-dark-border hidden lg:block" />
 
         {/* User Profile Chip */}
         <button
@@ -193,7 +193,7 @@ export default function Topbar({ setMobileOpen }) {
             size="sm"
             className="ring-1 ring-border/60 dark:ring-dark-border-strong"
           />
-          <div className="hidden md:block text-left">
+          <div className="hidden lg:block text-left">
             <p className="text-xs font-semibold text-deep dark:text-dark-text leading-tight truncate max-w-[120px]">
               {user?.name || 'Admin'}
             </p>

@@ -233,10 +233,10 @@ export default function Attendance() {
       </div>
 
       {/* Tab Switcher Pills */}
-      <div className="flex items-center gap-1.5 p-1 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl w-fit shadow-2xs">
+      <div className="flex items-center gap-1.5 p-1 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl w-full sm:w-fit shadow-2xs">
         <button
           onClick={() => setActiveTab('mark')}
-          className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+          className={`flex-1 sm:flex-initial px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all text-center justify-center ${
             activeTab === 'mark'
               ? 'bg-forest dark:bg-emerald-500 text-white dark:text-gray-900 shadow-2xs'
               : 'text-secondary dark:text-dark-text-secondary hover:bg-surface dark:hover:bg-dark-hover hover:text-deep dark:hover:text-dark-text font-medium'
@@ -246,7 +246,7 @@ export default function Attendance() {
         </button>
         <button
           onClick={() => { setActiveTab('history'); setLoading(true); }}
-          className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+          className={`flex-1 sm:flex-initial px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all text-center justify-center ${
             activeTab === 'history'
               ? 'bg-forest dark:bg-emerald-500 text-white dark:text-gray-900 shadow-2xs'
               : 'text-secondary dark:text-dark-text-secondary hover:bg-surface dark:hover:bg-dark-hover hover:text-deep dark:hover:text-dark-text font-medium'
@@ -259,22 +259,22 @@ export default function Attendance() {
       {activeTab === 'mark' ? (
         <div className="space-y-4 animate-scale-in">
           {/* Class / Section / Date selector Toolbar */}
-          <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-2xs flex flex-wrap items-center gap-3">
-            <div className="w-40">
+          <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-2xs grid grid-cols-2 sm:flex sm:flex-wrap sm:items-end gap-2.5 sm:gap-3">
+            <div className="col-span-2 sm:col-span-1 sm:w-40">
               <span className="font-semibold text-secondary dark:text-dark-text-secondary text-xs block mb-1">Date</span>
               <input
                 type="date"
                 value={markDate}
                 onChange={(e) => setMarkDate(e.target.value)}
-                className="w-full px-2.5 py-1.5 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-lg text-xs text-deep dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-forest/20 dark:focus:ring-emerald-500/20 focus:border-forest dark:focus:border-emerald-500"
+                className="w-full px-2.5 py-1.5 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-lg text-xs text-deep dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-forest/20 dark:focus:ring-emerald-500/20 focus:border-forest dark:focus:border-emerald-500 h-9"
               />
             </div>
-            <div className="w-44">
+            <div className="col-span-1 sm:w-44">
               <span className="font-semibold text-secondary dark:text-dark-text-secondary text-xs block mb-1">Class</span>
               <select
                 value={markClass}
                 onChange={(e) => { setMarkClass(e.target.value); setMarkSection(''); setStudentList([]); }}
-                className="w-full px-2.5 py-1.5 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-lg text-xs text-deep dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-forest/20 dark:focus:ring-emerald-500/20 focus:border-forest dark:focus:border-emerald-500"
+                className="w-full px-2.5 py-1.5 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-lg text-xs text-deep dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-forest/20 dark:focus:ring-emerald-500/20 focus:border-forest dark:focus:border-emerald-500 h-9 truncate"
               >
                 <option value="">Select class...</option>
                 {classes.map((c) => (
@@ -282,12 +282,12 @@ export default function Attendance() {
                 ))}
               </select>
             </div>
-            <div className="w-44">
+            <div className="col-span-1 sm:w-44">
               <span className="font-semibold text-secondary dark:text-dark-text-secondary text-xs block mb-1">Section</span>
               <select
                 value={markSection}
                 onChange={(e) => { setMarkSection(e.target.value); setStudentList([]); }}
-                className="w-full px-2.5 py-1.5 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-lg text-xs text-deep dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-forest/20 dark:focus:ring-emerald-500/20 focus:border-forest dark:focus:border-emerald-500"
+                className="w-full px-2.5 py-1.5 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-lg text-xs text-deep dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-forest/20 dark:focus:ring-emerald-500/20 focus:border-forest dark:focus:border-emerald-500 h-9 truncate"
               >
                 <option value="">Select section...</option>
                 {filteredSections.map((s) => (
@@ -295,8 +295,8 @@ export default function Attendance() {
                 ))}
               </select>
             </div>
-            <div className="pt-5">
-              <Button variant="outline" size="sm" onClick={loadStudents} disabled={!markClass || !markSection} className="text-xs gap-1.5">
+            <div className="col-span-2 sm:col-span-1 sm:w-auto">
+              <Button variant="outline" size="sm" onClick={loadStudents} disabled={!markClass || !markSection} className="w-full sm:w-auto text-xs gap-1.5 justify-center h-9">
                 <RefreshCw size={13} /> Refresh
               </Button>
             </div>
@@ -485,42 +485,42 @@ export default function Attendance() {
       ) : (
         /* History Tab (Admissions pattern) */
         <div className="space-y-4 animate-scale-in">
-          <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3.5 shadow-2xs flex flex-wrap items-center gap-3">
-            <div className="w-40">
+          <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-2xs grid grid-cols-2 sm:flex sm:flex-wrap sm:items-end gap-2.5 sm:gap-3">
+            <div className="col-span-2 sm:col-span-1 sm:w-40">
               <span className="font-semibold text-secondary dark:text-dark-text-secondary text-xs block mb-1">Date</span>
               <input
                 type="date"
                 value={date}
                 onChange={(e) => { setLoading(true); setDate(e.target.value); }}
-                className="w-full px-2.5 py-1.5 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-lg text-xs text-deep dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-forest/20 dark:focus:ring-emerald-500/20"
+                className="w-full px-2.5 py-1.5 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-lg text-xs text-deep dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-forest/20 dark:focus:ring-emerald-500/20 h-9"
               />
             </div>
-            <div className="w-44">
+            <div className="col-span-1 sm:w-44">
               <span className="font-semibold text-secondary dark:text-dark-text-secondary text-xs block mb-1">Class</span>
               <select
                 value={classFilter}
                 onChange={(e) => { setLoading(true); setClassFilter(e.target.value); }}
-                className="w-full px-2.5 py-1.5 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-lg text-xs text-deep dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-forest/20 dark:focus:ring-emerald-500/20"
+                className="w-full px-2.5 py-1.5 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-lg text-xs text-deep dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-forest/20 dark:focus:ring-emerald-500/20 h-9 truncate"
               >
                 <option value="">All Classes</option>
                 {classes.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}
               </select>
             </div>
-            <div className="w-44">
+            <div className="col-span-1 sm:w-44">
               <span className="font-semibold text-secondary dark:text-dark-text-secondary text-xs block mb-1">Search</span>
               <div className="relative">
-                <Search size={13} className="absolute left-2.5 top-2.5 text-muted dark:text-dark-text-muted pointer-events-none" />
+                <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted dark:text-dark-text-muted pointer-events-none" />
                 <input
                   type="text"
                   placeholder="Search logs..."
                   value={search}
                   onChange={(e) => { setLoading(true); setPage(1); setSearch(e.target.value); }}
-                  className="w-full pl-7 pr-2.5 py-1.5 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-lg text-xs text-deep dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-forest/20 dark:focus:ring-emerald-500/20"
+                  className="w-full pl-7 pr-2.5 py-1.5 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-lg text-xs text-deep dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-forest/20 dark:focus:ring-emerald-500/20 h-9"
                 />
               </div>
             </div>
-            <div className="pt-5">
-              <Button onClick={() => { setLoading(true); setPage(1); setFilterActive((v) => !v); }} className="text-xs gap-1.5">
+            <div className="col-span-2 sm:col-span-1 sm:w-auto">
+              <Button onClick={() => { setLoading(true); setPage(1); setFilterActive((v) => !v); }} className="w-full sm:w-auto text-xs gap-1.5 justify-center h-9">
                 <Filter size={13} /> Apply Filter
               </Button>
             </div>
