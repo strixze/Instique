@@ -7,6 +7,9 @@ export default {
   ],
   theme: {
     extend: {
+      screens: {
+        'xs': '390px',
+      },
       colors: {
         // Primary Brand Violet / Periwinkle Identity (#6C5CE7)
         primary: {

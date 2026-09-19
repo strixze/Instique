@@ -44,6 +44,7 @@ import Badge from '../../components/ui/Badge';
 import Card from '../../components/ui/Card';
 import EmptyState from '../../components/ui/EmptyState';
 import DataTable from '../../components/ui/DataTable';
+import Pagination from '../../components/ui/Pagination';
 import UserAvatar from '../../components/ui/UserAvatar';
 import { useUserStore } from '../../store/userStore';
 import { eventApi } from '../../api/event.api';
@@ -1097,32 +1098,14 @@ export default function Events() {
 
           {/* Pagination */}
           {meta && meta.totalPages > 1 && (
-            <div className="flex items-center justify-between pt-4 border-t border-border">
-              <span className="text-xs text-muted">
-                Showing {events.length} of {meta.total} events
-              </span>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={!meta.hasPrevPage}
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                >
-                  Previous
-                </Button>
-                <span className="text-xs font-semibold text-deep px-2">
-                  Page {meta.page} of {meta.totalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={!meta.hasNextPage}
-                  onClick={() => setPage((p) => p + 1)}
-                >
-                  Next
-                </Button>
-              </div>
-            </div>
+            <Pagination
+              page={meta.page}
+              totalPages={meta.totalPages}
+              total={meta.total}
+              limit={meta.limit}
+              onPageChange={setPage}
+              loading={loading}
+            />
           )}
         </>
       )}

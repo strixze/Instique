@@ -497,12 +497,21 @@ export default function SchoolAdminDashboard() {
         <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-2xl shadow-2xs flex flex-col justify-between overflow-hidden">
           <div className="px-5 py-3.5 flex items-center justify-between border-b border-border dark:border-dark-border">
             <h3 className="text-xs font-bold text-deep dark:text-dark-text uppercase tracking-wider">Today's Schedule</h3>
-            <button
-              onClick={() => navigate('/timetable')}
-              className="text-xs font-semibold text-forest dark:text-emerald-400 hover:underline cursor-pointer"
-            >
-              View Full Timetable
-            </button>
+            <div className="flex items-center gap-2.5">
+              <button
+                onClick={() => navigate('/timetable?action=create-manual')}
+                className="text-xs font-semibold text-forest dark:text-emerald-400 hover:underline cursor-pointer"
+              >
+                + Add Timetable
+              </button>
+              <span className="text-muted/30">|</span>
+              <button
+                onClick={() => navigate('/timetable')}
+                className="text-xs font-medium text-secondary dark:text-dark-text-secondary hover:underline cursor-pointer"
+              >
+                View Full
+              </button>
+            </div>
           </div>
 
           <div className="p-5 flex-1 flex flex-col justify-center overflow-y-auto max-h-72">

@@ -73,4 +73,14 @@ export const bulkPublishSchoolSchema = z.object({
   status: z.enum(['draft', 'published']),
 });
 
+export const createTimetableSchema = z.object({
+  schoolClass: z.string().min(1, 'Class is required'),
+  section: z.string().min(1, 'Section is required'),
+  academicYear: z.string().min(1, 'Academic year is required'),
+  status: z.enum(['draft', 'published']).optional().default('draft'),
+  totalPeriodsPerDay: z.number().min(1).max(15).optional(),
+  lunchBreakAfter: z.number().min(1).max(15).optional(),
+  periods: z.array(periodSchema).optional().default([]),
+});
+
 

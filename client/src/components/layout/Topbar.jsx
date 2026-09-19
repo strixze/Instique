@@ -1,4 +1,4 @@
-import { Bell, Calendar, Clock, Menu, Search, Volume2, VolumeX } from 'lucide-react';
+import { Bell, BookOpen, Calendar, Clock, Menu, Search, Volume2, VolumeX } from 'lucide-react';
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useUserStore } from '../../store/userStore';
 import { notificationApi } from '../../api/notification.api';
@@ -80,25 +80,29 @@ export default function Topbar({ setMobileOpen }) {
   }, []);
 
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between h-14 px-4 lg:px-5 bg-white dark:bg-dark-surface border-b border-border dark:border-dark-border">
-      {/* Mobile Toggle */}
-      <div className="flex items-center gap-3">
+    <header className="sticky top-0 z-30 flex items-center justify-between h-14 px-3 sm:px-4 lg:px-5 bg-white dark:bg-dark-surface border-b border-border dark:border-dark-border">
+      {/* Left: Instique brand on mobile (consistent across all sections) */}
+      <div className="flex items-center gap-2">
         <button
-          className="lg:hidden p-1.5 text-secondary dark:text-dark-text-secondary hover:text-deep dark:hover:text-dark-text rounded-lg hover:bg-surface dark:hover:bg-dark-hover transition-colors"
-          onClick={() => { setMobileOpen?.(true); uiSound.tap(); }}
-          title="Open menu"
+          type="button"
+          onClick={() => { uiSound.tap?.(); navigate('/dashboard'); }}
+          className="flex items-center gap-2 md:hidden cursor-pointer select-none text-left"
+          aria-label="Instique Home"
         >
-          <Menu size={18} />
+          <div className="w-7 h-7 rounded-lg bg-primary dark:bg-emerald-500 flex items-center justify-center text-white shrink-0">
+            <BookOpen size={14} strokeWidth={2.2} />
+          </div>
+          <span className="text-sm font-bold text-deep dark:text-dark-text tracking-tight">Instique</span>
         </button>
       </div>
 
       {/* Right Side Actions */}
       <div className="flex items-center gap-2 sm:gap-3 ml-auto">
-        {/* Global Spotlight Search Trigger */}
+        {/* Global Spotlight Search Trigger — hidden on mobile */}
         <button
           type="button"
           onClick={() => { setSpotlightOpen(true); uiSound.modal(); }}
-          className="relative flex items-center justify-between w-52 sm:w-60 lg:w-64 px-3 py-1.5 bg-slate-50 dark:bg-[#101315] hover:bg-slate-100 dark:hover:bg-[#181D20] border border-border/80 dark:border-[#262A2E] rounded-lg text-xs text-secondary dark:text-slate-400 cursor-pointer transition-all group focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+          className="hidden md:relative md:flex items-center justify-between w-52 sm:w-60 lg:w-64 px-3 py-1.5 bg-slate-50 dark:bg-[#101315] hover:bg-slate-100 dark:hover:bg-[#181D20] border border-border/80 dark:border-[#262A2E] rounded-lg text-xs text-secondary dark:text-slate-400 cursor-pointer transition-all group focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
           title="Search students, teachers, events, pages... (Cmd/Ctrl + K)"
         >
           <div className="flex items-center gap-2 truncate">
@@ -110,8 +114,19 @@ export default function Topbar({ setMobileOpen }) {
           </kbd>
         </button>
 
-        {/* Date & Time Pill */}
-        <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-50 dark:bg-dark-card border border-border dark:border-dark-border rounded-lg text-xs font-medium text-secondary dark:text-dark-text-secondary">
+        {/* Mobile Search icon — visible only on mobile */}
+        <button
+          type="button"
+          onClick={() => { setSpotlightOpen(true); uiSound.modal(); }}
+          className="md:hidden p-1.5 text-secondary dark:text-dark-text-secondary hover:text-deep dark:hover:text-dark-text rounded-lg hover:bg-surface dark:hover:bg-dark-hover transition-colors"
+          title="Search"
+          aria-label="Search"
+        >
+          <Search size={17} strokeWidth={1.8} />
+        </button>
+
+        {/* Date & Time Pill — hidden on mobile */}
+        <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-50 dark:bg-dark-card border border-border dark:border-dark-border rounded-lg text-xs font-medium text-secondary dark:text-dark-text-secondary">
           <Calendar size={12} className="text-muted dark:text-dark-text-muted" />
           <span>{todayFormatted}</span>
           <span className="text-border dark:text-dark-border-strong">|</span>
@@ -119,8 +134,8 @@ export default function Topbar({ setMobileOpen }) {
           <span className="font-mono text-deep dark:text-dark-text font-semibold">{timeFormatted}</span>
         </div>
 
-        {/* UI Sound Controls */}
-        <div className="relative" ref={soundMenuRef}>
+        {/* UI Sound Controls — hidden on mobile */}
+        <div className="relative hidden md:block" ref={soundMenuRef}>
           <button
             type="button"
             className="p-1.5 text-secondary dark:text-dark-text-secondary hover:text-deep dark:hover:text-dark-text rounded-lg hover:bg-surface dark:hover:bg-dark-hover transition-colors flex items-center justify-center"
@@ -141,10 +156,12 @@ export default function Topbar({ setMobileOpen }) {
           )}
         </div>
 
-        {/* Theme Toggle */}
-        <ThemeToggle />
+        {/* Theme Toggle — visible on all devices */}
+        <div className="flex items-center shrink-0">
+          <ThemeToggle />
+        </div>
 
-        {/* Notification Bell */}
+        {/* Notification Bell — always visible */}
         <button
           className="relative p-1.5 text-secondary dark:text-dark-text-secondary hover:text-deep dark:hover:text-dark-text rounded-lg hover:bg-surface dark:hover:bg-dark-hover transition-colors"
           onClick={() => navigate('/notices')}
@@ -158,13 +175,13 @@ export default function Topbar({ setMobileOpen }) {
           )}
         </button>
 
-        {/* Divider */}
-        <div className="w-px h-5 bg-border dark:bg-dark-border hidden sm:block" />
+        {/* Divider — hidden on mobile */}
+        <div className="w-px h-5 bg-border dark:bg-dark-border hidden md:block" />
 
         {/* User Profile Chip */}
         <button
           onClick={() => navigate('/settings')}
-          className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-lg hover:bg-surface dark:hover:bg-dark-hover cursor-pointer transition-colors"
+          className="flex items-center gap-2 pl-1 pr-1 md:pr-2 py-1 rounded-lg hover:bg-surface dark:hover:bg-dark-hover cursor-pointer transition-colors"
           title="Profile & settings"
         >
           <UserAvatar

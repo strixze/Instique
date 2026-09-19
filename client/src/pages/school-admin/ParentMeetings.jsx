@@ -33,6 +33,7 @@ import Badge from '../../components/ui/Badge';
 import Card from '../../components/ui/Card';
 import EmptyState from '../../components/ui/EmptyState';
 import DataTable from '../../components/ui/DataTable';
+import Pagination from '../../components/ui/Pagination';
 import { parentMeetingApi } from '../../api/parentMeeting.api';
 import { academicApi } from '../../api/academic.api';
 import { teacherApi } from '../../api/teacher.api';
@@ -813,6 +814,19 @@ export default function ParentMeetings() {
               </div>
             ))}
       </div>
+
+      {meta && (
+        <div className="md:hidden mt-3 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl overflow-hidden shadow-2xs">
+          <Pagination
+            page={meta.page}
+            totalPages={meta.totalPages}
+            total={meta.total}
+            limit={meta.limit}
+            onPageChange={setPage}
+            loading={loading}
+          />
+        </div>
+      )}
 
       <Modal isOpen={formOpen} onClose={() => setFormOpen(false)} title={editingMeeting ? 'Edit Meeting' : 'Schedule Parent Meeting'} size="xl">
         <div className="space-y-4">

@@ -14,6 +14,7 @@ import Badge from '../../components/ui/Badge';
 import { academicApi } from '../../api/academic.api';
 import { teacherApi } from '../../api/teacher.api';
 import BulkImportModal from '../../components/ui/BulkImportModal';
+import Pagination from '../../components/ui/Pagination';
 
 /* ──────────────────────── Academic Years Subtab ──────────────────────── */
 function AcademicYears() {
@@ -202,13 +203,14 @@ function AcademicYears() {
           </table>
         </div>
         {meta && (
-          <div className="flex items-center justify-between px-3.5 py-2.5 border-t border-border dark:border-dark-border bg-surface/30 dark:bg-dark-elevated">
-            <span className="text-xs text-muted dark:text-dark-text-muted">Showing {((meta.page - 1) * meta.limit) + (meta.total > 0 ? 1 : 0)} to {Math.min(meta.page * meta.limit, meta.total)} of {meta.total} entries</span>
-            <div className="flex items-center gap-1.5">
-              <Button variant="outline" size="sm" disabled={loading || !meta.hasPrevPage} onClick={() => setPage(meta.page - 1)} className="p-1 px-2 text-xs"><ChevronLeft size={14} /></Button>
-              <Button variant="outline" size="sm" disabled={loading || !meta.hasNextPage} onClick={() => setPage(meta.page + 1)} className="p-1 px-2 text-xs"><ChevronRight size={14} /></Button>
-            </div>
-          </div>
+          <Pagination
+            page={meta.page}
+            totalPages={meta.totalPages}
+            total={meta.total}
+            limit={meta.limit}
+            onPageChange={setPage}
+            loading={loading}
+          />
         )}
       </div>
 
@@ -494,13 +496,14 @@ function Classes() {
           </table>
         </div>
         {meta && (
-          <div className="flex items-center justify-between px-3.5 py-2.5 border-t border-border bg-surface/30">
-            <span className="text-xs text-muted">Showing {((meta.page - 1) * meta.limit) + (meta.total > 0 ? 1 : 0)} to {Math.min(meta.page * meta.limit, meta.total)} of {meta.total} entries</span>
-            <div className="flex items-center gap-1.5">
-              <Button variant="outline" size="sm" disabled={loading || !meta.hasPrevPage} onClick={() => setPage(meta.page - 1)} className="p-1 px-2 text-xs"><ChevronLeft size={14} /></Button>
-              <Button variant="outline" size="sm" disabled={loading || !meta.hasNextPage} onClick={() => setPage(meta.page + 1)} className="p-1 px-2 text-xs"><ChevronRight size={14} /></Button>
-            </div>
-          </div>
+          <Pagination
+            page={meta.page}
+            totalPages={meta.totalPages}
+            total={meta.total}
+            limit={meta.limit}
+            onPageChange={setPage}
+            loading={loading}
+          />
         )}
       </div>
 
@@ -703,13 +706,14 @@ function Sections() {
           </table>
         </div>
         {meta && (
-          <div className="flex items-center justify-between px-3.5 py-2.5 border-t border-border bg-surface/30">
-            <span className="text-xs text-muted">Showing {((meta.page - 1) * meta.limit) + (meta.total > 0 ? 1 : 0)} to {Math.min(meta.page * meta.limit, meta.total)} of {meta.total} entries</span>
-            <div className="flex items-center gap-1.5">
-              <Button variant="outline" size="sm" disabled={loading || !meta.hasPrevPage} onClick={() => setPage(meta.page - 1)} className="p-1 px-2 text-xs"><ChevronLeft size={14} /></Button>
-              <Button variant="outline" size="sm" disabled={loading || !meta.hasNextPage} onClick={() => setPage(meta.page + 1)} className="p-1 px-2 text-xs"><ChevronRight size={14} /></Button>
-            </div>
-          </div>
+          <Pagination
+            page={meta.page}
+            totalPages={meta.totalPages}
+            total={meta.total}
+            limit={meta.limit}
+            onPageChange={setPage}
+            loading={loading}
+          />
         )}
       </div>
 
@@ -937,13 +941,14 @@ function Subjects() {
           </table>
         </div>
         {meta && (
-          <div className="flex items-center justify-between px-3.5 py-2.5 border-t border-border dark:border-dark-border bg-surface/30 dark:bg-dark-elevated">
-            <span className="text-xs text-muted dark:text-dark-text-muted">Showing {((meta.page - 1) * meta.limit) + (meta.total > 0 ? 1 : 0)} to {Math.min(meta.page * meta.limit, meta.total)} of {meta.total} entries</span>
-            <div className="flex items-center gap-1.5">
-              <Button variant="outline" size="sm" disabled={loading || !meta.hasPrevPage} onClick={() => setPage(meta.page - 1)} className="p-1 px-2 text-xs"><ChevronLeft size={14} /></Button>
-              <Button variant="outline" size="sm" disabled={loading || !meta.hasNextPage} onClick={() => setPage(meta.page + 1)} className="p-1 px-2 text-xs"><ChevronRight size={14} /></Button>
-            </div>
-          </div>
+          <Pagination
+            page={meta.page}
+            totalPages={meta.totalPages}
+            total={meta.total}
+            limit={meta.limit}
+            onPageChange={setPage}
+            loading={loading}
+          />
         )}
       </div>
 
