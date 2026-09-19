@@ -26,7 +26,7 @@ export const requirePermission = (module, action) => {
     ];
     if (role === 'super_admin') return next();
 
-    if (role === 'school_admin' || role === 'teacher' || role === 'student' || role === 'parent') {
+    if (role === 'school_admin' || role === 'teacher' || role === 'student' || role === 'parent' || role === 'security_guard') {
       if (permissions && permissions[module]) {
         if (permissions[module].includes(action) || permissions[module].includes('all')) {
           return next();
@@ -38,7 +38,16 @@ export const requirePermission = (module, action) => {
         teacher: ['read', 'write', 'update'],
         student: ['read'],
         parent: ['read'],
+        security_guard: ['read', 'write', 'update'],
       };
+
+      if (role === 'security_guard') {
+        const securityModules = ['gate_security', 'gate_logs', 'visitors', 'vehicles'];
+        if (securityModules.includes(module) && roleDefaults.security_guard.includes(action)) {
+          return next();
+        }
+        throw new ApiError(403, `Insufficient permissions for ${module}:${action}`);
+      }
 
       if (roleDefaults[role] && roleDefaults[role].includes(action)) {
         return next();

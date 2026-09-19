@@ -27,6 +27,7 @@ import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import Input from '../../components/ui/Input';
 import Badge from '../../components/ui/Badge';
+import MobileSummaryCards from '../../components/ui/MobileSummaryCards';
 import { roleApi } from '../../api/role.api';
 
 const MODULES = [
@@ -335,8 +336,43 @@ export default function Roles() {
         }
       />
 
-      {/* Summary KPI Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      {/* Mobile Summary Cards (mobile only) */}
+      <MobileSummaryCards
+        metrics={[
+          {
+            label: 'Total Roles',
+            value: meta?.total ?? data.length,
+            icon: ShieldCheck,
+            iconColor: 'text-emerald-600 dark:text-emerald-400',
+            iconBg: 'bg-emerald-500/10 dark:bg-emerald-500/15',
+          },
+          {
+            label: 'System Roles',
+            value: data.filter((r) => r.isSystem).length,
+            icon: Lock,
+            iconColor: 'text-blue-500 dark:text-blue-400',
+            iconBg: 'bg-blue-500/10 dark:bg-blue-500/15',
+          },
+          {
+            label: 'Custom Roles',
+            value: data.filter((r) => !r.isSystem).length,
+            icon: Award,
+            iconColor: 'text-amber-500 dark:text-amber-400',
+            iconBg: 'bg-amber-500/10 dark:bg-amber-500/15',
+          },
+          {
+            label: 'Assigned Staff',
+            value: data.reduce((acc, r) => acc + (Array.isArray(r.assignedUsers) ? r.assignedUsers.length : 0), 0),
+            icon: Users,
+            iconColor: 'text-purple-500 dark:text-purple-400',
+            iconBg: 'bg-purple-500/10 dark:bg-purple-500/15',
+          },
+        ]}
+        loading={loading}
+      />
+
+      {/* Summary KPI Cards (desktop/tablet) */}
+      <div className="hidden md:grid md:grid-cols-4 gap-3">
         <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3.5 shadow-2xs flex items-center gap-3">
           <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
             <ShieldCheck size={18} />

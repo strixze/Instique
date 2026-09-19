@@ -90,6 +90,7 @@ async function seed() {
     { email: 'student2@springfield.edu', password: passwordHash, role: 'student', schoolId: school._id, name: 'Sneha Verma', isActive: true },
     { email: 'parent1@springfield.edu', password: passwordHash, role: 'parent', schoolId: school._id, name: 'Vikram Kumar', isActive: true },
     { email: 'parent2@springfield.edu', password: passwordHash, role: 'parent', schoolId: school._id, name: 'Neha Verma', isActive: true },
+    { email: 'guard@springfield.edu', password: passwordHash, role: 'security_guard', schoolId: school._id, name: 'Ramesh Security Guard', isActive: true },
   ]);
   console.log('Users created');
 

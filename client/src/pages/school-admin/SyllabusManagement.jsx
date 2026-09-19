@@ -13,6 +13,8 @@ import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import Input from '../../components/ui/Input';
 import Select from '../../components/ui/Select';
+import Pagination from '../../components/ui/Pagination';
+import MobileSummaryCards from '../../components/ui/MobileSummaryCards';
 import { syllabusApi } from '../../api/syllabus.api';
 import { academicApi } from '../../api/academic.api';
 import { useUserStore } from '../../store/userStore';
@@ -84,7 +86,7 @@ export default function SyllabusManagement() {
   });
 
   // Fetch School-wide Analytics via TanStack Query
-  const { data: analyticsData } = useQuery({
+  const { data: analyticsData, isLoading: analyticsLoading } = useQuery({
     queryKey: ['syllabus-analytics'],
     queryFn: async () => {
       const res = await syllabusApi.getAnalytics();
@@ -96,6 +98,37 @@ export default function SyllabusManagement() {
   const meta = syllabiData?.meta;
   const kpis = analyticsData?.kpis || { totalSyllabi: 0, publishedSyllabi: 0, activeTracks: 0, averageProgress: 0 };
   const needsAttention = analyticsData?.needsAttention || [];
+
+  const mobileMetrics = [
+    {
+      label: 'Total Syllabi',
+      value: kpis.totalSyllabi,
+      icon: BookOpen,
+      iconColor: 'text-forest dark:text-emerald-400',
+      iconBg: 'bg-forest-soft dark:bg-dark-accent-soft',
+    },
+    {
+      label: 'Published',
+      value: kpis.publishedSyllabi,
+      icon: CheckCircle2,
+      iconColor: 'text-emerald-600 dark:text-emerald-400',
+      iconBg: 'bg-emerald-50 dark:bg-emerald-500/10',
+    },
+    {
+      label: 'Active Tracks',
+      value: kpis.activeTracks,
+      icon: Layers,
+      iconColor: 'text-blue-600 dark:text-blue-400',
+      iconBg: 'bg-blue-50 dark:bg-blue-500/10',
+    },
+    {
+      label: 'Avg Completion',
+      value: `${kpis.averageProgress}%`,
+      icon: TrendingUp,
+      iconColor: 'text-amber-600 dark:text-amber-400',
+      iconBg: 'bg-amber-50 dark:bg-amber-500/10',
+    },
+  ];
 
   const handleCreateSyllabus = async () => {
     if (!createForm.schoolClass || !createForm.subject || !createForm.academicYear) {
@@ -211,8 +244,11 @@ export default function SyllabusManagement() {
         )}
       </div>
 
-      {/* KPI Overview Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      {/* Mobile Summary Cards (2x2 grid, mobile only) */}
+      <MobileSummaryCards metrics={mobileMetrics} loading={analyticsLoading} />
+
+      {/* Desktop/Tablet KPI Overview Row */}
+      <div className="hidden md:grid md:grid-cols-4 gap-3">
         <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-2xs">
           <span className="text-[11px] font-semibold text-muted dark:text-dark-text-muted uppercase tracking-wide">Total Syllabi</span>
           <p className="text-2xl font-bold text-deep dark:text-dark-text mt-1">{kpis.totalSyllabi}</p>
@@ -299,7 +335,85 @@ export default function SyllabusManagement() {
             <h2 className="text-xs font-bold text-deep dark:text-dark-text uppercase tracking-wider">Curriculum Syllabi Definitions</h2>
           </div>
 
-          <div className="overflow-x-auto">
+          {/* ── Mobile List Cards View (< 768px) ── */}
+          <div className="md:hidden divide-y divide-border/60 dark:divide-dark-border bg-white dark:bg-dark-card">
+            {loadingList ? (
+              [1, 2, 3, 4].map((i) => (
+                <div key={i} className="p-3.5 space-y-2 animate-pulse">
+                  <div className="h-4 bg-surface dark:bg-dark-hover rounded w-3/4" />
+                  <div className="h-3 bg-surface dark:bg-dark-hover rounded w-1/2" />
+                </div>
+              ))
+            ) : syllabi.length === 0 ? (
+              <div className="px-4 py-12 text-center text-xs text-muted dark:text-dark-text-muted">
+                No syllabi definitions found. Create one to get started!
+              </div>
+            ) : (
+              syllabi.map((syl) => (
+                <div
+                  key={syl._id}
+                  onClick={() => navigate(`/syllabus/${syl._id}`)}
+                  className="p-3.5 space-y-2.5 hover:bg-surface/50 dark:hover:bg-dark-hover/40 transition-colors cursor-pointer active:bg-surface/70"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-bold text-xs text-deep dark:text-dark-text leading-snug">
+                        {syl.title || `${syl.subject?.name} - ${syl.schoolClass?.name}`}
+                      </p>
+                      <p className="text-[11px] text-muted dark:text-dark-text-muted mt-0.5">
+                        {syl.chapters?.length || 0} chapters • {syl.totalTopicsCount || 0} topics
+                      </p>
+                    </div>
+                    <div className="shrink-0">
+                      {renderStatusBadge(syl.status)}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs text-secondary dark:text-dark-text-secondary pt-1 border-t border-border/40 dark:border-dark-border/40">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-surface dark:bg-dark-elevated text-deep dark:text-dark-text border border-border/70 dark:border-dark-border">
+                        {syl.schoolClass?.name || '—'}
+                      </span>
+                      <span className="text-[11px] text-muted dark:text-dark-text-muted">
+                        {syl.academicYear?.name || '2026-2027'}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={() => navigate(`/syllabus/${syl._id}`)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-forest dark:text-emerald-400 bg-forest/10 dark:bg-emerald-500/10 border border-forest/20 dark:border-emerald-500/20 rounded-lg transition-colors"
+                        title="View / Edit Builder"
+                      >
+                        <Eye size={12} /> View
+                      </button>
+                      {syl.status === 'draft' && (
+                        <button
+                          onClick={(e) => handlePublish(syl._id, e)}
+                          className="p-1 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 rounded-lg transition-colors"
+                          title="Publish"
+                        >
+                          <Send size={12} />
+                        </button>
+                      )}
+                      {(currentUser?.role === 'school_admin' || currentUser?.role === 'super_admin') && (
+                        <button
+                          onClick={(e) => handleDelete(syl._id, syl.title, e)}
+                          className="p-1 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 rounded-lg transition-colors"
+                          title="Delete"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* ── Desktop Table View (>= 768px) ── */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-border dark:border-dark-border text-[11px] font-semibold text-secondary dark:text-dark-text-secondary uppercase tracking-wider bg-slate-50/80 dark:bg-dark-elevated">
@@ -378,6 +492,17 @@ export default function SyllabusManagement() {
               </tbody>
             </table>
           </div>
+
+          {meta && (
+            <Pagination
+              page={page}
+              totalPages={meta.totalPages}
+              total={meta.total}
+              limit={meta.limit}
+              onPageChange={setPage}
+              loading={loadingList}
+            />
+          )}
         </div>
 
         {/* Needs Attention Sidebar */}

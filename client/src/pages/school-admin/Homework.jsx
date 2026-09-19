@@ -34,6 +34,7 @@ import Input from '../../components/ui/Input';
 import Select from '../../components/ui/Select';
 import Badge from '../../components/ui/Badge';
 import Card from '../../components/ui/Card';
+import MobileSummaryCards from '../../components/ui/MobileSummaryCards';
 import { homeworkApi } from '../../api/homework.api';
 import { parentApi } from '../../api/parent.api';
 import { settingApi } from '../../api/setting.api';
@@ -505,9 +506,47 @@ export default function Homework() {
         </div>
       )}
 
-      {/* ── KPI Summary Cards (Teacher / Admin) ── */}
+      {/* ── Mobile Summary Cards (Teacher / Admin, mobile only) ── */}
       {isTeacherOrAdmin && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <MobileSummaryCards
+          metrics={[
+            {
+              label: 'Total Assignments',
+              value: meta?.total ?? kpiStats.total,
+              icon: BookMarked,
+              iconColor: 'text-forest dark:text-emerald-400',
+              iconBg: 'bg-forest-soft dark:bg-dark-accent-soft',
+            },
+            {
+              label: 'Published',
+              value: kpiStats.published,
+              icon: CheckCircle2,
+              iconColor: 'text-emerald-600 dark:text-emerald-400',
+              iconBg: 'bg-emerald-50 dark:bg-emerald-500/10',
+            },
+            {
+              label: 'Due This Week',
+              value: kpiStats.dueSoon,
+              icon: Clock,
+              iconColor: 'text-amber-600 dark:text-amber-400',
+              iconBg: 'bg-amber-50 dark:bg-amber-500/10',
+            },
+            {
+              label: 'Drafts',
+              value: kpiStats.drafts,
+              icon: FileText,
+              iconColor: 'text-slate-600 dark:text-slate-400',
+              iconBg: 'bg-slate-50 dark:bg-slate-500/10',
+            },
+          ]}
+          loading={loading}
+          className="mb-0"
+        />
+      )}
+
+      {/* ── KPI Summary Cards (Teacher / Admin, desktop/tablet) ── */}
+      {isTeacherOrAdmin && (
+        <div className="hidden md:grid md:grid-cols-4 gap-4">
           <div className="p-4 bg-white border border-border/80 rounded-2xl shadow-2xs flex flex-col justify-between">
             <div className="flex items-center justify-between text-muted text-xs">
               <span>Total Assignments</span>
@@ -575,7 +614,7 @@ export default function Homework() {
       )}
 
       {/* ── Filter Bar ── */}
-      <div className="bg-white border border-border/80 rounded-2xl p-4 shadow-2xs space-y-3">
+      <div className="bg-white dark:bg-dark-card border border-border/80 dark:border-dark-border rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-2xs space-y-2.5">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           {/* Search */}
           <div className="lg:col-span-2 relative">
@@ -667,7 +706,7 @@ export default function Homework() {
             return (
               <div
                 key={hw._id}
-                className="bg-white border border-border/80 hover:border-forest/40 rounded-2xl p-5 shadow-2xs hover:shadow-card transition-all flex flex-col justify-between group"
+                className="bg-white dark:bg-dark-card border border-border/80 dark:border-dark-border hover:border-forest/40 rounded-xl sm:rounded-2xl p-3.5 sm:p-5 shadow-2xs hover:shadow-card transition-all flex flex-col justify-between group"
               >
                 <div>
                   {/* Top Bar: Subject & Status */}
@@ -691,20 +730,20 @@ export default function Homework() {
                   {/* Title & Description */}
                   <h3
                     onClick={() => handleOpenDetails(hw)}
-                    className="text-sm font-bold text-deep group-hover:text-forest transition-colors cursor-pointer line-clamp-2 leading-snug"
+                    className="text-sm font-bold text-deep dark:text-dark-text group-hover:text-forest dark:group-hover:text-emerald-400 transition-colors cursor-pointer line-clamp-2 leading-snug"
                   >
                     {hw.title}
                   </h3>
 
                   {hw.description && (
-                    <p className="text-xs text-muted mt-1.5 line-clamp-2 leading-relaxed">
+                    <p className="text-xs text-muted dark:text-dark-text-muted mt-1.5 line-clamp-2 leading-relaxed">
                       {hw.description}
                     </p>
                   )}
 
                   {/* Attachment pills */}
                   {hw.attachments && hw.attachments.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-1.5">
+                    <div className="mt-2.5 flex flex-wrap gap-1.5">
                       {hw.attachments.map((att, i) => {
                         const Icon = getFileIcon(att.mimeType, att.name);
                         return (
@@ -713,10 +752,10 @@ export default function Homework() {
                             href={att.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 px-2 py-1 bg-slate-50 hover:bg-slate-100 border border-border rounded-lg text-[10px] font-medium text-secondary truncate max-w-44 transition-colors"
+                            className="inline-flex items-center gap-1 px-2 py-1 bg-slate-50 dark:bg-dark-elevated hover:bg-slate-100 dark:hover:bg-dark-hover border border-border dark:border-dark-border rounded-lg text-[10px] font-medium text-secondary dark:text-dark-text-secondary truncate max-w-44 transition-colors"
                             title={att.name}
                           >
-                            <Icon size={11} className="shrink-0 text-forest" />
+                            <Icon size={11} className="shrink-0 text-forest dark:text-emerald-400" />
                             <span className="truncate">{att.name}</span>
                           </a>
                         );
@@ -726,10 +765,10 @@ export default function Homework() {
                 </div>
 
                 {/* Bottom Footer */}
-                <div className="mt-4 pt-3 border-t border-border/60 flex items-center justify-between text-xs text-muted">
+                <div className="mt-3.5 pt-2.5 border-t border-border/60 dark:border-dark-border flex items-center justify-between text-xs text-muted dark:text-dark-text-muted">
                   <div>
-                    <span className="text-[10px] block text-muted">Due: <b className="text-deep">{formattedDue}</b></span>
-                    <span className="text-[10px] text-muted">By: {teacherName}</span>
+                    <span className="text-[10px] block text-muted dark:text-dark-text-muted">Due: <b className="text-deep dark:text-dark-text">{formattedDue}</b></span>
+                    <span className="text-[10px] text-muted dark:text-dark-text-muted">By: {teacherName}</span>
                   </div>
 
                   {/* Action Buttons */}

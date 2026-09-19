@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, Users, ClipboardList, Calendar, BookMarked,
-  GraduationCap, MoreHorizontal, BookOpen,
+  GraduationCap, MoreHorizontal, BookOpen, Shield,
 } from 'lucide-react';
 import { useUserStore } from '../../store/userStore';
 import { uiSound } from '../../utils/soundManager';
@@ -34,6 +34,10 @@ const bottomNavItems = {
     { to: '/timetable', icon: Calendar, label: 'Timetable' },
     { to: '/attendance', icon: ClipboardList, label: 'Attendance' },
     { to: '/homework', icon: BookMarked, label: 'Homework' },
+  ],
+  security_guard: [
+    { to: '/dashboard', icon: LayoutDashboard, label: 'Gate' },
+    { to: '/gate-activity', icon: Shield, label: 'Activity' },
   ],
 };
 

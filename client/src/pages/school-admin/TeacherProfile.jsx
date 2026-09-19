@@ -241,7 +241,7 @@ export default function TeacherProfile() {
             <div className="h-4 w-32 bg-slate-200 dark:bg-dark-hover rounded" />
           </div>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 mobile-keep-grid">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className="h-20 bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl" />
           ))}
@@ -406,7 +406,7 @@ export default function TeacherProfile() {
       </div>
 
       {/* Quick Overview (KPI Cards) */}
-      <div className="grid grid-cols-2 sm:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 mobile-keep-grid">
         <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-3.5 shadow-2xs">
           <span className="text-[11px] font-semibold text-muted dark:text-dark-text-muted uppercase tracking-wide">Assigned Classes</span>
           <p className="text-xl font-bold text-deep dark:text-dark-text mt-1">{kpis.assignedClassesCount}</p>

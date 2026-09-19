@@ -34,6 +34,7 @@ import Card from '../../components/ui/Card';
 import EmptyState from '../../components/ui/EmptyState';
 import DataTable from '../../components/ui/DataTable';
 import Pagination from '../../components/ui/Pagination';
+import MobileSummaryCards from '../../components/ui/MobileSummaryCards';
 import { parentMeetingApi } from '../../api/parentMeeting.api';
 import { academicApi } from '../../api/academic.api';
 import { teacherApi } from '../../api/teacher.api';
@@ -707,7 +708,42 @@ export default function ParentMeetings() {
         }
       />
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Mobile Summary Cards (mobile only) */}
+      <MobileSummaryCards
+        metrics={[
+          {
+            label: 'Upcoming Meetings',
+            value: stats.upcoming,
+            icon: CalendarClock,
+            iconColor: 'text-forest dark:text-emerald-400',
+            iconBg: 'bg-forest-soft dark:bg-dark-accent-soft',
+          },
+          {
+            label: 'Today',
+            value: stats.today,
+            icon: CalendarCheck,
+            iconColor: 'text-blue-600 dark:text-blue-400',
+            iconBg: 'bg-blue-50 dark:bg-blue-500/10',
+          },
+          {
+            label: 'Completed',
+            value: stats.completed,
+            icon: CheckCircle,
+            iconColor: 'text-emerald-600 dark:text-emerald-400',
+            iconBg: 'bg-emerald-50 dark:bg-emerald-500/10',
+          },
+          {
+            label: 'Parents Invited',
+            value: stats.parentsInvited,
+            icon: Users,
+            iconColor: 'text-amber-600 dark:text-amber-400',
+            iconBg: 'bg-amber-50 dark:bg-amber-500/10',
+          },
+        ]}
+        loading={statsLoading}
+      />
+
+      <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-4">
         {statsCards.map((s) => (
           <Card key={s.label} className="!p-4">
             <div className="flex items-center gap-3">

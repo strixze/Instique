@@ -5,7 +5,7 @@ import env from '../config/env.js';
 const userSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true, trim: true, lowercase: true },
     password: { type: String, required: true },
-    role: { type: String, enum: ['super_admin', 'school_admin', 'teacher', 'student', 'parent'], required: true },
+    role: { type: String, enum: ['super_admin', 'school_admin', 'teacher', 'student', 'parent', 'security_guard'], required: true },
     schoolId: { type: mongoose.Schema.Types.ObjectId, ref: 'School', default: null },
     profileId: { type: mongoose.Schema.Types.ObjectId },
     profileModel: { type: String, enum: ['Student', 'Teacher', 'Parent', null], default: null },

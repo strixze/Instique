@@ -15,6 +15,7 @@ import Modal from '../../components/ui/Modal';
 import Input from '../../components/ui/Input';
 import UserAvatar from '../../components/ui/UserAvatar';
 import Pagination from '../../components/ui/Pagination';
+import MobileSummaryCards from '../../components/ui/MobileSummaryCards';
 import { leaveApi } from '../../api/leave.api';
 import { substitutionApi } from '../../api/substitution.api';
 
@@ -384,7 +385,42 @@ export default function Leaves() {
 
       {/* Teachers KPI Cards */}
       {categoryTab === 'teachers' && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <>
+          <MobileSummaryCards
+            metrics={[
+              {
+                label: 'Pending Leaves',
+                value: counts.pendingTeachers,
+                icon: AlertCircle,
+                iconColor: 'text-amber-500 dark:text-amber-400',
+                iconBg: 'bg-amber-500/10 dark:bg-amber-500/15',
+              },
+              {
+                label: 'Approved Leaves',
+                value: counts.approvedTeachers,
+                icon: CheckCircle,
+                iconColor: 'text-emerald-500 dark:text-emerald-400',
+                iconBg: 'bg-emerald-500/10 dark:bg-emerald-500/15',
+              },
+              {
+                label: 'Substitutions',
+                value: substitutions.length,
+                icon: ClipboardList,
+                iconColor: 'text-blue-500 dark:text-blue-400',
+                iconBg: 'bg-blue-500/10 dark:bg-blue-500/15',
+              },
+              {
+                label: 'Total Records',
+                value: leavesMeta?.total || leaves.length,
+                icon: Users,
+                iconColor: 'text-purple-500 dark:text-purple-400',
+                iconBg: 'bg-purple-500/10 dark:bg-purple-500/15',
+              },
+            ]}
+            loading={loading}
+          />
+
+          <div className="hidden md:grid md:grid-cols-4 gap-3">
           <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-card flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-500">
               <AlertCircle size={20} />
@@ -425,11 +461,47 @@ export default function Leaves() {
             </div>
           </div>
         </div>
+        </>
       )}
 
       {/* Students KPI Cards */}
       {categoryTab === 'students' && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <>
+          <MobileSummaryCards
+            metrics={[
+              {
+                label: 'Pending Leaves',
+                value: counts.pendingStudents,
+                icon: AlertCircle,
+                iconColor: 'text-amber-500 dark:text-amber-400',
+                iconBg: 'bg-amber-500/10 dark:bg-amber-500/15',
+              },
+              {
+                label: 'Approved Leaves',
+                value: counts.approvedStudents,
+                icon: CheckCircle,
+                iconColor: 'text-emerald-500 dark:text-emerald-400',
+                iconBg: 'bg-emerald-500/10 dark:bg-emerald-500/15',
+              },
+              {
+                label: 'Rejected/Cancelled',
+                value: leaves.filter((l) => l.status === 'rejected' || l.status === 'cancelled').length,
+                icon: XCircle,
+                iconColor: 'text-rose-500 dark:text-rose-400',
+                iconBg: 'bg-rose-500/10 dark:bg-rose-500/15',
+              },
+              {
+                label: 'Total Records',
+                value: leavesMeta?.total || leaves.length,
+                icon: GraduationCap,
+                iconColor: 'text-blue-500 dark:text-blue-400',
+                iconBg: 'bg-blue-500/10 dark:bg-blue-500/15',
+              },
+            ]}
+            loading={loading}
+          />
+
+          <div className="hidden md:grid md:grid-cols-4 gap-3">
           <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-card flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-500">
               <AlertCircle size={20} />
@@ -472,11 +544,47 @@ export default function Leaves() {
             </div>
           </div>
         </div>
+        </>
       )}
 
       {/* Substitutions KPI Cards */}
       {categoryTab === 'substitutions' && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <>
+          <MobileSummaryCards
+            metrics={[
+              {
+                label: 'Total Substitutions',
+                value: subsMeta?.total || substitutions.length,
+                icon: ClipboardList,
+                iconColor: 'text-blue-500 dark:text-blue-400',
+                iconBg: 'bg-blue-500/10 dark:bg-blue-500/15',
+              },
+              {
+                label: 'Teacher Assigned',
+                value: substitutions.filter((s) => s.substituteTeacher).length,
+                icon: CheckCircle,
+                iconColor: 'text-emerald-500 dark:text-emerald-400',
+                iconBg: 'bg-emerald-500/10 dark:bg-emerald-500/15',
+              },
+              {
+                label: 'Unassigned',
+                value: substitutions.filter((s) => !s.substituteTeacher && s.status === 'assigned').length,
+                icon: AlertCircle,
+                iconColor: 'text-amber-500 dark:text-amber-400',
+                iconBg: 'bg-amber-500/10 dark:bg-amber-500/15',
+              },
+              {
+                label: 'Completed',
+                value: substitutions.filter((s) => s.status === 'completed').length,
+                icon: CheckSquare,
+                iconColor: 'text-purple-500 dark:text-purple-400',
+                iconBg: 'bg-purple-500/10 dark:bg-purple-500/15',
+              },
+            ]}
+            loading={subsLoading}
+          />
+
+          <div className="hidden md:grid md:grid-cols-4 gap-3">
           <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-card flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-500">
               <ClipboardList size={20} />
@@ -523,6 +631,7 @@ export default function Leaves() {
             </div>
           </div>
         </div>
+        </>
       )}
 
       {/* Secondary Status Tabs (Pending, Approved, History) */}

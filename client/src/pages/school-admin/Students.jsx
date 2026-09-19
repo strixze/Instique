@@ -19,6 +19,7 @@ import { feeApi } from '../../api/fee.api';
 import BulkImportModal from '../../components/ui/BulkImportModal';
 import UserAvatar from '../../components/ui/UserAvatar';
 import Pagination from '../../components/ui/Pagination';
+import MobileSummaryCards from '../../components/ui/MobileSummaryCards';
 
 /* ──────────────────────── Constants ──────────────────────── */
 
@@ -177,6 +178,37 @@ export default function Students() {
   const inactiveCount = data.filter(s => s.status !== 'active').length;
   const maleCount = data.filter(s => s.gender === 'male').length;
   const femaleCount = data.filter(s => s.gender === 'female').length;
+
+  const mobileMetrics = [
+    {
+      label: 'Total Students',
+      value: totalCount,
+      icon: Users,
+      iconColor: 'text-forest dark:text-emerald-400',
+      iconBg: 'bg-forest-soft dark:bg-dark-accent-soft',
+    },
+    {
+      label: 'Active',
+      value: activeCount,
+      icon: UserCheck,
+      iconColor: 'text-emerald-600 dark:text-emerald-400',
+      iconBg: 'bg-emerald-50 dark:bg-emerald-500/10',
+    },
+    {
+      label: 'Inactive',
+      value: inactiveCount,
+      icon: UserX,
+      iconColor: 'text-amber-600 dark:text-amber-400',
+      iconBg: 'bg-amber-50 dark:bg-amber-500/10',
+    },
+    {
+      label: 'Gender Split',
+      value: `${maleCount}M / ${femaleCount}F`,
+      icon: GraduationCap,
+      iconColor: 'text-blue-600 dark:text-blue-400',
+      iconBg: 'bg-blue-50 dark:bg-blue-500/10',
+    },
+  ];
 
   /* ──────────────────────── CRUD ──────────────────────── */
 
@@ -372,8 +404,11 @@ export default function Students() {
         </div>
       </div>
 
-      {/* KPI Summary Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      {/* Mobile Summary Cards (2x2 grid, mobile only) */}
+      <MobileSummaryCards metrics={mobileMetrics} loading={loading} />
+
+      {/* Desktop/Tablet KPI Summary Cards */}
+      <div className="hidden md:grid md:grid-cols-4 gap-3">
         <div className="bg-white dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-4 shadow-2xs">
           <div className="w-7 h-7 rounded-lg bg-forest-soft dark:bg-dark-accent-soft text-forest dark:text-emerald-400 flex items-center justify-center mb-2">
             <Users size={15} strokeWidth={1.8} />

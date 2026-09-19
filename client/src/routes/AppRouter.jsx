@@ -50,6 +50,8 @@ import SyllabusDetail from '../pages/school-admin/SyllabusDetail';
 import SectionSyllabusTrackView from '../pages/teacher/SectionSyllabusTrackView';
 import ParentSyllabusView from '../pages/parent/ParentSyllabusView';
 import ParentLeaves from '../pages/parent/ParentLeaves';
+import SecurityDashboard from '../pages/security/SecurityDashboard';
+import GateActivity from '../pages/security/GateActivity';
 
 function RoleDashboard() {
   const user = useUserStore((s) => s.user);
@@ -59,6 +61,7 @@ function RoleDashboard() {
     teacher: TeacherDashboard,
     student: StudentDashboard,
     parent: ParentDashboard,
+    security_guard: SecurityDashboard,
   };
   const Dashboard = dashboards[user?.role] || SchoolAdminDashboard;
   return <DashboardShell><Dashboard /></DashboardShell>;
@@ -156,6 +159,9 @@ export default function AppRouter() {
       <Route path="/parent-meetings" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/parent-meetings']}><UnifiedParentMeetings /></ModulePage>} />
       <Route path="/leaves" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/leaves']}><UnifiedLeaves /></ModulePage>} />
       <Route path="/complaints" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/complaints']}><Complaints /></ModulePage>} />
+
+      {/* Security Guard / Gate Security Routes */}
+      <Route path="/gate-activity" element={<ModulePage allowedRoles={ROUTE_PERMISSIONS['/gate-activity']}><GateActivity /></ModulePage>} />
 
       {/* Common Route Aliases */}
       <Route path="/admission" element={<Navigate to="/admissions" replace />} />
