@@ -13,34 +13,37 @@ export default function ManualStudentSearchModal({ isOpen, onClose, onEventRecor
   const [loading, setLoading] = useState(false);
   const [recordingId, setRecordingId] = useState(null);
 
+  const fetchStudents = async (query = '') => {
+    setLoading(true);
+    try {
+      const res = await gateSecurityApi.searchStudents(query.trim());
+      setStudents(res.data || res || []);
+    } catch (err) {
+      toast.error('Search failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!isOpen) {
       setSearch('');
       setStudents([]);
       return;
     }
+    // Load initial active students immediately when opened
+    fetchStudents('');
   }, [isOpen]);
 
   useEffect(() => {
-    if (!search || search.trim().length < 2) {
-      setStudents([]);
-      return;
-    }
+    if (!isOpen) return;
 
-    const timer = setTimeout(async () => {
-      setLoading(true);
-      try {
-        const res = await gateSecurityApi.searchStudents(search.trim());
-        setStudents(res.data || res || []);
-      } catch (err) {
-        toast.error('Search failed');
-      } finally {
-        setLoading(false);
-      }
+    const timer = setTimeout(() => {
+      fetchStudents(search);
     }, 250);
 
     return () => clearTimeout(timer);
-  }, [search]);
+  }, [search, isOpen]);
 
   const handleRecordEvent = async (studentId, eventType) => {
     setRecordingId(studentId);
@@ -77,13 +80,18 @@ export default function ManualStudentSearchModal({ isOpen, onClose, onEventRecor
           autoFocus
         />
 
+        <div className="flex items-center justify-between text-[11px] font-semibold text-muted px-1">
+          <span>{search.trim() ? `Search Results (${students.length})` : 'Active Students in Database'}</span>
+          {students.length > 0 && <span className="text-[10px] text-muted">Showing up to {students.length}</span>}
+        </div>
+
         <div className="max-h-72 overflow-y-auto space-y-2 scrollbar-thin">
           {loading ? (
-            <div className="py-8 text-center text-xs text-muted">Searching students...</div>
-          ) : search.trim().length < 2 ? (
-            <div className="py-8 text-center text-xs text-muted">Type at least 2 characters to search</div>
+            <div className="py-8 text-center text-xs text-muted">Searching student database...</div>
           ) : students.length === 0 ? (
-            <div className="py-8 text-center text-xs text-muted">No matching active students found</div>
+            <div className="py-8 text-center text-xs text-muted">
+              {search.trim() ? 'No matching students found in database' : 'No active students found'}
+            </div>
           ) : (
             students.map((st) => (
               <div

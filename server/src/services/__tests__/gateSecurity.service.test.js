@@ -543,4 +543,46 @@ describe('Gate Security Service & Attendance Isolation Tests', () => {
       expect(summary.gateName).toBe('Main Gate');
     });
   });
+
+  describe('12. Student Search in Gate Activity & Database Queries', () => {
+    it('should search gate activity including matching student IDs from student relation', async () => {
+      // Mock matching student query
+      Student.find = jest.fn().mockReturnValue({
+        select: jest.fn().mockResolvedValue([{ _id: studentAId }]),
+      });
+
+      // Mock GateLog count and find for pagination
+      GateLog.countDocuments = jest.fn().mockResolvedValue(1);
+      GateLog.find = jest.fn().mockReturnValue({
+        sort: jest.fn().mockReturnValue({
+          skip: jest.fn().mockReturnValue({
+            limit: jest.fn().mockReturnValue({
+              populate: jest.fn().mockReturnValue({
+                populate: jest.fn().mockReturnValue({
+                  populate: jest.fn().mockResolvedValue([
+                    {
+                      _id: new mongoose.Types.ObjectId(),
+                      schoolId: schoolAId,
+                      entityType: 'STUDENT',
+                      eventType: 'ENTRY',
+                      student: { firstName: 'Rahul', lastName: 'Sharma', admissionNo: 'ADM-101' },
+                    },
+                  ]),
+                }),
+              }),
+            }),
+          }),
+        }),
+      });
+
+      const activity = await getGateActivity(schoolAId, { search: 'Rahul Sharma' });
+      expect(activity.data).toHaveLength(1);
+      expect(Student.find).toHaveBeenCalled();
+      const calledQuery = GateLog.find.mock.calls[0][0];
+      expect(calledQuery.$or).toBeDefined();
+      const studentCondition = calledQuery.$or.find((c) => c.student);
+      expect(studentCondition).toBeDefined();
+      expect(studentCondition.student.$in).toContain(studentAId);
+    });
+  });
 });
