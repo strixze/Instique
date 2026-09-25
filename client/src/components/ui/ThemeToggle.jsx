@@ -35,11 +35,10 @@ export default function ThemeToggle() {
           e.stopPropagation();
           if (isDark) toggleTheme();
         }}
-        className={`flex items-center justify-center transition-colors duration-200 ${
-          !isDark
+        className={`flex items-center justify-center transition-colors duration-200 ${!isDark
             ? 'text-amber-500 dark:text-amber-400'
             : 'text-slate-400 dark:text-[#707980]'
-        }`}
+          }`}
         title="Light Mode"
       >
         <Sun size={15} strokeWidth={2} />
@@ -47,16 +46,14 @@ export default function ThemeToggle() {
 
       {/* Sliding Toggle Track + Knob (Center) */}
       <div
-        className={`relative inline-flex items-center h-5 w-9 mx-1.5 rounded-full p-0.5 transition-colors duration-200 ease-in-out ${
-          isDark
+        className={`relative inline-flex items-center h-5 w-9 mx-1.5 rounded-full p-0.5 transition-colors duration-200 ease-in-out ${isDark
             ? 'bg-[#34D399]'
             : 'bg-amber-500'
-        }`}
+          }`}
       >
         <span
-          className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow-xs transform transition-transform duration-200 ease-in-out ${
-            isDark ? 'translate-x-4' : 'translate-x-0'
-          }`}
+          className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow-xs transform transition-transform duration-200 ease-in-out ${isDark ? 'translate-x-4' : 'translate-x-0'
+            }`}
         />
       </div>
 
@@ -66,11 +63,10 @@ export default function ThemeToggle() {
           e.stopPropagation();
           if (!isDark) toggleTheme();
         }}
-        className={`flex items-center justify-center transition-colors duration-200 ${
-          isDark
+        className={`flex items-center justify-center transition-colors duration-200 ${isDark
             ? 'text-[#34D399]'
             : 'text-slate-400 dark:text-[#707980]'
-        }`}
+          }`}
         title="Dark Mode"
       >
         <Moon size={15} strokeWidth={2} />

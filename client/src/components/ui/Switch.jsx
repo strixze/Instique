@@ -45,9 +45,8 @@ export default function Switch({
 
   return (
     <div
-      className={`inline-flex items-center gap-2 select-none text-xs font-semibold text-deep dark:text-dark-text ${
-        disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-      } ${className}`}
+      className={`inline-flex items-center gap-2 select-none text-xs font-semibold text-deep dark:text-dark-text ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+        } ${className}`}
       onClick={(e) => {
         handleToggle(e);
       }}
@@ -56,6 +55,7 @@ export default function Switch({
         type="button"
         id={switchId}
         role="switch"
+        data-switch="true"
         aria-checked={checked}
         disabled={disabled}
         onKeyDown={handleKeyDown}
@@ -63,14 +63,16 @@ export default function Switch({
           e.stopPropagation();
           handleToggle(e);
         }}
-        className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-forest/20 dark:focus:ring-emerald-500/20 ${
+        className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-forest/20 dark:focus:ring-emerald-500/20 !min-h-[20px] !max-h-[20px] !h-5 !w-9 !min-w-[36px] !max-w-[36px] ${
           checked ? 'bg-forest dark:bg-emerald-500' : 'bg-slate-300 dark:bg-slate-700'
         }`}
+        style={{ minHeight: '20px', maxHeight: '20px', height: '20px', width: '36px', minWidth: '36px', maxWidth: '36px' }}
       >
         <span
-          className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-xs transition duration-200 ease-in-out ${
+          className={`pointer-events-none inline-block h-4 w-4 transform rounded-full shadow-xs transition duration-200 ease-in-out switch-thumb ${
             checked ? 'translate-x-4' : 'translate-x-0'
           }`}
+          style={{ backgroundColor: '#ffffff' }}
         />
       </button>
       {label && <span className="select-none">{label}</span>}

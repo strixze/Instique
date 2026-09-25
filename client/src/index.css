@@ -11,7 +11,9 @@
   --primary-foreground: #FFFFFF;
 }
 
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
   margin: 0;
 }
@@ -49,13 +51,16 @@ html.theme-transition *::after {
     width: 4px;
     height: 4px;
   }
+
   .scrollbar-thin::-webkit-scrollbar-track {
     background: transparent;
   }
+
   .scrollbar-thin::-webkit-scrollbar-thumb {
     background: #CBD5E1;
     border-radius: 4px;
   }
+
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     background: #94A3B8;
   }
@@ -65,6 +70,7 @@ html.theme-transition *::after {
 .dark .scrollbar-thin::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.1);
 }
+
 .dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.18);
 }
@@ -90,28 +96,61 @@ html.theme-transition *::after {
 
 /* Animations */
 @keyframes scale-in {
-  from { opacity: 0; transform: scale(0.97); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @keyframes slide-right {
-  from { transform: translateX(-100%); }
-  to { transform: translateX(0); }
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
 }
 
 @keyframes fade-in {
-  from { opacity: 0; transform: translateY(2px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
 }
 
-.animate-scale-in { animation: scale-in 0.12s ease-out; }
-.animate-slide-right { animation: slide-right 0.18s ease-out; }
-.animate-fade-in { animation: fade-in 0.15s ease-out; }
+.animate-scale-in {
+  animation: scale-in 0.12s ease-out;
+}
+
+.animate-slide-right {
+  animation: slide-right 0.18s ease-out;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.15s ease-out;
+}
+
 .animate-shimmer {
   background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
   background-size: 200% 100%;
@@ -128,28 +167,33 @@ html.theme-transition *::after {
 .dark .swal2-popup {
   background-color: #15191C !important;
   color: #F5F7F8 !important;
-  border: 1px solid rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
 }
+
 .dark .swal2-title {
   color: #F5F7F8 !important;
 }
+
 .dark .swal2-html-container {
   color: #A7AFB5 !important;
 }
+
 .dark .swal2-input,
 .dark .swal2-textarea {
   background-color: #101315 !important;
   color: #F5F7F8 !important;
-  border-color: rgba(255,255,255,0.1) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
 }
+
 .dark .swal2-confirm {
   background-color: #34D399 !important;
   color: #07090B !important;
 }
+
 .dark .swal2-cancel {
   background-color: #181D20 !important;
   color: #A7AFB5 !important;
-  border: 1px solid rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
 }
 
 /* ── Dark Mode: Surface, Table Header/Footer & Text Hierarchy ── */
@@ -160,6 +204,14 @@ html.theme-transition *::after {
 
 .dark .bg-white {
   background-color: #101315 !important;
+}
+
+/* ── Preserve pure white background for toggle switch thumbs & theme knobs in dark mode ── */
+.dark .switch-thumb,
+.dark [role="switch"] span,
+.dark [data-switch] span,
+.dark .theme-toggle-knob {
+  background-color: #FFFFFF !important;
 }
 
 .dark .bg-surface,
@@ -203,6 +255,7 @@ html.theme-transition *::after {
 .dark th {
   color: #CBD5E1 !important;
 }
+
 .dark th span,
 .dark th div {
   color: #CBD5E1 !important;
@@ -223,8 +276,8 @@ html.theme-transition *::after {
   border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
-.dark .divide-border > :not([hidden]) ~ :not([hidden]),
-.dark .divide-border\/60 > :not([hidden]) ~ :not([hidden]) {
+.dark .divide-border> :not([hidden])~ :not([hidden]),
+.dark .divide-border\/60> :not([hidden])~ :not([hidden]) {
   border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
@@ -310,24 +363,38 @@ html.theme-transition *::after {
    ═══════════════════════════════════════════════════════════════════ */
 
 /* ── Global Safety ── */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
 /* ── Tablet: ≤ 1024px ── */
 @media (max-width: 1024px) {
+
   /* Reduce large paddings */
-  .p-6 { padding: 1.125rem; }
-  .px-6 { padding-left: 1.125rem; padding-right: 1.125rem; }
+  .p-6 {
+    padding: 1.125rem;
+  }
+
+  .px-6 {
+    padding-left: 1.125rem;
+    padding-right: 1.125rem;
+  }
 
   /* Large stat values scale down slightly */
-  .text-3xl { font-size: 1.625rem; }
+  .text-3xl {
+    font-size: 1.625rem;
+  }
 }
 
 /* ── Mobile: ≤ 767px ── */
 @media (max-width: 767px) {
+
   /* ── Root Overflow Prevention ── */
-  html, body, #root {
+  html,
+  body,
+  #root {
     overflow-x: hidden;
     max-width: 100vw;
   }
@@ -338,16 +405,26 @@ html.theme-transition *::after {
   }
 
   /* ── Page Content Padding ── */
-  main > div {
+  main>div {
     padding-left: 1rem !important;
     padding-right: 1rem !important;
     padding-bottom: 7.5rem !important;
   }
 
   /* ── Typography Scale ── */
-  h1, .text-2xl { font-size: 1.25rem !important; line-height: 1.6rem; }
-  .text-xl { font-size: 1.125rem !important; }
-  .text-3xl { font-size: 1.375rem !important; }
+  h1,
+  .text-2xl {
+    font-size: 1.25rem !important;
+    line-height: 1.6rem;
+  }
+
+  .text-xl {
+    font-size: 1.125rem !important;
+  }
+
+  .text-3xl {
+    font-size: 1.375rem !important;
+  }
 
   /* ── Grid Overrides ──
      Convert multi-col grids to mobile-appropriate layouts */
@@ -440,7 +517,8 @@ html.theme-transition *::after {
   }
 
   /* Table cells — reduce padding */
-  th, td {
+  th,
+  td {
     padding: 0.5rem 0.625rem !important;
   }
 
@@ -451,7 +529,9 @@ html.theme-transition *::after {
   }
 
   /* Full-width inputs */
-  input, select, textarea {
+  input,
+  select,
+  textarea {
     max-width: 100% !important;
     min-height: 2.75rem;
     font-size: 0.875rem !important;
@@ -489,8 +569,9 @@ html.theme-transition *::after {
   }
 
   /* ── Buttons ── */
-  /* Touch-friendly button sizes */
-  button, [role="button"] {
+  /* Touch-friendly button sizes (excluding toggle switches) */
+  button:not([role="switch"]):not([data-switch]):not(.switch-btn),
+  [role="button"]:not([role="switch"]):not([data-switch]) {
     min-height: 2.25rem;
   }
 
@@ -501,19 +582,20 @@ html.theme-transition *::after {
   }
 
   /* ── Spacing ── */
-  .space-y-5 > :not([hidden]) ~ :not([hidden]) {
+  .space-y-5> :not([hidden])~ :not([hidden]) {
     --tw-space-y-reverse: 0;
     margin-top: calc(1rem * calc(1 - var(--tw-space-y-reverse)));
     margin-bottom: calc(1rem * var(--tw-space-y-reverse));
   }
 
-  .space-y-6 > :not([hidden]) ~ :not([hidden]) {
+  .space-y-6> :not([hidden])~ :not([hidden]) {
     --tw-space-y-reverse: 0;
     margin-top: calc(1rem * calc(1 - var(--tw-space-y-reverse)));
     margin-bottom: calc(1rem * var(--tw-space-y-reverse));
   }
 
-  .gap-5, .gap-6 {
+  .gap-5,
+  .gap-6 {
     gap: 1rem !important;
   }
 
@@ -523,7 +605,9 @@ html.theme-transition *::after {
   }
 
   /* ── Text Overflow Safety ── */
-  p, td, th {
+  p,
+  td,
+  th {
     overflow-wrap: break-word;
   }
 
@@ -536,7 +620,10 @@ html.theme-transition *::after {
   }
 
   /* ── Images & Media ── */
-  img, svg, video, canvas {
+  img,
+  svg,
+  video,
+  canvas {
     max-width: 100%;
     height: auto;
   }
@@ -618,20 +705,21 @@ html.theme-transition *::after {
 
   /* ── Attendance Student Row ── */
   /* Make rows comfortable to tap */
-  .divide-y > div,
-  .divide-y > tr {
+  .divide-y>div,
+  .divide-y>tr {
     min-height: 2.75rem;
   }
 
   /* ── Leave / Homework Cards ── */
-  .rounded-xl.border.bg-white + .rounded-xl.border.bg-white,
-  .rounded-2xl.border.bg-white + .rounded-2xl.border.bg-white {
+  .rounded-xl.border.bg-white+.rounded-xl.border.bg-white,
+  .rounded-2xl.border.bg-white+.rounded-2xl.border.bg-white {
     margin-top: 0.5rem;
   }
 }
 
 /* ── Small Mobile: ≤ 390px ── */
 @media (max-width: 390px) {
+
   /* Even more compact stat cards */
   .grid.xl\:grid-cols-4,
   .grid.lg\:grid-cols-4,
@@ -645,15 +733,24 @@ html.theme-transition *::after {
   }
 
   /* Smaller page padding */
-  main > div {
+  main>div {
     padding-left: 0.75rem !important;
     padding-right: 0.75rem !important;
   }
 
   /* Typography — smallest scale */
-  h1, .text-2xl { font-size: 1.125rem !important; }
-  .text-xl { font-size: 1rem !important; }
-  .text-3xl { font-size: 1.25rem !important; }
+  h1,
+  .text-2xl {
+    font-size: 1.125rem !important;
+  }
+
+  .text-xl {
+    font-size: 1rem !important;
+  }
+
+  .text-3xl {
+    font-size: 1.25rem !important;
+  }
 
   /* Even more compact buttons */
   .flex.items-center.gap-2 button {
@@ -677,8 +774,13 @@ html.theme-transition *::after {
 /* ── Animations for mobile ── */
 @media (max-width: 767px) {
   @keyframes slide-up {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
+    from {
+      transform: translateY(100%);
+    }
+
+    to {
+      transform: translateY(0);
+    }
   }
 
   .animate-scale-in {
@@ -693,7 +795,8 @@ html.theme-transition *::after {
     margin: 5mm;
   }
 
-  html, body {
+  html,
+  body {
     height: 100vh !important;
     max-height: 100vh !important;
     overflow: hidden !important;
@@ -776,5 +879,32 @@ html.theme-transition *::after {
   }
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   GLOBAL TOGGLE SWITCH SYSTEM
+   Guarantees perfect pill shape and crisp white knob across all screens (≤ 766px, mobile, desktop)
+   ═══════════════════════════════════════════════════════════════════ */
+button[role="switch"],
+[role="switch"],
+[data-switch="true"],
+.switch-btn {
+  min-height: 20px !important;
+  max-height: 20px !important;
+  height: 20px !important;
+  width: 36px !important;
+  min-width: 36px !important;
+  max-width: 36px !important;
+  box-sizing: border-box !important;
+  border-radius: 9999px !important;
+}
 
-
+button[role="switch"] span,
+[role="switch"] span,
+[data-switch="true"] span,
+.switch-thumb {
+  height: 16px !important;
+  width: 16px !important;
+  min-height: 16px !important;
+  min-width: 16px !important;
+  border-radius: 9999px !important;
+  background-color: #FFFFFF !important;
+}
